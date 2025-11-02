@@ -1,0 +1,32 @@
+/* music-frontend/src/components/AuthHeader.css */
+
+.auth-header-container {
+  /* Cố định ở trên cùng của màn hình */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 60px; /* Chiều cao bằng Header chính */
+  background-color: var(--color-black); 
+  border-bottom: 1px solid #282828;
+  z-index: 1000; /* Đảm bảo nó nằm trên tất cả các phần tử khác */
+  
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+}
+
+.auth-header-logo {
+  cursor: pointer;
+}
+
+.lame-logo-text {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--color-accent); /* Màu xanh Spotify */
+}
+.content-placeholder {
+    height: 60px; /* Bằng chiều cao của Header */
+    width: 100%;
+}

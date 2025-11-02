@@ -1,0 +1,173 @@
+/* music-frontend/src/pages/ArtistDetail.css */
+
+.artist-detail-container {
+    padding-bottom: 50px;
+}
+
+.artist-header {
+    display: flex;
+    align-items: flex-end;
+    padding: 40px 20px 20px 20px;
+    background: linear-gradient(180deg, #1A1A1A 0%, var(--color-background) 100%);
+    margin-bottom: 30px;
+    min-height: 300px;
+}
+
+.artist-avatar-large {
+    width: 250px;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 50%; /* ẢNH TRÒN */
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+    margin-right: 30px;
+}
+
+.artist-info h1 {
+    font-size: 72px;
+    font-weight: 900;
+    margin: 0 0 15px 0;
+}
+
+.artist-type {
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    margin-bottom: 8px;
+}
+
+.artist-stats, .artist-bio {
+    color: var(--color-text-secondary);
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+/* Controls */
+.artist-controls {
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+    gap: 20px;
+}
+.artist-play-button {
+    background-color: var(--color-accent);
+    color: var(--color-black);
+    border: none;
+    padding: 14px 28px;
+    border-radius: 500px;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: transform 0.2s;
+}
+.follow-button {
+    background-color: var(--color-surface);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-text-secondary);
+    border-radius: 500px;
+    padding: 12px 20px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Song List (Danh sách bài hát) */
+.song-list-detail {
+    margin-top: 20px;
+}
+.song-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #282828;
+    cursor: pointer;
+}
+.song-row:hover {
+    background-color: #242424;
+}
+.song-title-col {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.song-title-col img {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+}
+.song-row-title {
+    font-weight: 500;
+    margin: 0;
+}
+.song-row-artist {
+    color: var(--color-text-secondary);
+    font-size: 13px;
+    margin: 0;
+}
+.song-play-count {
+    color: var(--color-text-secondary);
+    font-size: 14px;
+}
+.subtle-text {
+    color: var(--color-text-secondary);
+    font-style: italic;
+}
+
+/* music-frontend/src/pages/ArtistDetail.css (SỬA LẠI PHẦN ALBUM) */
+
+/* ... (Các CSS cũ giữ nguyên) ... */
+
+/* DANH SÁCH ALBUM */
+.album-list-scroll {
+    /* Đảm bảo album cuộn ngang nếu có nhiều */
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    padding-bottom: 20px;
+}
+
+/* THẺ ALBUM MỚI (Khung Vuông/Chữ nhật) */
+.album-card-small {
+    background-color: var(--color-surface); /* Nền cho thẻ */
+    padding: 15px;
+    border-radius: 8px;
+    width: 180px; /* Chiều rộng cố định */
+    flex-shrink: 0; /* Không cho thẻ bị co lại */
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.album-card-small:hover {
+    background-color: var(--color-surface-hover);
+}
+
+.album-card-small img {
+    width: 100%; /* Ảnh bìa vuông */
+    height: auto;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.album-title-small {
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--color-text-primary);
+    margin: 0 0 5px 0;
+    /* Ẩn chữ nếu quá dài */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.album-year-small {
+    color: var(--color-text-secondary);
+    font-size: 13px;
+    margin: 0;
+}

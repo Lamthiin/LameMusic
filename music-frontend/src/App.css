@@ -1,0 +1,60 @@
+/* music-frontend/src/App.css (LAYOUT MỚI VỚI HEADER NGANG) */
+body {
+  /* (Giữ nguyên phần body cũ) */
+  background-color: var(--color-black);
+  color: var(--color-text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
+    Arial, sans-serif;
+  margin: 0;
+  overflow: hidden;
+}
+.main-content {
+  background: linear-gradient(180deg, #1A1A1A 0%, var(--color-background) 350px);
+}
+
+.app-container {
+  display: grid;
+  height: 100vh;
+  overflow: hidden;
+  
+  /* ĐỊNH NGHĨA LAYOUT MỚI
+    Hàng 1: Header (cao 60px)
+    Hàng 2: Nội dung chính (co giãn 1fr)
+    Hàng 3: PlayerBar (cao 90px)
+    
+    Cột 1: Sidebar (rộng 240px)
+    Cột 2: Content (co giãn 1fr)
+  */
+  grid-template-rows: 60px 1fr 90px;
+  grid-template-columns: 240px 1fr;
+  
+  /* Đặt tên cho các khu vực */
+  grid-template-areas:
+    "header header"  /* Header chiếm 2 cột hàng 1 */
+    "sidebar main"    /* Sidebar cột 1, Main cột 2 (hàng 2) */
+    "player player";  /* PlayerBar chiếm 2 cột hàng 3 */
+}
+
+/* Gán component vào đúng khu vực */
+
+.header-container {
+  grid-area: header;
+  /* (CSS chi tiết sẽ ở Header.css) */
+}
+
+.sidebar-container {
+  grid-area: sidebar;
+  /* (CSS chi tiết sẽ ở Sidebar.css) */
+}
+
+.main-content {
+  grid-area: main;
+  overflow-y: auto; /* Chỉ cuộn nội dung chính */
+  padding: 20px;
+  background-color: var(--color-background);
+}
+
+.player-bar-container {
+  grid-area: player;
+  /* (CSS chi tiết sẽ ở PlayerBar.css) */
+}

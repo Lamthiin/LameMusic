@@ -1,0 +1,191 @@
+/* music-frontend/src/pages/Home.css (BẢN FINAL VỚI GRID 4 CỘT CHUẨN) */
+
+.home-page h2 {
+  font-size: 38px; 
+  font-weight: 800;
+  color: var(--color-text-primary);
+  margin-bottom: 30px; 
+}
+
+/* === KHU VỰC CHUNG === */
+.home-section {
+  margin-bottom: 40px; 
+}
+
+.home-section-header {
+  display: flex;
+  justify-content: space-between; 
+  align-items: center; 
+  margin-bottom: 25px;
+}
+
+.home-section-header h3 {
+  font-size: 24px; 
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.see-more-link {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.see-more-link:hover {
+  color: var(--color-text-primary);
+  text-decoration: underline;
+}
+
+/* === CUỘN NGANG === */
+.horizontal-scroll {
+  display: flex;
+  gap: 20px; 
+  overflow-x: auto; 
+  padding-bottom: 20px; 
+}
+.horizontal-scroll::-webkit-scrollbar {
+  height: 8px;
+}
+.horizontal-scroll::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 4px;
+}
+
+/* HIỆU ỨNG CHUNG CHO CARD */
+.track-item, .artist-card, .post-card, .genre-card {
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+    border-radius: 12px;
+}
+.track-item:hover, .artist-card:hover, .post-card:hover {
+    background-color: #242424 !important; 
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); 
+}
+
+/* === 1. BÀI HÁT (TRACK LIST) === */
+.track-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
+  gap: 28px; 
+}
+.track-item {
+  background-color: var(--color-surface); 
+  padding: 20px; 
+}
+.track-image-container {
+  position: relative;
+  margin-bottom: 16px;
+}
+.track-image {
+  width: 100%;
+  border-radius: 4px;
+  aspect-ratio: 1 / 1; 
+  object-fit: cover;
+}
+.play-button { 
+  position: absolute;
+  right: 15px; 
+  bottom: 15px;
+  width: 56px; 
+  height: 56px; 
+  font-size: 26px; 
+  opacity: 0; 
+  transform: translateY(10px); 
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+.track-item:hover .play-button {
+  opacity: 1;
+  transform: translateY(0);
+}
+.track-title {
+  font-weight: bold;
+  font-size: 18px; 
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+.track-artist {
+  font-size: 15px; 
+  color: var(--color-text-secondary); 
+  margin: 4px 0 0 0;
+}
+
+
+/* === 2. NGHỆ SĨ (ARTIST CARD) === */
+.artist-card {
+  width: 190px; 
+  flex-shrink: 0;
+  text-align: center; 
+}
+.artist-card img {
+  width: 140px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 50%; 
+  margin-bottom: 12px;
+}
+
+
+/* === 3. THỂ LOẠI (GENRE CARD) - FIX 4 CỘT CHUẨN === */
+.genres-grid {
+  display: grid;
+  /* Dùng grid-template-columns: repeat(4, 1fr) để ÉP CHIA 4 CỘT ĐỀU NHAU */
+  grid-template-columns: repeat(4, 1fr); 
+  gap: 20px; 
+  overflow-x: hidden;
+}
+
+/* Media Query cho màn hình hẹp hơn (Nếu không đủ 4 cột) */
+@media (max-width: 1200px) {
+  .genres-grid {
+    grid-template-columns: repeat(3, 1fr); /* 3 cột cho màn hình trung bình */
+  }
+}
+
+@media (max-width: 800px) {
+  .genres-grid {
+    grid-template-columns: repeat(2, 1fr); /* 2 cột cho màn hình điện thoại */
+  }
+}
+
+
+.genre-card {
+  height: 120px; 
+  padding: 16px;
+  display: flex;
+  align-items: flex-end; 
+  justify-content: flex-start;
+}
+.genre-card p {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+/* === 4. TIN HOT (POST CARD) === */
+.post-card {
+  width: 250px; 
+  flex-shrink: 0; 
+  padding: 12px;
+}
+.post-card img {
+  width: 100%;
+  height: 140px; 
+  object-fit: cover;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+.post-card p {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

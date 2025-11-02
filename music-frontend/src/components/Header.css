@@ -1,0 +1,159 @@
+/* music-frontend/src/components/Header.css (BẢN SỬA LỖI THANH TÌM KIẾM) */
+
+.header-container {
+  grid-area: header; 
+  background-color: var(--color-surface); 
+  padding: 0 24px;
+  display: grid;
+  align-items: center;
+  height: 100%; 
+  border-bottom: 1px solid #282828;
+
+  /* === SỬA LỖI Ở ĐÂY === */
+  /* Cột 1 (Logo) rộng 240px (bằng Sidebar) */
+  /* Cột 2 (Search) chiếm 1fr (tất cả không gian còn lại) */
+  /* Cột 3 (Auth) rộng 240px (đối xứng) */
+  grid-template-columns: 240px 1fr 240px; 
+}
+
+/* 1. Trái: Logo "lame" */
+.header-left {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+.header-logo {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 900;
+  cursor: pointer;
+  color: var(--color-accent); 
+}
+
+/* 2. Giữa: Search Bar */
+.header-center {
+  display: flex;
+  justify-content: center; /* <-- Đảm bảo nó căn giữa trong cột 1fr */
+}
+.search-bar {
+  display: flex;
+  align-items: center;
+  background-color: var(--color-black); 
+  border-radius: 500px;
+  padding: 8px 16px;
+  width: 100%;
+  max-width: 450px; /* <-- Tăng độ rộng tối đa 1 chút */
+  border: 1px solid transparent;
+}
+.search-bar:focus-within {
+  border: 1px solid var(--color-text-primary); 
+}
+.search-bar .search-icon {
+  color: var(--color-text-secondary);
+  margin-right: 8px;
+}
+.search-bar input {
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--color-text-primary);
+  font-size: 14px;
+  width: 100%;
+}
+
+/* 3. Phải: User/Auth Buttons */
+.header-right {
+  display: flex;
+  justify-content: flex-end; /* Đẩy các nút sang phải */
+  align-items: center;
+}
+
+/* (Phần CSS cho .register-artist, .user-profile-area, .user-dropdown... giữ nguyên) */
+.header-button.register-artist {
+  background-color: var(--color-accent);
+  color: var(--color-black);
+  padding: 8px 16px;
+  border: none;
+  border-radius: 500px;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  margin-right: 20px;
+}
+.header-button.register-artist:hover {
+  transform: scale(1.05);
+  background-color: var(--color-accent-hover);
+}
+
+.user-profile-area {
+  position: relative; 
+  display: flex;
+  align-items: center;
+}
+.user-avatar {
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+.user-avatar:hover,
+.user-profile-area:hover .user-avatar {
+  color: var(--color-text-primary); 
+}
+
+.user-dropdown {
+  position: absolute;
+  top: 50px; 
+  right: 0;
+  background-color: var(--color-surface-hover); 
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  width: 200px; 
+  z-index: 1001; 
+  border: 1px solid #3E3E3E;
+}
+.user-dropdown ul {
+  list-style: none;
+  padding: 5px; 
+  margin: 0;
+}
+.user-dropdown li {
+  padding: 12px 15px;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.user-dropdown li:hover {
+  background-color: #3E3E3E; 
+  color: var(--color-text-primary); 
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 16px;
+}
+.header-button {
+  padding: 10px 20px; 
+  border: none;
+  border-radius: 500px;
+  font-weight: bold;
+  font-size: 15px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+.header-button:hover {
+  transform: scale(1.05);
+}
+.header-button.login {
+  background-color: var(--color-text-primary); 
+  color: var(--color-black);
+}
+.header-button.register {
+  background-color: transparent;
+  color: var(--color-text-secondary); 
+}
+.header-button.register:hover {
+  color: var(--color-text-primary); 
+}

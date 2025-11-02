@@ -1,0 +1,25 @@
+// music-backend/src/artist/artist.service.ts
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Artist } from './artist.entity';
+
+@Injectable()
+export class ArtistService {
+  constructor(
+    @InjectRepository(Artist)
+    private artistRepository: Repository<Artist>,
+  ) {}
+
+  /**
+   * Lấy danh sách 6 nghệ sĩ ngẫu nhiên cho trang chủ
+   */
+  async findFeaturedArtists(): Promise<Artist[]> {
+    return this.artistRepository
+      .createQueryBuilder('artist')
+      // Sắp xếp ngẫu nhiên và giới hạn 6 kết quả
+      .orderBy('RAND()') 
+      .limit(6) 
+      .getMany();
+  }
+}

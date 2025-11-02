@@ -1,0 +1,75 @@
+/* music-frontend/src/components/Footer.css */
+.footer-container {
+  background-color: var(--color-surface); 
+  color: var(--color-text-secondary);
+  padding: 40px 20px;
+  margin-top: 50px; 
+  border-top: 1px solid #282828;
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto 30px auto;
+  text-align: left;
+}
+
+.footer-section h4 {
+  color: var(--color-text-primary);
+  font-size: 16px;
+  margin-bottom: 15px;
+}
+
+.footer-logo {
+  color: var(--color-accent);
+  font-size: 28px;
+  font-weight: 900;
+  margin: 0 0 10px 0;
+}
+
+.footer-section p {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.footer-section.links ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-section.links li {
+  margin-bottom: 10px;
+}
+
+.footer-section.links a {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.footer-section.links a:hover {
+  color: var(--color-text-primary);
+  text-decoration: underline;
+}
+
+.social-icons {
+  display: flex;
+  gap: 15px;
+}
+.social-icons a {
+  color: var(--color-text-secondary);
+  font-size: 24px;
+  transition: color 0.2s;
+}
+.social-icons a:hover {
+  color: var(--color-accent);
+}
+
+.footer-bottom {
+  text-align: center;
+  border-top: 1px solid #282828;
+  padding-top: 20px;
+  font-size: 12px;
+}

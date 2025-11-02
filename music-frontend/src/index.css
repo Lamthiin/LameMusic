@@ -1,0 +1,25 @@
+:root {
+  /* Màu nền */
+  --color-black: #000000;
+  --color-background: #121212; /* Màu nền chính (không phải đen tuyền) */
+  --color-surface: #181818;   /* Màu nền cho component (Player, Sidebar, Card) */
+  --color-surface-hover: #282828; /* Màu khi hover */
+
+  /* Màu chữ */
+  --color-text-primary: #FFFFFF; /* Chữ chính (tiêu đề) */
+  --color-text-secondary: #b3b3b3; /* Chữ phụ (tên nghệ sĩ, mô tả) */
+  
+  /* Màu nhấn (Spotify Green) */
+  --color-accent: #1ED760;
+  --color-accent-hover: #1FDF64;
+}
+.main-content {
+  background: linear-gradient(180deg, #1A1A1A 0%, var(--color-background) 350px);
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  font-family: 'Helvetica', 'Arial', sans-serif; /* (Sẽ nâng cấp sau) */
+  overflow: hidden;
+}

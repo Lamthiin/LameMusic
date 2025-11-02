@@ -1,0 +1,129 @@
+/* music-frontend/src/pages/SongDetail.css (BẢN "LỒNG LỘN") */
+
+.song-detail-container {
+  padding-bottom: 50px;
+  position: relative; /* Cần cho Gradient */
+}
+
+/* === NỀN GRADIENT MỚI === */
+/* (Nó sẽ nằm sau header) */
+.song-detail-gradient-bg {
+  position: absolute;
+  top: -20px; /* Kéo lên trên (sau Header) */
+  left: -20px; /* Kéo sang trái (sau Sidebar) */
+  right: -20px; /* Kéo sang phải */
+  height: 400px;
+  /* (Màu này sẽ thay đổi theo ảnh album sau, tạm dùng màu tĩnh) */
+  background: linear-gradient(180deg, #404040 0%, var(--color-background) 100%);
+  z-index: -1;
+  filter: blur(10px);
+}
+
+
+.song-detail-header {
+  display: flex;
+  align-items: flex-end; 
+  padding: 40px 20px 20px 20px; /* Tăng padding trên */
+  /* background: transparent; (Không cần nền nữa) */
+  margin-bottom: 30px;
+  min-height: 300px;
+}
+
+.detail-album-cover {
+  width: 250px;
+  height: 250px;
+  object-fit: cover;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7); /* Đổ bóng sâu */
+  margin-right: 30px;
+  border-radius: 10px;
+}
+
+.song-info {
+  color: var(--color-text-primary);
+}
+
+.song-type {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--color-text-primary); /* Cho sáng hơn */
+  margin-bottom: 8px;
+}
+
+.song-info h1 {
+  font-size: 35px; /* <-- TIÊU ĐỀ SIÊU TO */
+  font-weight: 900;
+  margin: 0 0 15px 0;
+  line-height: 1.1;
+}
+
+.song-artist-info {
+  font-size: 16px;
+  color: var(--color-text-secondary);
+  margin-bottom: 25px;
+}
+
+.song-artist-info .artist-name {
+  color: var(--color-text-primary);
+  font-weight: bold;
+}
+
+/* Controls (Nút bấm) */
+.detail-controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.detail-play-button {
+  background-color: var(--color-accent); 
+  color: var(--color-black);
+  border: none;
+  padding: 14px 28px; /* Nút to hơn */
+  border-radius: 500px;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: transform 0.2s;
+}
+.detail-play-button:hover {
+    transform: scale(1.05);
+}
+
+.icon-button {
+    background: none;
+    border: none;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.icon-button:hover {
+    color: var(--color-text-primary);
+}
+.icon-button.liked {
+    color: var(--color-accent); /* Màu xanh khi đã like */
+}
+
+/* Body (Lyrics, Related) */
+.song-detail-body {
+    display: grid;
+    grid-template-columns: 2fr 1fr; 
+    gap: 30px;
+    margin-top: 40px;
+}
+.lyrics-section h3, .related-section h3 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #282828;
+    padding-bottom: 10px;
+}
+.lyrics-content {
+    font-size: 16px;
+    line-height: 1.8;
+    color: var(--color-text-secondary);
+    white-space: pre-wrap; /* Giữ định dạng \n */
+}
