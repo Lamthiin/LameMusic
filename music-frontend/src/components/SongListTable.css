@@ -1,0 +1,125 @@
+/* music-frontend/src/components/SongListTable.css */
+
+.song-list-table-container {
+    padding: 10px;
+}
+
+.song-list-table-container .section-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--color-text-primary);
+}
+
+/* === HEADER BẢNG === */
+.song-table-header {
+    display: grid;
+    /* Cấu trúc cột: Index | Title | Artist | Album | Duration */
+    grid-template-columns: 40px 4fr 3fr 2fr 100px; 
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+.song-table-header span {
+    align-self: center;
+}
+.song-table-header .col-title { grid-column: 2; }
+
+
+/* === DÒNG BÀI HÁT === */
+.song-table-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.song-table-row {
+    display: grid;
+    /* Cấu trúc cột tương đương Header */
+    grid-template-columns: 40px 4fr 3fr 2fr 100px;
+    padding: 8px 15px;
+    border-radius: 6px;
+    align-items: center;
+    transition: background-color 0.2s;
+    color: var(--color-text-secondary);
+    font-size: 15px;
+}
+
+.song-table-row:hover {
+    background-color: var(--color-surface-hover);
+}
+
+.song-table-row.active {
+    background-color: rgba(29, 185, 84, 0.1); /* Nền xanh nhẹ */
+    color: var(--color-accent);
+}
+
+/* Cột Index và nút Play */
+.col-index {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+.col-index .index-number {
+    display: block;
+    cursor: pointer;
+}
+.col-index .play-button {
+    position: absolute;
+    background: none;
+    border: none;
+    color: var(--color-text-primary);
+    opacity: 0; /* Ẩn nút play mặc định */
+    transition: opacity 0.2s;
+}
+.song-table-row:hover .col-index .index-number {
+    opacity: 0; /* Ẩn số khi hover */
+}
+.song-table-row:hover .col-index .play-button {
+    opacity: 1; /* Hiện nút play khi hover */
+}
+.song-table-row.active .col-index .index-number {
+    opacity: 0; /* Ẩn số khi đang phát */
+}
+.song-table-row.active .col-index .play-button {
+    opacity: 1; /* Hiện nút play khi đang phát */
+    color: var(--color-accent);
+}
+
+/* Cột Tên Bài Hát */
+.song-table-row .col-title {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    cursor: pointer;
+    color: var(--color-text-primary);
+}
+.song-table-row .col-title img {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+.song-table-row .song-title {
+    font-weight: 500;
+    margin: 0;
+    line-height: 1.2;
+}
+
+/* Cột Nghệ sĩ/Album */
+.col-artist, .col-album {
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+}
+.col-artist:hover, .col-album:hover {
+    color: var(--color-text-primary);
+}

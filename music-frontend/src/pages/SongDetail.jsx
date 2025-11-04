@@ -212,10 +212,6 @@ const SongDetail = () => {
                 <p className="lyrics-content">{lyrics}</p>
             )}
         </div>
-        <div className="related-section">
-            <h3>Ca khúc cùng thể loại</h3>
-            <p className="subtle-text">(Coming soon...)</p>
-        </div>
       </div>
 
       {/* (8) THÊM MODAL ADD TO PLAYLIST (NẰM ẨN) */}

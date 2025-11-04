@@ -265,3 +265,37 @@ export const getPublicPlaylistApi = async (playlistId) => {
         throw error;
     }
 };
+
+/* === API MỚI: LẤY CHI TIẾT ALBUM === */
+export const fetchAlbumDetailApi = async (albumId) => {
+    try {
+        const response = await api.get(`/albums/${albumId}`);
+        return response.data;
+    } catch (error) {
+        console.error('Lỗi khi tải chi tiết album:', error);
+        throw error;
+    }
+};
+
+/* === API MỚI: LẤY TẤT CẢ ALBUM === */
+export const fetchAllAlbumsApi = async () => {
+    try {
+        const response = await api.get('/albums/all');
+        return response.data;
+    } catch (error) {
+        console.error('Lỗi khi tải tất cả album:', error);
+        return [];
+    }
+};
+
+
+export const registerArtistApi = async (stageName) => {
+    try {
+        // Dùng 'api' (đã có interceptor)
+        const response = await api.post('/artists/register', { stageName: stageName });
+        return response.data;
+    } catch (error){
+        console.error('Lỗi khi đăng ký nghệ sĩ:', error);
+        throw error; // Ném lỗi để component (Form) bắt
+    }
+};

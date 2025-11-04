@@ -6,6 +6,7 @@ import { usePlayer } from '../context/PlayerContext';
 import { useAuth } from '../context/AuthContext';
 import './LikedSongsPage.css';
 import { FaPlay, FaHeart } from 'react-icons/fa';
+import SongListTable from '../components/SongListTable'; // <-- IMPORT MỚI
 
 const fixImageUrl = (url) => {
   if (!url) return '/images/default-album.png';

@@ -59,7 +59,7 @@ const GenreDetailPage = () => {
       <div
         className="playlist-header"
         style={{
-          background: 'linear-gradient(180deg, #509BF5 0%, var(--color-background) 100%)',
+          background: 'linear-gradient(210deg, #007525ff 0%, var(--color-background) 100%)',
         }}
       >
         <div className="playlist-info">

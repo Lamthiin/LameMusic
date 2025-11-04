@@ -17,6 +17,8 @@ import { CategoryModule } from './category/category.module'; // <-- IMPORT MỚI
 import { PlaylistModule } from './playlist/playlist.module';
 import { SearchModule } from './search/search.module';
 import { FollowModule } from './follow/follow.module'; // <-- IMPORT MỚI
+import { AlbumModule } from './album/album.module';
+
 
 @Module({
   imports: [
@@ -44,6 +46,7 @@ import { FollowModule } from './follow/follow.module'; // <-- IMPORT MỚI
     PlaylistModule,
     SearchModule,
     FollowModule,
+    AlbumModule,
   ],
   controllers: [AppController],
   providers: [AppService],

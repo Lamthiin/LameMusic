@@ -292,3 +292,54 @@ footer a {
 footer a:hover {
   text-decoration: underline;
 }
+
+/* music-frontend/src/pages/Home.css (THÊM VÀO CUỐI FILE) */
+
+/* ... (CSS cũ cho .home-page, .track-list, .artist-card... giữ nguyên) ... */
+
+/* === (MỚI) BANNER CHÀO NGHỆ SĨ === */
+.artist-welcome-banner {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    /* Gradient "màu mè" */
+    background: linear-gradient(90deg, var(--color-accent-hover) 0%, var(--color-accent) 60%, #1a1a1a 100%);
+    border-radius: 12px;
+    padding: 25px 30px;
+    margin-bottom: 40px;
+    color: var(--color-black); /* Chữ đen trên nền xanh */
+}
+
+.artist-welcome-banner .banner-text {
+    flex-grow: 1; /* Đẩy nút ra xa */
+}
+
+.artist-welcome-banner h3 {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 5px 0;
+    color: #000; /* Chữ đen đậm */
+}
+
+.artist-welcome-banner p {
+    font-size: 16px;
+    margin: 0;
+    color: #1a1a1a; /* Chữ xám đậm (gần đen) */
+}
+
+.artist-welcome-banner .btn-manage-music {
+    background-color: rgba(255, 255, 255, 0.9);
+    color: var(--color-black);
+    padding: 12px 20px;
+    border: none;
+    border-radius: 500px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 15px;
+    white-space: nowrap; /* Chống vỡ chữ */
+}
+.artist-welcome-banner .btn-manage-music:hover {
+    background-color: #fff;
+    transform: scale(1.05);
+}

@@ -29,6 +29,13 @@ import ProfilePlaylists from './pages/ProfileUser/ProfilePlaylists';
 import ProfileFollowing from './pages/ProfileUser/ProfileFollowing'; // <-- (1) IMPORT MỚI
 import PublicProfilePage from './pages/ProfileUser/PublicProfilePage'; // <-- (1) IMPORT MỚI
 import PlaylistDetailPage from './pages/PlaylistDetailPage'; // <-- (2) IMPORT MỚI
+import PublicProfileLayout from './pages/ProfileUser/PublicProfileLayout';
+import PublicProfileFollowing from './pages/ProfileUser/PublicProfileFollowing';
+import PublicProfileLikes from './pages/ProfileUser/PublicProfileLikes';
+import PublicProfilePlaylists from './pages/ProfileUser/PublicProfilePlaylists';
+import AlbumDetailPage from './pages/AlbumDetailPage'; // <-- (1) IMPORT ALBUM DETAIL MỚI
+import AllAlbumsPage from './pages/AllAlbumsPage'; // <-- (2) LỖI ĐÃ SỬA: IMPORT ALL ALBUMS MỚI
+import ArtistRegistrationPage from './pages/ArtistRegistrationPage'; // <-- (2) IMPORT MỚI
 
 function App() {
   return (
@@ -49,12 +56,25 @@ function App() {
         <Route path="songs" element={<AllSongsPage />} />
         <Route path="artists" element={<AllArtistsPage />} />
         <Route path="blog" element={<div>Trang Blog (Sắp ra mắt)</div>} />
-        <Route path="/profile/:username" element={<PublicProfilePage />} />
+        <Route path="albums" element={<AllAlbumsPage />} />
+        <Route path="album/:id" element={<AlbumDetailPage />} /> 
+        {/* === (3) ROUTE ĐĂNG KÝ NGHỆ SĨ MỚI === */}
+        <Route path="artist-registration" element={<ArtistRegistrationPage />} />
+        {/* ==================================== */}
+
+        {/* === (3) ROUTE PUBLIC PROFILE MỚI (LỒNG NHAU) === */}
+        <Route path="profile/:username" element={<PublicProfileLayout />}>
+            <Route index element={<PublicProfilePlaylists />} />
+            <Route path="playlists" element={<PublicProfilePlaylists />} /> // Mặc định hiển thị Playlists
+            <Route path="likes" element={<PublicProfileLikes />} />
+            <Route path="following" element={<PublicProfileFollowing />} />
+        </Route>
+        {/* =================================================== */}
         
         {/* (4) ROUTE BẢO VỆ (CẦN LOGIN) */}
         <Route element={<ProtectedRoute />}>
             <Route path="liked-songs" element={<LikedSongsPage />} />
-{/* === (3) ROUTE MỚI === */}
+        {/* === (3) ROUTE MỚI === */}
         <Route path="playlist/:id" element={<PlaylistDetailPage />} />
             {/* (5) ROUTE PROFILE MỚI (LỒNG NHAU) */}
             <Route path="profile" element={<ProfileLayout />}>

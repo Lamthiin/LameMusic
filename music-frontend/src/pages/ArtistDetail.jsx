@@ -198,24 +198,29 @@ const ArtistDetail = () => {
         </div>
       </div>
 
-      {/* DANH SÁCH ALBUM */}
-      <div className="artist-body-section">
-        <h3>Album</h3>
-        <div className="album-list-scroll">
-            {albums.length > 0 ? (
-                albums.map(album => (
-                    <div key={album.id} className="album-card-small">
-                        <img src={album.cover_url} alt={album.title} />
-                        <div className="album-card-info">
-                            <p className="album-title-small">{album.title}</p>
-                            <p className="album-year-small">{new Date(album.release_date).getFullYear() || ''}</p>
-                        </div>
-                    </div>
-                ))
-            ) : (            <p className="subtle-text">Nghệ sĩ này chưa có album nào.</p>
-            )}
-        </div>
-      </div>
+        {/* === PHẦN DANH SÁCH ALBUM === */}
+            <h2 className="section-title">Albums</h2>
+            <div className="album-grid"> 
+                {artist.albums && artist.albums.map((album) => (
+                    // === SỬA DÒNG NÀY ĐỂ THÊM onClick ===
+                    <div 
+                        key={album.id} 
+                        className="album-card"
+                        // ===============================================
+                        // THÊM SỰ KIỆN onClick VÀO CARD ALBUM
+                        onClick={() => navigate(`/album/${album.id}`)} 
+                        // ===============================================
+                    >
+                        <img 
+                            src={album.cover_url} 
+                            alt={album.title} 
+                            className="album-cover" 
+                        />
+                        <p className="album-title">{album.title}</p>
+                        <p className="album-year">{new Date(album.release_date).getFullYear()}</p>
+                    </div>
+                ))}
+        </div>
       
     </div>
   );

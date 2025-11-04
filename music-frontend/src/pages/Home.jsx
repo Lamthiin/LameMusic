@@ -94,12 +94,7 @@ const Home = () => {
 
   return (
     <div className="home-page">
-      <h2>
-        {user
-          ? `Chào mừng trở lại, ${user.username}!`
-          : "Chào mừng đến với Lame 🎵"}
-      </h2>
-
+      
       {/* BÀI HÁT */}
       <div className="home-section">
         <div className="home-section-header">

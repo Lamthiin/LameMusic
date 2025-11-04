@@ -29,6 +29,8 @@ export class Song {
   @Column({ type: 'varchar', length: 255 })
   file_url: string;
 
+  @Column({ type: 'int', nullable: true, name: 'track_number' })
+  track_number: number | null;
 
   @Column({ type: 'boolean', default: true })
   active: boolean;

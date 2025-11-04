@@ -1,5 +1,4 @@
 // music-backend/src/artist/artist.service.ts (BẢN FINAL FIX LỖI TRÙNG LẶP)
-import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Artist } from './artist.entity';
@@ -7,6 +6,11 @@ import { Artist } from './artist.entity';
 import { User } from '../user/user.entity';
 import { Song } from '../song/song.entity';
 import { Album } from '../album/album.entity';
+import { 
+    Injectable, NotFoundException, ConflictException, 
+    BadRequestException, InternalServerErrorException 
+} from '@nestjs/common'; // <-- THÊM CÁC EXCEPTION
+import { Role } from '../role/role.entity'; // <-- CẦN IMPORT
 
 
 @Injectable()
@@ -14,7 +18,10 @@ export class ArtistService {
   constructor(
     @InjectRepository(Artist)
     private artistRepository: Repository<Artist>,
-    // Cần inject thêm các Repository khác nếu Service cần truy cập trực tiếp
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+    @InjectRepository(Role) // <-- (2) THÊM ROLE REPO VÀO CONSTRUCTOR
+    private roleRepository: Repository<Role>,
   ) {}
 
   /**
@@ -40,22 +47,95 @@ export class ArtistService {
    */
   async findOne(id: number): Promise<Artist | null> {
     return this.artistRepository.findOne({
-      where: { id: id, active: true },
+      where: { id: id, active: 1 },
       // === QUAN TRỌNG: JOIN các quan hệ ===
       relations: ['user', 'songs', 'albums'], 
       // Sắp xếp dữ liệu liên quan
+     // === SỬA LỖI TYPESCRIPT/TYPEORM TẠI ĐÂY ===
       order: {
-        albums: { release_date: 'DESC' } // Album mới nhất
-      }
+         songs: { id: 'DESC' }, // Sắp xếp bài hát theo ID (mới nhất)
+         albums: { release_date: 'DESC' } // Album mới nhất
+       } as any // <-- PHẢI THÊM 'as any' để tránh lỗi TS2353/lỗi cú pháp
+          
     });
   }
 
   async findAllArtists(): Promise<Artist[]> {
     return this.artistRepository.find({
-      where: { active: true },
+      where: { active: 1 },
       order: { stage_name: 'ASC' }, // Sắp xếp A-Z
     });
   }
 
+/**
+   * 1. HÀM ĐĂNG KÝ (Tạo Artist với trạng thái PENDING)
+   */
+  async registerArtistProfile(userId: number, stageName: string): Promise<Artist> {
+    const user = await this.userRepository.findOne({ where: { id: userId }, relations: ['artist', 'role'] });
+
+    if (!user) throw new NotFoundException('Người dùng không tồn tại.');
+    if (user.artist) throw new ConflictException('Hồ sơ Nghệ sĩ đã tồn tại.');
+    if (user.role.name !== 'listener') throw new BadRequestException('Bạn không phải là Listener.');
+
+    // 1. Kiểm tra nghệ danh đã tồn tại chưa
+    const existingArtist = await this.artistRepository.findOne({ where: { stage_name: stageName } });
+    if (existingArtist) throw new ConflictException(`Nghệ danh "${stageName}" đã có người sử dụng.`);
+
+    // 2. Tạo Entity Artist 
+    const newArtist = this.artistRepository.create({
+      user: user,
+      stage_name: stageName,
+      // === SỬA LỖI: DÙNG LOGIC CỦA BẠN ===
+      active: 1, // <-- Mới đăng ký thì active (visible), Admin có thể ẩn sau
+      registrationStatus: 'PENDING', // <-- SỬ DỤNG CỘT TRẠNG THÁI
+      // ===================================
+      bio: 'Hồ sơ đang chờ Admin duyệt...',
+    });
+
+    return this.artistRepository.save(newArtist);
+  }
+
+  /**
+   * 2. HÀM LẤY DANH SÁCH CHỜ DUYỆT (ADMIN)
+   */
+  async findPendingArtists(): Promise<Artist[]> {
+    return this.artistRepository.find({
+      where: { registrationStatus: 'PENDING' }, 
+      relations: ['user'],
+      order: { created_at: 'ASC' }
+    });
+  }
+
+  /**
+   * 3. HÀM DUYỆT HỒ SƠ (ADMIN)
+   */
+  async approveArtist(artistId: number): Promise<Artist> {
+    const artist = await this.artistRepository.findOne({ 
+      where: { id: artistId, registrationStatus: 'PENDING' }, 
+      relations: ['user', 'user.role'] 
+    });
+
+    if (!artist) {
+      throw new NotFoundException('Hồ sơ không tìm thấy hoặc không ở trạng thái chờ duyệt.');
+    }
+
+    // 1. CẬP NHẬT TRẠNG THÁI DUYỆT CỦA HỒ SƠ
+    artist.registrationStatus = 'APPROVED'; 
+    
+    // 2. CẬP NHẬT ROLE CỦA USER TỪ 'listener' SANG 'artist'
+    const artistRole = await this.userRepository.manager
+      .getRepository(Role) 
+      .findOne({ where: { name: 'artist' } });
+
+    if (artistRole) {
+      artist.user.role = artistRole;
+      await this.userRepository.save(artist.user);
+    }
+    
+    // Xóa password trước khi trả về
+    delete artist.user.password; 
+
+    return this.artistRepository.save(artist);
+  }
   
 }

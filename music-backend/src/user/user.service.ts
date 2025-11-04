@@ -18,7 +18,7 @@ export class UserService {
   async findById(id: number): Promise<Omit<User, 'password'>> { 
     const user = await this.userRepository.findOne({ 
         where: { id },
-        relations: ['role', 'playlists', 'likedSongs'] 
+        relations: ['role', 'playlists', 'likedSongs','artist'] 
     });
     if (!user) {
       throw new NotFoundException('Không tìm thấy người dùng.');

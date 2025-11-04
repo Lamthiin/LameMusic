@@ -498,3 +498,316 @@
 }
 
 
+/* music-frontend/src/pages/ProfileUser/Profile.css */
+
+/* === Bố cục chung === */
+.profile-layout-container {
+    padding: 20px;
+    color: var(--color-text);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* === HEADER PROFILE (Chung cho cả Private và Public) === */
+.profile-header {
+    position: relative;
+    height: 250px; /* Chiều cao cố định cho header */
+    background: linear-gradient(to right, var(--color-primary-dark), var(--color-accent));
+    border-radius: 8px;
+    margin-bottom: 30px;
+    overflow: hidden;
+    display: flex; /* Dùng flexbox để căn giữa nội dung */
+    align-items: flex-end; /* Căn xuống dưới */
+}
+
+/* Overlay cho Header (tạo hiệu ứng màu sắc) */
+.profile-header-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.7), rgba(0,0,0,0.2));
+    display: flex;
+    align-items: flex-end;
+    padding: 20px;
+}
+
+.profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--color-background);
+    margin-right: 20px;
+}
+
+.profile-header-info {
+    z-index: 1; /* Đảm bảo chữ nằm trên overlay */
+}
+
+.profile-header-sub {
+    font-size: 0.9em;
+    color: var(--color-text-light);
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.profile-header-name {
+    font-size: 2.8em;
+    font-weight: bold;
+    color: var(--color-white);
+    margin-bottom: 10px;
+    line-height: 1;
+}
+
+.profile-stats {
+    font-size: 0.95em;
+    color: var(--color-text-light);
+}
+
+/* === Navigation tabs (Chỉ cho Private Profile) === */
+.profile-nav {
+    display: flex;
+    gap: 20px;
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: 30px;
+}
+
+.profile-nav-item {
+    padding: 10px 0;
+    font-size: 1.1em;
+    color: var(--color-text-light);
+    text-decoration: none;
+    transition: color 0.2s ease-in-out;
+    position: relative;
+}
+
+.profile-nav-item:hover,
+.profile-nav-item.active {
+    color: var(--color-white);
+}
+
+.profile-nav-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; /* Đặt dưới border-bottom */
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: var(--color-accent);
+}
+
+/* === Nội dung các section === */
+.profile-content {
+    margin-top: 20px; /* Để tạo khoảng cách với header */
+}
+
+.profile-section {
+    margin-bottom: 40px;
+}
+
+.section-title {
+    font-size: 1.8em;
+    color: var(--color-white);
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 10px;
+}
+
+/* === Card Grid (Dùng cho Playlist và Artist) === */
+.grid-container {
+    display: grid;
+    gap: 20px;
+}
+
+.grid-playlists {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+}
+
+.grid-artists {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+}
+
+.card {
+    background-color: var(--color-card-background);
+    border-radius: 8px;
+    overflow: hidden;
+    padding: 15px;
+    text-align: center;
+    transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+.card:hover {
+    background-color: var(--color-card-background-hover);
+    transform: translateY(-5px);
+}
+
+.card-image {
+    width: 100%;
+    height: 150px; /* Chiều cao cố định cho ảnh */
+    object-fit: cover;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.artist-avatar-round {
+    border-radius: 50%; /* Làm ảnh nghệ sĩ tròn */
+    width: 100px; /* Kích thước nhỏ hơn cho avatar tròn */
+    height: 100px;
+    margin: 0 auto 10px auto; /* Căn giữa và khoảng cách */
+    border: 2px solid var(--color-accent);
+}
+
+.card-title {
+    font-size: 1.1em;
+    color: var(--color-white);
+    margin-bottom: 5px;
+    white-space: nowrap; /* Ngăn tiêu đề xuống dòng */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Thêm dấu "..." nếu quá dài */
+}
+
+.card-subtitle {
+    font-size: 0.85em;
+    color: var(--color-text-light);
+}
+
+/* === Song List Detail (Dùng cho Bài hát đã thích) === */
+.song-list-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.song-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--color-card-background);
+    padding: 10px 15px;
+    border-radius: 6px;
+    transition: background-color 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+.song-row:hover {
+    background-color: var(--color-card-background-hover);
+}
+
+.song-title-col {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-grow: 1;
+}
+
+.song-title-col img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.song-row-title {
+    font-size: 1em;
+    color: var(--color-white);
+    margin: 0;
+}
+
+.song-row-artist {
+    font-size: 0.85em;
+    color: var(--color-text-light);
+    margin: 0;
+}
+
+.liked-icon {
+    color: var(--color-accent); /* Màu cho icon trái tim */
+    margin-left: 10px;
+}
+
+.subtle-text {
+    color: var(--color-text-light);
+    font-style: italic;
+    /* text-align: center; */
+    padding: 20px;
+}
+
+.error-message-center {
+    color: var(--color-accent);
+    text-align: center;
+    padding: 50px;
+    font-size: 1.2em;
+}
+
+/* === Responsive === */
+@media (max-width: 768px) {
+    .profile-header-name {
+        font-size: 2em;
+    }
+    .profile-avatar {
+        width: 90px;
+        height: 90px;
+    }
+    .grid-playlists {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    }
+    .grid-artists {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+    .card-image {
+        height: 120px;
+    }
+    .artist-avatar-round {
+        width: 80px;
+        height: 80px;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-layout-container {
+        padding: 10px;
+    }
+    .profile-header {
+        height: 200px;
+    }
+    .profile-header-overlay {
+        padding: 10px;
+    }
+    .profile-avatar {
+        width: 70px;
+        height: 70px;
+        margin-right: 10px;
+    }
+    .profile-header-name {
+        font-size: 1.5em;
+    }
+    .profile-stats, .profile-header-sub {
+        font-size: 0.8em;
+    }
+    .section-title {
+        font-size: 1.4em;
+    }
+    .grid-playlists, .grid-artists {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    }
+    .card-image {
+        height: 90px;
+    }
+    .artist-avatar-round {
+        width: 60px;
+        height: 60px;
+    }
+    .song-title-col img {
+        width: 40px;
+        height: 40px;
+    }
+    .song-row-title {
+        font-size: 0.9em;
+    }
+    .song-row-artist {
+        font-size: 0.75em;
+    }
+}

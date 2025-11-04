@@ -1,19 +1,18 @@
-/* music-frontend/src/pages/LikedSongsPage.css (FINAL CLEAN VERSION) */
+/* music-frontend/src/pages/LikedSongsPage.css (TẠO MỚI) */
 
 .liked-songs-container {
   padding-bottom: 50px;
 }
 
-/* Header (Banner thể loại hoặc danh sách) */
+/* Header (Nơi có trái tim lớn) */
 .playlist-header {
-  display: flex;
-  align-items: flex-end;
-  padding: 40px 20px 20px 20px;
-  background: linear-gradient(155deg, #5b5a5c 0%, #000000 100%);
-  margin-bottom: 30px;
-  min-height: 300px;
+    display: flex;
+    align-items: flex-end;
+    padding: 40px 20px 20px 20px;
+    background: linear-gradient(155deg, #5b5a5c 0%, #000000 100%);
+    margin-bottom: 30px;
+    min-height: 300px;
 }
-
 .playlist-cover-art {
   width: 250px;
   height: 250px;
@@ -60,49 +59,82 @@
   transition: transform 0.2s;
 }
 .playlist-play-button:hover {
-  transform: scale(1.05);
+    transform: scale(1.05);
 }
 
-/* ==============================
-   DANH SÁCH BÀI HÁT (DẠNG BẢNG)
-   ============================== */
-
+/* Danh sách bài hát (Copy từ ArtistDetail.css) */
 .song-list-detail {
-  margin-top: 20px;
+    margin-top: 20px;
 }
-
-/* Header các cột */
+.song-row {
+    display: grid; /* Dùng Grid để chia cột */
+    grid-template-columns: 4fr 2fr 1fr; /* Tên | Album | Icon */
+    align-items: center;
+    padding: 10px 15px;
+    border-radius: 6px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05); /* Viền mờ */
+    cursor: pointer;
+}
+.song-row:hover {
+    background-color: var(--color-surface-hover);
+}
+.song-title-col {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.song-title-col img {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+}
+.song-row-title {
+    font-weight: 500;
+    margin: 0;
+    color: var(--color-text-primary);
+}
+.song-row-artist {
+    color: var(--color-text-secondary);
+    font-size: 13px;
+    margin: 0;
+}
+.song-album-col {
+    color: var(--color-text-secondary);
+    font-size: 14px;
+}
+.song-row-liked {
+    color: var(--color-accent); /* Luôn luôn "thích" */
+    justify-self: center;
+}
+.subtle-text {
+    color: var(--color-text-secondary);
+    font-style: italic;
+    padding-left: 15px;
+}
 .song-list-header {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr;
   padding: 10px 20px;
   font-weight: bold;
   color: var(--color-text-secondary);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
   text-transform: uppercase;
   font-size: 12px;
-  letter-spacing: 1px;
 }
 
-/* Dòng bài hát */
 .song-row {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr;
   align-items: center;
   padding: 10px 20px;
   cursor: pointer;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   transition: background 0.2s ease;
 }
+
 .song-row:hover {
   background: rgba(255, 255, 255, 0.1);
 }
 
-/* Cột Bài hát */
-.col-song {
-  display: flex;
-  align-items: center;
-}
 .song-index {
   width: 25px;
   display: inline-block;
@@ -110,6 +142,7 @@
   margin-right: 10px;
   color: var(--color-text-secondary);
 }
+
 .col-song img {
   width: 45px;
   height: 45px;
@@ -117,20 +150,18 @@
   border-radius: 4px;
   margin-right: 10px;
 }
+
+.col-song {
+  display: flex;
+  align-items: center;
+}
+
 .song-row-title {
   font-weight: 500;
-  color: var(--color-text-primary);
 }
 
-/* Cột Nghệ sĩ + Album */
-.col-artist,
-.col-album {
+.song-row-artist,
+.song-row-album {
   color: var(--color-text-secondary);
   font-size: 14px;
-}
-
-.subtle-text {
-  color: var(--color-text-secondary);
-  font-style: italic;
-  padding-left: 15px;
 }

@@ -30,8 +30,11 @@ export class Artist {
   @Column({ length: 255, nullable: true })
   avatar_url: string;
 
-  @Column({ default: true })
-  active: boolean;
+  @Column({ type: 'tinyint', default: 1 }) 
+  active: number; // 0=Inactive, 1=Active
+
+  @Column({ type: 'varchar', length: 20, default: 'PENDING', name: 'registration_status' }) 
+  registrationStatus: 'PENDING' | 'APPROVED' | 'REJECTED';
 
   @CreateDateColumn()
   created_at: Date;

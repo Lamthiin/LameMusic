@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { api, searchApi } from '../utils/api'; 
 import './Header.css'; 
-import { FaSearch, FaUserCircle } from 'react-icons/fa';
+import { FaSearch, FaUserCircle , FaCheckCircle} from 'react-icons/fa';
 
 // === HÀM HELPER: Sửa lỗi URL (Giữ nguyên) ===
 const fixImageUrl = (url, type = 'image') => {
@@ -33,15 +33,9 @@ const Header = () => {
   const searchContainerRef = useRef(null);
   const userMenuRef = useRef(null); 
 
-  // (useEffect Debouncing cho Search)
+  // (useEffect Debouncing cho Search - Giữ nguyên)
   useEffect(() => {
-    // Nếu query rỗng, xóa kết quả và không gọi API
-    if (query.trim() === '') {
-      setResults(null);
-      return;
-    }
-
-    // Trì hoãn 500ms
+    if (query.trim() === '') { setResults(null); return; }
     const delayDebounce = setTimeout(async () => {
       const data = await searchApi(query);
       
@@ -83,13 +77,18 @@ const Header = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [searchContainerRef, userMenuRef]);
 
-  // (Hàm xử lý click kết quả Search - Dùng onMouseDown để fix flicker)
+  // === (1) HÀM SỬA LỖI: Dùng onClick, không dùng onMouseDown cho sự kiện chính ===
+  // Note: onMouseDown cho phép sự kiện click diễn ra, nhưng chúng ta dùng onClick
+  // VÀ DÙNG e.stopPropagation() để ngăn sự kiện nổi lên DOM.
   const handleResultClick = (path, e) => {
-    e.preventDefault(); 
-    setResults(null); 
+    e.preventDefault(); // Ngăn hành vi mặc định (như link)
+    e.stopPropagation(); // <-- QUAN TRỌNG: Ngăn event nổi lên để đóng dropdown
+    
+    setResults(null); // Đóng dropdown ngay lập tức
     setQuery('');
     navigate(path);
   };
+  // ==============================================================================
   
   const handleUserMenu = () => {
     setDropdownOpen(!dropdownOpen);
@@ -100,7 +99,6 @@ const Header = () => {
     setDropdownOpen(false);
   };
 
-  // === HÀM KIỂM TRA TỔNG KẾT QUẢ ===
   const hasResults = results && (
     results.songs?.length > 0 || 
     results.artists?.length > 0 || 
@@ -125,20 +123,17 @@ const Header = () => {
             placeholder="Tìm kiếm bài hát, nghệ sĩ, album..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            // === SỬA LỖI: HIỂN THỊ LẠI KẾT QUẢ KHI FOCUS ===
             onFocus={() => { 
                 if (query.trim() !== '' && !results) {
                     searchApi(query).then(setResults); 
                 } 
             }}
-            // ===============================================
           />
           
           {/* === KẾT QUẢ TÌM KIẾM (DROPDOWN) === */}
           {results && (
             <div className="search-results-dropdown">
               
-              {/* === (1) LOGIC XỬ LÝ "KHÔNG CÓ THÔNG TIN" === */}
               {!hasResults ? (
                 <div className="search-no-results">Không có thông tin cho "{query}"</div>
               ) : (
@@ -148,7 +143,12 @@ const Header = () => {
                     <div className="search-result-section">
                       <h4>Bài hát</h4>
                       {results.songs.map(song => (
-                        <div key={song.id} className="search-result-item" onMouseDown={(e) => handleResultClick(`/song/${song.id}`, e)}>
+                        <div 
+                          key={song.id} 
+                          className="search-result-item" 
+                          // (2) SỬ DỤNG onClick VÀ TRUYỀN EVENT
+                          onClick={(e) => handleResultClick(`/song/${song.id}`, e)}
+                        >
                           <img src={song.image_url || song.album?.cover_url} alt={song.title} />
                           <div>
                             <p>{song.title}</p>
@@ -164,7 +164,11 @@ const Header = () => {
                     <div className="search-result-section">
                       <h4>Nghệ sĩ</h4>
                       {results.artists.map(artist => (
-                        <div key={artist.id} className="search-result-item" onMouseDown={(e) => handleResultClick(`/artist/${artist.id}`, e)}>
+                        <div 
+                          key={artist.id} 
+                          className="search-result-item" 
+                          onClick={(e) => handleResultClick(`/artist/${artist.id}`, e)}
+                        >
                           <img src={artist.avatar_url} alt={artist.stage_name} className="artist-avatar" />
                           <div>
                             <p>{artist.stage_name}</p>
@@ -180,7 +184,11 @@ const Header = () => {
                     <div className="search-result-section">
                       <h4>Album</h4>
                       {results.albums.map(album => (
-                        <div key={album.id} className="search-result-item" onMouseDown={(e) => handleResultClick(`/album/${album.id}`, e)}>
+                        <div 
+                          key={album.id} 
+                          className="search-result-item" 
+                          onClick={(e) => handleResultClick(`/album/${album.id}`, e)}
+                        >
                           <img src={album.cover_url} alt={album.title} />
                           <div>
                             <p>{album.title}</p>
@@ -196,8 +204,13 @@ const Header = () => {
                     <div className="search-result-section">
                       <h4>Người dùng</h4>
                       {results.users.map(user => (
-                        <div key={user.id} className="search-result-item" onMouseDown={(e) => handleResultClick(`/profile/${user.username}`, e)}>
-                          <img src={fixImageUrl(null, 'artist')} alt={user.username} className="artist-avatar" />
+                        <div 
+                          key={user.id} 
+                          className="search-result-item" 
+                          // (3) SỬ DỤNG onClick VÀ TRUYỀN EVENT (FIX LỖI)
+                          onClick={(e) => handleResultClick(`/profile/${user.username}`, e)}
+                        >
+                          <FaUserCircle size={28} className="artist-avatar" />
                           <div>
                             <p>{user.username}</p>
                             <span>Hồ sơ</span>
@@ -229,7 +242,8 @@ const Header = () => {
               </button>
               {dropdownOpen && (
                 <div className="user-dropdown">
-                  <div onClick={() => { navigate('/profile/info'); setDropdownOpen(false); }}>Tài khoản</div>                  <div onClick={logout}>Đăng xuất</div>
+                  <div onClick={() => { navigate('/profile/info'); setDropdownOpen(false); }}>Tài khoản</div>
+                  <div onClick={logout}>Đăng xuất</div>
                 </div>
               )}
             </div>

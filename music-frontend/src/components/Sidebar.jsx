@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext'; // Vẫn cần để check log
 
 // Import icons
 import { MdOutlineExplore, MdExplore } from 'react-icons/md'; // Khám phá
-import { FaUser, FaBlog } from 'react-icons/fa'; // Dành cho tôi, Trang blog
+import { FaUser, FaBlog, FaCompactDisc} from 'react-icons/fa'; // Dành cho tôi, Trang blog
 import { VscLibrary } from 'react-icons/vsc'; // Thư viện
 import { GoHeartFill, GoPlus } from 'react-icons/go'; // Yêu, Plus
 
@@ -72,12 +72,13 @@ const Sidebar = () => {
           </li>
 
           {/* 3. Trang blog */}
+          {/* 3. ALBUMS (THAY CHO BLOG) */}
           <li 
-            className={activePage === 'blog' ? 'active' : ''}
-            onClick={() => navigate('/blog')} 
+            className={activePage === 'albums' ? 'active' : ''} // Đổi tên activePage
+            onClick={() => navigate('/albums')} // <-- SỬA ROUTE
           >
-            <FaBlog size={28} />
-            <span>Trang blog</span>
+            <FaCompactDisc size={28} /> {/* <-- SỬA ICON */}
+            <span>Albums</span> {/* <-- SỬA TEXT */}
           </li>
         </ul>
       </div>

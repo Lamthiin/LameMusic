@@ -25,5 +25,4 @@ export class Category {
     name: 'image_url' 
   })
   image_url: string;
-  // (Chúng ta sẽ thêm quan hệ với Post sau)
 }

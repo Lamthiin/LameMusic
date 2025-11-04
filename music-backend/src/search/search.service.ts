@@ -38,7 +38,7 @@ export class SearchService {
       
       // 2. Tìm Nghệ sĩ
       this.artistRepository.find({
-        where: { stage_name: Like(searchTerm), active: true },
+        where: { stage_name: Like(searchTerm), active: 1 },
         take: 5,
       }),
       
