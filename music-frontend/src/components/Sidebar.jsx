@@ -48,6 +48,7 @@ const Sidebar = () => {
 
   return (
     <div className="sidebar-container">
+  <div className="sidebar-top-spacer"></div>
       
       {/* ===== KHU VỰC TRÊN: Điều hướng chính ===== */}
       <div className="sidebar-section sidebar-nav">

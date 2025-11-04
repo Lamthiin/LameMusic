@@ -33,11 +33,6 @@ export class User {
   @Column({ type: 'datetime', nullable: true, select: false }) 
   otp_expiry: Date | null; // Hạn OTP
 
-  @Column({ type: 'varchar', length: 255, nullable: true, select: false, name: 'reset_password_token' }) 
-  reset_password_token: string | null;
-
-  @Column({ type: 'datetime', nullable: true, select: false, name: 'reset_password_expires' })
-  reset_password_expires: Date | null;
 
   @Column({ length: 20, default: 'prefer not to say' })
   gender: string;

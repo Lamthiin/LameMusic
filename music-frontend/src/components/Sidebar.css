@@ -27,7 +27,7 @@
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 30px; /* Khoảng cách giữa các mục */
+  gap: 50px; /* Khoảng cách giữa các mục */
 }
 
 /* 4. Từng mục Menu (li) - Cho khu vực Nav chính */

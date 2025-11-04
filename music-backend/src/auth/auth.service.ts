@@ -18,16 +18,17 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto'; // <-- IMPORT M�
 import { ResetPasswordWithOtpDto } from './dto/reset-password-with-otp.dto'; // <-- IMPORT MỚI
 import { ChangePasswordDto } from './dto/change-password.dto'; // <-- IMPORT MỚI
 
+
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
-    @InjectRepository(Role)
-    private roleRepository: Repository<Role>,
-    private jwtService: JwtService,
-    private mailerService: MailerService, 
-    private totpService: TotpService, 
+@InjectRepository(User)
+    private userRepository: Repository<User>,
+    @InjectRepository(Role)
+    private roleRepository: Repository<Role>, // <-- (Repo cho Role)
+    private jwtService: JwtService,
+    private mailerService: MailerService, 
+    private totpService: TotpService,
   ) {}
   
   // ===============================================
@@ -50,67 +51,171 @@ export class AuthService {
       }
   }
 
-  // ===============================================
-  // 1. HÀM REGISTER (ĐĂNG KÝ)
-  // ===============================================
-  async register(registerAuthDto: RegisterAuthDto): Promise<Omit<User, 'password'>> {
-    const { username, email, password, gender, birth_year } = registerAuthDto;
+ // ===============================================
+  // 1. HÀM REGISTER (ĐĂNG KÝ)
+  // ===============================================
+  async register(registerAuthDto: RegisterAuthDto): Promise<Omit<User, 'password'>> {
+    const { username, email, password, gender, birth_year } = registerAuthDto;
 
-    const existingUser = await this.userRepository.findOne({ where: { email } });
+    const existingUser = await this.userRepository.findOne({ where: { email } });
 
-    if (existingUser) {
-        if (existingUser.active === 1) { 
-             throw new ConflictException('Email đã tồn tại và đã được kích hoạt.');
-        }
+    // (Logic xử lý user đã tồn tại - giữ nguyên)
+    if (existingUser) {
+        if (existingUser.active === 1) { 
+             throw new ConflictException('Email đã tồn tại và đã được kích hoạt.');
+        }
+        if (existingUser.active === 0) {
+            throw new ConflictException('Tài khoản đã bị khóa.');
+        }
+        if (existingUser.active === 2) {
+            // (Logic gửi lại OTP - giữ nguyên)
+          const otpCode = this.totpService.generateOtp();
+          const expiryTime = this.totpService.getExpiryTime();
+          existingUser.verification_token = otpCode;
+          existingUser.otp_expiry = expiryTime;
+          await this.userRepository.save(existingUser);
+          await this.sendOtpEmail(email, otpCode);
+          throw new ConflictException({
+                message: 'Tài khoản đang chờ xác thực. Mã xác nhận mới đã được gửi lại.',
+                status: 'pending_verification', 
+            });
+        }
+    }
+
+    // === SỬA LỖI 500 (DÙNG SAI REPO) ===
+    const listenerRole = await this.roleRepository.findOne({ where: { name: 'listener' } });
+    // ===================================
+    if (!listenerRole) throw new InternalServerErrorException("Default role 'listener' not found");
+
+    const salt = await bcrypt.genSalt();
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const otpCode = this.totpService.generateOtp(); 
+    const expiryTime = this.totpService.getExpiryTime();
+
+    const user = this.userRepository.create({
+      username, email, password: hashedPassword, 
+      role: listenerRole,
+      active: 2, 
+      verification_token: otpCode, 
+      otp_expiry: expiryTime,      
+      gender: gender, 
+      birth_year: birth_year ? birth_year : null,
+    });
+
+    try {
+          const savedUser = await this.userRepository.save(user); 
+          // Tách mail ra try riêng
+          try {
+              await this.sendOtpEmail(savedUser.email, otpCode);
+          } catch (mailError) {
+              console.error('Lỗi gửi mail:', mailError);
+          }
+          
+          const { password, ...result } = savedUser;
+          return result;
+      } catch (error) {
+          console.error('Lỗi khi save user:', error);
+          throw new InternalServerErrorException('Failed to register user due to database error.');
+      }
+  }
+
+  // ===============================================
+  // 2. HÀM LOGIN (SỬA LỖI PAYLOAD)
+  // ===============================================
+  async login(loginAuthDto: LoginAuthDto): Promise<{ accessToken: string }> {
+    const { email, password } = loginAuthDto;
+
+    const user = await this.userRepository
+      .createQueryBuilder('user') 
+      .leftJoinAndSelect('user.role', 'role') 
+      .addSelect('user.password') 
+      .where('user.email = :email', { email }) 
+      .getOne(); 
+
+    if (!user) throw new UnauthorizedException('Email hoặc mật khẩu không đúng');
+    if (user.active !== 1) {
+        if (user.active === 0) throw new UnauthorizedException('Tài khoản của bạn đã bị khóa.');
+        else throw new UnauthorizedException('Tài khoản chưa được kích hoạt. ');
+    }
+    
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) throw new UnauthorizedException('Email hoặc mật khẩu không đúng');
+
+    // === SỬA LỖI: THÊM EMAIL VÀO PAYLOAD ===
+    const payload = { 
+        userId: user.id, 
+        username: user.username, 
+        role: user.role.name,
+        email: user.email // <-- DÒNG BỊ THIẾU
+    };
+    // ====================================
+
+    const accessToken = this.jwtService.sign(payload);
+    return { accessToken };
+  }
+
+  // // ===============================================
+  // // 1. HÀM REGISTER (ĐĂNG KÝ)
+  // // ===============================================
+  // async register(registerAuthDto: RegisterAuthDto): Promise<Omit<User, 'password'>> {
+  //   const { username, email, password, gender, birth_year } = registerAuthDto;
+
+  //   const existingUser = await this.userRepository.findOne({ where: { email } });
+
+  //   if (existingUser) {
+  //       if (existingUser.active === 1) { 
+  //            throw new ConflictException('Email đã tồn tại và đã được kích hoạt.');
+  //       }
         
-        if (existingUser.active === 0) {
-            throw new ConflictException('Tài khoản đã bị khóa. Vui lòng liên hệ bộ phận hỗ trợ.');
-        }
+  //       if (existingUser.active === 0) {
+  //           throw new ConflictException('Tài khoản đã bị khóa. Vui lòng liên hệ bộ phận hỗ trợ.');
+  //       }
         
-        if (existingUser.active === 2) {
-            const otpCode = this.totpService.generateOtp();
-            const expiryTime = this.totpService.getExpiryTime();
+  //       if (existingUser.active === 2) {
+  //           const otpCode = this.totpService.generateOtp();
+  //           const expiryTime = this.totpService.getExpiryTime();
             
-            existingUser.verification_token = otpCode;
-            existingUser.otp_expiry = expiryTime;
-            await this.userRepository.save(existingUser);
-            await this.sendOtpEmail(email, otpCode);
+  //           existingUser.verification_token = otpCode;
+  //           existingUser.otp_expiry = expiryTime;
+  //           await this.userRepository.save(existingUser);
+  //           await this.sendOtpEmail(email, otpCode);
 
-            throw new ConflictException({
-                message: 'Tài khoản đang chờ xác thực. Mã xác nhận mới đã được gửi lại.',
-                status: 'pending_verification', 
-            });
-        }
-    }
+  //           throw new ConflictException({
+  //               message: 'Tài khoản đang chờ xác thực. Mã xác nhận mới đã được gửi lại.',
+  //               status: 'pending_verification', 
+  //           });
+  //       }
+  //   }
 
-    const listenerRole = await this.roleRepository.findOne({ where: { name: 'listener' } });
-    if (!listenerRole) throw new InternalServerErrorException("Default role 'listener' not found");
+  //   const listenerRole = await this.roleRepository.findOne({ where: { name: 'listener' } });
+  //   if (!listenerRole) throw new InternalServerErrorException("Default role 'listener' not found");
 
-    const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash(password, salt);
+  //   const salt = await bcrypt.genSalt();
+  //   const hashedPassword = await bcrypt.hash(password, salt);
 
-    const otpCode = this.totpService.generateOtp(); 
-    const expiryTime = this.totpService.getExpiryTime();
+  //   const otpCode = this.totpService.generateOtp(); 
+  //   const expiryTime = this.totpService.getExpiryTime();
 
-    const user = this.userRepository.create({
-      username, email, password: hashedPassword, 
-      role: listenerRole!,
-      active: 2, 
-      verification_token: otpCode, 
-      otp_expiry: expiryTime,      
-      gender: gender, birth_year: birth_year,
-    });
+  //   const user = this.userRepository.create({
+  //     username, email, password: hashedPassword, 
+  //     role: listenerRole!,
+  //     active: 2, 
+  //     verification_token: otpCode, 
+  //     otp_expiry: expiryTime,      
+  //     gender: gender, birth_year: birth_year,
+  //   });
 
-    try {
-      const savedUser = await this.userRepository.save(user); 
-      await this.sendOtpEmail(savedUser.email, otpCode); 
+  //   try {
+  //     const savedUser = await this.userRepository.save(user); 
+  //     await this.sendOtpEmail(savedUser.email, otpCode); 
       
-      const { password, ...result } = savedUser;
-      return result;
-    } catch (error) {
-      throw new InternalServerErrorException('Failed to register user due to database error.');
-    }
-  }
+  //     const { password, ...result } = savedUser;
+  //     return result;
+  //   } catch (error) {
+  //     throw new InternalServerErrorException('Failed to register user due to database error.');
+  //   }
+  // }
 
   // // ===============================================
   // // 2. HÀM LOGIN (ĐĂNG NHẬP)
@@ -144,42 +249,42 @@ export class AuthService {
   // }
 
   // 2. HÀM LOGIN (SỬA LỖI PAYLOAD)
-  // ===============================================
-  async login(loginAuthDto: LoginAuthDto): Promise<{ accessToken: string }> {
-    const { email, password } = loginAuthDto;
+//   // ===============================================
+//   async login(loginAuthDto: LoginAuthDto): Promise<{ accessToken: string }> {
+//     const { email, password } = loginAuthDto;
 
-    const user = await this.userRepository
-      .createQueryBuilder('user') 
-      .leftJoinAndSelect('user.role', 'role') 
-      .addSelect('user.password') 
-      .where('user.email = :email', { email }) 
-      .getOne(); 
+//     const user = await this.userRepository
+//       .createQueryBuilder('user') 
+//       .leftJoinAndSelect('user.role', 'role') 
+//       .addSelect('user.password') 
+//       .where('user.email = :email', { email }) 
+//       .getOne(); 
 
-    if (!user) throw new UnauthorizedException('Email hoặc mật khẩu không đúng');
+//     if (!user) throw new UnauthorizedException('Email hoặc mật khẩu không đúng');
 
-    if (user.active !== 1) {
-        if (user.active === 0) {
-            throw new UnauthorizedException('Tài khoản của bạn đã bị khóa.');
-        } else { 
-            throw new UnauthorizedException('Tài khoản chưa được kích hoạt. ');
-        }
-    }
-    
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) throw new UnauthorizedException('Email hoặc mật khẩu không đúng');
+//     if (user.active !== 1) {
+//         if (user.active === 0) {
+//             throw new UnauthorizedException('Tài khoản của bạn đã bị khóa.');
+//         } else { 
+//             throw new UnauthorizedException('Tài khoản chưa được kích hoạt. ');
+//         }
+//     }
+//     
+//     const isPasswordValid = await bcrypt.compare(password, user.password);
+//     if (!isPasswordValid) throw new UnauthorizedException('Email hoặc mật khẩu không đúng');
 
-    // === SỬA LỖI: THÊM EMAIL VÀO PAYLOAD ===
-    const payload = { 
-        userId: user.id, 
-        username: user.username, 
-        role: user.role.name,
-        email: user.email // <-- DÒNG BỊ THIẾU
-    };
-    // ====================================
+//     // === SỬA LỖI: THÊM EMAIL VÀO PAYLOAD ===
+//     const payload = { 
+//         userId: user.id, 
+//         username: user.username, 
+//         role: user.role.name,
+//         email: user.email // <-- DÒNG BỊ THIẾU
+//     };
+//     // ====================================
 
-    const accessToken = this.jwtService.sign(payload);
-    return { accessToken };
-  }
+//     const accessToken = this.jwtService.sign(payload);
+//     return { accessToken };
+//   }
 
   // ===============================================
   // 3. HÀM VERIFY OTP (XÁC THỰC MÃ)
@@ -347,36 +452,34 @@ export class AuthService {
     
     return { message: 'Đổi mật khẩu thành công.' };
   }
+/**
+ * 8. HÀM MỚI: Yêu cầu OTP đổi pass (Khi ĐÃ ĐĂNG NHẬP)
+ * Chỉ áp dụng cho user đã active (active=1)
+ */
+async requestPasswordResetOtp(userId: number): Promise<{ message: string }> {
+  // 1. Tìm user bằng ID
+  const user = await this.userRepository.findOne({ where: { id: userId } });
 
-  /**
-   * 8. HÀM MỚI: Yêu cầu OTP đổi pass (Khi ĐÃ ĐĂNG NHẬP)
-   * Sẽ gửi OTP đến email của user đang được JWT token xác thực.
-   */
-  async requestPasswordResetOtp(userId: number): Promise<{ message: string }> {
-    // 1. Tìm user bằng ID
-    const user = await this.userRepository.findOne({ where: { id: userId } });
-
-    // 2. Nếu user không tồn tại hoặc bị cấm (active=0)
-    if (!user || user.active === 0) {
-      throw new NotFoundException('Không thể xử lý yêu cầu cho người dùng này.');
-    }
-
-    // 3. Tạo OTP mới và lưu vào cột (sử dụng lại cột cũ)
-    const otpCode = this.totpService.generateOtp();
-    const expiryTime = this.totpService.getExpiryTime(); // Hạn 5 phút
-
-    user.verification_token = otpCode;
-    user.otp_expiry = expiryTime;
-    
-    // Đảm bảo user ở trạng thái chờ (active=2) để OTP có hiệu lực
-    // (Nếu user đã active=1, OTP vẫn có tác dụng)
-    if (user.active === 0) user.active = 2; // Nếu bị inactive thì chuyển sang pending
-
-    await this.userRepository.save(user);
-
-    // 4. Gửi mail OTP (dùng hàm sendOtpEmail đã có)
-    await this.sendOtpEmail(user.email, otpCode);
-
-    return { message: `Đã gửi mã OTP đến email ${user.email}.` };
+  // 2. Nếu user không tồn tại hoặc chưa active
+  if (!user || user.active !== 1) {
+    throw new NotFoundException(
+      'Chỉ có thể yêu cầu đổi mật khẩu cho tài khoản đã kích hoạt.'
+    );
   }
+
+  // 3. Tạo OTP mới và lưu vào cột verification_token + otp_expiry
+  const otpCode = this.totpService.generateOtp();
+  const expiryTime = this.totpService.getExpiryTime(); // Hạn 5 phút
+
+  user.verification_token = otpCode;
+  user.otp_expiry = expiryTime;
+
+  await this.userRepository.save(user);
+
+  // 4. Gửi mail OTP (dùng hàm sendOtpEmail đã có)
+  await this.sendOtpEmail(user.email, otpCode);
+
+  return { message: `Đã gửi mã OTP đến email ${user.email}.` };
+}
+
 }
