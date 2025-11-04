@@ -112,36 +112,74 @@ export class AuthService {
     }
   }
 
-  // ===============================================
-  // 2. HÀM LOGIN (ĐĂNG NHẬP)
-  // ===============================================
-  async login(loginAuthDto: LoginAuthDto): Promise<{ accessToken: string }> {
-    const { email, password } = loginAuthDto;
+  // // ===============================================
+  // // 2. HÀM LOGIN (ĐĂNG NHẬP)
+  // // ===============================================
+  // async login(loginAuthDto: LoginAuthDto): Promise<{ accessToken: string }> {
+  //   const { email, password } = loginAuthDto;
 
-    const user = await this.userRepository
-      .createQueryBuilder('user') 
-      .leftJoinAndSelect('user.role', 'role') 
-      .addSelect('user.password') 
-      .where('user.email = :email', { email }) 
-      .getOne(); 
+  //   const user = await this.userRepository
+  //     .createQueryBuilder('user') 
+  //     .leftJoinAndSelect('user.role', 'role') 
+  //     .addSelect('user.password') 
+  //     .where('user.email = :email', { email }) 
+  //     .getOne(); 
 
-    if (!user) throw new UnauthorizedException('Email hoặc mật khẩu không đúng');
+  //   if (!user) throw new UnauthorizedException('Email hoặc mật khẩu không đúng');
 
-    if (user.active !== 1) {
-        if (user.active === 0) {
-            throw new UnauthorizedException('Tài khoản của bạn đã bị khóa.');
-        } else { // user.active === 2 (đang chờ xác thực)
-            throw new UnauthorizedException('Tài khoản chưa được kích hoạt. ');
-        }
-    }
+  //   if (user.active !== 1) {
+  //       if (user.active === 0) {
+  //           throw new UnauthorizedException('Tài khoản của bạn đã bị khóa.');
+  //       } else { // user.active === 2 (đang chờ xác thực)
+  //           throw new UnauthorizedException('Tài khoản chưa được kích hoạt. ');
+  //       }
+  //   }
     
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) throw new UnauthorizedException('Email hoặc mật khẩu không đúng');
+  //   const isPasswordValid = await bcrypt.compare(password, user.password);
+  //   if (!isPasswordValid) throw new UnauthorizedException('Email hoặc mật khẩu không đúng');
 
-    const payload = { userId: user.id, username: user.username, role: user.role.name };
-    const accessToken = this.jwtService.sign(payload);
-    return { accessToken };
-  }
+  //   const payload = { userId: user.id, username: user.username, role: user.role.name };
+  //   const accessToken = this.jwtService.sign(payload);
+  //   return { accessToken };
+  // }
+
+  // 2. HÀM LOGIN (SỬA LỖI PAYLOAD)
+  // ===============================================
+  async login(loginAuthDto: LoginAuthDto): Promise<{ accessToken: string }> {
+    const { email, password } = loginAuthDto;
+
+    const user = await this.userRepository
+      .createQueryBuilder('user') 
+      .leftJoinAndSelect('user.role', 'role') 
+      .addSelect('user.password') 
+      .where('user.email = :email', { email }) 
+      .getOne(); 
+
+    if (!user) throw new UnauthorizedException('Email hoặc mật khẩu không đúng');
+
+    if (user.active !== 1) {
+        if (user.active === 0) {
+            throw new UnauthorizedException('Tài khoản của bạn đã bị khóa.');
+        } else { 
+            throw new UnauthorizedException('Tài khoản chưa được kích hoạt. ');
+        }
+    }
+    
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) throw new UnauthorizedException('Email hoặc mật khẩu không đúng');
+
+    // === SỬA LỖI: THÊM EMAIL VÀO PAYLOAD ===
+    const payload = { 
+        userId: user.id, 
+        username: user.username, 
+        role: user.role.name,
+        email: user.email // <-- DÒNG BỊ THIẾU
+    };
+    // ====================================
+
+    const accessToken = this.jwtService.sign(payload);
+    return { accessToken };
+  }
 
   // ===============================================
   // 3. HÀM VERIFY OTP (XÁC THỰC MÃ)
