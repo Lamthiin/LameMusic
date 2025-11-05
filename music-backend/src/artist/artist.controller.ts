@@ -1,5 +1,5 @@
 // music-backend/src/artist/artist.controller.ts (BẢN SỬA LỖI 400 FINAL)
-import { Controller, Get, Param, ParseIntPipe, NotFoundException, UseGuards, Req, Post, ValidationPipe, Body } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, NotFoundException, Patch, UseInterceptors, UploadedFile, UseGuards, Req, Post, ValidationPipe, Body } from '@nestjs/common';
 import { ArtistService } from './artist.service';
 import { Artist } from './artist.entity';
 import { ArtistRegistrationDto } from './dto/artist-registration.dto'; // <-- IMPORT MỚI
@@ -7,6 +7,9 @@ import { AuthGuard } from '@nestjs/passport'; // <-- (1) IMPORT
 import { RolesGuard } from '../auth/roles.guard'; // <-- (2) IMPORT
 import { Roles } from '../auth/roles.decorator'; // <-- (3) IMPORT
 import { JwtPayload } from '../auth/jwt.strategy'; // <-- (4) IMPORT
+import { FileInterceptor } from '@nestjs/platform-express'; // <-- THÊM
+// ... (imports khác)
+import { UpdateArtistDto } from './dto/update-artist.dto'; // <-- THÊM
 
 @Controller('artists')
 export class ArtistController {
@@ -28,17 +31,7 @@ export class ArtistController {
     return this.artistService.findAllArtists();
   }
 
-  /**
-   * API: GET /artists/:id
-   */
-  @Get(':id')
-  async findOne(@Param('id', ParseIntPipe) id: number) {
-    const artist = await this.artistService.findOne(id);
-    if (!artist) {
-        throw new NotFoundException(`Nghệ sĩ với ID ${id} không tồn tại`);
-    }
-    return artist;
-  }
+
 
   /**
    * API ADMIN: GET /artists/pending (Lấy hồ sơ chờ duyệt)
@@ -71,5 +64,44 @@ export class ArtistController {
   ) {
     const userId = (req.user as JwtPayload).userId;
     return this.artistService.registerArtistProfile(userId, artistRegistrationDto.stageName);
+  }
+
+  /**
+   * API ARTIST: GET /artists/me (Lấy hồ sơ cá nhân của Artist)
+   */
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('artist') // <-- CHỈ ARTIST MỚI GỌI ĐƯỢC
+  @Get('me')
+  async getMyArtistProfile(@Req() req: any) {
+    const userId = (req.user as JwtPayload).userId;
+    return this.artistService.getMyArtistProfile(userId);
+  }
+
+  /**
+   * API ARTIST: PATCH /artists/me (Cập nhật hồ sơ cá nhân)
+   */
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('artist')
+  @Patch('me')
+  @UseInterceptors(FileInterceptor('avatarFile')) // <-- Nhận file tên là 'avatarFile'
+  async updateMyArtistProfile(
+    @Req() req: any,
+    @Body(ValidationPipe) dto: UpdateArtistDto,
+    @UploadedFile() file: Express.Multer.File
+  ) {
+    const userId = (req.user as JwtPayload).userId;
+    return this.artistService.updateMyArtistProfile(userId, dto, file);
+  }
+
+    /**
+   * API: GET /artists/:id
+   */
+  @Get(':id')
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    const artist = await this.artistService.findOne(id);
+    if (!artist) {
+        throw new NotFoundException(`Nghệ sĩ với ID ${id} không tồn tại`);
+    }
+    return artist;
   }
 }

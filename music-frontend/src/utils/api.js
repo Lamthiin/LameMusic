@@ -299,3 +299,80 @@ export const registerArtistApi = async (stageName) => {
         throw error; // Ném lỗi để component (Form) bắt
     }
 };
+
+/* === API MỚI: QUẢN LÝ NGHỆ SĨ (CẦN TOKEN) === */
+export const getMyArtistProfileApi = async () => {
+    try {
+        const response = await api.get('/artists/me');
+        return response.data;
+    } catch (error) {
+        console.error('Lỗi khi tải hồ sơ nghệ sĩ:', error);
+        throw error;
+    }
+};
+
+// Cần dùng FormData vì có file
+export const updateMyArtistProfileApi = async (formData) => {
+    try {
+        const response = await api.patch('/artists/me', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data', // Quan trọng
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Lỗi khi cập nhật hồ sơ nghệ sĩ:', error);
+        throw error;
+    }
+};
+
+/* === API MỚI: QUẢN LÝ ALBUM CỦA NGHỆ SĨ (CẦN TOKEN) === */
+
+// (1) Lấy danh sách album
+export const getMyAlbumsApi = async () => {
+    try {
+        const response = await api.get('/albums/my-albums');
+        return response.data;
+    } catch (error) {
+        console.error('Lỗi khi tải album của tôi:', error);
+        throw error;
+    }
+};
+
+// (2) Tạo album mới (dùng FormData)
+export const createAlbumApi = async (formData) => {
+    try {
+        const response = await api.post('/albums', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Lỗi khi tạo album:', error);
+        throw error; 
+    }
+};
+
+// (3) Sửa album (dùng FormData)
+export const updateAlbumApi = async (albumId, formData) => {
+    try {
+        // API PATCH /albums/my/:id (Backend đã tạo)
+        const response = await api.patch(`/albums/my/${albumId}`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Lỗi khi cập nhật album:', error);
+        throw error; 
+    }
+};
+
+// (4) Xóa album
+export const deleteMyAlbumApi = async (id) => {
+    try {
+        const response = await api.delete(`/albums/my/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error('Lỗi khi xóa album:', error);
+        throw error;
+    }
+};

@@ -1,0 +1,125 @@
+/* music-frontend/src/pages/ArtistDashboard/ArtistDashboard.css (TẠO MỚI) */
+
+
+/* === CSS CHO TAB INFO (UPLOAD AVATAR) === */
+.avatar-upload-section {
+    
+}
+.avatar-preview-box {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+.avatar-preview {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--color-border);
+}
+
+.profile-edit-form textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 5px;
+    background-color: #2a2a2a;
+    color: var(--color-text-primary);
+    font-size: 16px;
+    box-sizing: border-box; 
+    font-family: inherit; /* Giữ font */
+}
+
+
+
+.dashboard-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.dashboard-section-header h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+/* Nút Tạo Mới */
+.btn-create-new {
+    background-color: var(--color-accent);
+    color: var(--color-black);
+    border: none;
+    border-radius: 500px;
+    padding: 10px 20px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+.btn-create-new:hover {
+    background-color: var(--color-accent-hover);
+    transform: scale(1.03);
+}
+
+/* Nút Sửa/Xóa trên Card */
+.card-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+.btn-icon {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.btn-icon:hover {
+    background-color: var(--color-surface-hover);
+    color: var(--color-text-primary);
+}
+.btn-icon.btn-danger:hover {
+    background-color: var(--color-error-bg);
+    color: var(--color-error);
+}
+
+.artist-dashboard-header {
+  position: relative;
+  width: 100%;
+}
+
+.artist-dashboard-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5); /* phủ đen nhẹ để chữ dễ đọc */
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 20px;
+  color: #fff;
+}
+
+.artist-dashboard-info {
+  text-align: center;
+}
+
+.profile-header-name {
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.profile-header-sub {
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.85;
+}

@@ -6,7 +6,8 @@
   
   "compilerOptions": {
   "assets": [
-    { "include": "templates/**/*", "outDir": "dist/templates" }
+    { "include": "templates/**/*", "outDir": "dist/templates" },
+    { "include": "../uploads/avatars/**/*", "outDir": "dist/uploads/avatars" }
   ],
   "watchAssets": true
 }

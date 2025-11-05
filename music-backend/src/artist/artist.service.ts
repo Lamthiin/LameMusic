@@ -11,6 +11,7 @@ import {
     BadRequestException, InternalServerErrorException 
 } from '@nestjs/common'; // <-- THÊM CÁC EXCEPTION
 import { Role } from '../role/role.entity'; // <-- CẦN IMPORT
+import { UpdateArtistDto } from './dto/update-artist.dto'; // <-- IMPORT MỚI
 
 
 @Injectable()
@@ -138,4 +139,56 @@ export class ArtistService {
     return this.artistRepository.save(artist);
   }
   
+/**
+   * 4. HÀM MỚI: Lấy hồ sơ Artist CÁ NHÂN (cho Dashboard)
+   */
+  async getMyArtistProfile(userId: number): Promise<Artist> {
+    // === SỬA LỖI TẠI ĐÂY ===
+    // (Tìm bằng 'user_id' thay vì 'user: { id: ... }')
+    const artist = await this.artistRepository.findOne({
+      where: { user_id: userId },
+      relations: ['user'] 
+    });
+    // ======================
+
+    if (!artist) {
+      throw new NotFoundException('Không tìm thấy hồ sơ nghệ sĩ của bạn.');
+    }
+    return artist;
+  }
+
+  /**
+   * 5. HÀM MỚI: Cập nhật hồ sơ Artist CÁ NHÂN
+   */
+  async updateMyArtistProfile(
+    userId: number, 
+    dto: UpdateArtistDto, 
+    avatarFile?: Express.Multer.File // <-- File avatar (optional)
+  ): Promise<Artist> {
+    
+    const artist = await this.getMyArtistProfile(userId); // Lấy hồ sơ hiện tại
+
+    // Cập nhật thông tin text (Bio, StageName)
+    if (dto.stage_name) {
+        // Kiểm tra xem stage_name mới có bị trùng không (nếu nó khác tên cũ)
+        if (dto.stage_name !== artist.stage_name) {
+            const existing = await this.artistRepository.findOne({ where: { stage_name: dto.stage_name } });
+            if (existing) throw new ConflictException('Nghệ danh này đã có người sử dụng.');
+        }
+        artist.stage_name = dto.stage_name;
+    }
+    if (dto.bio) artist.bio = dto.bio;
+
+    // Cập nhật avatar (nếu có file mới)
+    if (avatarFile) {
+        // Cần xóa file avatar cũ (nếu có)
+        // ... (logic xóa file cũ) ...
+        
+        // Cập nhật đường dẫn avatar mới
+        artist.avatar_url = `/uploads/avatars/${avatarFile.filename}`;
+    }
+
+    return this.artistRepository.save(artist);
+  }
+
 }

@@ -1,4 +1,4 @@
-// music-backend/src/user/user.service.ts (FULL CODE)
+// music-backend/src/user/user.service.ts (BẢN SỬA LỖI "DELETE" VÀ "RELATIONS")
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -13,89 +13,58 @@ export class UserService {
   ) {}
 
   /**
-   * HÀM MỚI: Tìm user bằng ID (dùng cho 'me')
+   * HÀM: Tìm user bằng ID (dùng cho 'me')
    */
-  async findById(id: number): Promise<Omit<User, 'password'>> { 
+  async findById(id: number): Promise<Omit<User, 'password' | 'otp'>> { 
     const user = await this.userRepository.findOne({ 
         where: { id },
-        relations: ['role', 'playlists', 'likedSongs','artist'] 
+        // === SỬA LỖI: THÊM 'artist' VÀO ĐÂY ===
+        relations: ['role', 'playlists', 'likedSongs', 'artist'] 
+        // =====================================
     });
     if (!user) {
       throw new NotFoundException('Không tìm thấy người dùng.');
     }
     
-    const { password, ...result } = user;
+    const { password, otp, ...result } = user;
     return result; 
   }
 
   /**
-   * HÀM MỚI: Cập nhật thông tin (Họ tên, Giới tính, Năm sinh)
+   * HÀM: Cập nhật thông tin (Họ tên, Giới tính, Năm sinh)
    */
-  async updateProfile(userId: number, updateUserDto: UpdateUserDto): Promise<Omit<User, 'password'>> { 
+  async updateProfile(userId: number, updateUserDto: UpdateUserDto): Promise<Omit<User, 'password' | 'otp'>> { 
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
         throw new NotFoundException('Không tìm thấy người dùng.');
     }
     
-    // Cập nhật các trường được phép
-    Object.assign(user, updateUserDto);
+    const { username, gender, birth_year } = updateUserDto;
+    
+    if (username !== undefined) user.username = username;
+    if (gender !== undefined) user.gender = gender;
+    
+    if (birth_year === null || birth_year === undefined ) {
+        user.birth_year = null;
+    } else {
+        user.birth_year = Number(birth_year); // Đảm bảo là number
+    }
     
     const savedUser = await this.userRepository.save(user);
     
-    const { password, ...result } = savedUser;
+    const { password, otp, ...result } = savedUser;
     return result;
   }
-
-  // /**
-  //  * HÀM MỚI: Lấy Profile CÔNG KHAI (Chỉ playlist/like công khai)
-  //  */
-  // async findPublicProfileByUsername(username: string): Promise<Omit<User, 'password' | 'email' | 'verification_token' | 'otp_expiry'>> {
-  //   const user = await this.userRepository.findOne({ 
-  //       where: { username: username, active: 1 },
-  //       relations: [
-  //           'playlists', 
-  //           'likedSongs', 'likedSongs.song', 'likedSongs.song.artist', 
-  //           'following', 'following.following', 'following.following.artist' 
-  //       ] 
-  //   });
-    
-  //   if (!user) {
-  //     throw new NotFoundException('Không tìm thấy người dùng này.');
-  //   }
-
-  //   // === LỌC LẠI DỮ LIỆU CÔNG KHAI ===
-  //   if (user.playlists) {
-  //       user.playlists = user.playlists.filter(pl => pl.is_private === 0 && pl.is_active === 1);
-  //   }
-  //   if (user.following) {
-  //       user.following = user.following.filter(f => f.active === 1);
-  //   }
-    
-  //   // === SỬA LỖI TS2790 (LỖI DELETE) ===
-  //   // Dùng destructuring để loại bỏ các trường nhạy cảm
-  //   const { 
-  //     password, 
-  //     email, 
-  //     otp, // (Tên quan hệ mới)
-  //     // (Xóa các cột cũ đã bị loại bỏ khỏi Entity)
-  //     // verification_token, 
-  //     // otp_expiry, 
-  //     ...publicProfile 
-  //   } = user;
-
-  //   return publicProfile; // Trả về profile sạch
-  // }
-
 
   /**
    * HÀM: Lấy Profile CÔNG KHAI
    */
-  async findPublicProfileByUsername(username: string): Promise<Omit<User, 'password' | 'email' | 'otp'>> { // <-- (1) OMIT 'otp'
+  async findPublicProfileByUsername(username: string): Promise<Omit<User, 'password' | 'email' | 'otp'>> { 
     const user = await this.userRepository.findOne({ 
         where: { username: username, active: 1 },
         relations: [
-            'playlists', 
-            'likedSongs', 'likedSongs.song', 'likedSongs.song.artist', 
+            'playlists', 'playlists.songs',
+            'likedSongs', 'likedSongs.song', 'likedSongs.song.artist', 'likedSongs.song.album',
             'following', 'following.following', 'following.following.artist' 
         ] 
     });
@@ -104,7 +73,6 @@ export class UserService {
       throw new NotFoundException('Không tìm thấy người dùng này.');
     }
 
-    // === LỌC LẠI DỮ LIỆU CÔNG KHAI ===
     if (user.playlists) {
         user.playlists = user.playlists.filter(pl => pl.is_private === 0 && pl.is_active === 1);
     }
@@ -112,16 +80,13 @@ export class UserService {
         user.following = user.following.filter(f => f.active === 1);
     }
     
-    // === (2) SỬA LỖI TS2741 (LỖI DELETE) ===
-    // Dùng destructuring để loại bỏ các trường nhạy cảm
     const { 
       password, 
       email, 
-      otp, // (Loại bỏ quan hệ otp)
+      otp, 
       ...publicProfile 
     } = user;
 
-    return publicProfile; // Trả về profile sạch (đã mất 'otp')
+    return publicProfile; 
   }
-
 }

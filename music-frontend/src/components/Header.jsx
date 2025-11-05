@@ -241,10 +241,20 @@ const Header = () => {
                 <span>{user?.username}</span>
               </button>
               {dropdownOpen && (
-                <div className="user-dropdown">
-                  <div onClick={() => { navigate('/profile/info'); setDropdownOpen(false); }}>Tài khoản</div>
-                  <div onClick={logout}>Đăng xuất</div>
-                </div>
+              <div className="user-dropdown">
+                {/* SỬA LINK: /account thay vì /profile/info */}
+                <div onClick={() => { navigate('/profile/info'); setDropdownOpen(false); }}>Tài khoản (Cá nhân)</div>
+                
+                {/* === (THÊM LINK MỚI NẾU LÀ ARTIST) === */}
+                {user?.role === 'artist' && (
+                    <div onClick={() => { navigate('/artist-dashboard'); setDropdownOpen(false); }}>
+                        Quản lý Kênh Nghệ sĩ
+                    </div>
+                )}
+                {/* ==================================== */}
+
+                <div onClick={logout}>Đăng xuất</div>
+              </div>
               )}
             </div>
           </>

@@ -36,6 +36,9 @@ import PublicProfilePlaylists from './pages/ProfileUser/PublicProfilePlaylists';
 import AlbumDetailPage from './pages/AlbumDetailPage'; // <-- (1) IMPORT ALBUM DETAIL MỚI
 import AllAlbumsPage from './pages/AllAlbumsPage'; // <-- (2) LỖI ĐÃ SỬA: IMPORT ALL ALBUMS MỚI
 import ArtistRegistrationPage from './pages/ArtistRegistrationPage'; // <-- (2) IMPORT MỚI
+import ArtistDashboardLayout from './pages/ArtistDashboard/ArtistDashboardLayout'; // <-- (1) IMPORT MỚI
+import ArtistInfo from './pages/ArtistDashboard/ArtistInfo'; // <-- (2) IMPORT MỚI
+import ArtistAlbums from './pages/ArtistDashboard/ArtistAlbums'; // <-- (1) IMPORT MỚI
 
 function App() {
   return (
@@ -70,6 +73,19 @@ function App() {
             <Route path="following" element={<PublicProfileFollowing />} />
         </Route>
         {/* =================================================== */}
+
+        {/* === (3) ROUTE ARTIST DASHBOARD MỚI (BẢO VỆ) === */}
+            {/* (Chúng ta sẽ thêm ArtistRouteGuard sau, tạm thời dùng ProtectedRoute) */}
+            <Route path="artist-dashboard" element={<ArtistDashboardLayout />}>
+                <Route index element={<ArtistInfo />} />
+                <Route path="info" element={<ArtistInfo />} />
+                {/* (Tạm thời placeholder cho các tab khác) */}
+                <Route path="songs" element={<div>Trang Quản lý Bài hát (Sắp ra mắt)</div>} />
+                <Route path="albums" element={<ArtistAlbums />} />
+                <Route path="playlists" element={<div>Trang Playlist Nghệ sĩ (Sắp ra mắt)</div>} />
+                <Route path="likes" element={<LikedSongsPage />} />
+                <Route path="following" element={<ProfileFollowing />} />
+            </Route>
         
         {/* (4) ROUTE BẢO VỆ (CẦN LOGIN) */}
         <Route element={<ProtectedRoute />}>
