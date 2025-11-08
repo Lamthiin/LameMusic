@@ -1,116 +1,272 @@
-/* music-frontend/src/components/Sidebar.css (BẢN CUỐI CÙNG & ĐẸP) */
+  /* =================================================== */
+  /* SIDEBAR - CYBER GLOW DỊU (MÀU XANH NGỌC DỊU 40%)   */
+  /* DÁN VÀO: src/components/Sidebar.css               */
+  /* ĐÃ ĐỒNG BỘ PLAYBAR + HEADER + DỊU MẮT 100%        */
+  /* =================================================== */
 
-/* 1. Container chính (Sidebar) */
-.sidebar-container {
-  grid-area: sidebar; /* Đảm bảo nó nằm đúng khu vực grid */
-  background-color: var(--color-black); 
-  display: flex;
-  flex-direction: column; 
-  height: 100%; /* Lấp đầy ô grid */
-  padding: 0 8px 8px 8px; /* Đệm dưới và hai bên */
-  gap: 8px; /* Khoảng cách 8px giữa 2 khu vực */
-  box-sizing: border-box; 
-  overflow-y: auto; /* Cho phép cuộn toàn bộ sidebar nếu quá dài */
-}
+  .sidebar-container {
+    position: fixed;
+    left: 0; top: 70px; bottom: 70px;
+    width: 260px;
+    /* MÀU DỊU NHƯ BUỔI TỐI */
+    background: linear-gradient(90deg, #001a1a, #002424, #001a1a);
+    backdrop-filter: blur(14px);
+    border-right: 1px solid rgba(0, 200, 180, 0.25);
+    padding: 20px 0;
+    overflow-y: auto;
+    overflow-x: visible;
+    z-index: 9997;
+    box-shadow: 
+      8px 0 20px rgba(0, 200, 180, 0.12),
+      inset -2px 0 8px rgba(0, 0, 0, 0.5);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    color: #c8f5f0;
+  }
 
-/* 2. Các khu vực (Nav, Library) */
-.sidebar-section {
-  background-color: var(--color-surface); /* Nền xám tối */
-  border-radius: 8px; 
-  padding: 8px 12px;
-}
+  .sidebar-container::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(90deg, 
+      rgba(0, 200, 180, 0.06) 0%, 
+      rgba(0, 200, 180, 0.10) 50%, 
+      rgba(0, 200, 180, 0.06) 100%);
+    pointer-events: none;
+    z-index: -1;
+  }
 
-/* 3. Danh sách Menu (ul) */
-.sidebar-section ul {
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 50px; /* Khoảng cách giữa các mục */
-}
+  /* Scrollbar dịu */
+  .sidebar-container::-webkit-scrollbar { width: 8px; }
+  .sidebar-container::-webkit-scrollbar-thumb {
+    background: #00b8a0;
+    border-radius: 4px;
+    box-shadow: 0 0 8px rgba(0, 200, 180, 0.4);
+  }
 
-/* 4. Từng mục Menu (li) - Cho khu vực Nav chính */
-.sidebar-nav li {
-  display: flex;
-  align-items: center;
-  gap: 20px; 
+  /* Items – dịu mà sang */
+  .sidebar-nav li,
+  .sidebar-library-items li,
+  .library-heading {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 35px 24px;
+    cursor: pointer;
+    transition: all 0.35s ease;
+    color: #a0e8e0;
+    font-weight: 600;
+    font-size: 14px;
+    border-radius: 12px;
+    margin: 4px 12px;
+  }
+
+  .library-heading clickable: hover{
+none;
+  }   
+
+  .sidebar-nav li:hover,
+  .sidebar-library-items li:hover,
+  .library-heading:hover {
+    background: rgba(0, 200, 180, 0.12);
+    color: #00e6c8;
+    transform: translateX(5px);
+    box-shadow: 0 4px 12px rgba(0, 200, 180, 0.18);
+  }
+
+  .sidebar-nav li.active,
+  .sidebar-library-items li.active {
+    background: rgba(0, 200, 180, 0.20);
+    color: #00e6c8;
+    font-weight: 700;
+    box-shadow: 0 0 16px rgba(0, 200, 180, 0.3);
+  }
+
+  /* Icon dịu */
+  .sidebar-nav li svg,
+  .sidebar-library-items li svg,
+  .library-heading svg {
+    font-size: 20px;
+    filter: drop-shadow(0 0 5px rgba(0, 200, 180, 0.4));
+  }
+
+  /* Icon Box */
+  .icon-box {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 200, 180, 0.15);
+    border: 1px solid rgba(0, 200, 180, 0.3);
+  }
+  .icon-box svg { color: #00e6c8; }
+
+  /* Divider dịu */
+  .sidebar-divider {
+    height: 1px;
+    background: rgba(0, 200, 180, 0.25);
+    margin: 16px 24px;
+    box-shadow: 0 0 6px rgba(0, 200, 180, 0.3);
+  }
+
+  /* Thư viện */
+  .library-heading {
+    padding: 16px 24px 8px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #80d8d0;
+    font-weight: 700;
+    text-shadow: 0 0 4px rgba(0, 200, 180, 0.25);
+  }
+
+  /* DROPDOWN – DỊU & HIỆN ĐÚNG CHỖ */
+  .sidebar-dropdown-parent { position: relative; }
+  /* ============================================= */
+  /* CHỈ DÁN ĐOẠN NÀY VÀO CUỐI FILE Sidebar.css   */
+  /* ĐÃ GIỮ NGUYÊN CODE CŨ – CHỈ SỬA DROPDOWN    */
+  /* ============================================= */
+
+  /* DROPDOWN: CHỈ HIỆN 2 DÒNG + CUỘN MƯỢT */
+  .dropdown-content {
+    position: absolute;
+    left: 280px;
+    top: 0;
+    width: 230px;
+    background: rgba(0, 30, 30, 0.98);
+    backdrop-filter: blur(16px);
+    border: 2px solid rgba(0,230,200,0.4);
+    border-radius: 18px;
+    box-shadow: 0 15px 50px rgba(0,0,0,0.7);
+    z-index: 9999;
+    max-height: 80vh;
+    overflow: hidden;
+  }
+
+  /* CHỈ HIỆN 2 DÒNG (80px x 2 + padding) */
+  .dropdown-items-container {
+    max-height: 180px; /* 2 dòng x 80px + margin */
+    overflow-y: auto;
+    padding: 12px 0;
+  }
+
+  /* SCROLLBAR MỎNG ĐẸP */
+  .dropdown-items-container::-webkit-scrollbar {
+    width: 5px;
+  }
+  .dropdown-items-container::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .dropdown-items-container::-webkit-scrollbar-thumb {
+    background: rgba(0,230,200,0.5);
+    border-radius: 3px;
+  }
+  .dropdown-items-container::-webkit-scrollbar-thumb:hover {
+    background: #00e6c8;
+  }
+
+  /* ẨN PHẦN TRÊN & DƯỚI KHI CUỘN */
+  .dropdown-content::before,
+  .dropdown-content::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    height: 30px;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .dropdown-content::before {
+    top: 0;
+    background: linear-gradient(to bottom, rgba(0,30,30,1), transparent);
+  }
+  .dropdown-content::after {
+    bottom: 0;
+    background: linear-gradient(to top, rgba(0,30,30,1), transparent);
+  }
+
+  /* MỖI DÒNG ARTIST */
+  .dropdown-item {
+    padding: 5px 20px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .dropdown-item:hover {
+    background: rgba(0,230,200,0.2);
+    padding-left: 24px;
+  }
+
+  .artist-mini-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #00e6c8;
+  }
+
+  /* MINI WAVE */
+  .mini-wave {
+    display: flex;
+    gap: 2px;
+    opacity: 0;
+  }
+  .dropdown-item:hover .mini-wave { opacity: 1; }
+  .mini-wave span {
+    width: 3px;
+    height: 14px;
+    background: #00e6c8;
+    border-radius: 2px;
+    animation: wave 1s ease-in-out infinite;
+  }
+  .mini-wave span:nth-child(2) { animation-delay: 0.2s; }
+  .mini-wave span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes wave {
+    0%,100% { transform: scaleY(0.4); }
+    50% { transform: scaleY(1); }
+  }
+
+  /* Avatar + SNAGS dịu */
+  .artist-mini-avatar {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: 2px solid #00e6c8;
+    box-shadow: 0 0 10px rgba(0, 200, 180, 0.4);
+  }
+
+  .mini-wave {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex; gap: 2px;
+    opacity: 0;
+  }
+  .mini-wave span {
+    width: 3px; height: 10px;
+    background: #00e6c8;
+    border-radius: 2px;
+    animation: wave 1.2s ease-in-out infinite;
+  }
+  .mini-wave span:nth-child(2) { animation-delay: .15s; }
+  .mini-wave span:nth-child(3) { animation-delay: .3s; }
+  @keyframes wave { 0%,100% {transform:scaleY(.5)} 50% {transform:scaleY(1)} }
+  .dropdown-item:hover .mini-wave { opacity: 1; }
+
+  /* CHA KHÔNG CẮT */
+  .sidebar-container,
+  .sidebar-library-items { overflow: visible !important; }
+
+  /* RESPONSIVE */
+  @media (max-width: 1200px) {
+    .sidebar-container { width: 72px; padding: 16px 0; }
+    .sidebar-container span,
+    .dropdown-content { display: none !important; }
+    .sidebar-nav li,
+    .sidebar-library-items li,
+    .library-heading { justify-content: center; padding: 14px; margin: 0; }
+  }
+
   
-  color: var(--color-text-secondary); 
-  font-size: 14px; /* <-- Chữ nhỏ lại */
-  font-weight: 500;
-  
-  cursor: pointer;
-  transition: color 0.2s ease;
-  padding: 8  px 0; /* Tăng padding để mục lớn hơn */
-}
-
-.sidebar-nav li:hover {
-  color: var(--color-text-primary); 
-}
-
-.sidebar-nav li.active {
-  color: var(--color-text-primary); 
-}
-
-/* 5. Khu vực Thư viện (cho phép nó giãn ra) */
-.sidebar-library {
-  flex-grow: 1; /* <-- Đẩy nó giãn ra, chiếm hết không gian thừa */
-}
-
-/* 6. TIÊU ĐỀ THƯ VIỆN (library-heading) */
-.library-heading {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--color-text-secondary); 
-  
-  font-size: 10px; /* <-- CHỮ BÉ VÀ PHÙ HỢP */
-  text-transform: uppercase; /* Viết hoa chữ */
-  letter-spacing: 0.5px; 
-  
-  padding: 12px 0 8px 0; 
-  opacity: 0.8;
-  cursor: default;
-}
-.library-heading span {
-  /* Căn chỉnh chữ và icon cho cân đối */
-  margin-top: 2px; 
-}
-
-/* 7. Các mục con của Thư viện (Bài hát yêu, Tạo playlist) */
-.sidebar-library-items {
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px; 
-  margin-top: 10px; /* Tạo khoảng cách với tiêu đề */
-}
-
-.sidebar-library-items li {
-  display: flex;
-  align-items: center;
-  gap: 12px; 
-  font-size: 14px; 
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  transition: color 0.2s ease;
-  padding: 8px 0;
-}
-.sidebar-library-items li:hover {
-  color: var(--color-text-primary);
-}
-
-.sidebar-library-items .icon-box {
-  width: 24px; 
-  height: 24px;
-  min-width: 24px; /* Giữ kích thước icon ổn định */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-radius: 2px;
-  color: white;
-}

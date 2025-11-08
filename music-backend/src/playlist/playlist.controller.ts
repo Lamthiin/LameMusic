@@ -4,7 +4,7 @@ import {
   UseGuards, Req, HttpStatus, HttpCode, 
   ValidationPipe, ParseIntPipe, Param, 
   UnauthorizedException,
-  BadRequestException
+  BadRequestException,Delete
 } from '@nestjs/common';
 import { PlaylistService } from './playlist.service';
 import { CreatePlaylistDto } from './dto/create-playlist.dto';
@@ -72,5 +72,18 @@ export class PlaylistController {
   async getPlaylistById(@Param('id', ParseIntPipe) id: number) {
     // Service sẽ kiểm tra quyền riêng tư
     return this.playlistService.findPublicById(id);
+  }
+
+  /**
+   * API MỚI: DELETE /playlists/my/:id (Xóa Playlist)
+   */
+  @UseGuards(AuthGuard('jwt'))
+  @Delete('my/:id')
+  async deleteMyPlaylist(
+    @Req() req: any,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    const userId = (req.user as JwtPayload).userId;
+    return this.playlistService.deleteMyPlaylist(userId, id);
   }
 }

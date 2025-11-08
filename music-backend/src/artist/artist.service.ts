@@ -34,7 +34,7 @@ async findFeaturedArtists(): Promise<Artist[]> {
       SELECT * FROM artist 
       WHERE active = 1 AND registration_status = 'APPROVED' 
       ORDER BY RAND() 
-      LIMIT 6
+      LIMIT 10
     `;
     const artists = await this.artistRepository.query(query);
     return artists;

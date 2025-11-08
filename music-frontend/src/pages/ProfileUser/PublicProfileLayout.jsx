@@ -71,7 +71,7 @@ const PublicProfileLayout = () => {
             {/* 1. HEADER CÔNG KHAI */}
             <div className="profile-header public-profile">
                 <div className="profile-header-overlay">
-                    <img src={avatarUrl} alt={profile.username} className="profile-avatar" />
+                    {/* <img src={avatarUrl} alt={profile.username} className="profile-avatar" /> */}
                     <div className="profile-header-info">
                         <p className="profile-header-sub">HỒ SƠ CÔNG KHAI</p>
                         <h1 className="profile-header-name">{profile.username}</h1>

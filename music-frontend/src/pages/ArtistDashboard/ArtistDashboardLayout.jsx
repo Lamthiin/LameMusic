@@ -27,7 +27,7 @@ const ArtistDashboardLayout = () => {
       {/* 1. HEADER (Lấy từ User) */}
       <div className="profile-header artist-dashboard-header"> {/* Thêm class mới */}
         <div className="profile-header-overlay">
-            <img src={avatarUrl} alt={user?.username} className="profile-avatar" />
+            {/* <img src={avatarUrl} alt={user?.username} className="profile-avatar" /> */}
             <div className="profile-header-info">
                 <p className="profile-header-sub">TRANG QUẢN LÝ NGHỆ SĨ</p>
                 <h1 className="profile-header-name">{user?.username}</h1>

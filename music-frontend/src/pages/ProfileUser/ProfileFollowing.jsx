@@ -1,80 +1,66 @@
-// music-frontend/src/pages/Profile/ProfileFollowing.jsx (TẠO MỚI)
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchMyFollowingApi } from '../../utils/api';
-import './Profile.css'; // Dùng chung CSS
+import { fetchMyFollowingApi } from '../../utils/api'; 
+import './Profile.css';
+import { FaUserCircle } from 'react-icons/fa';
 
-// (Hàm helper fix URL - Rất quan trọng)
-const fixUrl = (url, type = 'artist') => {
-    if (!url) { 
-        return '/images/default-artist.png'; 
-    }
-    if (url.startsWith('http')) return url;
-    const prefix = type === 'image' ? '/media/images' : '/media/audio';
-    const originalPath = type === 'image' ? '/images' : '/audio';
-    
-    if (url.startsWith(prefix)) {
-        return `http://localhost:3000${url}`;
-    }
-    return `http://localhost:3000${url.replace(originalPath, prefix)}`;
-};
+const showToast = (message) => { alert(message); };
+const fixUrl = (url) => url?.startsWith('http') ? url : `http://localhost:3000${url}`;
 
 const ProfileFollowing = () => {
     const [followingList, setFollowingList] = useState([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        const loadFollowing = async () => {
-            setLoading(true);
-            try {
-                const data = await fetchMyFollowingApi(); // Trả về [Follow]
-
-                // Trích xuất thông tin Artist từ object Follow
-                const artists = data.map(follow => {
-                    // API trả về: { ..., following: { id, username, ..., artist: { id, stage_name, avatar_url } } }
-                    const artistProfile = follow.following.artist;
-                    
-                    if (artistProfile) {
-                        // Fix URL ảnh
-                        artistProfile.avatar_url = fixUrl(artistProfile.avatar_url, 'artist');
-                        return artistProfile;
-                    }
-                    return null; // Bỏ qua nếu user đó không phải artist
-                }).filter(Boolean); // Lọc bỏ các giá trị null
-
-                setFollowingList(artists);
-            } catch (error) {
-                console.error("Lỗi tải danh sách đang theo dõi:", error);
-            }
+    const loadFollowing = useCallback(async () => {
+        setLoading(true);
+        try {
+            const data = await fetchMyFollowingApi();
+            const finalArtists = data
+                .filter(f => f.following && f.following.registrationStatus === 'APPROVED')
+                .map(f => f.following);
+            setFollowingList(finalArtists);
+        } catch (error) {
+            console.error("Lỗi tải danh sách đang theo dõi:", error);
+            showToast('Lỗi tải danh sách đang theo dõi.');
+        } finally {
             setLoading(false);
-        };
-        loadFollowing();
+        }
     }, []);
 
-    if (loading) return <p>Đang tải...</p>;
+    useEffect(() => {
+        loadFollowing();
+    }, [loadFollowing]); 
+
+    const goToArtist = (artistId) => {
+        navigate(`/artist/${artistId}`);
+    };
+
+    if (loading) return <p>Đang tải danh sách theo dõi...</p>;
 
     return (
-        <div className="profile-following-container">
-            <h2>Đang theo dõi</h2>
+        <div className="pf-following-container">
+            <h2>Đang theo dõi ({followingList.length})</h2>
             
-            {/* Tái sử dụng class 'artist-grid-full' (nếu đã có) hoặc 'playlist-grid' */}
-            <div className="playlist-grid"> 
+            <div className="pf-artist-grid">
                 {followingList.length > 0 ? (
                     followingList.map(artist => (
                         <div 
                             key={artist.id} 
-                            // Tái sử dụng style 'playlist-card' (hoặc 'artist-card' nếu bạn thích)
-                            className="playlist-card" 
-                            onClick={() => navigate(`/artist/${artist.id}`)}
+                            className="pf-artist-card"
+                            onClick={() => goToArtist(artist.id)}
                         >
-                            <img src={artist.avatar_url} alt={artist.stage_name} style={{ borderRadius: '50%' }} />
-                            <h4>{artist.stage_name}</h4>
-                            <p>Nghệ sĩ</p>
+                            <img 
+                                src={fixUrl(artist.avatar_url) || '/images/default-artist.png'} 
+                                alt={artist.stage_name} 
+                                className="pf-artist-avatar" 
+                            />
+                            <h4 className="pf-artist-name">{artist.stage_name}</h4>
+                            <p className="pf-artist-role">Nghệ sĩ</p>
                         </div>
                     ))
                 ) : (
-                    <p>Bạn chưa theo dõi nghệ sĩ nào.</p>
+                    <p className="pf-subtle-text">Bạn chưa theo dõi nghệ sĩ nào đã được duyệt.</p>
                 )}
             </div>
         </div>

@@ -1,261 +1,393 @@
-/* music-frontend/src/components/Header.css (BẢN SỬA LỖI 3 CỘT) */
-
+/* ================= HEADER - CYBER NEON 2025 ================= */
 .header-container {
-  grid-area: header;
-  background-color: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
-  display: grid; 
-  grid-template-columns: 1fr 2fr 1fr; /* Chia 3 cột */
-  align-items: center;
-  padding: 0px 40px;
-  height: 60px;
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 1000;
-}
-
-/* === CỘT 1: BÊN TRÁI (LOGO) === */
-.header-left {
+  left: 0;
+  width: 100%;
+  height: 70px;
+  background: rgba(0, 25, 25, 0.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(0, 255, 204, 0.3);
   display: flex;
   align-items: center;
-  justify-content: flex-start; 
+  justify-content: space-between;
+  padding: 0 24px;
+  z-index: 9998;
+  box-shadow: 
+    0 8px 25px rgba(0, 255, 204, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.5);
+  transition: all 0.4s ease;
+  font-family: 'Segoe UI', system-ui, sans-serif;
 }
-.logo {
-  color: var(--color-accent);
-  font-size: 24px;
+
+.header-container::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(90deg, 
+    rgba(0, 255, 204, 0.1) 0%, 
+    rgba(0, 255, 204, 0.18) 50%, 
+    rgba(0, 255, 204, 0.1) 100%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.header-container:hover {
+  background: rgba(0, 28, 28, 0.9);
+  box-shadow: 0 10px 35px rgba(0, 255, 204, 0.2);
+}
+
+/* === LOGO === */
+.header-left .logo {
+  font-size: 28px;
   font-weight: 900;
+  background: linear-gradient(90deg, #00ffcc, #00cc99);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   cursor: pointer;
-  margin: 0;
+  user-select: none;
+  text-shadow: 0 0 15px rgba(0, 255, 204, 0.5);
+  transition: all 0.3s ease;
+  letter-spacing: 1px;
 }
 
-/* === CỘT 2: GIỮA (SEARCH) === */
+.header-left .logo:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 0 12px #00ffcc);
+}
+
+/* === SEARCH BAR === */
 .header-center {
-  display: flex;
-  justify-content: center; 
+  flex: 1;
+  max-width: 560px;
+  margin: 0 40px;
+  position: relative;
 }
+
 .search-bar-container {
-    position: relative;
-    width: 100%;
-    max-width: 450px;
+  position: relative;
+  width: 100%;
 }
-.search-icon {
-    position: absolute;
-    top: 50%;
-    left: 15px;
-    transform: translateY(-50%);
-    color: var(--color-text-secondary);
-    font-size: 16px;
-}
+
 .search-bar-container input {
-    width: 100%;
-    padding: 12px 20px 12px 45px; 
-    border: 1px solid var(--color-border);
-    border-radius: 500px; 
-    background-color: #434343;
-    color: var(--color-text-primary);
-    font-size: 15px;
-    box-sizing: border-box;
+  width: 100%;
+  padding: 12px 44px 12px 44px;
+  border-radius: 50px;
+  border: 2px solid rgba(0, 255, 204, 0.4);
+  background: rgba(0, 40, 40, 0.7);
+  color: #e0fffa;
+  font-size: 15px;
+  outline: none;
+  transition: all 0.4s ease;
+  backdrop-filter: blur(8px);
 }
+
+.search-bar-container input::placeholder {
+  color: #88cccc;
+  font-style: italic;
+}
+
 .search-bar-container input:focus {
-    border-color: rgb(219, 219, 219);
-    outline: none;
+  border-color: #00ffcc;
+  background: rgba(0, 45, 45, 0.9);
+  box-shadow: 
+    0 0 20px rgba(0, 255, 204, 0.5),
+    inset 0 1px 3px rgba(0, 0, 0, 0.3);
+  transform: scale(1.02);
 }
 
-/* === KHUNG KẾT QUẢ TÌM KIẾM (DROPDOWN) === */
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #00ffcc;
+  font-size: 18px;
+  pointer-events: none;
+  filter: drop-shadow(0 0 6px #00ffcc);
+  z-index: 2;
+}
+
+/* === SEARCH DROPDOWN === */
 .search-results-dropdown {
-    position: absolute;
-    top: 50px; 
-    left: 0;
-    width: 100%;
-    background-color: var(--color-surface-hover);
-    border: 1px solid var(--color-border);
-    border-radius: 10px;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.5);
-    z-index: 1001;
-    max-height: 400px; 
-    overflow-y: auto;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 70vh;
+  overflow-y: auto;
+  background: rgba(0, 25, 25, 0.95);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 255, 204, 0.3);
+  border-radius: 16px;
+  margin-top: 8px;
+  box-shadow: 
+    0 15px 40px rgba(0, 0, 0, 0.6),
+    0 0 20px rgba(0, 255, 204, 0.2);
+  z-index: 9999;
+  animation: slideDown 0.3s ease;
 }
 
-/* === (2) STYLE CHO "KHÔNG CÓ THÔNG TIN" === */
-.search-no-results {
-    padding: 20px;
-    text-align: center;
-    color: var(--color-text-secondary);
-    font-style: italic;
-    font-weight: 500;
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .search-result-section {
-    padding: 10px 0;
-    border-bottom: 1px solid var(--color-border);
+  padding: 12px 16px;
+  border-bottom: 1px dashed rgba(0, 255, 204, 0.2);
 }
-.search-result-section:last-child { border-bottom: none; }
+
+.search-result-section:last-child {
+  border-bottom: none;
+}
 
 .search-result-section h4 {
-    margin: 0;
-    padding: 5px 15px 10px 15px;
-    color: var(--color-text-primary);
-    font-size: 16px;
-    font-weight: 700;
+  margin: 0 0 10px;
+  color: #00ffcc;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 0 0 8px rgba(0, 255, 204, 0.6);
 }
 
 .search-result-item {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding: 10px 15px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-.search-result-item:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-}
-.search-result-item img {
-    width: 40px;
-    height: 40px;
-    object-fit: cover;
-    border-radius: 4px; 
-}
-.search-result-item img.artist-avatar {
-    border-radius: 50%;
-}
-.search-result-item p {
-    margin: 0;
-    font-weight: 500;
-    color: var(--color-text-primary);
-    font-size: 15px;
-}
-.search-result-item span {
-    font-size: 13px;
-    color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-/* === CỘT 3: BÊN PHẢI (AUTH) === */
+.search-result-item:hover {
+  background: rgba(0, 255, 204, 0.15);
+  transform: translateX(6px);
+  box-shadow: 0 4px 15px rgba(0, 255, 204, 0.2);
+}
+
+.search-result-item img {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1.5px solid #00cc99;
+  box-shadow: 0 0 10px rgba(0, 255, 204, 0.4);
+}
+
+.artist-avatar {
+  border-radius: 50% !important;
+  background: #001f1f;
+}
+
+.search-result-item p {
+  margin: 0;
+  font-weight: 600;
+  color: #e0fffa;
+  font-size: 14px;
+}
+
+.search-result-item span {
+  font-size: 12px;
+  color: #88cccc;
+  font-style: italic;
+}
+
+.search-no-results {
+  padding: 20px;
+  text-align: center;
+  color: #88b3b3;
+  font-style: italic;
+  font-size: 15px;
+}
+
+/* === USER MENU & AUTH === */
 .header-right {
   display: flex;
   align-items: center;
-  gap: 15px; 
-  justify-content: flex-end; 
+  gap: 16px;
 }
 
-/* (CSS cho .auth-buttons, .btn-login, .btn-signup) */
-.auth-buttons { display: flex; gap: 15px; }
+.auth-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-signup, .btn-login {
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
 .btn-signup {
-  background: none;
-  border: 1px solid var(--color-text-secondary);
-  color: var(--color-text-primary);
-  padding: 8px 20px;
-  border-radius: 500px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
+  background: rgba(0, 255, 204, 0.2);
+  color: #00ffcc;
+  border-color: #00ffcc;
 }
+
 .btn-signup:hover {
-    border-color: #fff;
-    transform: scale(1.03);
+  background: #00ffcc;
+  color: #001f1f;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 255, 204, 0.4);
 }
+
 .btn-login {
-  background-color: var(--color-accent);
-  color: var(--color-black);
-  border: none;
-  padding: 8px 20px;
-  border-radius: 500px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
+  background: transparent;
+  color: #e0fffa;
+  border-color: rgba(0, 255, 204, 0.5);
 }
+
 .btn-login:hover {
-    background-color: var(--color-accent-hover);
-    transform: scale(1.03);
+  background: rgba(0, 255, 204, 0.15);
+  border-color: #00ffcc;
+  transform: translateY(-2px);
 }
 
-/* (CSS cho .btn-become-artist) */
-.btn-become-artist {
-  background: none;
-  border: 1px solid var(--color-accent);
-  color: var(--color-accent);
-  padding: 8px 20px;
-  border-radius: 500px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.btn-become-artist:hover {
-    background-color: rgba(30, 215, 96, 0.1); 
-    transform: scale(1.03);
-}
-
-
-/* (CSS cho .user-menu, .user-dropdown) */
-.user-menu {
-    position: relative; 
-}
-.user-menu-button {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
-    color: var(--color-text-primary);
-    padding: 8px 15px;
-    border-radius: 500px;
-    cursor: pointer;
-    font-size: 15px;
-    font-weight: 600;
-}
-.user-dropdown {
-    position: absolute;
-    top: 50px; 
-    right: 0;
-    width: 220px;
-    background-color: #282828; 
-    border-radius: 8px;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.5);
-    z-index: 1001;
-    overflow: hidden; 
-}
-.user-dropdown div {
-    padding: 14px 20px;
-    color: var(--color-text-secondary);
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-.user-dropdown div:hover {
-    background-color: var(--color-surface-hover);
-    color: var(--color-text-primary);
-}
-.user-dropdown div:last-child {
-    border-top: 1px solid var(--color-border);
-}
-
-/* music-frontend/src/components/Header.css (THÊM VÀO CUỐI) */
-
-/* === (MỚI) HUY HIỆU ARTIST ĐÃ DUYỆT === */
+/* === Artist Badge === */
 .btn-artist-badge {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    
-    /* Style cơ bản giống nút nhưng không phải nút bấm */
-    background-color: var(--color-surface); 
-    border: 1px solid var(--color-accent);
-    
-    color: var(--color-accent); /* Chữ xanh lá */
-    padding: 8px 12px;
-    border-radius: 500px;
-    font-weight: 700;
-    font-size: 14px;
-    
-    cursor: pointer; /* Cho phép click để chuyển sang dashboard */
-    transition: background-color 0.2s;
-    cursor: 'default'
+  background: linear-gradient(135deg, #00cc99, #009977);
+  color: white;
+  padding: 8px 14px;
+  border-radius: 50px;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: default;
+  box-shadow: 0 0 15px rgba(0, 204, 153, 0.6);
+  animation: pulse-badge 4s infinite;
 }
 
-.btn-artist-badge:hover {
-    background-color: rgba(29, 185, 84, 0.2); /* Nền xanh nhẹ khi hover */
+@keyframes pulse-badge {
+  0%, 100% { box-shadow: 0 0 15px rgba(0, 204, 153, 0.6); }
+  50% { box-shadow: 0 0 25px rgba(0, 204, 153, 0.9); }
 }
 
-.btn-artist-badge svg {
-    color: var(--color-accent); /* Màu icon tích xanh */
+.btn-become-artist {
+  background: transparent;
+  color: #00ffcc;
+  border: 2px solid #00ffcc;
+  padding: 8px 16px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-become-artist:hover {
+  background: #00ffcc;
+  color: #001f1f;
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(0, 255, 204, 0.5);
+}
+
+/* === User Menu === */
+.user-menu {
+  position: relative;
+}
+
+.user-menu-button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(0, 255, 204, 0.15);
+  color: #e0fffa;
+  padding: 8px 16px;
+  border-radius: 50px;
+  border: 1.5px solid rgba(0, 255, 204, 0.4);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+
+.user-menu-button:hover {
+  background: rgba(0, 255, 204, 0.25);
+  border-color: #00ffcc;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 255, 204, 0.3);
+}
+
+.user-menu-button svg {
+  color: #00ffcc;
+  filter: drop-shadow(0 0 6px #00ffcc);
+}
+
+.user-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 10px;
+  background: rgba(0, 25, 25, 0.95);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(0, 255, 204, 0.3);
+  border-radius: 14px;
+  min-width: 200px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+  animation: slideDown 0.3s ease;
+}
+
+.user-dropdown > div {
+  padding: 14px 18px;
+  color: #e0fffa;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.user-dropdown > div:hover {
+  background: rgba(0, 255, 204, 0.2);
+  color: #00ffcc;
+  padding-left: 24px;
+}
+
+.user-dropdown > div:last-child {
+  border-top: 1px solid rgba(0, 255, 204, 0.2);
+  color: #ff6b6b;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 992px) {
+  .header-container {
+    padding: 0 16px;
+    height: 64px;
+  }
+  .header-center {
+    margin: 0 20px;
+    max-width: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  .header-container {
+    flex-direction: column;
+    height: auto;
+    padding: 12px 16px;
+    gap: 12px;
+  }
+  .header-center {
+    order: 3;
+    width: 100%;
+    margin: 0;
+  }
+  .header-left, .header-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .header-left .logo {
+    font-size: 24px;
+  }
+  .auth-buttons {
+    order: 2;
+  }
 }

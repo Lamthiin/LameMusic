@@ -442,3 +442,27 @@ export const incrementPlayCountApi = async (songId) => {
         console.warn(`Không thể tăng lượt nghe cho bài hát ID ${songId}.`);
     }
 };
+
+export const toggleLikeSongApi = async (songId) => {
+    try {
+        // API POST /like/:songId (Backend đã tạo)
+        const response = await api.post(`/like/${songId}`);
+        // Giả định Backend trả về trạng thái mới (isLiked: true/false)
+        return response.data; 
+    } catch (error) {
+        console.error(`Lỗi khi toggle like cho Song ID ${songId}:`, error);
+        throw error;
+    }
+};
+
+/* === API MỚI: XÓA PLAYLIST CÁ NHÂN === */
+export const deleteMyPlaylistApi = async (playlistId) => {
+    try {
+        // API DELETE /playlists/my/:id
+        const response = await api.delete(`/playlists/my/${playlistId}`);
+        return response.data; 
+    } catch (error) {
+        console.error('Lỗi khi xóa playlist:', error);
+        throw error;
+    }
+};

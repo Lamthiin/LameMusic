@@ -27,7 +27,6 @@ import AllArtistsPage from './pages/AllArtistsPage';
 import ProfileInfo from './pages/ProfileUser/ProfileInfo';
 import ProfilePlaylists from './pages/ProfileUser/ProfilePlaylists';
 import ProfileFollowing from './pages/ProfileUser/ProfileFollowing'; // <-- (1) IMPORT MỚI
-import PublicProfilePage from './pages/ProfileUser/PublicProfilePage'; // <-- (1) IMPORT MỚI
 import PlaylistDetailPage from './pages/PlaylistDetailPage'; // <-- (2) IMPORT MỚI
 import PublicProfileLayout from './pages/ProfileUser/PublicProfileLayout';
 import PublicProfileFollowing from './pages/ProfileUser/PublicProfileFollowing';

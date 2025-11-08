@@ -161,12 +161,8 @@ const SongDetail = () => {
           </p>
 
           <div className="detail-controls">
-            <button className="detail-play-button" onClick={handlePlayPause}>
-               {isThisSongPlaying ? <FaPause size={20} /> : <FaPlay size={20} />} 
-               {isThisSongPlaying ? 'TẠM DỪNG' : 'PHÁT'}
-            </button>
             
-            <button className="icon-button" onClick={handleReplay}>
+            <button className="detail-play-button" onClick={handleReplay}>
                <FaRedo size={20} /> PHÁT LẠI
             </button>
             

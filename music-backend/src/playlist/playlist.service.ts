@@ -119,4 +119,33 @@ export class PlaylistService {
     
     return playlist;
   }
+
+  /**
+   * HÀM MỚI: Xóa Playlist của User hiện tại
+   */
+  async deleteMyPlaylist(userId: number, playlistId: number): Promise<{ message: string }> {
+    // 1. Tìm Playlist và User
+    const playlist = await this.playlistRepository.findOne({
+      where: { id: playlistId, is_active: 1 },
+      relations: ['user'] // Cần load user để kiểm tra quyền sở hữu
+    });
+
+    if (!playlist) {
+      throw new NotFoundException('Playlist không tồn tại.');
+    }
+
+    // 2. Kiểm tra quyền sở hữu
+    if (playlist.user.id !== userId) {
+      throw new UnauthorizedException('Bạn không có quyền xóa playlist này.');
+    }
+
+    // 3. Xóa (Sử dụng delete của TypeORM)
+    const result = await this.playlistRepository.delete(playlistId);
+
+    if (result.affected === 0) {
+        throw new NotFoundException('Xóa thất bại (Có thể playlist không tồn tại).');
+    }
+
+    return { message: 'Xóa playlist thành công.' };
+  }
 }

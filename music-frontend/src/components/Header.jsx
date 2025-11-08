@@ -111,7 +111,7 @@ const Header = () => {
       
       {/* === CỘT 1: BÊN TRÁI (LOGO) === */}
       <div className="header-left">
-        <h1 className="logo" onClick={() => navigate('/')}>lame 🎵</h1>
+        <h1 className="logo" onClick={() => navigate('/')}>Lame 🎵</h1>
       </div>
       
       {/* === CỘT 2: GIỮA (SEARCH) === */}

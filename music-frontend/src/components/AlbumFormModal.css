@@ -1,5 +1,5 @@
 /* src/components/AlbumFormModal.css */
-/* PHONG CÁCH ĐEN – GỌN – MƯỢT – CỰC MỊN */
+/* PHIÊN BẢN NANO – NHỎ NHẤT CÓ THỂ – ĐEN TUYỆT ĐỐI – CHỈ XANH NGỌC */
 
 .album-modal-overlay {
   position: fixed;
@@ -20,63 +20,48 @@
   max-width: 400px;
   max-height: 88vh;
   border-radius: 18px;
-  padding: 22px;
+  padding: 20px;
   box-shadow: 0 16px 50px rgba(0,0,0,0.8);
   border: 1px solid #1a1a1a;
   position: relative;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(0,230,200,0.3) transparent;
   font-family: 'Inter', sans-serif;
+  overflow-y: auto;
 }
 
-/* Thanh cuộn siêu mảnh */
-.album-modal-box::-webkit-scrollbar {
-  width: 4px;
-}
-.album-modal-box::-webkit-scrollbar-thumb {
-  background: rgba(0,230,200,0.25);
-  border-radius: 2px;
-}
-.album-modal-box::-webkit-scrollbar-thumb:hover {
-  background: #00e6c8;
-}
-
-/* Nút đóng nhỏ gọn */
+/* CLOSE BUTTON NANO */
 .album-modal-close {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 12px;
+  right: 12px;
   background: #222;
-  color: #aaa;
+  color: #999;
   border: none;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  font-size: 14px;
+  font-size: 15px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: 0.25s;
 }
 .album-modal-close:hover {
   background: #00e6c8;
   color: #000;
+  transform: rotate(90deg);
 }
 
-/* Tiêu đề */
+/* TITLE SIÊU NHỎ */
 .album-modal-box h2 {
   font-size: 18px;
   font-weight: 800;
   text-align: center;
+  margin: 0 0 14px;
   color: #fff;
-  margin: 0 0 12px;
+  letter-spacing: -0.3px;
 }
 
-/* Thông báo lỗi */
+/* ERROR NANO */
 .album-error {
   background: rgba(255,91,91,0.15);
   color: #ff5b5b;
@@ -84,83 +69,121 @@
   border-radius: 10px;
   font-size: 12px;
   text-align: center;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(255,91,91,0.3);
 }
 
-/* Form – nhỏ và đều */
-.album-form {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+/* UPLOAD SECTION */
+.album-upload-section {
+  margin-bottom: 16px;
+  text-align: center;
 }
 
-.album-upload-section label,
-.album-field label {
-  font-size: 13px;
-  font-weight: 600;
-  color: #ccc;
-  margin-bottom: 4px;
+.album-upload-section label {
   display: block;
+  font-size: 12px;
+  color: #aaa;
+  margin-bottom: 8px;
+  font-weight: 600;
 }
 
-/* Ảnh preview */
 .album-preview-box {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .album-preview-img {
   width: 100px;
   height: 100px;
-  border-radius: 12px;
+  border-radius: 14px;
   object-fit: cover;
-  border: 1px solid #333;
-  box-shadow: 0 0 6px rgba(0,0,0,0.4);
+  border: 2px solid #333;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.6);
 }
 
-/* Input */
-.album-field input[type="text"],
-.album-field input[type="date"] {
+.album-preview-box input[type="file"] {
+  font-size: 9px;
+  color: #00e6c8;
+  background: #1a1a1a;
+  padding: 6px;
+  border-radius: 8px;
   width: 100%;
-  padding: 10px;
+  max-width: 200px;
+}
+
+/* FIELD */
+.album-field {
+  margin-bottom: 14px;
+}
+
+.album-field label {
+  display: block;
+  font-size: 12px;
+  color: #ccc;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.album-field input {
+  width: 100%;
+  padding: 10px 12px;
   border-radius: 10px;
-  border: 1px solid #222;
-  background: #151515;
-  color: #fff;
+  border: 1px solid #333;
+  background: #1a1a1a;
+  color: #e5e5e5;
   font-size: 13px;
-  outline: none;
   transition: 0.2s;
 }
+
 .album-field input:focus {
+  outline: none;
   border-color: #00e6c8;
+  background: #222;
+  box-shadow: 0 0 0 2px rgba(0,230,200,0.2);
 }
 
-/* Nút lưu */
+/* BUTTONS */
 .album-buttons {
-  margin-top: 8px;
+  margin-top: 10px;
+  text-align: center;
 }
+
 .album-btn {
   width: 100%;
   padding: 12px;
-  background: #00e6c8;
-  color: #000;
   border: none;
   border-radius: 12px;
+  background: #00e6c8;
+  color: #000;
+  font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  font-size: 14px;
   transition: 0.25s;
 }
+
 .album-btn:hover:not(:disabled) {
   background: #00f0d0;
   transform: translateY(-2px);
 }
+
 .album-btn:disabled {
   background: #333;
-  color: #777;
+  color: #666;
   cursor: not-allowed;
+}
+
+/* SCROLLBAR MỎNG */
+.album-modal-box::-webkit-scrollbar {
+  width: 4px;
+}
+.album-modal-box::-webkit-scrollbar-thumb {
+  background: rgba(0,230,200,0.3);
+  border-radius: 2px;
+}
+.album-modal-box::-webkit-scrollbar-thumb:hover {
+  background: #00e6c8;
 }
 
 /* MOBILE */
@@ -170,7 +193,11 @@
     max-height: 92vh;
   }
   .album-preview-img {
-    width: 90px;
-    height: 90px;
+    width: 80px;
+    height: 80px;
+  }
+  .album-field input {
+    padding: 9px;
+    font-size: 12px;
   }
 }

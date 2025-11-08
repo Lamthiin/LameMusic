@@ -1,109 +1,240 @@
+/* === PLAYER BAR CONTAINER - Cyber Glow Edition === */
 .player-bar-container {
   position: fixed;
   bottom: 0;
+  left: 0;
   width: 100%;
-  background: linear-gradient(90deg, #001f1f, #003333);
-  color: #fff;
+  background: linear-gradient(90deg, #001f1f, #002b2b, #001f1f);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #e0fffa;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 2px 30px;
-  box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.5);
-  transition: all 0.3s ease;
-  z-index: 999;
-  border-top: 1px solid #004d4d;
+  padding: 0px 24px;
+  /* box-shadow: 
+    0 -8px 25px rgba(0, 255, 204, 0.15),
+    0 -2px 8px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(0, 255, 204, 0.1); */
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 9999;
+  border-top: 1px solid rgba(0, 255, 204, 0.3);
+  font-family: 'Segoe UI', system-ui, sans-serif;
 }
 
+.player-bar-container::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(90deg, 
+    rgba(0, 255, 204, 0.08) 0%, 
+    rgba(0, 255, 204, 0.15) 50%, 
+    rgba(0, 255, 204, 0.08) 100%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* .player-bar-container:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 -12px 30px rgba(0, 255, 204, 0.25),
+    0 -4px 12px rgba(0, 0, 0, 0.7);
+} */
+
+/* Khi không có nhạc */
 .player-bar-container.empty {
   justify-content: center;
-  text-align: center;
+  background: rgba(0, 25, 25, 0.85);
+  backdrop-filter: blur(10px);
+}
+.player-bar-container.empty::before { display: none; }
+.waiting-text {
   font-size: 15px;
-  color: #ccc;
-  background: #001919;
+  color: #88cccc;
+  text-shadow: 0 0 8px rgba(0, 255, 204, 0.4);
+  animation: pulse 3s infinite;
 }
 
+/* === TRACK INFO - Neon Card === */
 .player-track-info {
   display: flex;
   align-items: center;
-  gap: 15px;
-  min-width: 240px;
+  gap: 16px;
+  min-width: 260px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.player-track-info:hover {
+  background: rgba(0, 255, 204, 0.1);
+  padding-left: 12px;
+  transform: translateX(4px);
 }
 
 .player-track-info img {
-  width: 60px;
-  height: 60px;
-  border-radius: 8px;
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
   object-fit: cover;
-  border: 2px solid #00cc99;
-  box-shadow: 0 0 8px #009977;
+  border: 2px solid #00ffcc;
+  box-shadow: 
+    0 0 15px rgba(0, 255, 204, 0.6),
+    0 0 30px rgba(0, 255, 204, 0.3);
+  transition: all 0.4s ease;
+  animation: float 6s ease-in-out infinite;
+}
+
+.player-track-info img:hover {
+  box-shadow: 0 0 25px rgba(0, 255, 204, 0.9);
+  transform: scale(1.05);
 }
 
 .player-track-info .title {
-  font-weight: 600;
+  font-weight: 700;
   font-size: 15px;
   margin: 0;
   color: #00ffcc;
+  text-shadow: 0 0 8px rgba(0, 255, 204, 0.6);
+  letter-spacing: 0.5px;
 }
 
 .player-track-info .artist {
   font-size: 13px;
-  margin: 2px 0 0;
-  color: #b3e6d8;
+  margin: 3px 0 0;
+  color: #a8ffeb;
+  font-weight: 500;
 }
 
-.waiting-text {
-  font-style: italic;
-  color: #88b3b3;
-}
-
-/* === Audio Player Core === */
+/* === AUDIO PLAYER CORE - React H5 Audio Player === */
 .audio-player-core {
-  width: 40%;
-  background: transparent !important;
-  box-shadow: none !important;
+  width: 42%;
+  min-width: 320px;
 }
 
 .rhap_container {
   background: transparent !important;
-  color: #00ffcc;
+  box-shadow: none !important;
+  padding: 0 !important;
 }
 
-.rhap_controls-section {
-  filter: brightness(1.2);
+.rhap_progress-container {
+  margin: 0 12px;
 }
 
 .rhap_progress-bar {
-  background-color: #004d4d !important;
+  height: 6px !important;
+  border-radius: 3px;
+  background: rgba(0, 77, 77, 0.6) !important;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);
 }
 
 .rhap_progress-filled {
-  background-color: #00ffcc !important;
+  background: linear-gradient(90deg, #00ffcc, #00cc99) !important;
+  border-radius: 3px;
+  box-shadow: 0 0 12px rgba(0, 255, 204, 0.7);
+}
+
+.rhap_progress-indicator {
+  width: 14px;
+  height: 14px;
+  background: #00ffcc;
+  box-shadow: 0 0 15px #00ffcc;
+  top: -4px;
+  margin-left: -7px;
 }
 
 .rhap_time {
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
   color: #00ffcc !important;
+  text-shadow: 0 0 8px rgba(0, 255, 204, 0.5);
+  font-size: 13px;
 }
 
+/* Nút Play/Pause - Epic Hover */
 .rhap_main-controls-button {
   color: #00ffcc !important;
-  transition: transform 0.2s ease;
+  font-size: 36px !important;
+  /* transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) !important; */
 }
 
 .rhap_main-controls-button:hover {
-  transform: scale(1.1);
-  color: #33ffd6 !important;
+  color: #33ffe6 !important;
+  /* transform: scale(1.2) rotate(6deg) !important; */
+  filter: drop-shadow(0 0 12px #00ffcc);
 }
 
-/* === Volume === */
+.rhap_play-pause-button {
+  animation: pulse-play 2s infinite;
+}
+
+/* === VOLUME CONTROL - Sleek === */
 .player-volume-controls {
   display: flex;
   align-items: center;
-  color: #00ffcc;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 50px;
+  transition: all 0.3s ease;
   cursor: pointer;
 }
 
 .player-volume-controls:hover {
-  color: #33ffd6;
-  transform: scale(1.1);
+  background: rgba(0, 255, 204, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 255, 204, 0.3);
+}
+
+.player-volume-controls svg {
+  filter: drop-shadow(0 0 6px #00ffcc);
   transition: all 0.3s ease;
+}
+
+.player-volume-controls:hover svg {
+  transform: scale(1.15);
+}
+
+/* === ANIMATIONS === */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+@keyframes pulse-play {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.3) drop-shadow(0 0 10px #00ffcc); }
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+  .player-bar-container {
+    padding: 6px 12px;
+    flex-direction: column;
+    gap: 8px;
+    padding-bottom: 12px;
+  }
+  
+  .player-track-info {
+    min-width: auto;
+    justify-content: center;
+  }
+  
+  .audio-player-core {
+    width: 100%;
+    order: -1;
+  }
+  
+  .player-volume-controls {
+    order: 1;
+  }
+  
+  .rhap_main-controls-button {
+    font-size: 32px !important;
+  }
 }

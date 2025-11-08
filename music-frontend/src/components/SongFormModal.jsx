@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 // (1) IMPORT API CATEGORY
 import { createSongApi, updateMySongApi, getMyAlbumsApi, fetchCategories } from '../utils/api'; 
-import './ChangePasswordModal.css'; 
+import './SongFormModal.css'; 
 import '../pages/ArtistDashboard/ArtistDashboard.css'; 
 import { FaTimes, FaMusic, FaImage } from 'react-icons/fa';
 
@@ -106,75 +106,67 @@ const SongFormModal = ({ onClose, onComplete, songToEdit }) => {
     };
 
     return (
-        <div className="modal-overlay" onClick={onClose}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                <button className="modal-close-btn" onClick={onClose}><FaTimes /></button>
-                <h2>{isEditMode ? 'Sửa Bài hát' : 'Tải lên Bài hát Mới'}</h2>
-                
-                <form className="profile-edit-form" onSubmit={handleSubmit}>
-                    {error && <p className="modal-error">{error}</p>}
+    <div className="song-modal-overlay" onClick={onClose}>
+        <div className="song-modal-content" onClick={(e) => e.stopPropagation()}>
+        <button className="song-modal-close" onClick={onClose}><FaTimes /></button>
+        <h2>{isEditMode ? 'Sửa Bài hát' : 'Tải lên Bài hát Mới'}</h2>
 
-                    {/* Tiêu đề */}
-                    <div className="form-group">
-                        <label>Tiêu đề:</label>
-                        <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required />
-                    </div>
-                    
-                    {/* === (4) DROPDOWN THỂ LOẠI === */}
-                    <div className="form-group">
-                        <label>Thể loại (Bắt buộc):</label>
-                        <select value={genre} onChange={(e) => setGenre(e.target.value)} className="form-select" required>
-                            <option value="" disabled>--- Chọn Thể loại ---</option>
-                            {categories.map(cat => (
-                                <option key={cat.id} value={cat.name}>{cat.name}</option>
-                            ))}
-                        </select>
-                    </div>
-                    {/* ============================== */}
+        <form className="song-form" onSubmit={handleSubmit}>
+            {error && <p className="song-error">{error}</p>}
 
-
-                    {/* Album và Track Number */}
-                    <div className="form-group-flex">
-                         <div className="form-group">
-                            <label>Album:</label>
-                            {/* === ALBUM CHO PHÉP TRỐNG === */}
-                            <select value={albumId} onChange={(e) => setAlbumId(e.target.value)} className="form-select">
-                                <option value="">(Chọn Album - Single)</option>
-                                {artistAlbums.map(album => (
-                                    <option key={album.id} value={album.id}>{album.title}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className="form-group">
-                            <label>Track #:</label>
-                            <input type="number" value={trackNumber} onChange={(e) => setTrackNumber(e.target.value)} placeholder="Thứ tự" />
-                        </div>
-                    </div>
-                    
-                    {/* File Nhạc (Bắt buộc khi tạo) */}
-                    <div className="form-group">
-                        <label>{isEditMode ? 'Đổi File Nhạc' : 'File Nhạc (MP3/WAV)'}: <FaMusic /></label>
-                        <input type="file" accept=".mp3,.wav" onChange={(e) => handleFileChange(e, 'audio')} required={!isEditMode} />
-                        {isEditMode && songToEdit?.file_url && <p className='subtle-text'>File hiện tại: {songToEdit.file_url.split('/').pop()}</p>}
-                    </div>
-                    
-                    {/* Ảnh Bìa */}
-                    <div className="form-group avatar-upload-section">
-                        <label>Ảnh Bìa ({isEditMode ? 'Đổi Ảnh' : 'Optional'}): <FaImage /></label>
-                        <div className="avatar-preview-box">
-                            <img src={imagePreview} alt="Cover Preview" className="avatar-preview" style={{ borderRadius: '8px' }}/>
-                            <input type="file" accept="image/*" onChange={(e) => handleFileChange(e, 'image')} />
-                        </div>
-                    </div>
-                    
-                    <div className="form-buttons">
-                        <button type="submit" disabled={loading} className="profile-button save">
-                            {loading ? 'Đang xử lý...' : (isEditMode ? 'Lưu & Gửi Duyệt lại' : 'Tải lên & Gửi duyệt')}
-                        </button>
-                    </div>
-                </form>
+            <div className="song-form-group">
+            <label>Tiêu đề:</label>
+            <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required />
             </div>
+
+            <div className="song-form-group">
+            <label>Thể loại (Bắt buộc):</label>
+            <select value={genre} onChange={(e) => setGenre(e.target.value)} className="form-select" required>
+                <option value="" disabled>--- Chọn Thể loại ---</option>
+                {categories.map(cat => (
+                <option key={cat.id} value={cat.name}>{cat.name}</option>
+                ))}
+            </select>
+            </div>
+
+            <div className="song-form-group-flex">
+            <div className="song-form-group">
+                <label>Album:</label>
+                <select value={albumId} onChange={(e) => setAlbumId(e.target.value)} className="form-select">
+                <option value="">(Chọn Album - Single)</option>
+                {artistAlbums.map(album => (
+                    <option key={album.id} value={album.id}>{album.title}</option>
+                ))}
+                </select>
+            </div>
+            <div className="song-form-group">
+                <label>Track #:</label>
+                <input type="number" value={trackNumber} onChange={(e) => setTrackNumber(e.target.value)} placeholder="Thứ tự" />
+            </div>
+            </div>
+
+            <div className="song-form-group">
+            <label>{isEditMode ? 'Đổi File Nhạc' : 'File Nhạc (MP3/WAV)'}:</label>
+            <input type="file" accept=".mp3,.wav" onChange={(e) => handleFileChange(e, 'audio')} required={!isEditMode} />
+            {isEditMode && songToEdit?.file_url && <p className="song-subtle">File hiện tại: {songToEdit.file_url.split('/').pop()}</p>}
+            </div>
+
+            <div className="song-form-group">
+            <label>Ảnh Bìa ({isEditMode ? 'Đổi Ảnh' : 'Optional'}):</label>
+            <div className="song-avatar-preview-box">
+                <img src={imagePreview} alt="Cover Preview" className="song-avatar-preview" />
+                <input type="file" accept="image/*" onChange={(e) => handleFileChange(e, 'image')} />
+            </div>
+            </div>
+
+            <div className="song-form-buttons">
+            <button type="submit" disabled={loading} className="song-btn-save">
+                {loading ? 'Đang xử lý...' : (isEditMode ? 'Lưu & Gửi Duyệt lại' : 'Tải lên & Gửi duyệt')}
+            </button>
+            </div>
+        </form>
         </div>
+    </div>
     );
 };
 

@@ -56,9 +56,9 @@ const CreatePlaylistModal = ({ isOpen, onClose, onPlaylistCreated }) => {
 
   return (
     <>
-      <div className="modal-overlay" onClick={handleClose}>
-        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-          <button className="modal-close-btn" onClick={handleClose}>
+      <div className="playlist-modal-overlay" onClick={handleClose}>
+        <div className="playlist-modal-content" onClick={(e) => e.stopPropagation()}>
+          <button className="playlist-close-btn" onClick={handleClose}>
             <FaTimes />
           </button>
           <h2>Tạo Playlist mới</h2>
@@ -73,7 +73,7 @@ const CreatePlaylistModal = ({ isOpen, onClose, onPlaylistCreated }) => {
               disabled={loading}
             />
 
-            <div className="privacy-group">
+            <div className="playlist-privacy-group">
               <label>
                 <input
                   type="radio"
@@ -98,17 +98,17 @@ const CreatePlaylistModal = ({ isOpen, onClose, onPlaylistCreated }) => {
               </label>
             </div>
 
-            {error && <p className="modal-error">{error}</p>}
+            {error && <p className="playlist-error">{error}</p>}
 
-            <button type="submit" className="create-btn" disabled={loading || !name.trim()}>
+            <button type="submit" className="playlist-create-btn" disabled={loading || !name.trim()}>
               {loading ? 'Đang tạo...' : 'Tạo Playlist'}
             </button>
           </form>
         </div>
       </div>
 
-      {/* ✅ Toast chỉ hiển 1 lần duy nhất */}
-      {showToast && <div className="toast-message">🎵 Tạo playlist thành công!</div>}
+      {/* Toast */}
+      {showToast && <div className="playlist-toast">Tạo playlist thành công!</div>}
     </>
   );
 };

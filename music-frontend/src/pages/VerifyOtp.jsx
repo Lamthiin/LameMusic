@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import AuthHeader from '../components/AuthHeader';
-import './Login.css'; // Dùng chung CSS cho form
+// import './Login.css'; // Dùng chung CSS cho form
 
 // Sử dụng instance axios đã được cấu hình (không có token)
 const api = axios.create({ baseURL: 'http://localhost:3000' }); 
@@ -58,7 +58,7 @@ const VerifyOtp = () => {
       });
 
       // Nếu thành công: Chuyển hướng về Login và truyền thông báo
-      navigate('/login', { state: { message: 'Tài khoản đã được kích hoạt thành công! Vui lòng đăng nhập.' } });
+      navigate('/login', { state: { message: 'Tài khoản đã được kích hoạt thành công!' } });
 
     } catch (err) {
       // Lỗi hết hạn hoặc mã sai

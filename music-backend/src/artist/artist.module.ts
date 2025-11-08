@@ -15,12 +15,12 @@ import { MulterModule } from '@nestjs/platform-express'; // <-- (1) IMPORT MULTE
 import { diskStorage } from 'multer'; // <-- (2) IMPORT diskStorage
 import { extname } from 'path';
 import { BadRequestException } from '@nestjs/common';
-
+import { Follow } from '../follow/follow.entity'
 
 @Module({
   imports: [
     // === PHẢI ĐĂNG KÝ TẤT CẢ ENTITY MÀ 'relations' SỬ DỤNG ===
-    TypeOrmModule.forFeature([Artist, User, Song, Album, Role]),
+    TypeOrmModule.forFeature([Artist, User, Song, Album, Role, Follow]),
     // ===================================================
     forwardRef(() => AuthModule), // (AuthGuard dùng trong Controller)
 

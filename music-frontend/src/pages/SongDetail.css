@@ -1,129 +1,260 @@
-/* music-frontend/src/pages/SongDetail.css (BẢN "LỒNG LỘN") */
+/* ==================================================== */
+/* SONG DETAIL – FINAL ĐẸP NHẤT (FULL CSS)             */
+/* FORM NHỎ GỌN – 2 NÚT BẰNG NHAU – ARIAL SẠCH        */
+/* DÁN VÀO: src/pages/SongDetail.css                   */
+/* ==================================================== */
 
 .song-detail-container {
-  padding-bottom: 50px;
-  position: relative; /* Cần cho Gradient */
+  min-height: 100vh;
+  background: #001a1a;
+  color: #e0fffa;
+  padding: 90px 24px 140px;
+  font-family: 'Arial', 'Helvetica', sans-serif;
+  line-height: 1.6;
+  position: relative;
+  overflow-x: hidden;
 }
 
-/* === NỀN GRADIENT MỚI === */
-/* (Nó sẽ nằm sau header) */
+/* Nền glow nhẹ */
 .song-detail-gradient-bg {
   position: absolute;
-  top: -20px; /* Kéo lên trên (sau Header) */
-  left: -20px; /* Kéo sang trái (sau Sidebar) */
-  right: -20px; /* Kéo sang phải */
-  height: 400px;
-  /* (Màu này sẽ thay đổi theo ảnh album sau, tạm dùng màu tĩnh) */
-  background: linear-gradient(180deg, #404040 0%, var(--color-background) 100%);
-  z-index: -1;
-  filter: blur(10px);
+  inset: 0;
+  background: 
+    radial-gradient(circle at 15% 25%, rgba(0,230,200,0.15) 0%, transparent 45%),
+    radial-gradient(circle at 85% 75%, rgba(0,200,180,0.1) 0%, transparent 40%);
+  pointer-events: none;
+  z-index: 0;
 }
 
-
+/* HEADER – NHỎ GỌN, ĐẸP */
 .song-detail-header {
   display: flex;
-  align-items: flex-end; 
-  padding: 40px 20px 20px 20px; /* Tăng padding trên */
-  /* background: transparent; (Không cần nền nữa) */
-  margin-bottom: 30px;
-  min-height: 300px;
+  gap: 40px;
+  align-items: flex-end;
+  max-width: 1200px;
+  margin: 0 auto 70px;
+  position: relative;
+  z-index: 1;
+  padding: 0 20px;
 }
 
+/* ẢNH BÌA NHỎ GỌN */
 .detail-album-cover {
-  width: 250px;
-  height: 250px;
+  width: 260px;
+  height: 260px;
+  border-radius: 20px;
   object-fit: cover;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7); /* Đổ bóng sâu */
-  margin-right: 30px;
-  border-radius: 10px;
+  box-shadow: 
+    0 20px 50px rgba(0,0,0,0.7),
+    0 0 40px rgba(0,230,200,0.5);
+  border: 4px solid #00e6c8;
+  transition: all 0.5s ease;
 }
 
+.detail-album-cover:hover {
+  transform: scale(1.08);
+  box-shadow: 0 30px 70px rgba(0,0,0,0.85), 0 0 60px rgba(0,230,200,0.9);
+}
+
+/* THÔNG TIN BÀI HÁT */
 .song-info {
-  color: var(--color-text-primary);
+  flex: 1;
+  padding-bottom: 16px;
 }
 
 .song-type {
   font-size: 14px;
   font-weight: 700;
+  color: #80d8d0;
   text-transform: uppercase;
-  color: var(--color-text-primary); /* Cho sáng hơn */
-  margin-bottom: 8px;
+  letter-spacing: 3px;
+  margin: 0 0 12px;
+  text-shadow: 0 0 10px rgba(0,230,200,0.5);
 }
 
 .song-info h1 {
-  font-size: 35px; /* <-- TIÊU ĐỀ SIÊU TO */
+  font-size: 48px;
   font-weight: 900;
-  margin: 0 0 15px 0;
+  margin: 0 0 14px;
+  background: linear-gradient(90deg, #00e6c8, #00f0d0);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 25px rgba(0,230,200,0.7);
   line-height: 1.1;
+  letter-spacing: -1px;
 }
 
 .song-artist-info {
-  font-size: 16px;
-  color: var(--color-text-secondary);
-  margin-bottom: 25px;
+  font-size: 19px;
+  color: #c0f8f0;
+  margin: 0 0 32px;
+  font-weight: 600;
 }
 
-.song-artist-info .artist-name {
-  color: var(--color-text-primary);
-  font-weight: bold;
+.artist-name {
+  color: #00e6c8;
+  font-weight: 800;
+  cursor: pointer;
 }
 
-/* Controls (Nút bấm) */
+.artist-name:hover {
+  text-shadow: 0 0 16px #00e6c8;
+}
+
+/* NÚT ĐIỀU KHIỂN – 2 NÚT BÊN PHẢI BẰNG NHAU */
 .detail-controls {
-    display: flex;
-    align-items: center;
-    gap: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 20px;
 }
 
+/* NÚT PHÁT – DÀI VỪA VẸN */
 .detail-play-button {
-  background-color: var(--color-accent); 
-  color: var(--color-black);
+  background: linear-gradient(90deg, #00e6c8, #00c8a8);
+  color: #001a1a;
   border: none;
-  padding: 14px 28px; /* Nút to hơn */
-  border-radius: 500px;
-  font-weight: bold;
-  font-size: 16px;
+  padding: 16px 36px;
+  border-radius: 50px;
+  font-size: 18px;
+  font-weight: 900;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 10px;
-  transition: transform 0.2s;
+  justify-content: center;
+  gap: 14px;
+  box-shadow: 0 12px 35px rgba(0,230,200,0.7);
+  transition: all 0.4s ease;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  min-width: 220px;
+  backdrop-filter: blur(6px);
 }
+
 .detail-play-button:hover {
-    transform: scale(1.05);
+  transform: translateY(-6px) scale(1.06);
+  box-shadow: 0 25px 50px rgba(0,230,200,0.9), 0 0 40px rgba(0,230,200,1);
 }
 
+/* NÚT ICON – TRÒN, ĐỀU, BẰNG NHAU */
 .icon-button {
-    background: none;
-    border: none;
-    color: var(--color-text-secondary);
-    cursor: pointer;
-    transition: color 0.2s;
-}
-.icon-button:hover {
-    color: var(--color-text-primary);
-}
-.icon-button.liked {
-    color: var(--color-accent); /* Màu xanh khi đã like */
+  background: rgba(0, 40, 40, 0.9);
+  color: #a0e8e0;
+  border: 2.5px solid rgba(0,230,200,0.4);
+  width: 100px;
+  height: 52px;
+  min-width: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  backdrop-filter: blur(8px);
 }
 
-/* Body (Lyrics, Related) */
+.icon-button:hover {
+  background: rgba(0,230,200,0.3);
+  color: #00e6c8;
+  border-color: #00e6c8;
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(0,230,200,0.6);
+}
+
+.icon-button.liked {
+  color: #ff4757;
+  background: rgba(255,71,87,0.25);
+  border-color: #ff4757;
+}
+
+/* KHUNG LỜI BÀI HÁT – XUỐNG DƯỚI */
 .song-detail-body {
-    display: grid;
-    grid-template-columns: 2fr 1fr; 
-    gap: 30px;
-    margin-top: 40px;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1px 20px;
+  position: relative;
+  z-index: 1;
 }
-.lyrics-section h3, .related-section h3 {
-    font-size: 20px;
-    font-weight: 600;
-    margin-bottom: 15px;
-    border-bottom: 1px solid #282828;
-    padding-bottom: 10px;
+
+.lyrics-section {
+  background: rgba(0, 30, 30, 0.92);
+  backdrop-filter: blur(16px);
+  padding: 44px 52px;
+  border-radius: 32px;
+  border: 3px solid rgba(0,230,200,0.35);
+  box-shadow: 
+    0 25px 70px rgba(0,0,0,0.8),
+    inset 0 2px 0 rgba(0,230,200,0.2);
+  margin-top: 50px;
 }
+
+.lyrics-section h3 {
+  font-size: 26px;
+  font-weight: 700;
+  color: #00e6c8;
+  margin: 0 0 26px;
+  text-align: center;
+  text-shadow: 0 0 16px rgba(0,230,200,0.7);
+}
+
 .lyrics-content {
+  font-size: 18px;
+  line-height: 2;
+  color: #e8fffc;
+  white-space: pre-line;
+  margin: 0;
+  text-align: center;
+  font-weight: 500;
+  letter-spacing: 0.4px;
+}
+
+/* LOADING & ERROR */
+.song-detail-error {
+  text-align: center;
+  padding: 120px 20px;
+  font-size: 24px;
+  color: #ff6b6b;
+  font-weight: 700;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .song-detail-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 32px;
+    margin-bottom: 50px;
+  }
+  
+  .detail-album-cover {
+    width: 220px;
+    height: 220px;
+  }
+  
+  .song-info h1 {
+    font-size: 38px;
+  }
+  
+  .detail-play-button {
+    padding: 14px 32px;
+    font-size: 17px;
+    min-width: 200px;
+  }
+  
+  .icon-button {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .lyrics-section {
+    padding: 32px 28px;
+    margin-top: 40px;
+  }
+  
+  .lyrics-content {
     font-size: 16px;
-    line-height: 1.8;
-    color: var(--color-text-secondary);
-    white-space: pre-wrap; /* Giữ định dạng \n */
+  }
 }

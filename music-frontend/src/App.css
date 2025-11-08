@@ -5,7 +5,7 @@ body {
   color: var(--color-text-primary);
   font-family: 'Circular Std', sans-serif;
   margin: 0;
-  overflow: hidden;
+  /* overflow: hidden; */
 }
 .main-content {
   background: linear-gradient(180deg, #1A1A1A 0%, var(--color-background) 350px);

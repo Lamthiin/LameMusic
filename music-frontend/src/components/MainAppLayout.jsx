@@ -1,4 +1,5 @@
 // music-frontend/src/components/MainAppLayout.jsx (BẢN SỬA LỖI)
+//listener
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 // import { Navigate } from 'react-router-dom'; // <-- KHÔNG CẦN
@@ -10,11 +11,6 @@ import Header from './Header';
 import '../App.css'; 
 
 const MainAppLayout = () => {
-  // === XÓA HẾT LOGIC KIỂM TRA AUTH Ở ĐÂY ===
-  // const { isAuthenticated, isLoading } = useAuth(); // <-- XÓA
-  // if (isLoading) { ... } // <-- XÓA
-  // if (!isAuthenticated) { ... } // <-- XÓA
-  // =========================================
 
   // Chỉ cần return (trả về) layout
   return (

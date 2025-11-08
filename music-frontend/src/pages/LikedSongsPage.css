@@ -73,58 +73,7 @@
   margin-top: 10px;
 }
 
-.artist-play-button {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: #1db954;
-  color: white;
-  font-weight: 600;
-  border: none;
-  border-radius: 30px;
-  padding: 14px 28px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
 
-.artist-play-button:hover {
-  background: #1ed760;
-  transform: scale(1.05);
-}
-
-.follow-button {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: transparent;
-  border: 2px solid #fff;
-  border-radius: 30px;
-  padding: 12px 24px;
-  color: #fff;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.follow-button:hover {
-  background: rgba(255, 255, 255, 0.1);
-  transform: scale(1.05);
-}
-
-.follow-button.active {
-  background: #ff4b5c;
-  border-color: #ff4b5c;
-}
-
-.follow-button.active:hover {
-  background: #ff6b7c;
-}
-
-.follow-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
 
 /* === BODY SECTION === */
 .artist-body-section {

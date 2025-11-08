@@ -12,6 +12,7 @@ import {
 import { User } from '../user/user.entity';
 import { Album } from '../album/album.entity';
 import { Song } from '../song/song.entity';
+import { Follow } from '../follow/follow.entity'; // <-- BẮT BUỘC CÓ
 
 @Entity('Artist')
 export class Artist {
@@ -54,4 +55,8 @@ export class Artist {
   // Quan hệ 1:N với Song
   @OneToMany(() => Song, (song) => song.artist)
   songs: Song[];
+
+    // Quan hệ 1:N với Follow (Mảng người đang theo dõi Artist này)
+    @OneToMany(() => Follow, follow => follow.following) 
+    followers: Follow[]; // <-- Thuộc tính này là bắt buộc
 }

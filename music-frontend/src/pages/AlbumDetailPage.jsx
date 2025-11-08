@@ -1,23 +1,23 @@
-// music-frontend/src/pages/AlbumDetailPage.jsx (TẠO MỚI)
+// music-frontend/src/pages/AlbumDetailPage.jsx
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { fetchAlbumDetailApi } from '../utils/api';
 import { usePlayer } from '../context/PlayerContext';
-// import '../pages/LikedSongsPage.css'; // Dùng chung style list nhạc
-import './AlbumDetailPage.css'; // CSS riêng cho album
+import SongListTable from '../components/SongListTable';
+import './AlbumDetailPage.css';
 import { FaPlay } from 'react-icons/fa';
 
 // HÀM HELPER (BẮT BUỘC)
 const fixUrl = (url, type = 'image') => {
-    if (!url) { 
+    if (!url) {
         if (type === 'artist') return '/images/default-artist.png';
-        if (type === 'audio') return ''; 
-        return '/images/default-album.png'; 
+        if (type === 'audio') return '';
+        return '/images/default-album.png';
     }
     if (url.startsWith('http')) return url;
     const prefix = type === 'image' ? '/media/images' : '/media/audio';
     const originalPath = type === 'image' ? '/images' : '/audio';
-    
+   
     if (url.startsWith(prefix)) {
         return `http://localhost:3000${url}`;
     }
@@ -28,7 +28,7 @@ const AlbumDetailPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { playTrack } = usePlayer();
-    
+
     const [album, setAlbum] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -38,21 +38,23 @@ const AlbumDetailPage = () => {
             setLoading(true);
             setError('');
             try {
-                const data = await fetchAlbumDetailApi(id); 
-                
-                // === FIX URL CHO TOÀN BỘ ALBUM ===
-                data.cover_url = fixUrl(data.cover_url, 'album');
-                
-                // Fix URL cho từng bài hát (cho Player)
+                const data = await fetchAlbumDetailApi(id);
+
+                // Fix URL cho ảnh bìa
+                data.cover_url = fixUrl(data.cover_url, 'image');
+
+                // Fix URL cho tất cả bài hát
                 const fixedSongs = data.songs.map(song => ({
                     ...song,
-                    // Giả sử ảnh bài hát mặc định là ảnh album
-                    image_url: fixUrl(data.cover_url, 'image'), 
-                    file_url: fixUrl(song.file_url, 'audio')
+                    image_url: fixUrl(data.cover_url, 'image'), // Dùng ảnh album
+                    cover_url: fixUrl(data.cover_url, 'image'), // SongListTable dùng cover_url
+                    file_url: fixUrl(song.file_url, 'audio'),
+                    // Đảm bảo có các field cần thiết
+                    album: { title: data.title },
+                    artist: { stage_name: data.artist?.stage_name || 'Nghệ sĩ' }
                 }));
-                data.songs = fixedSongs;
-                // =================================
 
+                data.songs = fixedSongs;
                 setAlbum(data);
             } catch (err) {
                 setError('Không tìm thấy Album này.');
@@ -68,27 +70,29 @@ const AlbumDetailPage = () => {
             playTrack(album.songs[0], album.songs, 0);
         }
     };
-    
+
     if (loading) return <div className="loading-message">Đang tải Album...</div>;
     if (error || !album) return <div className="error-message">{error}</div>;
 
-    const songs = album.songs || [];
     const releaseYear = new Date(album.release_date).getFullYear();
 
     return (
         <div className="album-detail-container">
-            
-            {/* 1. HEADER ALBUM */}
-            <div className="playlist-header"> {/* Tái sử dụng class playlist-header */}
+            {/* HEADER ALBUM */}
+            <div className="playlist-header">
                 <img src={album.cover_url} alt={album.title} />
                 <div className="playlist-info">
                     <p className="playlist-type">ALBUM</p>
                     <h1>{album.title}</h1>
                     <p className="playlist-owner">
-                        <span className="artist-name" onClick={() => navigate(`/artist/${album.artist?.id}`)}>
+                        <span 
+                            className="artist-name" 
+                            onClick={() => navigate(`/artist/${album.artist?.id}`)}
+                            style={{ cursor: 'pointer', color: '#fff' }}
+                        >
                             {album.artist?.stage_name || 'Nghệ sĩ'}
-                        </span> 
-                        • {releaseYear} • {songs.length} bài hát
+                        </span>
+                        • {releaseYear} • {album.songs.length} bài hát
                     </p>
                     <button className="playlist-play-button" onClick={handlePlayAll}>
                         <FaPlay size={20} /> PHÁT TẤT CẢ
@@ -96,26 +100,15 @@ const AlbumDetailPage = () => {
                 </div>
             </div>
 
-            {/* 2. DANH SÁCH BÀI HÁT */}
-            <div className="song-list-detail"> {/* Tái sử dụng style */}
-                {songs.length > 0 ? (
-                    songs.map((song, index) => (
-                        // Tái sử dụng SongListTable style (Nếu không có SongListTable)
-                        <div key={song.id} className="song-row" onClick={() => playTrack(song, songs, index)}>
-                            <div className="song-title-col">
-                                <span>{index + 1}.</span>
-                                <img src={song.image_url} alt={song.title} />
-                                <div>
-                                    <p className="song-row-title">{song.title}</p>
-                                    <p className="song-row-artist">{song.artist?.stage_name || album.artist?.stage_name}</p>
-                                </div>
-                            </div>
-                            {/* Bạn có thể thêm cột thời gian ở đây nếu có data */}
-                        </div>
-                    ))
-                ) : (
-                    <p className="subtle-text">Album này chưa có bài hát nào.</p>
-                )}
+            {/* DANH SÁCH BÀI HÁT - DÙNG SongListTable */}
+            <div className="song-list-wrapper">
+                <SongListTable 
+                    songs={album.songs} 
+                    onSelectionChange={(selected) => {
+                        console.log('Đã chọn:', selected.size, 'bài hát');
+                        // Có thể thêm hành động: thêm vào playlist, xóa, v.v.
+                    }}
+                />
             </div>
         </div>
     );

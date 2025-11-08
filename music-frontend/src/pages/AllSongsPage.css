@@ -1,88 +1,256 @@
-/* music-frontend/src/pages/AllPages.css (FULL CODE - DÃN CÁCH VÀ KÉO DÀI HƠN) */
-/* Dùng chung CSS với Home.css */
-@import './Home.css';
+/* ==================================================== */
+/* ALL SONGS PAGE – FINAL ĐẸP NHẤT (HOÀN CHỈNH)       */
+/* DÁN VÀO: src/pages/AllSongsPage.css                */
+/* ĐÃ DÙNG 100% PHONG CÁCH ALBUM + ARTIST            */
+/* ==================================================== */
 
-.all-songs-container, .all-artists-container {
-  padding: 0 20px 40px; 
+.all-songs-container {
+  min-height: 100vh;
+  background: #001a1a;
+  color: #e0fffa;
+  padding: 100px 40px 160px;
+  font-family: 'Arial', sans-serif;
+  position: relative;
+  overflow: hidden;
 }
 
-.all-songs-container h1, .all-artists-container h1 {
-  font-size: 36px;
-  font-weight: 800;
-  color: var(--color-text-primary);
-  margin-bottom: 30px;
+/* NỀN GLOW NHẸ */
+/* .all-songs-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(circle at 15% 25%, rgba(0,230,200,0.18) 0%, transparent 50%),
+    radial-gradient(circle at 85% 70%, rgba(0,200,180,0.1) 0%, transparent 40%);
+  pointer-events: none;
+  z-index: 0;
+} */
+
+/* TIÊU ĐỀ */
+.all-songs-container h1 {
+color: #61eed6;
+  font-family: 'Arial', sans-serif;
 }
 
-/* === THANH LỌC (FILTER BAR) === */
+/* FILTER BAR – SIÊU SANG */
 .filter-bar {
   display: flex;
-  gap: 20px; /* <-- Tăng khoảng cách */
-  margin-bottom: 40px; 
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 0 auto 60px;
+  max-width: 1000px;
+  padding: 0 20px;
+  position: relative;
+  z-index: 1;
 }
 
-.filter-bar select, .filter-bar button {
-  padding: 10px 15px;
-  border-radius: 8px; 
-  border: 1px solid var(--color-border); 
-  background-color: #2A2A2A; 
-  color: var(--color-text-primary);
-  font-size: 15px;
-  font-family: inherit;
+.filter-bar select,
+.filter-bar button {
+  padding: 3px 20px;
+  border-radius: 50px;
+  font-size: 17px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.4s ease;
+  backdrop-filter: blur(12px);
+  min-width: 150px;
+}
+
+.filter-bar select {
+  background: rgba(0,35,35,0.85);
+  color: #e0fffa;
+  border: 2px solid rgba(0,230,200,0.4);
+  outline: none;
+}
+
+.filter-bar select:focus {
+  border-color: #00e6c8;
+  box-shadow: 0 0 30px rgba(0,230,200,0.5);
 }
 
 .filter-bar button {
-  background-color: var(--color-accent);
-  color: var(--color-black);
+  background: linear-gradient(90deg, #00e6c8, #00c8a8);
+  color: #001a1a;
+  border: none;
+  box-shadow: 0 10px 30px rgba(0,230,200,0.6);
+}
+
+.filter-bar button:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 15px 40px rgba(0,230,200,0.8);
+}
+
+/* DANH SÁCH BÀI HÁT */
+.track-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
+  gap: 10px;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 20px;
+  position: relative;
+  z-index: 1;
+}
+
+/* CARD BÀI HÁT */
+.track-item {
+  background: rgba(0, 35, 35, 0.85);
+  backdrop-filter: blur(12px);
+  border-radius: 24px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+  border: 2px solid rgba(0,230,200,0.25);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.track-item:hover {
+  border-color: #00e6c8;
+}
+
+/* ẢNH + NÚT PLAY */
+.track-image-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 18px;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+}
+
+.track-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: all 0.5s ease;
+}
+
+.track-item:hover .track-image {
+  transform: scale(1.08);
+}
+
+.play-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 54px;
+  height: 54px;
+  background: linear-gradient(90deg, #00e6c8, #00c8a8);
+  color: #001a1a;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  opacity: 0;
+  transition: all 0.5s ease;
+  box-shadow: 0 10px 30px rgba(0,230,200,0.7);
+  cursor: pointer;
+  z-index: 2;
+}
+
+.track-item:hover .play-button {
+  /* opacity: 1;
+  transform: translate(-50%, -50%) scale(1.1); */
+}
+
+/* CHỮ */
+.track-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #e0fffa;
+  margin: 0 0 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 0 15px rgba(0,230,200,0.5);
+}
+
+.track-artist {
+  font-size: 16px;
+  color: #b0f8f0;
+  margin: 0;
   font-weight: 600;
 }
 
-
-/* === GRID HIỂN THỊ TẤT CẢ BÀI HÁT (FIX CỘT VÀ KÍCH THƯỚC) === */
-.track-list-all-songs {
-  display: grid;
-  /* === THAY ĐỔI: TĂNG KÍCH THƯỚC MINMAX (MIN: 200px -> 220px) === */
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
-  gap: 30px; /* <-- TĂNG KHOẢNG CÁCH GIỮA CÁC Ô */
-  justify-items: center;
+/* PHÂN TRANG */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 80px auto 40px;
+  padding: 20px;
+  max-width: 600px;
+  background: rgba(0,35,35,0.7);
+  border-radius: 50px;
+  border: 2px solid rgba(0,230,200,0.4);
+  backdrop-filter: blur(12px);
 }
 
-/* Nâng cấp kích thước thẻ bài hát (Kế thừa từ Home.css) */
-/* Cần đảm bảo Home.css có style cho .track-item */
-.track-list-all-songs .track-item {
-    padding: 20px; /* <-- TĂNG PADDING CHO THẺ DÀI RA (NHƯNG CẦN SỬA HOME.CSS ĐỂ CHÍNH XÁC) */
-    max-width: 280px; /* <-- TĂNG MAX WIDTH ĐỂ Ô TO HƠN */
+.pagination button {
+  background: rgba(0,230,200,0.2);
+  color: #80d8d0;
+  border: 2px solid rgba(0,230,200,0.4);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  font-size: 18px;
 }
 
-/* Responsive cho grid */
-@media (max-width: 1600px) {
-  .track-list-all-songs {
-    grid-template-columns: repeat(6, 1fr);
+.pagination button:hover:not(:disabled) {
+  background: #00e6c8;
+  color: #001a1a;
+  transform: translateY(-4px);
+}
+
+.pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pagination button.active {
+  background: linear-gradient(90deg, #00e6c8, #00c8a8);
+  color: #001a1a;
+  font-weight: 900;
+}
+
+/* LOADING & EMPTY */
+.loading-message,
+.home-subtitle {
+  text-align: center;
+  font-size: 28px;
+  color: #80d8d0;
+  padding: 120px 40px;
+  background: rgba(0,26,26,0.7);
+  border-radius: 32px;
+  margin: 40px auto;
+  max-width: 800px;
+  backdrop-filter: blur(12px);
+  border: 3px solid rgba(0,230,200,0.3);
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .all-songs-container h1 { font-size: 48px; margin-bottom: 50px; }
+  .filter-bar { flex-direction: column; align-items: center; }
+  .filter-bar select,
+  .filter-bar button { min-width: 280px; }
+  .track-list { 
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 0 16px;
   }
-}
-@media (max-width: 1200px) {
-  .track-list-all-songs {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-
-/* === GRID HIỂN THỊ TẤT CẢ NGHỆ SĨ === */
-.artist-grid-full {
-  display: grid;
-  /* Nới rộng minmax cho nghệ sĩ cũng to ra một chút */
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); 
-  gap: 30px; /* <-- TĂNG KHOẢNG CÁCH */
-}
-
-.artist-grid-full .artist-card {
-  width: 100%;
-  max-width: 220px; /* Nâng max width để to hơn */
-}
-.artist-grid-full .artist-card img {
-    /* Giữ kích thước cố định, nhưng có thể tăng thêm 10px */
-    width: 140px; 
-    height: 140px;
-    margin: 0 auto 12px;
+  .track-item:hover { transform: translateY(-6px); }
+  .pagination { gap: 8px; padding: 16px; }
 }

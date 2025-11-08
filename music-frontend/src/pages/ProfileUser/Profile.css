@@ -1,5 +1,9 @@
+/* ==================================================== */
+/* PROFILE PAGE – FINAL ĐẸP NHẤT (HOÀN CHỈNH)         */
+/* DÁN VÀO: src/pages/Profile/Profile.css             */
+/* ĐÃ GỘP TẤT CẢ: TAB, HEADER, GRID, FORM, FOLLOWING  */
+/* ==================================================== */
 
-/* SPOTIFY 2025 – MÁ CHỈNH TAB + HEADER CHUYỂN MÀU */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;700;900&display=swap');
 
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -9,136 +13,61 @@
   background: #000;
   color: #fff;
   font-family: 'Inter', sans-serif;
+  padding-bottom: 100px;
 }
 
-/* HEADER – GIỮ NGUYÊN ĐẸP */
-.profile-header.no-avatar {
-  height: 260px;
+/* HEADER – XANH LÁ + GRADIENT SIÊU SANG */
+.profile-header {
+  height: 200px;
   background: 
-    radial-gradient(circle at top left,   #1db954 0%, transparent 50%),
-    radial-gradient(circle at top right,  #1ed760 0%, transparent 50%),
-    linear-gradient(135deg, #121212 0%, #1a1a1a 100%);
+    radial-gradient(circle at 20% 30%, #195541 0%, transparent 60%),
+    radial-gradient(circle at 80% 70%, #00e6c8 0%, transparent 50%),
+    linear-gradient(135deg, #121212 0%, #001a1a 100%);
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
   overflow: hidden;
-}
-.profile-header::before {
-  content: ''; position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(18,18,18,.9) 0%, rgba(18,18,18,.7) 50%, #000 100%);
-}
-.profile-header-sub   { font:700 12px/1 Inter; letter-spacing:4px; color:#1ed760; text-transform:uppercase; margin-bottom:8px; }
-.profile-header-name  { font:900 clamp(38px,7vw,58px)/1 Inter; background:linear-gradient(90deg,#1db954,#fff,#1ed760); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
-
-/* TAB – MÁ ĐÃ CHỈNH TỪNG PIXEL */
-.profile-tabs {
-  background: rgba(24, 24, 27, 0.95);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-}
-
-.profile-tabs ul {
   display: flex;
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 0 16px;
-  list-style: none;
+  align-items: flex-end;
+  padding: 0 40px 40px;
 }
 
-.profile-tabs a {
-  flex: 1;
-  padding: 18px 0;
-  text-align: center;
-  color: #b3b3b3;
-  font-weight: 700;
-  font-size: 14px;
-  text-decoration: none;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  position: relative;
-  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.profile-tabs a::after {
+.profile-header::before {
   content: '';
   position: absolute;
-  bottom: 0;
-  left: 50%;
-  width: 0;
-  height: 4px;
-  background: #1db954;
-  border-radius: 2px;
-  transition: all 0.4s ease;
-  transform: translateX(-50%);
-  box-shadow: 0 0 12px #1db954;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.8) 100%);
 }
 
-.profile-tabs a:hover {
-  color: #fff;
+.profile-header-info {
+  position: relative;
+  z-index: 2;
 }
 
-.profile-tabs a:hover::after,
-.profile-tabs a.active::after {
-  width: 60px;
+.profile-header-sub {
+  font: 700 13px/1 Inter;
+  letter-spacing: 4px;
+  color: #00ffb3;
+  text-transform: uppercase;
+  margin-bottom: 12px;
 }
 
-.profile-tabs a.active {
-  color: #fff;
+.profile-header-name {
+  font: 900 clamp(48px, 8vw, 72px)/1 Inter;
+  background: linear-gradient(90deg, #07976c, #00e6c8, #00ff99);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 30px rgba(29, 185, 133, 0.6);
 }
 
-/* CONTENT */
-.profile-content {
-  max-width: 1000px;
-  margin: 40px auto;
-  padding: 0 16px;
-}
-
-.profile-card {
-  background: #181818;
-  border-radius: 12px;
-  padding: 28px;
-  border: 1px solid #333;
-  transition: all 0.4s ease;
-}
-
-.profile-card:hover {
-  background: #1f1f1f;
-  border-color: #1db954;
-  box-shadow: 0 10px 30px rgba(29,185,84,0.2);
-  transform: translateY(-4px);
-}
-
-/* MOBILE */
-@media (max-width: 768px) {
-  .profile-header { height: 220px; }
-  .profile-header-name { font-size: 42px; }
-  .profile-tabs a { 
-    font-size: 13px; 
-    padding: 16px 0; 
-  }
-  .profile-tabs a:hover::after,
-  .profile-tabs a.active::after { 
-    width: 40px; 
-  }
-}
-
-/* TAB SIÊU ĐẸP – CHUẨN SPOTIFY 2025 */
+/* TAB – CHUYỂN MÀU XANH NGỌC */
 .profile-tabs {
-  background: rgba(24, 24, 27, 0.92);
+  background: rgba(24, 24, 27, 0.95);
   backdrop-filter: blur(32px);
-  -webkit-backdrop-filter: blur(32px);
   position: sticky;
   top: 0;
   z-index: 100;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  border-bottom: 1px solid rgba(0,230,200,0.2);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
 }
 
 .profile-tabs ul {
@@ -146,35 +75,33 @@
   max-width: 1000px;
   margin: 0 auto;
   padding: 0 16px;
-  list-style: none;
-  gap: 4px;
+  gap: 6px;
 }
 
 .profile-tabs a {
   flex: 1;
-  padding: 16px 20px;
+  padding: 18px 24px;
   text-align: center;
-  color: #b3b3b3;
+  color: #80d8d0;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 15px;
   text-transform: uppercase;
-  letter-spacing: 0.8px;
+  letter-spacing: 1px;
   text-decoration: none;
-  border-radius: 8px;
+  border-radius: 12px;
   position: relative;
-  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
 }
 
-/* Hiệu ứng nền mờ khi hover */
 .profile-tabs a::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(29, 185, 84, 0.15);
-  border-radius: 8px;
+  background: rgba(0,230,200,0.2);
+  border-radius: 12px;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.35s ease;
 }
 
 .profile-tabs a:hover::before,
@@ -182,121 +109,139 @@
   opacity: 1;
 }
 
-/* Underline xanh lá chạy mượt */
 .profile-tabs a::after {
   content: '';
   position: absolute;
-  bottom: 4px;
+  bottom: 6px;
   left: 50%;
   width: 0;
-  height: 3px;
-  background: #1db954;
+  height: 4px;
+  background: #00e6c8;
   border-radius: 2px;
-  box-shadow: 0 0 12px #1db954;
-  transition: all 0.4s ease;
+  box-shadow: 0 0 16px #00e6c8;
+  transition: all 0.45s ease;
   transform: translateX(-50%);
 }
 
 .profile-tabs a:hover::after,
 .profile-tabs a.active::after {
-  width: 48px;
+  width: 60px;
 }
 
-/* Chữ sáng khi active */
 .profile-tabs a:hover,
 .profile-tabs a.active {
   color: #fff;
 }
 
-/* music-frontend/src/pages/Profile/Profile.css (CẬP NHẬT CSS) */
-
-/* (Giữ lại tất cả CSS từ bản cập nhật tabs ngang trước đó) */
-/* ... */
-
-/* LOADING SPINNER (tùy chọn) */
-.loading-spinner {
-    border: 4px solid rgba(255, 255, 255, 0.3);
-    border-top: 4px solid var(--color-accent);
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    animation: spin 1s linear infinite;
-    margin: 50px auto;
+/* CONTENT */
+.profile-content {
+  max-width: 1000px;
+  margin: 50px auto;
+  padding: 0 20px;
 }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* THÊM VÀO CUỐI Profile.css */
-
-/* VIEW GRID – 2 CỘT ĐẸP */
-.profile-view-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  margin: 24px 0;
-}
-
-.profile-view-item {
-  background: #282828;
-  padding: 16px 20px;
-  border-radius: 12px;
+/* CARD CHUNG */
+.profile-card,
+.playlist-card {
+  background: #181818;
+  border-radius: 16px;
+  padding: 28px;
   border: 1px solid #333;
+  transition: all 0.45s ease;
+  backdrop-filter: blur(8px);
 }
 
-.profile-view-item strong {
-  display: block;
-  color: #1db954;
+.profile-card:hover,
+.playlist-card:hover {
+  background: #1f1f1f;
+  border-color: #00e6c8;
+  box-shadow: 0 15px 40px rgba(0,230,200,0.3);
+  transform: translateY(-6px);
+}
+
+/* GRID PLAYLIST & ARTIST */
+.playlist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 15px;
+  margin: 30px 0;
+}
+
+.playlist-card img,
+.artist-avatar-round {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 16px;
+  border: 3px solid rgba(0,230,200,0.3);
+  transition: all 0.4s ease;
+}
+
+.playlist-card:hover img,
+.playlist-card:hover .artist-avatar-round {
+  transform: scale(1.08);
+  border-color: #00e6c8;
+}
+
+.playlist-card h4,
+.card-title {
   font-size: 14px;
-  margin-bottom: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.profile-view-item p {
-  font-size: 16px;
+  font-weight: 800;
   color: #fff;
+  margin: 12px 0 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.profile-view-actions {
-  grid-column: 1 / -1;
+.playlist-card p,
+.card-subtitle {
+  font-size: 14px;
+  color: #80d8d0;
+}
+
+/* FOLLOWING PAGE */
+.profile-following-container {
+  padding: 40px 20px;
+  background: #000;
+  min-height: 100vh;
+}
+
+.profile-following-container h2 {
+  font-size: 28px;
+  font-weight: 900;
+  color: #00e6c8;
+  margin-bottom: 30px;
   text-align: center;
-  margin-top: 16px;
+  text-shadow: 0 0 20px rgba(0,230,200,0.5);
 }
 
-/* FORM 2 CỘT – SIÊU ĐẸP */
+/* FORM 2 CỘT */
 .profile-edit-form-grid {
   display: grid;
-  gap: 24px;
+  gap: 28px;
   margin-top: 32px;
 }
 
 .form-row {
   display: grid;
-  grid-template-columns: 180px 1fr;
-  gap: 20px;
+  grid-template-columns: 200px 1fr;
+  gap: 24px;
   align-items: center;
 }
 
 .form-row label {
   font-weight: 700;
-  font-size: 15px;
-  color: #fff;
+  font-size: 16px;
+  color: #00e6c8;
   text-align: right;
-  letter-spacing: 0.5px;
-}
-
-.required {
-  color: #1db954;
 }
 
 .form-row input,
 .form-row select {
-  padding: 16px 20px;
-  background: #282828;
-  border: 2px solid transparent;
+  padding: 18px 24px;
+  background: #1a1a1a;
+  border: 2px solid rgba(0,230,200,0.4);
   border-radius: 16px;
   color: #fff;
   font-size: 16px;
@@ -305,39 +250,44 @@
 
 .form-row input:focus,
 .form-row select:focus {
-  outline: none;
-  border-color: #1db954;
-  background: #1a1a1a;
-  box-shadow: 0 0 0 4px rgba(29,185,84,0.25);
+  border-color: #00e6c8;
+  box-shadow: 0 0 0 4px rgba(0,230,200,0.3);
+  background: #111;
 }
 
-.form-actions-full {
-  grid-column: 1 / -1;
-  display: flex;
-  gap: 16px;
-  justify-content: center;
-  margin-top: 20px;
-}
-
-/* ĐỔI MẬT KHẨU */
-.change-password-section {
-  margin-top: 40px;
-  text-align: center;
-  padding: 24px;
-  background: #282828;
-  border-radius: 16px;
-  border: 1px solid #333;
-}
-
-.change-password-section h3 {
-  color: #1db954;
-  margin-bottom: 8px;
-}
-
-.change-password-section p {
-  color: #b3b3b3;
-  margin-bottom: 16px;
+/* NÚT */
+.btn {
+  padding: 16px 36px;
+  border: none;
+  border-radius: 50px;
+  font-weight: 700;
   font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  min-width: 160px;
+}
+
+.btn-primary {
+  background: linear-gradient(90deg, #00e6c8, #00c8a8);
+  color: #000;
+  box-shadow: 0 10px 30px rgba(0,230,200,0.5);
+}
+
+.btn-primary:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 15px 40px rgba(0,230,200,0.7);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: #00e6c8;
+  border: 2px solid #00e6c8;
+}
+
+.btn-secondary:hover {
+  background: rgba(0,230,200,0.2);
 }
 
 /* TOAST */
@@ -346,14 +296,14 @@
   bottom: 40px;
   left: 50%;
   transform: translateX(-50%);
-  padding: 18px 40px;
+  padding: 20px 50px;
   border-radius: 50px;
   font-weight: 700;
   z-index: 9999;
   opacity: 0;
   transition: all 0.5s ease;
-  box-shadow: 0 15px 40px rgba(0,0,0,0.5);
   backdrop-filter: blur(20px);
+  box-shadow: 0 15px 40px rgba(0,0,0,0.6);
 }
 
 .toast.show {
@@ -361,453 +311,864 @@
   transform: translateX(-50%) translateY(-12px);
 }
 
-.toast-success { background: #1db954; color: #000; }
+.toast-success { background: #00e6c8; color: #000; }
 .toast-error { background: #e91429; color: #fff; }
+
+/* LOADING */
+.loading-spinner {
+  border: 5px solid rgba(0,230,200,0.3);
+  border-top: 5px solid #00e6c8;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin: 80px auto;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
 
 /* RESPONSIVE */
 @media (max-width: 768px) {
-  .profile-view-grid,
-  .form-row {
-    grid-template-columns: 1fr;
-  }
+  .profile-header { height: 240px; padding: 0 20px 30px; }
+  .profile-header-name { font-size: 48px; }
+  .profile-tabs a { padding: 14px 16px; font-size: 13px; }
+  .form-row { grid-template-columns: 1fr; }
   .form-row label { text-align: left; }
-  .form-actions-full { flex-direction: column; }
-  .btn { width: 100%; }
+  .playlist-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
 }
+
+/* ==================================================== */
+/* PROFILE INFO – SIÊU ĐẸP, XANH NGỌC, FORM GLOW      */
+/* DÀNH RIÊNG CHO ProfileInfo.jsx                     */
+/* ==================================================== */
+
+.profile-info-container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+.profile-card {
+  background: rgba(24, 24, 27, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 40px;
+  border: 2px solid rgba(0,230,200,0.3);
+  box-shadow: 
+    0 20px 60px rgba(0,0,0,0.6),
+    0 0 40px rgba(0,230,200,0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.profile-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, 
+    rgba(0,230,200,0.1) 0%, 
+    transparent 50%
+  );
+  pointer-events: none;
+}
+
+.profile-card h2 {
+  font-size: 20px;
+  font-weight: 900;
+  text-align: center;
+  margin: 0 0 40px;
+  background: linear-gradient(90deg, #00e6c8, #00f0d0);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 30px rgba(0,230,200,0.5);
+}
+
+/* VIEW GRID – 2 CỘT ĐẸP */
+.profile-view-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin: 32px 0;
+}
+
+.profile-view-item {
+  background: rgba(0,35,35,0.7);
+  padding: 20px 24px;
+  border-radius: 18px;
+  border: 2px solid rgba(0,230,200,0.3);
+  backdrop-filter: blur(10px);
+}
+
+.profile-view-item strong {
+  display: block;
+  color: #00e6c8;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+
+.profile-view-item p {
+  font-size: 13px;
+  color: #e0fffa;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* FORM – 2 CỘT SIÊU SANG */
+.profile-edit-form-grid {
+  display: grid;
+  gap: 23px;
+  margin: 32px 0;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 24px;
+  align-items: center;
+}
+
+.form-row label {
+  font-weight: 700;
+  font-size: 14px;
+  color: #00e6c8;
+  text-align: right;
+  letter-spacing: 0.5px;
+}
+
+.required { color: #00f0d0; }
+
+.form-row input,
+.form-row select {
+  padding: 18px 24px;
+  background: rgba(0,35,35,0.9);
+  border: 2px solid rgba(0,230,200,0.4);
+  border-radius: 18px;
+  color: #e0fffa;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.4s ease;
+  backdrop-filter: blur(8px);
+}
+
+.form-row input::placeholder {
+  color: #80d8d0;
+  opacity: 0.8;
+}
+
+.form-row input:focus,
+.form-row select:focus {
+  outline: none;
+  border-color: #00e6c8;
+  background: rgba(0,40,40,0.95);
+  box-shadow: 
+    0 0 0 4px rgba(0,230,200,0.3),
+    0 0 30px rgba(0,230,200,0.4);
+  transform: scale(1.02);
+}
+
+/* NÚT */
+.form-actions-full {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
 .btn {
-  padding: 12px 24px;
+  padding: 16px 40px;
   border: none;
   border-radius: 50px;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 13px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 1.5px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.4s ease;
+  min-width: 180px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
 }
+
 .btn-primary {
-  background: #1db954;
+  background: linear-gradient(90deg, #00e6c8, #00c8a8);
   color: #000;
 }
 
-.btn-primary:hover {
-  background: #1ed760;
-  transform: translateY(-2px);
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-6px) scale(1.05);
+  box-shadow: 0 15px 40px rgba(0,230,200,0.7);
+}
+
+.btn-cancel {
+  background: rgba(255,255,255,0.1);
+  color: #80d8d0;
+  border: 2px solid rgba(0,230,200,0.5);
+}
+
+.btn-cancel:hover {
+  background: rgba(0,230,200,0.2);
+  color: #fff;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* ĐỔI MẬT KHẨU */
+.change-password-section {
+  margin-top: 50px;
+  text-align: center;
+  padding: 32px;
+  background: rgba(0,35,35,0.7);
+  border-radius: 24px;
+  border: 2px dashed rgba(0,230,200,0.4);
+}
+
+.change-password-section h3 {
+  color: #00f0d0;
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+.change-password-section p {
+  color: #b0f8f0;
+  margin-bottom: 20px;
+  font-size: 16px;
 }
 
 .btn-secondary {
   background: transparent;
-  color: #fff;
-  border: 1px solid #1db954;
+  color: #00e6c8;
+  border: 2px solid #00e6c8;
+  padding: 14px 36px;
 }
 
 .btn-secondary:hover {
-  background: rgba(29,185,84,0.2);
+  background: rgba(0,230,200,0.2);
+  transform: translateY(-4px);
 }
 
-.btn-cancel {
-  background: #333;
-  color: #fff;
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 20px 50px;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 17px;
+  z-index: 9999;
+  opacity: 0;
+  transition: all 0.5s ease;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+  min-width: 300px;
+  text-align: center;
 }
 
-.btn-cancel:hover {
-  background: #444;
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-12px);
 }
 
-/* (Nó sẽ tự động tái sử dụng .playlist-grid và .playlist-card đã có) */
-
-/* === ProfileFollowing Page CSS === */
-.profile-following-container {
-    padding: 30px 20px;
-    background-color: #121212; /* nền dark */
-    color: #eee; /* chữ sáng */
-    min-height: 100%;
+.toast-success { 
+  background: linear-gradient(90deg, #00e6c8, #00c8a8); 
+  color: #000; 
+}
+.toast-error { 
+  background: linear-gradient(90deg, #e91429, #ff4c68); 
+  color: #fff; 
 }
 
-.profile-following-container h2 {
-    font-size: 28px;
-    font-weight: 700;
-    margin-bottom: 20px;
-    color: #fff;
-    border-left: 4px solid #ff4c68; /* đỏ/hồng */
-    padding-left: 10px;
+/* LOADING */
+.loading-container {
+  text-align: center;
+  padding: 100px 20px;
 }
 
-/* Grid hiển thị các artist */
-.playlist-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 20px;
+.loading-spinner {
+  width: 60px;
+  height: 60px;
+  border: 6px solid rgba(0,230,200,0.3);
+  border-top: 6px solid #00e6c8;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 24px;
 }
 
-/* Card mỗi nghệ sĩ */
-.playlist-card {
-    background-color: #1e1e1e;
-    padding: 15px;
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-container p {
+  font-size: 22px;
+  color: #80d8d0;
+  font-weight: 600;
+}
+
+.error-text {
+  text-align: center;
+  font-size: 20px;
+  color: #e91429;
+  padding: 80px 20px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .profile-card { padding: 30px; }
+  .profile-card h2 { font-size: 30px; }
+  .profile-view-grid,
+  .form-row { grid-template-columns: 1fr; }
+  .form-row label { text-align: left; }
+  .form-actions-full { flex-direction: column; }
+  .btn { width: 100%; }
+}
+
+/* ==================================================== */
+/* PLAYLIST LIST – CHỈ TÊN + CÔNG KHAI/RIÊNG TƯ       */
+/* DÀNH RIÊNG CHO PROFILE PLAYLIST TAB                */
+/* ==================================================== */
+
+/* Container */
+.playlist-list-container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+/* Card chung */
+.playlist-list-card {
+  background: rgba(24, 24, 27, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 32px;
+  border: 2px solid rgba(0,230,200,0.3);
+  box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+  margin-bottom: 24px;
+}
+
+/* Tiêu đề */
+.playlist-list-card h2 {
+  font-size: 32px;
+  font-weight: 900;
+  text-align: center;
+  margin: 0 0 32px;
+  color: #00e6c8;
+  text-shadow: 0 0 20px rgba(0,230,200,0.5);
+}
+
+/* Danh sách */
+.playlist-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Mỗi playlist */
+.playlist-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  background: rgba(0,35,35,0.7);
+  border-radius: 16px;
+  border: 1px solid rgba(0,230,200,0.3);
+  transition: all 0.4s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.playlist-item:hover {
+  background: rgba(0,40,40,0.95);
+  border-color: #00e6c8;
+  transform: translateX(8px);
+  box-shadow: 0 10px 30px rgba(0,230,200,0.3);
+}
+
+/* Tên playlist */
+.playlist-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: #e0fffa;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 70%;
+}
+
+/* Trạng thái */
+.playlist-privacy {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #80d8d0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.playlist-privacy svg {
+  font-size: 18px;
+}
+
+/* Icon khóa */
+.lock-icon {
+  color: #00e6c8;
+}
+
+.public-icon {
+  color: #00f0d0;
+}
+
+/* Hover hiệu ứng sóng */
+.playlist-item::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0,230,200,0.15), transparent);
+  transition: left 0.6s ease;
+  pointer-events: none;
+}
+
+.playlist-item:hover::before {
+  left: 100%;
+}
+
+/* Không có playlist */
+.empty-playlist {
+  text-align: center;
+  padding: 80px 20px;
+  color: #80d8d0;
+  font-size: 20px;
+  font-style: italic;
+  background: rgba(0,26,26,0.7);
+  border-radius: 20px;
+  border: 2px dashed rgba(0,230,200,0.3);
+}
+
+/* Nút tạo playlist */
+.create-playlist-btn {
+  display: block;
+  margin: 40px auto 0;
+  padding: 16px 48px;
+  background: linear-gradient(90deg, #00e6c8, #00c8a8);
+  color: #000;
+  border: none;
+  border-radius: 50px;
+  font-weight: 900;
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(0,230,200,0.6);
+  transition: all 0.4s ease;
+}
+
+.create-playlist-btn:hover {
+  transform: translateY(-6px) scale(1.05);
+  box-shadow: 0 15px 40px rgba(0,230,200,0.8);
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .playlist-item {
+    padding: 16px 20px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .playlist-name {
+    max-width: 100%;
+    font-size: 18px;
+  }
+  .playlist-privacy {
+    align-self: flex-end;
+  }
+}
+
+/* ==================================================== */
+/* PROFILE PLAYLISTS – LIST SIÊU SẠCH, KHÔNG ẢNH       */
+/* CHỈ TÊN + CÔNG KHAI/RIÊNG TƯ – ĐẸP NHƯ SPOTIFY     */
+/* ==================================================== */
+
+.profile-playlists-container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+.profile-playlists-container h2 {
+  font-size: 24px;
+  font-weight: 900;
+  text-align: center;
+  margin: 0 0 50px;
+  background: linear-gradient(90deg, #00e6c8, #00f0d0);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 30px rgba(0,230,200,0.6);
+  letter-spacing: -1px;
+}
+
+/* CARD CHUNG */
+.playlist-list-wrapper {
+  background: rgba(24, 24, 27, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 40px;
+  border: 2px solid rgba(0,230,200,0.3);
+  box-shadow: 
+    0 20px 60px rgba(0,0,0,0.6),
+    0 0 40px rgba(0,230,200,0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.playlist-list-wrapper::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, 
+    rgba(0,230,200,0.12) 0%, 
+    transparent 60%
+  );
+  pointer-events: none;
+}
+
+/* DANH SÁCH */
+.playlist-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 20px;
+}
+
+/* MỖI PLAYLIST */
+.playlist-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 28px;
+  background: rgba(0,35,35,0.75);
+  border-radius: 18px;
+  border: 2px solid rgba(0,230,200,0.3);
+  transition: all 0.45s cubic-bezier(0.23, 1, 0.32, 1);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.playlist-row:hover {
+  background: rgba(0,42,42,0.95);
+  border-color: #00e6c8;
+  transform: translateX(10px);
+  box-shadow: 
+    0 12px 35px rgba(0,230,200,0.35),
+    inset 0 0 30px rgba(0,230,200,0.1);
+}
+
+/* TÊN PLAYLIST */
+.playlist-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #e0fffa;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 65%;
+  text-shadow: 0 0 15px rgba(0,230,200,0.4);
+}
+
+/* TRẠNG THÁI */
+.playlist-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.status-public {
+  color: #00f0d0;
+}
+
+.status-private {
+  color: #00e6c8;
+}
+
+.status-icon {
+  font-size: 20px;
+}
+
+/* HIỆU ỨNG SÓNG KHI HOVER */
+.playlist-row::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(0,230,200,0.2), 
+    transparent
+  );
+  transition: left 0.7s ease;
+  pointer-events: none;
+}
+
+.playlist-row:hover::after {
+  left: 100%;
+}
+
+/* KHÔNG CÓ PLAYLIST */
+.empty-state {
+  text-align: center;
+  padding: 90px 30px;
+  background: rgba(0,26,26,0.7);
+  border-radius: 24px;
+  border: 3px dashed rgba(0,230,200,0.4);
+  margin: 40px 0;
+}
+
+.empty-state p {
+  font-size: 22px;
+  color: #80d8d0;
+  margin-bottom: 30px;
+  font-weight: 600;
+}
+
+/* NÚT TẠO PLAYLIST */
+.create-playlist-btn {
+  display: block;
+  margin: 50px auto 0;
+  padding: 18px 56px;
+  background: linear-gradient(90deg, #00e6c8, #00c8a8);
+  color: #000;
+  border: none;
+  border-radius: 50px;
+  font-weight: 900;
+  font-size: 18px;
+  text-transform: uppercase;
+  letter-spacing: 2.5px;
+  cursor: pointer;
+  box-shadow: 0 12px 35px rgba(0,230,200,0.6);
+  transition: all 0.45s ease;
+  min-width: 260px;
+}
+
+.create-playlist-btn:hover {
+  transform: translateY(-8px) scale(1.06);
+  box-shadow: 0 20px 50px rgba(0,230,200,0.8);
+}
+
+/* LOADING */
+.loading-playlist {
+  text-align: center;
+  padding: 100px 20px;
+  color: #80d8d0;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .playlist-row {
+    padding: 18px 20px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .playlist-title {
+    max-width: 100%;
+    font-size: 20px;
+  }
+  .playlist-status {
+    align-self: flex-end;
+  }
+  .create-playlist-btn {
+    width: 100%;
+    padding: 16px;
+  }
+}
+
+.pf-following-container {
+    padding: 20px;
+    background-color: #000000;
     border-radius: 12px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    max-width: 1000px;
+    margin: auto;
+}
+
+.pf-artist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.pf-artist-card {
+    background-color: #002221;
+    border-radius: 12px;
+    padding: 10px;
     text-align: center;
     cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.playlist-card img {
-    width: 100px;
-    height: 100px;
-    object-fit: cover;
+.pf-artist-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+}
+
+.pf-artist-avatar {
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
-    margin-bottom: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-    transition: transform 0.2s ease;
+    object-fit: cover;
+    margin-bottom: 8px;
 }
 
-.playlist-card h4 {
+.pf-artist-name {
     font-size: 16px;
     font-weight: 600;
-    color: #fff;
-    margin: 5px 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.playlist-card p {
-    font-size: 13px;
-    color: #aaa;
     margin: 0;
 }
 
-/* Hover hiệu ứng */
-.playlist-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(29, 185, 84, 0.4);
+.pf-artist-role {
+    font-size: 14px;
+    color: #7d7d7d;
+    margin: 2px 0 0 0;
 }
 
-.playlist-card:hover img {
-    transform: scale(1.05);
-}
-
-/* Chú thích khi chưa follow ai */
-.profile-following-container p {
-    color: #777;
-    font-style: italic;
+.pf-subtle-text {
+    color: #ffffff;
     text-align: center;
     margin-top: 20px;
 }
 
 
-/* music-frontend/src/pages/ProfileUser/Profile.css */
-
-/* === Bố cục chung === */
-.profile-layout-container {
+.pp-container {
     padding: 20px;
-    color: var(--color-text);
-    max-width: 1200px;
-    margin: 0 auto;
+    background-color: #000000;
+    border-radius: 12px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+    max-width: 1000px;
+    margin: auto;
 }
 
-/* === HEADER PROFILE (Chung cho cả Private và Public) === */
-.profile-header {
-    position: relative;
-    height: 250px; /* Chiều cao cố định cho header */
-    background: linear-gradient(to right, var(--color-primary-dark), var(--color-accent));
-    border-radius: 8px;
-    margin-bottom: 30px;
-    overflow: hidden;
-    display: flex; /* Dùng flexbox để căn giữa nội dung */
-    align-items: flex-end; /* Căn xuống dưới */
-}
-
-/* Overlay cho Header (tạo hiệu ứng màu sắc) */
-.profile-header-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.7), rgba(0,0,0,0.2));
+.pp-header {
     display: flex;
-    align-items: flex-end;
-    padding: 20px;
-}
-
-.profile-avatar {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid var(--color-background);
-    margin-right: 20px;
-}
-
-.profile-header-info {
-    z-index: 1; /* Đảm bảo chữ nằm trên overlay */
-}
-
-.profile-header-sub {
-    font-size: 0.9em;
-    color: var(--color-text-light);
-    margin-bottom: 5px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.profile-header-name {
-    font-size: 2.8em;
-    font-weight: bold;
-    color: var(--color-white);
-    margin-bottom: 10px;
-    line-height: 1;
-}
-
-.profile-stats {
-    font-size: 0.95em;
-    color: var(--color-text-light);
-}
-
-/* === Navigation tabs (Chỉ cho Private Profile) === */
-.profile-nav {
-    display: flex;
-    gap: 20px;
-    border-bottom: 1px solid var(--color-border);
-    margin-bottom: 30px;
-}
-
-.profile-nav-item {
-    padding: 10px 0;
-    font-size: 1.1em;
-    color: var(--color-text-light);
-    text-decoration: none;
-    transition: color 0.2s ease-in-out;
-    position: relative;
-}
-
-.profile-nav-item:hover,
-.profile-nav-item.active {
-    color: var(--color-white);
-}
-
-.profile-nav-item.active::after {
-    content: '';
-    position: absolute;
-    bottom: -1px; /* Đặt dưới border-bottom */
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background-color: var(--color-accent);
-}
-
-/* === Nội dung các section === */
-.profile-content {
-    margin-top: 20px; /* Để tạo khoảng cách với header */
-}
-
-.profile-section {
-    margin-bottom: 40px;
-}
-
-.section-title {
-    font-size: 1.8em;
-    color: var(--color-white);
-    margin-bottom: 20px;
-    border-bottom: 1px solid var(--color-border);
-    padding-bottom: 10px;
-}
-
-/* === Card Grid (Dùng cho Playlist và Artist) === */
-.grid-container {
-    display: grid;
-    gap: 20px;
-}
-
-.grid-playlists {
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-}
-
-.grid-artists {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-}
-
-.card {
-    background-color: var(--color-card-background);
-    border-radius: 8px;
-    overflow: hidden;
-    padding: 15px;
-    text-align: center;
-    transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
-    cursor: pointer;
-}
-
-.card:hover {
-    background-color: var(--color-card-background-hover);
-    transform: translateY(-5px);
-}
-
-.card-image {
-    width: 100%;
-    height: 150px; /* Chiều cao cố định cho ảnh */
-    object-fit: cover;
-    border-radius: 4px;
-    margin-bottom: 10px;
-}
-
-.artist-avatar-round {
-    border-radius: 50%; /* Làm ảnh nghệ sĩ tròn */
-    width: 100px; /* Kích thước nhỏ hơn cho avatar tròn */
-    height: 100px;
-    margin: 0 auto 10px auto; /* Căn giữa và khoảng cách */
-    border: 2px solid var(--color-accent);
-}
-
-.card-title {
-    font-size: 1.1em;
-    color: var(--color-white);
-    margin-bottom: 5px;
-    white-space: nowrap; /* Ngăn tiêu đề xuống dòng */
-    overflow: hidden;
-    text-overflow: ellipsis; /* Thêm dấu "..." nếu quá dài */
-}
-
-.card-subtitle {
-    font-size: 0.85em;
-    color: var(--color-text-light);
-}
-
-/* === Song List Detail (Dùng cho Bài hát đã thích) === */
-.song-list-detail {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.song-row {
-    display: flex;
-    align-items: center;
     justify-content: space-between;
-    background-color: var(--color-card-background);
-    padding: 10px 15px;
-    border-radius: 6px;
-    transition: background-color 0.2s ease-in-out;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.pp-btn-create {
+    background-color: #00bfa9;
+    color: #000000;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 12px;
     cursor: pointer;
-}
-
-.song-row:hover {
-    background-color: var(--color-card-background-hover);
-}
-
-.song-title-col {
     display: flex;
     align-items: center;
+    gap: 5px;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+.pp-btn-create:hover {
+    background-color: #00826c;
+}
+
+.pp-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 15px;
-    flex-grow: 1;
 }
 
-.song-title-col img {
-    width: 50px;
-    height: 50px;
-    object-fit: cover;
-    border-radius: 4px;
+.pp-card {
+    position: relative;
+    background-color: #171717;
+    border-radius: 12px;
+    padding: 10px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.song-row-title {
-    font-size: 1em;
-    color: var(--color-white);
-    margin: 0;
+.pp-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
 }
 
-.song-row-artist {
-    font-size: 0.85em;
-    color: var(--color-text-light);
-    margin: 0;
+.pp-privacy-icon {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    color: #666;
 }
 
-.liked-icon {
-    color: var(--color-accent); /* Màu cho icon trái tim */
-    margin-left: 10px;
-}
-
-.subtle-text {
-    color: var(--color-text-light);
-    font-style: italic;
-    /* text-align: center; */
-    padding: 20px;
-}
-
-.error-message-center {
-    color: var(--color-accent);
+.pp-card-info {
+    margin-top: 20px;
     text-align: center;
-    padding: 50px;
-    font-size: 1.2em;
 }
 
-/* === Responsive === */
-@media (max-width: 768px) {
-    .profile-header-name {
-        font-size: 2em;
-    }
-    .profile-avatar {
-        width: 90px;
-        height: 90px;
-    }
-    .grid-playlists {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    }
-    .grid-artists {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    }
-    .card-image {
-        height: 120px;
-    }
-    .artist-avatar-round {
-        width: 80px;
-        height: 80px;
-    }
+.pp-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 4px 0;
 }
 
-@media (max-width: 480px) {
-    .profile-layout-container {
-        padding: 10px;
-    }
-    .profile-header {
-        height: 200px;
-    }
-    .profile-header-overlay {
-        padding: 10px;
-    }
-    .profile-avatar {
-        width: 70px;
-        height: 70px;
-        margin-right: 10px;
-    }
-    .profile-header-name {
-        font-size: 1.5em;
-    }
-    .profile-stats, .profile-header-sub {
-        font-size: 0.8em;
-    }
-    .section-title {
-        font-size: 1.4em;
-    }
-    .grid-playlists, .grid-artists {
-        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    }
-    .card-image {
-        height: 90px;
-    }
-    .artist-avatar-round {
-        width: 60px;
-        height: 60px;
-    }
-    .song-title-col img {
-        width: 40px;
-        height: 40px;
-    }
-    .song-row-title {
-        font-size: 0.9em;
-    }
-    .song-row-artist {
-        font-size: 0.75em;
-    }
+.pp-count {
+    font-size: 14px;
+    color: #888;
+    margin: 0;
+}
+
+.pp-btn-delete {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: none;
+    border: none;
+    color: #ff4d4f;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.pp-btn-delete:hover {
+    color: #d9363e;
+}
+
+.pp-subtle {
+    color: #888;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.pp-loading {
+    text-align: center;
+    padding: 30px;
+    font-size: 16px;
+    color: #555;
 }

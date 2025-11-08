@@ -120,6 +120,7 @@ const ArtistDetail = () => {
     try {
         const response = await toggleFollowApi(artist.id);
         setIsFollowing(response.isFollowing); 
+        window.dispatchEvent(new CustomEvent('followStatusChanged'));
     } catch (error) {
         alert(error.response?.data?.message || 'Đã xảy ra lỗi');
     }

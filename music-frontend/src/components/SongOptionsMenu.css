@@ -1,45 +1,25 @@
 .song-options-menu {
   position: absolute;
-  top: 0; /* cùng hàng với nút 3 chấm */
-  left: 100%; /* bung sang phải của nút cha */
-  margin-left: 10px; /* cách nút 3 chấm một tí */
-  background-color: #1b1b1b; 
-  border-radius: 10px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
-  width: 200px;
-  z-index: 1002;
-  border: 1px solid #2e2e2e;
-  padding: 6px 0;
-  backdrop-filter: blur(6px);
-  animation: fadeInRight 0.2s ease-in;
-}
-
-@keyframes fadeInRight {
-  from { opacity: 0; transform: translateX(-10px); }
-  to { opacity: 1; transform: translateX(0); }
+  background: rgb(0, 0, 0);
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  z-index: 1000;
+  min-width: 160px;
 }
 
 .song-options-menu ul {
   list-style: none;
-  padding: 0;
   margin: 0;
+  padding: 8px 0;
 }
 
 .song-options-menu li {
-  padding: 12px 16px;
-  color: #ccc;
-  font-size: 15px;
-  font-weight: 500;
+  padding: 8px 16px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  transition: background 0.15s;
 }
 
 .song-options-menu li:hover {
-  background-color: #00c85322;
-  color: #00e676;
-  transform: translateX(4px);
+  background: #000000;
 }

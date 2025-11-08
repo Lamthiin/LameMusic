@@ -54,7 +54,7 @@ export class SongService {
           where: { active: true, status: 'APPROVED' }, 
           relations: ['artist', 'album'],
           order: { play_count: 'DESC' }, // sắp xếp theo lượt nghe giảm dần
-          take: 5
+          take: 6
       });
   }
 

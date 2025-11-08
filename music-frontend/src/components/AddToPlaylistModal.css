@@ -1,180 +1,168 @@
-/* ===== Overlay ===== */
+/* src/components/AddToPlaylistModal.css */
+/* PHIÊN BẢN ĐEN SIÊU SẠCH – KHÔNG GLOW, KHÔNG NẶNG */
+
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.75);
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(8px);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 2000;
-  animation: fadeIn 0.25s ease-in-out;
 }
 
 .modal-content {
-  background: #111;
-  color: #f2f2f2;
-  width: 560px;
-  border-radius: 18px;
-  padding: 28px 30px; /* ✅ căn đều hơn, tránh dính mép */
-  position: relative;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-  animation: slideUp 0.3s ease-in-out;
-  overflow-y: auto;
-  overflow-x: hidden;
+  background: #0f0f0f;
+  color: #e5e5e5;
+  width: 90%;
+  max-width: 480px;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+  border: 1px solid #222;
   max-height: 85vh;
-  box-sizing: border-box; /* ✅ fix mọi phần tử con */
+  overflow: hidden;
 }
 
-
-/* ===== Title ===== */
+/* TITLE */
 .modal-content h2 {
-  font-size: 1.4rem;
-  font-weight: 600;
-  margin-bottom: 20px;
+  font-size: 22px;
+  font-weight: 700;
   text-align: center;
+  margin: 0 0 24px;
   color: #fff;
 }
 
-/* ===== Close button ===== */
+/* CLOSE */
 .modal-close-btn {
   position: absolute;
   top: 12px;
-  right: 14px;
-  background: transparent;
+  right: 12px;
+  background: #222;
+  color: #999;
   border: none;
-  color: #aaa;
-  font-size: 20px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 18px;
   cursor: pointer;
-  transition: color 0.2s;
 }
 .modal-close-btn:hover {
+  background: #333;
   color: #fff;
 }
 
-/* ===== Search box ===== */
+/* SEARCH */
 .playlist-search {
   width: 100%;
-  padding: 12px 16px;
-  border-radius: 10px;
-  border: 1px solid #2a2a2a;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid #333;
   background: #1a1a1a;
-  color: #f2f2f2;
-  margin-bottom: 16px;
-  box-sizing: border-box;
-  font-size: 1rem;
-  transition: all 0.2s ease;
+  color: #e5e5e5;
+  font-size: 16px;
+  margin-bottom: 20px;
 }
 .playlist-search:focus {
-  border-color: #22c55e;
   outline: none;
-  background: #202020;
+  border-color: #00e6c8;
+  background: #222;
 }
 
-/* ===== Create playlist row ===== */
+/* CREATE ROW */
 .create-playlist-row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
+  gap: 14px;
+  padding: 16px;
   background: #1a1a1a;
-  border-radius: 10px;
+  border-radius: 12px;
   cursor: pointer;
   margin-bottom: 20px;
-  transition: all 0.25s ease;
+  border: 1px dashed #333;
 }
 .create-playlist-row:hover {
-  background: #2f2f2f;
-  color: #c1bfbf;
-  transform: scale(1.02);
+  background: #222;
+  border-color: #00e6c8;
 }
 .create-playlist-icon-box {
-  width: 30px;
-  height: 30px;
-  background: #444444;
-  color: #ffffff;
+  width: 40px;
+  height: 40px;
+  background: #00e6c8;
+  color: #000;
+  border-radius: 10px;
   display: flex;
-  justify-content: center;
   align-items: center;
-  border-radius: 8px;
-  font-size: 15px;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 18px;
 }
 
-.playlist-section-title{
-    font-size: 15px;
-    color: rgb(130, 129, 129);
+/* SECTION TITLE */
+.playlist-section-title {
+  font-size: 13px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 20px 0 10px;
 }
-/* ===== Playlist list ===== */
+
+/* LIST */
 .playlist-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  max-height: 280px;
+  max-height: 300px;
   overflow-y: auto;
-  overflow-x: hidden; /* ✅ không cuộn ngang */
-  scrollbar-width: thin;
-  scrollbar-color: #22c55e #1a1a1a;
+  padding-right: 8px;
 }
-.playlist-list::-webkit-scrollbar {
-  width: 6px;
-}
+.playlist-list::-webkit-scrollbar { width: 4px; }
 .playlist-list::-webkit-scrollbar-thumb {
-  background-color: #22c55e;
-  border-radius: 10px;
+  background: #444;
+  border-radius: 4px;
 }
 
 .playlist-list li {
   padding: 14px 16px;
-  border-radius: 10px;
-  margin-bottom: 10px;
   background: #1a1a1a;
+  border-radius: 10px;
+  margin-bottom: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  transition: 0.2s;
 }
 .playlist-list li:hover {
-  /* background: #22c55e; */
-  /* color: #111; */
-  transform: translateX(8px);
+  background: #6d6d6d;
+  color: #000;
+}
+.playlist-list li .privacy {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 600;
+  color: #aaa;
 }
 
-/* ===== Error ===== */
-.modal-error {
-  color: #ff5b5b;
-  text-align: center;
-  margin-bottom: 10px;
-}
-
-/* ===== Toast message ===== */
+/* TOAST NHẸ */
 .toast {
   position: fixed;
-  bottom: -60px;
+  bottom: 30px;
   left: 50%;
   transform: translateX(-50%);
-  padding: 12px 22px;
-  border-radius: 8px;
-  font-weight: 500;
-  color: #fff;
+  padding: 12px 28px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 14px;
   opacity: 0;
-  transition: all 0.4s ease;
+  transition: 0.4s;
   z-index: 3000;
 }
-.toast-success {
-  background-color: #22c55e;
-}
-.toast-error {
-  background-color: #ef4444;
-}
-.toast.show {
-  bottom: 25px;
-  opacity: 1;
-}
+.toast.show { opacity: 1; bottom: 40px; }
+.toast-success { background: #00e6c8; color: #000; }
+.toast-error { background: #e91429; color: #fff; }
 
-/* ===== Animations ===== */
-@keyframes fadeIn {
-  from { opacity: 0; } 
-  to { opacity: 1; }
-}
-@keyframes slideUp {
-  from { transform: translateY(30px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+/* MOBILE */
+@media (max-width: 480px) {
+  .modal-content { padding: 24px; }
+  .create-playlist-row { padding: 14px; }
 }

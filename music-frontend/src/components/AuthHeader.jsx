@@ -9,7 +9,7 @@ const AuthHeader = () => {
   return (
     <header className="auth-header-container">
       <div className="auth-header-logo" onClick={() => navigate('/')}>
-        <h1 className="lame-logo-text">lame 🎵</h1>
+        <h1 className="lame-logo-text">Lame 🎵</h1>
       </div>
     </header>
   );

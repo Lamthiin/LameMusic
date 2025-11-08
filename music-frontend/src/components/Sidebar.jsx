@@ -1,130 +1,210 @@
-// music-frontend/src/components/Sidebar.jsx (BẢN FINAL FULL CODE)
-import React, { useState } from 'react'; // <-- (1) THÊM useState
+// src/components/Sidebar.jsx (BẢN SỬA LỖI FINAL - CÓ NÚT TẠO PLAYLIST)
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { fetchMyFollowingApi } from '../utils/api';
 import './Sidebar.css';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext'; // Vẫn cần để check login
+import { MdOutlineExplore, MdExplore } from 'react-icons/md';
+import { FaSearch, FaCompactDisc, FaHeart, FaUsers, FaAngleRight } from 'react-icons/fa';
+import { VscLibrary } from 'react-icons/vsc';
+import { GoHeartFill, GoPlus } from 'react-icons/go';
+import CreatePlaylistModal from './CreatePlaylistModal';
 
-// Import icons
-import { MdOutlineExplore, MdExplore } from 'react-icons/md'; // Khám phá
-import { FaUser, FaBlog, FaCompactDisc} from 'react-icons/fa'; // Dành cho tôi, Trang blog
-import { VscLibrary } from 'react-icons/vsc'; // Thư viện
-import { GoHeartFill, GoPlus } from 'react-icons/go'; // Yêu, Plus
-
-import CreatePlaylistModal from './CreatePlaylistModal'; // <-- (2) IMPORT MODAL MỚI
+// HÀM HELPER SNAGS PLAYER (Giữ nguyên)
+const audioPreview = new Audio();
+const playPreview = (url) => { /* ... */ };
+const stopPreview = () => { /* ... */ };
+const fixImageUrl = (url) => url?.startsWith('http') ? url : `http://localhost:3000${url}`;
 
 const Sidebar = () => {
-  const { isAuthenticated } = useAuth(); // Lấy trạng thái đăng nhập
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  
-  const activePage = 'discover'; // (Tạm thời)
-    
-  // === (3) STATE QUẢN LÝ MODAL ===
-  const [isModalOpen, setIsModalOpen] = useState(false); 
+  const location = useLocation();
 
-  // === HÀM XỬ LÝ CLICK (GUARD) ===
+  const [isModalOpen, setIsModalOpen] = useState(false); // <-- STATE TẠO PLAYLIST
+  const [followingList, setFollowingList] = useState([]);
+  const [isFollowMenuOpen, setIsFollowMenuOpen] = useState(false);
+  const [activePage, setActivePage] = useState('');
+  
+  const dropdownRef = useRef(null);
+  const triggerRef = useRef(null);
+
+  const loadFollowing = useCallback(async () => {
+        if (isAuthenticated) {
+            try {
+                const data = await fetchMyFollowingApi(); // API trả về mảng [Follow]
+                setFollowingList(data); 
+            } catch (error) {
+                console.error('Lỗi tải danh sách theo dõi:', error);
+            }
+        } else {
+            setFollowingList([]);
+        }
+    }, [isAuthenticated]);
+
+  // === (1) TẢI FOLLOWING VÀ LẮNG NGHE EVENT ===
+  useEffect(() => {
+    loadFollowing();
+
+    const handleFollowUpdate = () => {
+        loadFollowing(); // Kích hoạt hàm tải lại
+    };
+    
+    window.addEventListener('followStatusChanged', handleFollowUpdate);
+
+    return () => {
+        window.removeEventListener('followStatusChanged', handleFollowUpdate);
+    };
+  }, [isAuthenticated, loadFollowing]); 
+    
+  // ACTIVE PAGE
+  useEffect(() => {
+    const path = location.pathname.split('/')[1] || 'home';
+    setActivePage(path);
+  }, [location.pathname]);
+
+  // ĐÓNG DROPDOWN KHI CLICK RA NGOÀI
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target) &&
+          triggerRef.current && !triggerRef.current.contains(e.target)) {
+        setIsFollowMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const handleProtectedClick = (path) => {
+    if (isAuthenticated) navigate(path);
+    else navigate('/login');
+  };
+    
+  // === (2) HÀM TẠO PLAYLIST MỚI (MỞ MODAL) ===
+  const handleCreatePlaylistClick = () => {
     if (isAuthenticated) {
-      navigate(path);
+        setIsModalOpen(true); // <-- MỞ MODAL
     } else {
-      navigate('/login');
+        navigate('/login');
     }
   };
     
-  // === HÀM MỞ MODAL & CHECK AUTH ===
-  const handleCreatePlaylistClick = () => {
-    if (isAuthenticated) {
-        setIsModalOpen(true); // Mở modal nếu đã đăng nhập
-    } else {
-        navigate('/login'); // Đá về Login nếu chưa
-    }
+  const handlePlaylistCreated = () => {
+      setIsModalOpen(false); // Đóng Modal
+      // TODO: Nếu cần tải lại danh sách playlists dưới dạng LI, gọi API tải lại ở đây
   };
+    // ===========================================
 
-  // Hàm callback sau khi Playlist được tạo
-  const handlePlaylistCreated = (newPlaylist) => {
-      // alert(`Playlist "${newPlaylist.name}" đã được tạo thành công!`);
-      // TODO: Sau này bạn có thể cập nhật state playlist ở đây
-  };
-
+  // === (1) LOGIC LỌC VÀ TRUY CẬP DỮ LIỆU ĐÃ SỬA ===
+  const followedArtists = followingList // followingList là mảng [Follow]
+    .filter(f => f.following) // Lọc những object Follow có quan hệ Artist hợp lệ
+    .map(f => f.following); // Lấy trực tiếp Artist Entity ra khỏi Follow object
 
   return (
     <div className="sidebar-container">
-  <div className="sidebar-top-spacer"></div>
-      
-      {/* ===== KHU VỰC TRÊN: Điều hướng chính ===== */}
+      {/* NAV CHÍNH */}
       <div className="sidebar-section sidebar-nav">
         <ul>
-          {/* 1. Khám phá */}
-          <li 
-            className={activePage === 'discover' ? 'active' : ''} 
-            onClick={() => navigate('/')}
-          >
-            {activePage === 'discover' ? <MdExplore size={28} /> : <MdOutlineExplore size={28} />}
-            <span>Khám phá</span> 
+          <li className={activePage === 'home' ? 'active' : ''} onClick={() => navigate('/')}>
+            {activePage === 'home' ? <MdExplore size={24} /> : <MdOutlineExplore size={24} />}
+            <span>Khám phá</span>
           </li>
-          
-          {/* 2. Dành cho tôi */}
-          <li 
-            className={activePage === 'foryou' ? 'active' : ''}
-            onClick={() => handleProtectedClick('/for-you')} 
-          >
-            <FaUser size={28} />
-            <span>Dành cho tôi</span>
-          </li>
-
-          {/* 3. Trang blog */}
-          {/* 3. ALBUMS (THAY CHO BLOG) */}
-          <li 
-            className={activePage === 'albums' ? 'active' : ''} // Đổi tên activePage
-            onClick={() => navigate('/albums')} // <-- SỬA ROUTE
-          >
-            <FaCompactDisc size={28} /> {/* <-- SỬA ICON */}
-            <span>Albums</span> {/* <-- SỬA TEXT */}
+         
+          <li className={activePage === 'albums' ? 'active' : ''} onClick={() => navigate('/albums')}>
+            <FaCompactDisc size={24} />
+            <span>Albums</span>
           </li>
         </ul>
       </div>
 
-      {/* ===== KHU VỰC GIỮA: Thư viện (Bảo vệ khi click) ===== */}
+      <hr className="sidebar-divider" />
+
+      {/* THƯ VIỆN - BẤM ĐƯỢC */}
       <div className="sidebar-section sidebar-library">
-          
-        {/* 4. Tiêu đề "Thư viện" */}
         <div 
-          className="library-heading" 
-          onClick={() => handleProtectedClick('/library')} 
+          className="library-heading clickable" 
+          
         >
-          <VscLibrary size={28} />
+          <VscLibrary size={24} />
           <span>Thư viện</span>
         </div>
 
-        {/* Các mục con của Thư viện */}
         <ul className="sidebar-library-items">
-          {/* 4a. Bài hát yêu thích (Bảo vệ khi click) */}
-          <li 
-            className={activePage === 'liked' ? 'active' : ''}
-            onClick={() => handleProtectedClick('/liked-songs')} 
-          >
-            <div className="icon-box" style={{ background: 'linear-gradient(135deg, #450AF5, #C4EFD9)' }}>
+          
+{/*           TẠO PLAYLIST
+          <li onClick={handleCreatePlaylistClick} style={{ cursor: 'pointer' }}>
+            <div className="icon-box" style={{ background: '#7F7F7F', borderRadius: '4px' }}>
+              <GoPlus size={16} />
+            </div>
+            <span>Tạo playlist</span>
+          </li> */}
+
+          {/* YÊU THÍCH */}
+          <li className={activePage === 'liked-songs' ? 'active' : ''} onClick={() => handleProtectedClick('/liked-songs')}>
+            <div className="icon-box" style={{ background: 'linear-gradient(135deg, #ff0000ff, #C4EFD9)' }}>
               <GoHeartFill size={16} />
             </div>
             <span>Bài hát yêu thích</span>
           </li>
 
-          {/* 4b. Tạo playlist (GỌI HÀM MỞ MODAL) */}
-          <li onClick={handleCreatePlaylistClick}>
-            <div className="icon-box" style={{ background: '#7F7F7F' }}>
-              <GoPlus size={16} />
+          {/* QUAN TÂM - DROPDOWN HIỆN ĐÚNG CHỖ */}
+          {isAuthenticated && (
+            <div className="sidebar-dropdown-parent">
+              <li
+                ref={triggerRef}
+                className={`follow-header ${activePage === 'following' ? 'active' : ''}`}
+                onClick={() => setIsFollowMenuOpen(!isFollowMenuOpen)}
+              >
+                <FaUsers size={24} />
+                <span>Quan tâm</span>
+                <FaAngleRight size={12} className="dropdown-arrow" />
+              </li>
+
+              {isFollowMenuOpen && (
+              <div className="dropdown-content" ref={dropdownRef}>
+                <div className="dropdown-items-container">
+                  {followedArtists.length > 0 ? (
+                    followedArtists.map((artist) => (
+                      <div
+                        key={artist.id}
+                        className="dropdown-item"
+                        onClick={() => {
+                          navigate(`/artist/${artist.id}`);
+                          setIsFollowMenuOpen(false);
+                        }}
+                        onMouseEnter={() => playPreview(artist.preview_url)}
+                        onMouseLeave={stopPreview}
+                      >
+                        <img src={fixImageUrl(artist.avatar_url)} alt="" className="artist-mini-avatar" />
+                        <span>{artist.stage_name}</span>
+                        <div className="mini-wave">
+                          <span></span><span></span><span></span>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="dropdown-item empty">Chưa theo dõi Artist nào.</div>
+                  )}
+                </div>
+
+                <div
+                  className="dropdown-item view-all"
+                  onClick={() => {
+                    handleProtectedClick('/profile/following');
+                    setIsFollowMenuOpen(false);
+                  }}
+                >
+                  Xem tất cả
+                </div>
+              </div>
+
+              )}
             </div>
-            <span>Tạo playlist</span>
-          </li>
+          )}
         </ul>
       </div>
-        
-    {/* Component Modal */}
-    <CreatePlaylistModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onPlaylistCreated={handlePlaylistCreated}
-    />
 
+      {isModalOpen && <CreatePlaylistModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />}
     </div>
   );
 };

@@ -1,17 +1,12 @@
-// music-frontend/src/components/AlbumFormModal.jsx (FULL CODE NÂNG CẤP)
+// music-frontend/src/components/AlbumFormModal.jsx
 import React, { useState, useEffect } from 'react';
-import { createAlbumApi, updateAlbumApi } from '../utils/api'; // (1) Import cả 2 API
-import './ChangePasswordModal.css'; 
-import '../pages/ArtistDashboard/ArtistDashboard.css'; 
+import { createAlbumApi, updateAlbumApi } from '../utils/api';
+import './AlbumFormModal.css'; // 👈 File CSS mới
 import { FaTimes } from 'react-icons/fa';
 
-// (Hàm Toast Helper)
 const showToast = (message, type = 'success') => { alert(message); };
 
-// (2) NHẬN ALBUM CẦN SỬA (albumToEdit)
 const AlbumFormModal = ({ onClose, onComplete, albumToEdit }) => {
-    
-    // (3) KIỂM TRA CHẾ ĐỘ (MODE)
     const isEditMode = Boolean(albumToEdit); 
 
     const [title, setTitle] = useState('');
@@ -21,13 +16,11 @@ const AlbumFormModal = ({ onClose, onComplete, albumToEdit }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
-    // (4) TỰ ĐỘNG ĐIỀN FORM NẾU LÀ CHẾ ĐỘ SỬA
     useEffect(() => {
         if (isEditMode) {
             setTitle(albumToEdit.title);
-            // Cần format lại Date (YYYY-MM-DD)
             setReleaseDate(new Date(albumToEdit.release_date).toISOString().split('T')[0]);
-            setPreview(albumToEdit.cover_url); // Dùng URL đã fix từ trang cha
+            setPreview(albumToEdit.cover_url);
         }
     }, [isEditMode, albumToEdit]);
 
@@ -42,34 +35,28 @@ const AlbumFormModal = ({ onClose, onComplete, albumToEdit }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
-        
-        // (Bỏ 'coverFile' khỏi required khi Edit, vì user có thể chỉ sửa tên)
+
         if (!title || !releaseDate) {
             setError('Vui lòng điền Tiêu đề và Ngày phát hành.');
             return;
         }
 
         setLoading(true);
-        
         const formData = new FormData();
         formData.append('title', title);
         formData.append('release_date', releaseDate);
-        if (coverFile) { // Chỉ thêm file nếu user chọn file mới
-            formData.append('coverFile', coverFile); 
-        }
+        if (coverFile) formData.append('coverFile', coverFile);
 
         try {
             if (isEditMode) {
-                // === CHẠY API SỬA ===
                 await updateAlbumApi(albumToEdit.id, formData);
                 showToast('Cập nhật Album thành công!');
             } else {
-                // === CHẠY API TẠO ===
                 await createAlbumApi(formData);
                 showToast('Tạo Album mới thành công!');
             }
-            onComplete(); // Tải lại danh sách
-            onClose(); // Đóng modal
+            onComplete();
+            onClose();
         } catch (err) {
             setError(err.response?.data?.message || (isEditMode ? 'Sửa thất bại' : 'Tạo thất bại'));
         } finally {
@@ -78,41 +65,39 @@ const AlbumFormModal = ({ onClose, onComplete, albumToEdit }) => {
     };
 
     return (
-        <div className="modal-overlay" onClick={onClose}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                <button className="modal-close-btn" onClick={onClose}><FaTimes /></button>
-                
-                {/* (5) ĐỔI TIÊU ĐỀ TÙY THEO MODE */}
+        <div className="album-modal-overlay" onClick={onClose}>
+            <div className="album-modal-box" onClick={(e) => e.stopPropagation()}>
+                <button className="album-modal-close" onClick={onClose}><FaTimes /></button>
                 <h2>{isEditMode ? 'Sửa Album' : 'Tạo Album Mới'}</h2>
-                
-                <form className="profile-edit-form" onSubmit={handleSubmit}>
-                    {error && <p className="modal-error">{error}</p>}
-                    
-                    <div className="form-group avatar-upload-section">
+
+                <form className="album-form" onSubmit={handleSubmit}>
+                    {error && <p className="album-error">{error}</p>}
+
+                    <div className="album-upload-section">
                         <label>Ảnh bìa Album ({isEditMode ? 'Để trống nếu không đổi' : 'Bắt buộc'})</label>
-                        <div className="avatar-preview-box">
-                            <img src={preview} alt="Album Cover Preview" className="avatar-preview" style={{ borderRadius: '8px' }}/>
+                        <div className="album-preview-box">
+                            <img src={preview} alt="Album Preview" className="album-preview-img" />
                             <input 
                                 type="file" 
                                 accept="image/*"
-                                onChange={handleFileChange} 
-                                required={!isEditMode} // Chỉ bắt buộc khi Tạo mới
+                                onChange={handleFileChange}
+                                required={!isEditMode}
                             />
                         </div>
                     </div>
-                    
-                    <div className="form-group">
+
+                    <div className="album-field">
                         <label>Tiêu đề Album:</label>
                         <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required />
                     </div>
-                    
-                    <div className="form-group">
+
+                    <div className="album-field">
                         <label>Ngày phát hành:</label>
                         <input type="date" value={releaseDate} onChange={(e) => setReleaseDate(e.target.value)} required />
                     </div>
-                    
-                    <div className="form-buttons">
-                        <button type="submit" disabled={loading} className="profile-button save">
+
+                    <div className="album-buttons">
+                        <button type="submit" disabled={loading} className="album-btn">
                             {loading ? 'Đang lưu...' : (isEditMode ? 'Lưu thay đổi' : 'Tạo Album')}
                         </button>
                     </div>

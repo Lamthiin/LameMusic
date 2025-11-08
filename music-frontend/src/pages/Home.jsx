@@ -170,7 +170,7 @@ const Home = () => {
           <p className="loading-message">Đang tải thể loại...</p>
         ) : (
           <div className="genres-grid">
-            {genres.slice(0, 6).map((genre) => (
+           {genres.map((genre) => (
               <div
                 key={genre.id}
                 className="genre-card"
