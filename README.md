@@ -1,4 +1,8 @@
 # hien
+
+đổi database ở app.module.ts trong backend
+
+
 trong terminal của frontend: npm run start
 
 
