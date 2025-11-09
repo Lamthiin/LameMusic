@@ -1,125 +1,150 @@
-// music-frontend/src/context/PlayerContext.jsx (BẢN SỬA LỖI FINAL - DÙNG REF CỦA THƯ VIỆN)
+// music-frontend/src/context/PlayerContext.jsx (BẢN SỬA LỖI AUTO-QUEUE FINAL)
 import React, { createContext, useState, useContext, useCallback, useRef, useEffect } from 'react';
-import { incrementPlayCountApi } from '../utils/api'; 
+import { incrementPlayCountApi, logPlaybackApi, getRecommendedSongApi } from '../utils/api'; // <-- ĐÃ CÓ API ĐỀ XUẤT
 
 const PlayerContext = createContext(null);
 
+const getAudioElement = (ref) => ref.current?.audio?.current;
+
+// Helper fix URL nhạc (BẮT BUỘC)
+const fixAudioUrl = (url) => {
+  if (!url) return '';
+  // Giả định: nếu không có http, thêm host
+  return url.startsWith('http') ? url : `http://localhost:3000${url}`;
+};
+
 export const PlayerProvider = ({ children }) => {
-    const [currentTrack, setCurrentTrack] = useState(null);
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [currentPlaylist, setCurrentPlaylist] = useState([]); 
-    
-    // === 1. REF CHỨA COMPONENT THƯ VIỆN VÀ CỜ ĐẾM ===
-    const audioRef = useRef(null); // Ref component Player Bar
-    const hasIncrementedRef = useRef(false); 
-    // ======================================
-    
-    // Hàm Helper lấy Audio Element
-    const getAudioElement = () => {
-        // Cấu trúc của react-h5-audio-player: audioRef.current.audio.current
-        return audioRef.current?.audio?.current; 
-    };
+  const [currentTrack, setCurrentTrack] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentPlaylist, setCurrentPlaylist] = useState([]);
 
-    // === 2. HÀM XỬ LÝ LƯỢT NGHE (LISTENER) ===
-    const handleTimeUpdate = useCallback(() => {
-        const audio = getAudioElement();
-        if (!audio || !currentTrack) return;
-
-        // Nếu thời gian phát lớn hơn 2 giây VÀ chưa được đếm
-        if (audio.currentTime >= 2 && !hasIncrementedRef.current) {
-            incrementPlayCountApi(currentTrack.id);
-            hasIncrementedRef.current = true;
-            console.log(`[Play Count] Tăng lượt nghe cho Song ID: ${currentTrack.id} (2s rule)`);
-            
-            // Xóa listener (Không thể xóa listener trong useEffect, nên dùng cờ)
-            // LƯU Ý: Thư viện này tự quản lý listeners, chúng ta chỉ cần flag.
-        }
-    }, [currentTrack]);
-    // ===========================================
-    
-    const playTrack = useCallback((track, playlist = [], startIndex = 0) => {
-        // Nếu chọn bài mới
-        if (track.id !== currentTrack?.id || playlist.length > 0) {
-            setCurrentTrack(track);
-            if (playlist.length > 0) {
-                setCurrentPlaylist(playlist);
-            }
-            setIsPlaying(true); 
-        } else if (audioRef.current) {
-            // Nếu là bài cũ, toggle play/pause
-            const audio = getAudioElement();
-            if (audio) {
-                audio.paused ? audio.play() : audio.pause();
-                setIsPlaying(!audio.paused);
-            }
-        }
-    }, [currentTrack]); 
-
-    const togglePlay = useCallback(() => {
-        const audio = getAudioElement();
-        if (audio && currentTrack) {
-            audio.paused ? audio.play() : audio.pause();
-            setIsPlaying(!audio.paused);
-        }
-    }, [currentTrack]);
+  const audioRef = useRef(null);
+  const hasLoggedMapRef = useRef(new Map());
 
 
-    // === 3. HOOK QUẢN LÝ TỰ ĐỘNG PHÁT VÀ ĐẾM LƯỢT NGHE ===
-    useEffect(() => {
-        const audio = getAudioElement();
-        
-        // Gắn listener timeupdate cho Player Bar
-        if (audio && currentTrack) {
-            // Đảm bảo cờ đếm lượt nghe được reset khi track thay đổi
-            hasIncrementedRef.current = false; 
-            
-            // Thư viện tự gọi play/pause, chúng ta chỉ cần gắn listener cho đếm lượt nghe
-            const timeUpdateHandler = handleTimeUpdate;
-            audio.addEventListener('timeupdate', timeUpdateHandler);
+  // ----------------- Log lượt nghe -----------------
+  const handleTimeUpdate = useCallback(() => {
+    const audio = getAudioElement(audioRef);
+    if (!audio || !currentTrack) return;
+    const songId = currentTrack.id;
 
-            return () => {
-                // Cleanup
-                audio.removeEventListener('timeupdate', timeUpdateHandler);
-            };
-        }
-    }, [currentTrack, handleTimeUpdate]);
-    // ======================================================
+    if (audio.currentTime >= 2 && !hasLoggedMapRef.current.get(songId)) {
+      incrementPlayCountApi(songId);
+      logPlaybackApi(songId, Math.floor(audio.currentTime));
+      hasLoggedMapRef.current.set(songId, true);
+      console.log(`[Play Count] Logged playback for Song ID: ${currentTrack.id} (2s rule)`);
+    }
+  }, [currentTrack]);
 
 
-    const playNext = useCallback(() => {
-        // ... (logic chuyển bài next giữ nguyên) ...
-        if (!currentTrack || currentPlaylist.length === 0) return;
-        const currentIndex = currentPlaylist.findIndex(t => t.id === currentTrack.id);
-        const nextIndex = (currentIndex + 1) % currentPlaylist.length; 
-        if (currentPlaylist[nextIndex]) {
-             playTrack(currentPlaylist[nextIndex]);
-        }
-    }, [currentPlaylist, currentTrack, playTrack]);
+  // ----------------- Khai báo Ref -----------------
+  const playNextRef = useRef(() => {});
+  const playPreviousRef = useRef(() => {});
 
-    const playPrevious = useCallback(() => {
-        // ... (logic chuyển bài previous giữ nguyên) ...
-        if (!currentTrack || currentPlaylist.length === 0) return;
-        const currentIndex = currentPlaylist.findIndex(t => t.id === currentTrack.id);
-        const previousIndex = (currentIndex - 1 + currentPlaylist.length) % currentPlaylist.length;
-        if (currentPlaylist[previousIndex]) {
-            playTrack(currentPlaylist[previousIndex]);
-        }
-    }, [currentPlaylist, currentTrack, playTrack]);
-    
-    // EXPORT audioRef để PlayerBar có thể gắn ref vào AudioPlayer
-    const contextValue = {
-        currentTrack, isPlaying, playTrack, togglePlay,
-        audioRef, // <-- ĐÂY LÀ CHÌA KHÓA
-        currentPlaylist, playNext, playPrevious    
-    };
 
-    return (
-        <PlayerContext.Provider value={contextValue}>
-            {children}
-        </PlayerContext.Provider>
-    );
+  // ----------------- playTrack / togglePlay -----------------
+  const playTrack = useCallback((track, playlist = null, startIndex = 0) => {
+    if (!track) return;
+    const fixedTrack = { ...track, file_url: fixAudioUrl(track.file_url) };
+
+    if (fixedTrack.id !== currentTrack?.id || playlist) {
+      setCurrentTrack(fixedTrack);
+      // Nếu có playlist mới được truyền, cập nhật toàn bộ playlist
+      if (playlist) {
+        const fixedPlaylist = playlist.map(t => ({ ...t, file_url: fixAudioUrl(t.file_url) }));
+        setCurrentPlaylist(fixedPlaylist);
+      }
+      setIsPlaying(true);
+    } else {
+      const audio = getAudioElement(audioRef);
+      if (audio) {
+        audio.paused ? audio.play() : audio.pause();
+        setIsPlaying(!audio.paused);
+      }
+    }
+  }, [currentTrack]); // Bỏ currentPlaylist khỏi dependencies để tránh lỗi lặp
+
+
+  const togglePlay = useCallback(() => {
+    const audio = getAudioElement(audioRef);
+    if (audio && currentTrack) {
+      audio.paused ? audio.play() : audio.pause();
+      setIsPlaying(!audio.paused);
+    }
+  }, [currentTrack]);
+
+
+  // ----------------- Logic Chuyển bài (Auto-Queue) -----------------
+  playNextRef.current = useCallback(async () => { // <-- THÊM ASYNC
+    const currentIndex = currentPlaylist.findIndex(t => t.id === currentTrack?.id);
+    
+    // 1. Trường hợp có bài tiếp theo trong playlist
+    if (currentIndex !== -1 && currentIndex < currentPlaylist.length - 1) {
+      const nextTrack = currentPlaylist[currentIndex + 1];
+      playTrack(nextTrack);
+      return;
+    }
+
+    // 2. Trường hợp đã hết Playlist -> Gọi AI Đề xuất (Auto-Queue)
+    console.log("[Auto-Queue] Hết playlist. Đang tìm kiếm bài hát đề xuất AI...");
+    try {
+        const recommendedSong = await getRecommendedSongApi();
+        
+        if (recommendedSong?.id) {
+            // Cập nhật Playlist bằng cách thêm bài hát đề xuất vào
+            const fixedRecSong = { ...recommendedSong, file_url: fixAudioUrl(recommendedSong.file_url) };
+            
+            // Tùy chọn: Thay thế toàn bộ playlist bằng bài đề xuất để làm radio mode
+            setCurrentPlaylist([fixedRecSong]); 
+            
+            playTrack(fixedRecSong); // Phát bài đề xuất
+        } else {
+            setIsPlaying(false);
+        }
+    } catch (err) {
+        console.error("Lỗi Auto-Queue:", err.message);
+        setIsPlaying(false);
+    }
+  }, [currentTrack, currentPlaylist, playTrack]); // Đảm bảo dependencies đúng
+
+    playPreviousRef.current = useCallback(() => {
+        // Logic chuyển bài ngược (chỉ chuyển bài cũ, không gọi đề xuất)
+        const currentIndex = currentPlaylist.findIndex(t => t.id === currentTrack?.id);
+        if (currentIndex > 0) {
+            const previousIndex = currentIndex - 1;
+            playTrack(currentPlaylist[previousIndex]);
+        }
+    }, [currentTrack, currentPlaylist, playTrack]);
+
+
+  // ----------------- Gắn listener (Giữ nguyên) -----------------
+  useEffect(() => {
+    const audio = getAudioElement(audioRef);
+    if (!audio) return;
+
+    // ... (gắn listeners handleTimeUpdate và playNextRef.current) ...
+    audio.addEventListener('timeupdate', handleTimeUpdate);
+    audio.addEventListener('ended', playNextRef.current);
+
+    return () => {
+      audio.removeEventListener('timeupdate', handleTimeUpdate);
+      audio.removeEventListener('ended', playNextRef.current);
+    };
+  }, [handleTimeUpdate, playNextRef.current]);
+
+
+  const contextValue = {
+    currentTrack,
+    isPlaying,
+    playTrack,
+    togglePlay,
+    audioRef,
+    currentPlaylist,
+    playNext: playNextRef.current,
+    playPrevious: playPreviousRef.current,
+  };
+
+  return <PlayerContext.Provider value={contextValue}>{children}</PlayerContext.Provider>;
 };
 
-export const usePlayer = () => {
-    return useContext(PlayerContext);
-};
+export const usePlayer = () => useContext(PlayerContext);

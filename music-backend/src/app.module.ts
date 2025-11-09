@@ -18,7 +18,8 @@ import { PlaylistModule } from './playlist/playlist.module';
 import { SearchModule } from './search/search.module';
 import { FollowModule } from './follow/follow.module'; // <-- IMPORT MỚI
 import { AlbumModule } from './album/album.module';
-
+import { History } from './history/history.entity'; // <-- IMPORT MỚI
+import { HistoryModule } from './history/history.module'; // <-- IMPORT MỚI
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { AlbumModule } from './album/album.module';
     SearchModule,
     FollowModule,
     AlbumModule,
+    HistoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

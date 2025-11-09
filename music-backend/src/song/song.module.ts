@@ -14,12 +14,16 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { Category } from '../category/category.entity';
 import { LikeModule } from '../like/like.module';
+import { AiModule } from '../ai/ai.module'; // <-- THÊM AI MODULE
+import { HistoryModule } from '../history/history.module'; // <-- (1) IMPORT THIẾU
 
 @Module({
   imports: [
     // === ĐĂNG KÝ TẤT CẢ CÁC ENTITY CẦN THIẾT ===
     TypeOrmModule.forFeature([Song, Artist, Album, Lyrics, UserLikedSongs]), 
     // ============================================
+    AiModule, // <-- Đảm bảo AiModule được import
+    HistoryModule,
     forwardRef(() => AuthModule),
     forwardRef(() => LikeModule),
   // === (2) CẤU HÌNH UPLOAD (NHẠC VÀ ẢNH) ===

@@ -15,6 +15,7 @@ import { Artist } from '../artist/artist.entity';
 import { Lyrics } from '../lyrics/lyrics.entity';
 import { UserLikedSongs } from '../like/user-liked-songs.entity'; // <-- THÊM DÒNG NÀY
 import { Category } from '../category/category.entity';
+import { History } from '../history/history.entity'; // <-- (1) IMPORT HISTORY
 
 @Entity('Song') // Ánh xạ với bảng 'Song'
 export class Song {
@@ -68,6 +69,10 @@ export class Song {
   @Column({ type: 'int', default: 0 })
   play_count: number; // <--- thêm cột này
 
+  // === CỘT MỚI: EMBEDDING ===
+  @Column({ type: 'json', nullable: true })
+  embedding: number[] | null; // Lưu trữ mảng số (vector)
+
   // Quan hệ: Nhiều Song thuộc 1 Artist
   @ManyToOne(() => Artist, (artist) => artist.songs, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'artist_id' })
@@ -80,4 +85,8 @@ export class Song {
   // Quan hệ: Bài hát này được thích bởi những User nào
   @OneToMany(() => UserLikedSongs, (likedSong) => likedSong.song)
   likedByUsers: UserLikedSongs[]; // <-- THÊM DÒNG NÀY
+
+  // === (2) THÊM QUAN HỆ NGƯỢC LẠI (FIX LỖI TS2339) ===
+  @OneToMany(() => History, history => history.song)
+  history: History[];
 }

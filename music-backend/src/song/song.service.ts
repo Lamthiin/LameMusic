@@ -20,6 +20,8 @@ import { statSync } from 'fs'; // Cần để kiểm tra file
 import { extname, join } from 'path';
 import { Equal } from 'typeorm';
 import { IsNull, In } from 'typeorm';
+import { AiService } from '../ai/ai.service'; // <-- CẦN IMPORT
+import { HistoryService } from '../history/history.service'; // <-- IMPORT MỚI
 
 @Injectable()
 export class SongService {
@@ -32,6 +34,8 @@ export class SongService {
     private albumRepository: Repository<Album>,
     @InjectRepository(Lyrics) // <-- (1) PHẢI TIÊM LYRICS REPO
     private lyricsRepository: Repository<Lyrics>,
+    private aiService: AiService,
+    private historyService: HistoryService, // <-- TIÊM MỚI
   ) {}
 
   // (Hàm helper getArtistByUserId)
@@ -57,11 +61,38 @@ export class SongService {
       });
   }
 
+  /**
+   * (ARTIST) Lấy danh sách bài hát của TÔI
+   */
+  async findMySongs(userId: number, status: 'PENDING' | 'APPROVED' | 'REJECTED'): Promise<Song[]> {
+    const artist = await this.getArtistByUserId(userId);
+    
+    // SỬ DỤNG QUERY BUILDER AN TOÀN
+    const query = this.songRepository.createQueryBuilder('song')
+        // === FIX LỖI: BẮT BUỘC LEFT JOIN ARTIST ===
+        .leftJoinAndSelect('song.artist', 'artist') 
+        // ============================================
+        .leftJoinAndSelect('song.album', 'album')
+        
+        .where('song.artist_id = :artistId', { artistId: artist.id })
+        .andWhere('song.active = :activeStatus', { activeStatus: true })
+        .orderBy('song.created_at', 'DESC');
+        
+    // Lọc theo Status (nếu có)
+    if (status) {
+        query.andWhere('song.status = :status', { status: status });
+    } else {
+        query.andWhere('song.status = :defaultStatus', { defaultStatus: 'APPROVED' });
+    }
+
+    return query.getMany();
+  }
+
   // (Hàm findOne - Chi tiết bài hát)
   async findOne(id: number): Promise<Song | null> {
       const song = await this.songRepository.findOne({
           where: { id: id, active: true , status: 'APPROVED'},
-          relations: ['artist', 'album'], 
+          relations: ['artist', 'album', 'lyrics'], 
       });
       if (!song) {
           throw new NotFoundException(`Song with ID ${id} not found`); 
@@ -129,94 +160,98 @@ export class SongService {
   /**
    * (ARTIST) Lấy danh sách bài hát của TÔI (SỬ DỤNG QUERY BUILDER)
   */
-  async findMySongs(userId: number, status: 'PENDING' | 'APPROVED' | 'REJECTED'): Promise<Song[]> {
-    // 1. Lấy Artist ID (Hàm helper đã được sửa ở bước trước)
-    const artist = await this.getArtistByUserId(userId);
+  // async findMySongs(userId: number, status: 'PENDING' | 'APPROVED' | 'REJECTED'): Promise<Song[]> {
+  //   // 1. Lấy Artist ID (Hàm helper đã được sửa ở bước trước)
+  //   const artist = await this.getArtistByUserId(userId);
     
-    // 2. Xây dựng Query Builder (Dùng Artist ID)
-    const query = this.songRepository.createQueryBuilder('song')
-        // Load các quan hệ cần thiết cho Frontend
-        .leftJoinAndSelect('song.artist', 'artist')
-        .leftJoinAndSelect('song.album', 'album')
+  //   // 2. Xây dựng Query Builder (Dùng Artist ID)
+  //   const query = this.songRepository.createQueryBuilder('song')
+  //       // Load các quan hệ cần thiết cho Frontend
+  //       .leftJoinAndSelect('song.artist', 'artist')
+  //       .leftJoinAndSelect('song.album', 'album')
         
-        // Lọc BẮT BUỘC theo Khóa ngoại (artist_id)
-        .where('song.artist_id = :artistId', { artistId: artist.id })
-        .orderBy('song.created_at', 'DESC');
+  //       // Lọc BẮT BUỘC theo Khóa ngoại (artist_id)
+  //       .where('song.artist_id = :artistId', { artistId: artist.id })
+  //       .orderBy('song.created_at', 'DESC');
         
-    // 3. Lọc theo Status (Chỉ thêm WHERE nếu status không phải undefined/null)
-    if (status) {
-        query.andWhere('song.status = :status', { status: status });
-    }
+  //   // 3. Lọc theo Status (Chỉ thêm WHERE nếu status không phải undefined/null)
+  //   if (status) {
+  //       query.andWhere('song.status = :status', { status: status });
+  //   }
 
-    return query.getMany();
-  }
+  //   return query.getMany();
+  // }
 
 /**
  * (ARTIST) Tạo bài hát mới (Status: PENDING)
  */
-async createSong(
-  userId: number,
-  dto: CreateSongDto,
-  files: { audioFile?: Express.Multer.File[], imageFile?: Express.Multer.File[] }
-): Promise<Song> {
+  async createSong(
+    userId: number,
+    dto: CreateSongDto,
+    files: { audioFile?: Express.Multer.File[], imageFile?: Express.Multer.File[] }
+  ): Promise<Song> {
 
-  if (!files?.audioFile?.[0]) {
-    throw new BadRequestException('File nhạc (audioFile) là bắt buộc.');
-  }
-
-  const artist = await this.getArtistByUserId(userId);
-
-  let album: Album | null = null;
-  if (dto.albumId) {
-    album = await this.albumRepository.findOne({
-      where: { id: parseInt(dto.albumId), artist: { id: artist.id } }
-    });
-    if (!album) {
-      throw new NotFoundException('Album không tồn tại hoặc không thuộc về bạn.');
+    if (!files?.audioFile?.[0]) {
+      throw new BadRequestException('File nhạc (audioFile) là bắt buộc.');
     }
+
+    const artist = await this.getArtistByUserId(userId);
+
+    let album: Album | null = null;
+    if (dto.albumId) {
+      album = await this.albumRepository.findOne({
+        where: { id: parseInt(dto.albumId), artist: { id: artist.id } }
+      });
+      if (!album) {
+        throw new NotFoundException('Album không tồn tại hoặc không thuộc về bạn.');
+      }
+    }
+
+    const imagePath = files.imageFile?.[0]
+    ? `/uploads/covers/${files.imageFile[0].filename}`
+    : null;
+
+  const audioFile = files.audioFile[0];
+  const audioPath = `/uploads/music/${audioFile.filename}`;
+  const physicalPath = join(process.cwd(), 'uploads', 'music', audioFile.filename);
+
+  let songDuration = 0;
+  try {
+    const metadata = await parseFile(physicalPath);
+    if (metadata.format.duration) {
+      songDuration = Math.floor(metadata.format.duration);
+    }
+  } catch (err) {
+    console.warn(`[METADATA WARNING] Không đọc được duration: ${err.message}`);
   }
 
-  const imagePath = files.imageFile?.[0]
-  ? `/uploads/covers/${files.imageFile[0].filename}`
-  : null;
-
-const audioFile = files.audioFile[0];
-const audioPath = `/uploads/music/${audioFile.filename}`;
-const physicalPath = join(process.cwd(), 'uploads', 'music', audioFile.filename);
-
-let songDuration = 0;
-try {
-  const metadata = await parseFile(physicalPath);
-  if (metadata.format.duration) {
-    songDuration = Math.floor(metadata.format.duration);
+  let lyricsEntity: Lyrics | null = null;
+  if (dto.lyricsContent && dto.lyricsContent.trim()) {
+    lyricsEntity = this.lyricsRepository.create();
+    lyricsEntity.lyrics = dto.lyricsContent.trim();
+    lyricsEntity.language = 'vi'; // <-- fix: mặc định 'vi'
   }
-} catch (err) {
-  console.warn(`[METADATA WARNING] Không đọc được duration: ${err.message}`);
-}
 
-let lyricsEntity: Lyrics | null = null;
-if (dto.lyricsContent && dto.lyricsContent.trim()) {
-  lyricsEntity = this.lyricsRepository.create();
-  lyricsEntity.lyrics = dto.lyricsContent.trim();
-  lyricsEntity.language = 'vi'; // <-- fix: mặc định 'vi'
-}
+  const newSong = new Song();
+  newSong.title = dto.title;
+  newSong.file_url = audioPath;
+  newSong.image_url = imagePath ?? undefined; // <-- fix null -> undefined
+  newSong.duration = songDuration;
+  newSong.track_number = dto.track_number ? Number(dto.track_number) : null;
+  newSong.active = true;
+  newSong.status = 'PENDING';
+  newSong.genre = dto.genre;
 
-const newSong = new Song();
-newSong.title = dto.title;
-newSong.file_url = audioPath;
-newSong.image_url = imagePath ?? undefined; // <-- fix null -> undefined
-newSong.duration = songDuration;
-newSong.track_number = dto.track_number ? Number(dto.track_number) : null;
-newSong.active = true;
-newSong.status = 'PENDING';
-newSong.genre = dto.genre;
+  newSong.artist = artist;
+  newSong.album = album;
+  newSong.lyrics = lyricsEntity;
+  newSong.embedding = await this.aiService.generateSongEmbedding(
+        dto.title,
+        dto.genre
+  );
 
-newSong.artist = artist;
-newSong.album = album;
-newSong.lyrics = lyricsEntity;
-
-return this.songRepository.save(newSong);
-}
+  return this.songRepository.save(newSong);
+  }
 
 
   async updateMySong(
@@ -358,4 +393,230 @@ return this.songRepository.save(newSong);
             .where('id = :id', { id: songId })
             .execute();
     }
+
+  /**
+   * MAINTENANCE: Lấy tất cả bài hát đã APPROVED và thiếu Embedding
+   */
+  async findAllApprovedSongsWithMissingEmbedding(): Promise<Song[]> {
+    return this.songRepository.find({
+      where: {
+        status: 'APPROVED',
+        active: true,
+        embedding: IsNull(), // <-- Tìm những bài có cột embedding là NULL
+      },
+      select: ['id', 'title', 'genre'], // Chỉ cần các trường này cho AI Service
+    });
+  }
+
+  /**
+   * MAINTENANCE: Cập nhật Embedding sau khi nhận được từ AI Service
+   */
+  async updateSongEmbedding(songId: number, embedding: number[]): Promise<void> {
+    await this.songRepository.update(
+        { id: songId },
+        { embedding: embedding }
+    );
+  }
+
+/**
+   * HÀM HELPER: Tính Cosine Similarity giữa hai vector
+   */
+  // private calculateCosineSimilarity(vecA: number[], vecB: number[]): number {
+  //   if (vecA.length !== vecB.length) return 0; // Trả về 0 nếu kích thước không khớp
+  //   let dotProduct = 0;
+  //   let magnitudeA = 0;
+  //   let magnitudeB = 0;
+
+  //   for (let i = 0; i < vecA.length; i++) {
+  //       dotProduct += vecA[i] * vecB[i];
+  //       magnitudeA += vecA[i] * vecA[i];
+  //       magnitudeB += vecB[i] * vecB[i];
+  //   }
+
+  //   magnitudeA = Math.sqrt(magnitudeA);
+  //   magnitudeB = Math.sqrt(magnitudeB);
+
+  //   if (magnitudeA === 0 || magnitudeB === 0) return 0;
+  //   return dotProduct / (magnitudeA * magnitudeB);
+  // }
+
+  /**
+   * HÀM HELPER: Cơ chế dự phòng (Fallback) - Lấy bài hát hot nhất
+   */
+  // private async getFallbackSong(): Promise<Song> {
+  //   const fallbackSongs = await this.songRepository.find({
+  //       where: { status: 'APPROVED', active: true },
+  //       order: { play_count: 'DESC' }, 
+  //       take: 10, // Lấy top 10
+  //       skip: Math.floor(Math.random() * 10) // Chọn ngẫu nhiên 1 trong 10 bài hot nhất
+  //   });
+
+  //   if (fallbackSongs.length > 0) {
+  //       console.log("[RECOMMEND FALLBACK] Trả về bài hát phổ biến nhất ngẫu nhiên.");
+  //       return fallbackSongs[0];
+  //   }
+
+  //   // Trường hợp xấu nhất: Không có bài hát nào được duyệt
+  //   throw new NotFoundException("Không tìm thấy bài hát đề xuất mới phù hợp.");
+  // }
+
+
+  /**
+   * API USER: Đề xuất 1 bài hát dựa trên Lịch sử nghe (DÀNH CHO TÔI)
+   * Đã tích hợp Fallback.
+   */
+  // async recommendSong(userId: number): Promise<Song> {
+  //   const historyEntries = await this.historyService.getUserListenHistory(userId, 100);
+  //   const vectorSize = 128; // Chiều vector nhúng của bạn
+
+  //   // 1. TÍNH USER PREFERENCE VECTOR (Từ lịch sử nghe)
+  //   const validEmbeddings = historyEntries
+  //       .map(entry => entry.song.embedding as number[] | null)
+  //       .filter((emb): emb is number[] => emb !== null && emb.length === vectorSize);
+
+  //   // Trường hợp 1: Không có lịch sử hoặc không có embedding hợp lệ
+  //   if (historyEntries.length === 0 || validEmbeddings.length === 0) {
+  //       return this.getFallbackSong();
+  //   }
+
+  //   // Tính vector trung bình
+  //   const userVector = new Array(vectorSize).fill(0);
+  //   for (const embedding of validEmbeddings) {
+  //       for (let i = 0; i < vectorSize; i++) {
+  //           userVector[i] += embedding[i];
+  //       }
+  //   }
+  //   const userPreferenceVector = userVector.map(sum => sum / validEmbeddings.length); 
+
+  //   // 2. TÌM KIẾM VÀ TÍNH COSINE SIMILARITY TRONG DB
+  //   const allApprovedSongs = await this.songRepository.find({
+  //       where: { status: 'APPROVED', active: true },
+  //       relations: ['artist', 'album'],
+  //       take: 500, // Lấy 500 bài để so sánh
+  //   });
+
+  //   let bestMatch: Song | null = null;
+  //   let highestSimilarity = -1; 
+
+  //   for (const song of allApprovedSongs) {
+  //       const songEmbedding = song.embedding as number[] | null;
+  //       if (!songEmbedding || songEmbedding.length !== vectorSize) continue;
+        
+  //       // Bỏ qua bài hát user đã nghe gần đây
+  //       const isRecentlyListened = historyEntries.some(h => h.song.id === song.id);
+  //       if (isRecentlyListened) continue;
+
+  //       // TÍNH TOÁN ĐỘ TƯƠNG ĐỒNG
+  //       const similarity = this.calculateCosineSimilarity(userPreferenceVector, songEmbedding);
+
+  //       if (similarity > highestSimilarity) {
+  //           highestSimilarity = similarity;
+  //           bestMatch = song;
+  //       }
+  //   }
+    
+  //   // 3. TRẢ VỀ KẾT QUẢ HOẶC DỰ PHÒNG
+  //   if (bestMatch && highestSimilarity > 0.1) { // Chỉ trả về nếu độ tương đồng đủ cao (ví dụ: > 0.1)
+  //       console.log(`[RECOMMEND AI] Trả về bài hát tương đồng nhất (Similarity: ${highestSimilarity.toFixed(2)})`);
+  //       return bestMatch;
+  //   }
+
+  //   // Trường hợp 2: AI Logic thất bại (không tìm thấy bài hát mới hoặc tương đồng quá thấp)
+  //   return this.getFallbackSong();
+  // }
+
+  async recommendSong(userId: number): Promise<Song> {
+    const historyEntries = await this.historyService.getUserListenHistory(userId, 100);
+    const vectorSize = 128; // chiều vector embedding
+
+    // Lấy các embedding hợp lệ từ lịch sử
+    const validEmbeddings = historyEntries
+        .map(entry => entry.song.embedding as number[] | null)
+        .filter((emb): emb is number[] => emb !== null && emb.length === vectorSize);
+
+    // Nếu không có lịch sử hợp lệ, trả về bài fallback
+    if (validEmbeddings.length === 0) {
+        return this.getFallbackSong();
+    }
+
+    // Tính vector trung bình của user
+    const userVector = new Array(vectorSize).fill(0);
+    for (const embedding of validEmbeddings) {
+        for (let i = 0; i < vectorSize; i++) {
+            userVector[i] += embedding[i];
+        }
+    }
+    const userPreferenceVector = userVector.map(sum => sum / validEmbeddings.length);
+
+    // Lấy tất cả bài hát APPROVED
+    const allApprovedSongs = await this.songRepository.find({
+        where: { status: 'APPROVED', active: true },
+        relations: ['artist', 'album'],
+        take: 500, // lấy 500 bài gần nhất
+    });
+
+    // Tìm bài hát có similarity cao nhất, bỏ qua bài đã nghe gần đây
+    let bestMatch: Song | null = null;
+    let highestSimilarity = -1;
+
+    for (const song of allApprovedSongs) {
+        const embedding = song.embedding as number[] | null;
+        if (!embedding || embedding.length !== vectorSize) continue;
+
+        const isRecentlyListened = historyEntries.some(h => h.song.id === song.id);
+        if (isRecentlyListened) continue;
+
+        const similarity = this.calculateCosineSimilarity(userPreferenceVector, embedding);
+        if (similarity > highestSimilarity) {
+            highestSimilarity = similarity;
+            bestMatch = song;
+        }
+    }
+
+    // Nếu tìm được bài phù hợp với threshold (ví dụ 0.1), trả về
+    if (bestMatch && highestSimilarity > 0.1) {
+        console.log(`[RECOMMEND AI] Trả về bài tương đồng nhất (${bestMatch.title}, similarity: ${highestSimilarity.toFixed(2)})`);
+        return bestMatch;
+    }
+
+    // Fallback nếu không tìm được bài phù hợp
+    return this.getFallbackSong();
+}
+
+/**
+ * Hàm fallback: Trả về 1 bài phổ biến ngẫu nhiên từ top 10
+ */
+private async getFallbackSong(): Promise<Song> {
+    const topSongs = await this.songRepository.find({
+        where: { status: 'APPROVED', active: true },
+        relations: ['artist', 'album'],
+        order: { play_count: 'DESC' },
+        take: 10,
+    });
+
+    if (topSongs.length === 0) {
+        throw new NotFoundException("Không tìm thấy bài hát đề xuất.");
+    }
+
+    // Chọn ngẫu nhiên 1 bài trong top 10
+    const randomIndex = Math.floor(Math.random() * topSongs.length);
+    console.log(`[RECOMMEND FALLBACK] Trả về bài phổ biến: ${topSongs[randomIndex].title}`);
+    return topSongs[randomIndex];
+}
+
+/**
+ * Cosine similarity helper
+ */
+private calculateCosineSimilarity(vecA: number[], vecB: number[]): number {
+    if (vecA.length !== vecB.length) return 0;
+    let dot = 0, magA = 0, magB = 0;
+    for (let i = 0; i < vecA.length; i++) {
+        dot += vecA[i] * vecB[i];
+        magA += vecA[i] * vecA[i];
+        magB += vecB[i] * vecB[i];
+    }
+    magA = Math.sqrt(magA);
+    magB = Math.sqrt(magB);
+    return (magA && magB) ? dot / (magA * magB) : 0;
+}
 }

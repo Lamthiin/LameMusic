@@ -17,7 +17,7 @@ const templatePath =
         secure: true,
         auth: {
           user: 'ayame004@gmail.com',
-          pass: 'obxq fxwt nngz sevu',
+          pass: 'oglh ymsf qtne nlwx',
         },
       },
       defaults: {

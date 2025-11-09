@@ -1,44 +1,85 @@
-// music-frontend/src/components/PlayerBar.jsx (BẢN SỬA LỖI ẢNH BÀI HÁT)
-import React, { useEffect } from 'react'; 
+// music-frontend/src/components/PlayerBar.jsx
+import React from 'react'; 
 import { usePlayer } from '../context/PlayerContext';
 import AudioPlayer from 'react-h5-audio-player'; 
 import 'react-h5-audio-player/lib/styles.css'; 
 import './PlayerBar.css'; 
 
+// Icons
 import { 
   IoPlaySkipBackSharp, 
   IoPlaySkipForwardSharp, 
   IoPlaySharp, 
-  IoPauseSharp 
+  IoPauseSharp,
+  IoShuffle
 } from 'react-icons/io5';
-import { HiVolumeUp } from 'react-icons/hi';
+import { FaHeart } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+// import { toast } from 'react-toastify';
+
+// Helper fix URL
+const fixPlayerImageUrl = (track) => {
+  const url = track.image_url || track.album?.cover_url;
+  if (!url) return '/images/default-album.png'; 
+  if (url.startsWith('http')) return url;
+  return `http://localhost:3000${url.startsWith('/media') ? url : url.replace('/images', '/media/images')}`;
+};
+
+const fixAudioUrl = (url) => {
+  if (!url) return '';
+  return url.startsWith('http') ? url : `http://localhost:3000${url}`;
+};
 
 const PlayerBar = () => {
-  // LẤY audioRef TỪ CONTEXT
+  const navigate = useNavigate();
   const { 
-    currentTrack, isPlaying, setIsPlaying, audioRef, 
-    currentPlaylist, playNext, playPrevious 
-  } = usePlayer(); 
+    currentTrack, 
+    isPlaying, 
+    togglePlay, 
+    playNext, 
+    playPrevious, 
+    audioRef,
+    currentPlaylist, 
+    isShuffling, 
+    toggleShuffle,
+    setCurrentTrack,
+    setCurrentPlaylist,
+    setIsPlaying,
+    isLoggedIn,
+    getRecommendedSongApi
+  } = usePlayer();
 
-  // LOGIC ĐIỀU KHIỂN PLAYER TỪ CONTEXT
-  useEffect(() => {
-    if (audioRef.current && audioRef.current.audio.current) {
-      const audio = audioRef.current.audio.current;
-      
-      // KIỂM TRA QUAN TRỌNG: Nếu src đã được cập nhật
-      if (currentTrack?.file_url && audio.src !== currentTrack.file_url) {
-        audio.load(); 
-      }
-      
-      if (isPlaying) {
-        audio.play();
-      } else {
-        audio.pause();
-      }
+  const isReady = !!currentTrack;
+
+  const handleNextClick = () => currentPlaylist.length && playNext();
+  const handlePreviousClick = () => currentPlaylist.length && playPrevious();
+
+  const handleGoToSongDetail = () => {
+    if (currentTrack?.id) navigate(`/song/${currentTrack.id}`);
+  };
+
+  const handlePlayRecommended = async () => {
+    if (!isLoggedIn) {
+      toast.error('Vui lòng đăng nhập để sử dụng tính năng này.');
+      return;
     }
-  }, [isPlaying, currentTrack, audioRef]); 
-
-  const isReady = !!currentTrack; 
+    try {
+      toast.info('Đang tìm kiếm đề xuất AI...');
+      const recommendedSong = await getRecommendedSongApi();
+      if (recommendedSong) {
+        setCurrentTrack(recommendedSong);
+        setCurrentPlaylist([recommendedSong]);
+        setIsPlaying(true);
+        toast.success(`Đang phát: ${recommendedSong.title}`);
+      } else {
+        toast.warn('Không tìm thấy bài hát đề xuất phù hợp.');
+      }
+    } catch (error) {
+      console.error("Lỗi khi lấy đề xuất:", error);
+      const errorMessage = error.response?.data?.message || "Lỗi kết nối Server hoặc AI.";
+      toast.error(errorMessage);
+    }
+  };
 
   const customIcons = {
     play: <IoPlaySharp size={24} />,
@@ -47,35 +88,12 @@ const PlayerBar = () => {
     next: <IoPlaySkipForwardSharp size={22} />,
   };
 
-  // Xử lý khi bài hát kết thúc
-  const handleNextOnEnd = () => {
-    if (currentPlaylist.length > 1) { 
-        playNext();
-    } else {
-        setIsPlaying(false);
-    }
-  };
-
-  // Nút Next/Previous trên Player Bar
-  const handleNextClick = () => {
-    if (currentPlaylist.length > 0) playNext();
-  };
-  const handlePreviousClick = () => {
-    if (currentPlaylist.length > 0) playPrevious();
-  };
-
   return (
     <div className={`player-bar-container ${!isReady ? 'empty' : ''}`}>
-      {/* 1. Thông tin bài hát */}
-      <div className="player-track-info">
+      <div className="player-track-info" onClick={handleGoToSongDetail}>
         {isReady ? (
           <>
-            {/* === SỬA LỖI LOGIC ẢNH TẠI ĐÂY === */}
-            <img 
-              src={currentTrack.image_url || currentTrack.album?.cover_url || '/images/default-album.png'} 
-              alt={currentTrack.title} 
-            />
-            {/* ================================== */}
+            <img src={fixPlayerImageUrl(currentTrack)} alt={currentTrack.title} />
             <div>
               <p className="title">{currentTrack.title}</p>
               <p className="artist">{currentTrack.artist?.stage_name || 'Nghệ sĩ'}</p>
@@ -85,29 +103,38 @@ const PlayerBar = () => {
           <p className="waiting-text">Chọn một bài hát để bắt đầu nghe.</p>
         )}
       </div>
-      
-      {/* 2. Trình phát nhạc */}
+
       {isReady && (
         <AudioPlayer
-          ref={audioRef} 
+          ref={audioRef}
           className="audio-player-core"
-          src={currentTrack.file_url} // URL nhạc đã được fix ở (Home.jsx/SongDetail.jsx)
-          showSkipControls={true} 
-          showJumpControls={false} 
-          customIcons={customIcons} 
-          onPlay={() => setIsPlaying(true)} 
-          onPause={() => setIsPlaying(false)} 
-          onEnded={handleNextOnEnd} 
-          onClickNext={handleNextClick} 
-          onClickPrevious={handlePreviousClick} 
+          src={fixAudioUrl(currentTrack.file_url)}
+          onPlay={togglePlay}
+          onPause={togglePlay}
+          onEnded={playNext}
+          onClickNext={handleNextClick}
+          onClickPrevious={handlePreviousClick}
+          showSkipControls={true}
+          showJumpControls={false}
+          customIcons={customIcons}
+          customControls={[
+            <button 
+              key="shuffle" 
+              className={`rhap_shuffle_button ${isShuffling ? 'rhap_active' : ''}`}
+              onClick={toggleShuffle} 
+              title="Phát ngẫu nhiên"
+            >
+              <IoShuffle size={18} />
+            </button>,
+            <button 
+              key="like" 
+              className={`rhap_like_button ${currentTrack.isLiked ? 'liked' : ''}`}
+              title="Thích bài hát"
+            >
+              <FaHeart size={18} />
+            </button>
+          ]}
         />
-      )}
-      
-      {/* 3. Điều khiển Âm lượng */}
-      {isReady && (
-        <div className="player-volume-controls">
-          <HiVolumeUp size={24} /> 
-        </div>
       )}
     </div>
   );

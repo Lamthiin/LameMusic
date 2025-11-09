@@ -466,3 +466,58 @@ export const deleteMyPlaylistApi = async (playlistId) => {
         throw error;
     }
 };
+
+/* === API MỚI: ĐỀ XUẤT CÁ NHÂN (DÀNH CHO TÔI) === */
+export const getRecommendedSongApi = async () => {
+    try {
+        // GỌI API ĐÃ ĐƯỢC BẢO VỆ
+        const response = await api.get('/song/recommend');
+        return response.data;
+    } catch (error) {
+        console.error('Lỗi khi lấy đề xuất:', error);
+        throw error;
+    }
+};
+
+/**
+ * Lấy danh sách lịch sử nghe của người dùng.
+ * @param {number} limit - Số lượng bản ghi muốn lấy (mặc định 100)
+ */
+export const getListenHistoryApi = async (limit = 100) => {
+    const token = localStorage.getItem('access_token');
+    if (!token) return [];
+    
+    try {
+        const response = await axios.get(`${BASE_URL}/history/me?limit=${limit}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        // Response trả về mảng History entities, mỗi entity có chứa object Song
+        return response.data; 
+    } catch (error) {
+        console.error('Lỗi khi lấy lịch sử nghe:', error);
+        return [];
+    }
+};
+
+/**
+ * Ghi lại lịch sử nghe vào Database (log playback).
+ * @param {number} songId - ID bài hát
+ * @param {number} duration - Thời lượng đã nghe (tối thiểu 2 giây)
+ */
+export const logPlaybackApi = async (songId, duration = 30) => {
+    const token = localStorage.getItem('accessToken'); // Hoặc 'access_token' tùy theo cách bạn lưu
+    if (!token) return; // Không ghi log nếu chưa đăng nhập
+    
+    try {
+        // GỌI ENDPOINT ĐÚNG CÁCH: POST /history/log/:songId
+        await api.post(`/history/log/${songId}`, 
+        { 
+            durationListened: duration // Gửi duration qua body
+        });
+        
+    } catch (error) {
+        console.error('Lỗi khi ghi log lịch sử nghe:', error);
+    }
+};

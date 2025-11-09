@@ -108,8 +108,8 @@
 
 /* === AUDIO PLAYER CORE - React H5 Audio Player === */
 .audio-player-core {
-  width: 42%;
-  min-width: 320px;
+  width: 90%;
+  min-width: 400px;
 }
 
 .rhap_container {

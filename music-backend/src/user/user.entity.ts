@@ -10,6 +10,7 @@ import { UserLikedSongs } from '../like/user-liked-songs.entity';
 import { Playlist } from '../playlist/playlist.entity';
 import { Follow } from '../follow/follow.entity'; // <-- (1) IMPORT FOLLOW
 import { Otp } from '../totp/totp.entity'; // <-- (1) IMPORT OTP
+import { History } from '../history/history.entity'; // <-- IMPORT MỚI
 
 @Entity('User')
 export class User {
@@ -72,4 +73,8 @@ export class User {
   following: Follow[]; 
   @OneToMany(() => Follow, follow => follow.following)
   followers: Follow[]; 
+
+  // Thêm mối quan hệ với History
+  @OneToMany(() => History, history => history.user)
+  history: History[];
 }

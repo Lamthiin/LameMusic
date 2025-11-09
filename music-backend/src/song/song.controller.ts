@@ -23,6 +23,13 @@ import { UpdateSongDto } from './dto/update-song.dto';
 export class SongController {
   constructor(private readonly songService: SongService) {}
 
+  @Get('recommend')
+  @UseGuards(AuthGuard('jwt')) // BẮT BUỘC ĐĂNG NHẬP
+  async getRecommendation(@Req() req) {
+    const userId = (req.user as JwtPayload).userId;
+    return this.songService.recommendSong(userId);
+  }
+  
   // (findAll - giữ nguyên)
   @Get()
   @UseGuards(OptionalJwtAuthGuard) 
@@ -31,6 +38,8 @@ export class SongController {
     return this.songService.findAll(user);
   }
 
+
+  
   // (findAllWithFilters - giữ nguyên)
   @Get('all')
   @UseGuards(OptionalJwtAuthGuard)
@@ -185,6 +194,7 @@ export class SongController {
     const userId = (req.user as JwtPayload).userId;
     return this.songService.addSongToAlbum(userId, songId, albumId);
   }
+  
 
   /**
    * API MỚI: PATCH /song/play/:id (Tăng lượt nghe)
