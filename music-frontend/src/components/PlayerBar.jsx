@@ -1,5 +1,5 @@
 // music-frontend/src/components/PlayerBar.jsx
-import React, { useEffect } from 'react'; 
+import React from 'react'; 
 import { usePlayer } from '../context/PlayerContext';
 import AudioPlayer from 'react-h5-audio-player'; 
 import 'react-h5-audio-player/lib/styles.css'; 
@@ -15,7 +15,9 @@ import {
 } from 'react-icons/io5';
 import { FaHeart } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+// import { toast } from 'react-toastify';
 
+// Helper fix URL
 const fixPlayerImageUrl = (track) => {
   const url = track.image_url || track.album?.cover_url;
   if (!url) return '/images/default-album.png'; 
@@ -30,11 +32,11 @@ const fixAudioUrl = (url) => {
 
 const PlayerBar = () => {
   const navigate = useNavigate();
-
   const { 
     currentTrack, 
     isPlaying, 
-    playNext,
+    togglePlay, 
+    playNext, 
     playPrevious, 
     audioRef,
     currentPlaylist, 
@@ -56,6 +58,29 @@ const PlayerBar = () => {
     if (currentTrack?.id) navigate(`/song/${currentTrack.id}`);
   };
 
+  const handlePlayRecommended = async () => {
+    if (!isLoggedIn) {
+      toast.error('Vui lòng đăng nhập để sử dụng tính năng này.');
+      return;
+    }
+    try {
+      toast.info('Đang tìm kiếm đề xuất AI...');
+      const recommendedSong = await getRecommendedSongApi();
+      if (recommendedSong) {
+        setCurrentTrack(recommendedSong);
+        setCurrentPlaylist([recommendedSong]);
+        setIsPlaying(true);
+        toast.success(`Đang phát: ${recommendedSong.title}`);
+      } else {
+        toast.warn('Không tìm thấy bài hát đề xuất phù hợp.');
+      }
+    } catch (error) {
+      console.error("Lỗi khi lấy đề xuất:", error);
+      const errorMessage = error.response?.data?.message || "Lỗi kết nối Server hoặc AI.";
+      toast.error(errorMessage);
+    }
+  };
+
   const customIcons = {
     play: <IoPlaySharp size={24} />,
     pause: <IoPauseSharp size={24} />,
@@ -63,27 +88,8 @@ const PlayerBar = () => {
     next: <IoPlaySkipForwardSharp size={22} />,
   };
 
-  // -------------------------------------------------------------
-  // AUTO PLAY KHI ĐỔI BÀI (FIX CHÍNH)
-  // -------------------------------------------------------------
-  useEffect(() => {
-    if (!currentTrack || !audioRef.current) return;
-
-    const audio = audioRef.current.audio.current;
-
-    // Khi đổi bài → tự play
-    audio.play()
-      .then(() => setIsPlaying(true))
-      .catch(() => {
-        console.log("Autoplay bị chặn bởi trình duyệt.");
-      });
-  }, [currentTrack, audioRef, setIsPlaying]);
-
-
   return (
     <div className={`player-bar-container ${!isReady ? 'empty' : ''}`}>
-      
-      {/* LEFT: Song Info */}
       <div className="player-track-info" onClick={handleGoToSongDetail}>
         {isReady ? (
           <>
@@ -98,17 +104,14 @@ const PlayerBar = () => {
         )}
       </div>
 
-      {/* CENTER: Player */}
       {isReady && (
         <AudioPlayer
           ref={audioRef}
           className="audio-player-core"
           src={fixAudioUrl(currentTrack.file_url)}
-          onPlay={() => setIsPlaying(true)}
-          onPause={() => setIsPlaying(false)}
-          onEnded={playNext}
           onClickNext={handleNextClick}
           onClickPrevious={handlePreviousClick}
+          onEnded={playNext}
           showSkipControls={true}
           showJumpControls={false}
           customIcons={customIcons}
@@ -127,6 +130,15 @@ const PlayerBar = () => {
               title="Thích bài hát"
             >
               <FaHeart size={18} />
+            </button>,
+            // Thêm nút Play/Pause custom để tránh nhảy liên tục
+            <button
+              key="playpause"
+              className="rhap_custom_playpause"
+              onClick={togglePlay}
+              title={isPlaying ? "Tạm dừng" : "Phát"}
+            >
+              {isPlaying ? <IoPauseSharp size={18} /> : <IoPlaySharp size={18} />}
             </button>
           ]}
         />
