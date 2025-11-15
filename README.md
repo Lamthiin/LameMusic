@@ -1,5 +1,12 @@
 # hien
-trong terminal của frontend: npm run start
+
+đổi database ở app.module.ts trong backend
+
+
+trong terminal của frontend: 
+npm install
+npm install vite --save-dev
+npm run dev/npm run start
 
 
 trong terminal của backend: npm run start:dev
