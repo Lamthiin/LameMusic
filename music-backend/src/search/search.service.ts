@@ -6,7 +6,6 @@ import { Song } from '../song/song.entity';
 import { Artist } from '../artist/artist.entity';
 import { Album } from '../album/album.entity';
 import { User } from '../user/user.entity'; 
-import { Role } from '../role/role.entity'; // Cần cho TypeScript/Destructure
 
 @Injectable()
 export class SearchService {
@@ -32,14 +31,14 @@ export class SearchService {
       
       // 1. Tìm Bài hát
       this.songRepository.find({
-        where: { title: Like(searchTerm), active: true, status: 'APPROVED' },
+        where: { title: Like(searchTerm), active: true },
         relations: ['artist', 'album'],
         take: 5, 
       }),
       
       // 2. Tìm Nghệ sĩ
       this.artistRepository.find({
-        where: { stage_name: Like(searchTerm), active: 1, registrationStatus: 'APPROVED' },
+        where: { stage_name: Like(searchTerm), active: 1 },
         take: 5,
       }),
       
@@ -56,7 +55,7 @@ export class SearchService {
             username: Like(searchTerm), 
             active: 1, // Chỉ tìm user đã active
         },
-        relations: ['role', 'artist'], // <-- Tải Role để lọc ở bước dưới
+        relations: ['role'], // <-- Tải Role để lọc ở bước dưới
         take: 5,
       })
     ]);

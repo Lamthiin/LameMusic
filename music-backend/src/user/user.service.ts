@@ -12,6 +12,48 @@ export class UserService {
     private userRepository: Repository<User>,
   ) {}
 
+
+  /**
+   * HÀM: Lấy Profile CÔNG KHAI (ĐÃ ĐƠN GIẢN HÓA RELATIONS)
+   */
+  async findPublicProfileByUsername(username: string): Promise<Omit<User, 'password' | 'email' | 'otp'>> { 
+    const user = await this.userRepository.findOne({ 
+        where: { username: username, active: 1 },
+        // === FIX LỖI: CHỈ LẤY CÁC QUAN HỆ CẤP 1 VÀ CẤP 2 CẦN THIẾT ===
+        relations: [
+            'playlists', 
+            'playlists.songs', // Cần thiết cho đếm số bài hát
+            'likedSongs', 
+            'likedSongs.song', // Cần thiết để biết bài hát nào
+            'following', 
+            // Giả định 'following' là User Entity (người được theo dõi)
+            // Nếu Following là Artist Entity (như đã sửa):
+            'following.following', // Nếu following là quan hệ trung gian
+            // Nếu following là Artist Entity, ta chỉ cần 'following'
+        ] 
+        // ==========================================================
+    });
+    
+    if (!user) {
+      throw new NotFoundException('Không tìm thấy người dùng này.');
+    }
+
+    // Lọc Playlists (chỉ giữ Public Playlists)
+    if (user.playlists) {
+        user.playlists = user.playlists.filter(pl => pl.is_private === 0 && pl.is_active === 1);
+    }
+    
+    // Xử lý dữ liệu trả về (xóa các trường Private)
+    const { 
+      password, 
+      email, 
+      otp, 
+      ...publicProfile 
+    } = user;
+
+    return publicProfile; 
+  }
+
   /**
    * HÀM: Tìm user bằng ID (dùng cho 'me')
    */
@@ -56,37 +98,37 @@ export class UserService {
     return result;
   }
 
-  /**
-   * HÀM: Lấy Profile CÔNG KHAI
-   */
-  async findPublicProfileByUsername(username: string): Promise<Omit<User, 'password' | 'email' | 'otp'>> { 
-    const user = await this.userRepository.findOne({ 
-        where: { username: username, active: 1 },
-        relations: [
-            'playlists', 'playlists.songs',
-            'likedSongs', 'likedSongs.song', 'likedSongs.song.artist', 'likedSongs.song.album',
-            'following', 'following.following', 'following.following.artist' 
-        ] 
-    });
+  // /**
+  //  * HÀM: Lấy Profile CÔNG KHAI
+  //  */
+  // async findPublicProfileByUsername(username: string): Promise<Omit<User, 'password' | 'email' | 'otp'>> { 
+  //   const user = await this.userRepository.findOne({ 
+  //       where: { username: username, active: 1 },
+  //       relations: [
+  //           'playlists', 'playlists.songs',
+  //           'likedSongs', 'likedSongs.song', 'likedSongs.song.artist', 'likedSongs.song.album',
+  //           'following', 'following.following', 'following.following.artist' 
+  //       ] 
+  //   });
     
-    if (!user) {
-      throw new NotFoundException('Không tìm thấy người dùng này.');
-    }
+  //   if (!user) {
+  //     throw new NotFoundException('Không tìm thấy người dùng này.');
+  //   }
 
-    if (user.playlists) {
-        user.playlists = user.playlists.filter(pl => pl.is_private === 0 && pl.is_active === 1);
-    }
-    if (user.following) {
-        user.following = user.following.filter(f => f.active === 1);
-    }
+  //   if (user.playlists) {
+  //       user.playlists = user.playlists.filter(pl => pl.is_private === 0 && pl.is_active === 1);
+  //   }
+  //   if (user.following) {
+  //       user.following = user.following.filter(f => f.active === 1);
+  //   }
     
-    const { 
-      password, 
-      email, 
-      otp, 
-      ...publicProfile 
-    } = user;
+  //   const { 
+  //     password, 
+  //     email, 
+  //     otp, 
+  //     ...publicProfile 
+  //   } = user;
 
-    return publicProfile; 
-  }
+  //   return publicProfile; 
+  // }
 }

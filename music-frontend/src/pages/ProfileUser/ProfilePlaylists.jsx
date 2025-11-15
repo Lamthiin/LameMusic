@@ -76,7 +76,7 @@ const ProfilePlaylists = () => {
 
                             <div className="pp-card-info">
                                 <p className="pp-title">{pl.name}</p>
-                                <p className="pp-count">{pl.songs?.length || 0} bài hát</p>
+                               0
                             </div>
 
                             <button 
