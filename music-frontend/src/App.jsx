@@ -7,7 +7,12 @@ import MainAppLayout from './components/MainAppLayout';
 import AdminRoute from './components/AdminRoute'; 
 import ProtectedRoute from './components/ProtectedRoute'; // <-- (1) IMPORT GUARD
 import ProfileLayout from './pages/ProfileUser/ProfileLayout'; // <-- (2) IMPORT LAYOUT MỚI
-
+import AdminLayout from "./components/admin/AdminLayout";
+import Dashboard from "./pages/admin/Dashboard";
+import ManageUser from "./pages/admin/ManageUser";
+import ManageArtist from "./pages/admin/ManageArtist";
+import ManageAlbum from "./pages/admin/ManageAlbum";
+import ManageSong from "./pages/admin/ManageSong";
 // Import Trang
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -101,11 +106,18 @@ function App() {
       </Route>
       
       {/* 3. ROUTE ADMIN (BẢO VỆ RIÊNG - ĐÃ ĐƯA RA NGOÀI) */}
-      <Route element={<AdminRoute />}>
-        <Route path="/admin" element={<AdminPage />} />
-      </Route>
-      
-      <Route path="*" element={<div>404: Không tìm thấy trang này.</div>} />
+      {/* ADMIN ROUTE (CÓ LAYOUT + SIDEBAR + HEADER) */}
+      <Route element={<AdminRoute />}>
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<AdminPage />} />
+          <Route path="users" element={<ManageUser />} />
+          <Route path="artists" element={<ManageArtist />} />
+          <Route path="albums" element={<ManageAlbum />} />
+          <Route path="songs" element={<ManageSong />} />
+        </Route>
+      </Route>
+
+      <Route path="*" element={<div>404: Không tìm thấy trang này.</div>} />
     </Routes>
   );
 }

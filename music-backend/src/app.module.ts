@@ -28,8 +28,8 @@ import { HistoryModule } from './history/history.module'; // <-- IMPORT MỚI
       type: 'mysql', // <-- DÒNG NÀY SẼ SỬA LỖI CỦA BẠN
       host: 'localhost',
       port: 3306,
-      username: 'hiin', // Đảm bảo đúng username
-      password: '1234',     // Đảm bảo đúng password
+      username: 'root', // Đảm bảo đúng username
+      password: '123456',     // Đảm bảo đúng password
       database: 'musicdb',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: false, 

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import MainAppLayout from './MainAppLayout'; // Import layout chính
+ // Import layout chính
 
 const AdminRoute = () => {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -26,11 +26,7 @@ const AdminRoute = () => {
 
   // 4. NẾU LÀ ADMIN: Hiển thị Layout chính (Header, Sidebar)
   // và bên trong là AdminPage (do <Outlet /> render)
-  return (
-    <MainAppLayout>
-      <Outlet />
-    </MainAppLayout>
-  );
+  return <Outlet />;
 };
 
 export default AdminRoute;

@@ -1,0 +1,51 @@
+/* Container trang */
+.admin-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Card wrapper */
+.admin-card {
+  background: #1c1c1c;
+  padding: 20px 25px;
+  border-radius: 12px;
+  border: 1px solid #2a2a2a;
+}
+
+/* Title đẹp */
+.admin-card h1 {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+/* Description */
+.admin-card p {
+  color: #bdbdbd;
+  font-size: 15px;
+}
+
+.admin-card:hover {
+  background: #232323;
+  transition: 0.2s ease-in-out;
+}
+
+/* CARD LỚN */
+.admin-big-card {
+  background: #1b1b1b;
+  border: 1px solid #2e2e2e;
+  padding: 28px;
+  border-radius: 16px;
+  margin-bottom: 24px;
+}
+
+/* Hộp con */
+.admin-small-box {
+  margin-top: 12px;
+  padding: 18px;
+  border-radius: 12px;
+  background: #222;
+  border: 1px solid #333;
+  color: #ddd;
+}
