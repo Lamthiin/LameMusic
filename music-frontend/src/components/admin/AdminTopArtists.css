@@ -1,0 +1,80 @@
+.artist-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* HIỂN THỊ 5 NGHỆ SĨ / HÀNG */
+  gap: 18px;
+}
+
+.artist-card {
+  padding: 18px;
+  border-radius: 14px;
+  transition: 0.25s ease;
+
+  border: 1px solid transparent;   /* ⭐ Không thấy viền khi chưa hover */
+}
+
+/* Khi hover → hiện nền + viền */
+.artist-card:hover {
+  background: #232323;              /* ⭐ Nền sáng hơn nhẹ */
+  border: 1px solid rgba(255,255,255,0.08);   /* ⭐ Viền xám nhạt */
+}
+
+
+/* Ảnh nhỏ lại */
+.artist-image-wrapper {
+  width: 135px;
+  height: 135px;
+  border-radius: 50%;
+  overflow: hidden;                /* ⭐ KHÔNG CHO LỘ VIỀN VUÔNG */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;   
+  border: 2px solid rgba(255, 255, 255, 0.1); /* ⭐ VIỀN XÁM NHẸ */
+  box-shadow: none;                 /* TẮT VIỀN/XANH CŨ */
+  background: transparent;
+  padding: 0;
+}
+
+.artist-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+
+  object-position: 50% 30%;   /* ⭐ ƯU TIÊN PHẦN MẶT, KHÔNG CẮT */
+}
+
+
+.artist-name {
+  margin-top: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;   /* ⭐ Tên nghệ sĩ: TRẮNG */
+  text-align: center;
+}
+
+.artist-subtitle {
+  margin-top: 4px;
+  font-size: 14px;
+  color: #b3b3b3;   /* ⭐ Chữ Artist: XÁM NHẠT */
+  text-align: center;
+}
+
+.artist-section {
+  margin-top: 40px;   /* ⭐ Tăng khoảng cách phía trên */
+}
+
+.artist-section-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 15px;  /* ⭐ Tăng khoảng cách giữa chữ và hàng nghệ sĩ */
+}
+
+.artist-name {
+  color: #ffffff !important;
+}
+
+.artist-subtitle {
+  color: #b3b3b3 !important;
+}

@@ -14,7 +14,14 @@ import {
 const AdminSidebar = () => {
   return (
     <div className="admin-sidebar">
-      <h3 className="admin-sidebar-title">Admin Panel</h3>
+      {/* ==== LOGO + TÊN WEBSITE ==== */}
+      <div className="admin-sidebar-header">
+        <img 
+          src="/images/Logomusic.png"    // <--- thay logo bạn vào đây
+          alt="Logo"
+          className="admin-logo"
+        />
+      </div>
 
       <nav className="admin-nav">
         

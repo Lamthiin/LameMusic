@@ -3,7 +3,8 @@
 ============================= */
 .admin-wrapper {
   display: flex;
-  height: 100vh;
+  min-height: 100vh;
+  height: auto;
   background: #000;        /* nền đen chuẩn Spotify */
   padding: 10px;
   gap: 10px;
@@ -14,13 +15,37 @@
 /* =============================
     SIDEBAR (TRÁI)
 ============================= */
+
+/* Header logo */
+.admin-sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 15px;
+}
+
+.admin-logo {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+.admin-title {
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  margin: 0;
+}
+
 .admin-sidebar {
   width: 260px;
   background: #121212;
   padding: 20px;
   border-radius: 12px;
   border: 1px solid #222;
-  height: calc(100vh - 20px);
+  height: auto;
+  min-height: calc(100vh - 20px);
   display: flex;
   flex-direction: column;
 }
@@ -55,8 +80,11 @@
 }
 
 .admin-link.active {
-  background: #3A3A3A
-;
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+}
+
+.admin-link.active svg {
   color: white;
 }
 
@@ -68,41 +96,75 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  height: 100%;
 
-  /* quan trọng: không có nền xám nữa */
+  height: calc(100vh - 20px);   /* QUAN TRỌNG */
+
   background: transparent;
   border: none;
-
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden; /* OK */
+             /* container không scroll */
 }
+
 
 
 /* =============================
     HEADER CARD ĐẸP
 ============================= */
 .admin-header-card {
-  background: #1f1f1f;
-  min-height: 55px;
-
-  padding: 12px 22px;
-  border-radius: 14px;
-  border: 1px solid #2c2c2c;
+  background: rgba(255, 255, 255, 0.03);    /* nền blur nhẹ */
+  padding: 8px 20px;              /* ↓ giảm padding */
+  min-height: 48px;               /* ↓ giảm chiều cao tối thiểu */
 
   display: flex;
   align-items: center;
   justify-content: space-between;
 
-  /* cách viền admin-right */
-  margin: 0px 10px 15px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
 
-  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  margin: 0 12px 12px;
+
+  backdrop-filter: blur(12px);               /* Hiệu ứng kính */
+  
+  box-shadow: 0 2px 10px rgba(0,0,0,0.25); /* Shadow mềm, hiện đại */
+  position: relative; /* QUAN TRỌNG */
+  z-index: 10; /* QUAN TRỌNG */
+  flex-wrap: nowrap;   /* CHẶN không cho xuống hàng */
+  
 }
+
 
 .admin-header-title {
   color: white;
   font-size: 22px;
   font-weight: 700;
+}
+
+/* Khối chứa phần tên */
+.admin-header-title-box {
+  flex: 1;
+  min-width: 0; /* Quan trọng để tránh tràn khiến avatar biến mất */
+}
+
+/* Tên admin */
+.admin-header-title {
+  color: white;
+  font-size: 22px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Thêm "..." nếu text quá dài */
+}
+
+/* Subtitle */
+.admin-header-subtitle {
+  font-size: 13px;
+  color: #b3b3b3;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Avatar dropdown */
@@ -114,22 +176,40 @@
   cursor: pointer;
 }
 
-.admin-avatar {
-  width: 42px;
-  height: 42px;
+.admin-avatar-wrapper {
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
-  border: 2px solid #444;
+  background: rgba(255,255,255,0.05); /* vòng mờ */
+  padding: 4px;                       /* độ dày vòng */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow: 0 0 10px rgba(0,0,0,0.6); /* bóng mềm */
 }
+
+.admin-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+
+  border: 2px solid rgba(255,255,255,0.1);
+}
+
 
 .admin-dropdown {
   position: absolute;
-  top: 55px;
+  top: 60px;
   right: 0;
-  width: 150px;
-  background: #1d1d1d;
-  border: 1px solid #333;
-  border-radius: 10px;
-  padding: 8px 0;
+  width: 180px;
+  background: #1c1c1c;
+  border-radius: 5px;
+  padding: 10px 0;
+  border: 1px solid rgba(255,255,255,0.05);
+  z-index: 9999;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
 }
 
 .dropdown-item {
@@ -155,7 +235,8 @@
   flex: 1;
   overflow-y: auto;
 
-  padding: 20px 30px;
+  padding: 16px 28px;
+
   background: linear-gradient(
   to bottom,
   #0F0F0F 0%,
@@ -170,3 +251,207 @@
   margin: 0 10px; /* căn khớp header */
   color: white;
 }
+
+/*Top chart*/
+/* =============================
+   BẢNG XẾP HẠNG TOP 10
+============================= */
+
+.topchart-card {
+  margin-top: 24px;
+  background: #1a1a1a;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 18px 22px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.35);
+}
+
+.topchart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.topchart-title {
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.topchart-subtitle {
+  color: #b3b3b3;
+  font-size: 13px;
+  margin-top: 10px;
+}
+
+.topchart-tag {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(30, 215, 96, 0.12);
+  color: #1db954;
+  border: 1px solid rgba(30, 215, 96, 0.4);
+}
+
+/* Table */
+
+.topchart-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.topchart-table thead th {
+  text-align: left;
+  padding: 8px 6px;
+  color: #b3b3b3;
+  font-weight: 500;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.topchart-table tbody td {
+  padding: 10px 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  color: #ffffff;
+}
+
+.topchart-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.topchart-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* Rank badge */
+
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: #262626;
+  color: #e5e5e5;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.rank-badge-hot {
+  background: #1db954;
+  color: #ffffff;
+}
+
+/* Song cell */
+
+.topchart-song {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.topchart-cover {
+  width: 38px;
+  height: 38px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.topchart-song-title {
+  font-weight: 600;
+}
+
+.topchart-artist {
+  color: #b3b3b3;
+}
+
+.genre-tag {
+  display: inline-block;
+  padding: 4px 10px;
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+
+/* =============================
+   CUSTOM SCROLLBAR - DARK MODE
+   ============================= */
+.admin-content::-webkit-scrollbar {
+  width: 10px;                 /* độ rộng scrollbar */
+}
+
+.admin-content::-webkit-scrollbar-track {
+  background: #0f0f0f;         /* nền tối */
+  border-radius: 10px;
+}
+
+.admin-content::-webkit-scrollbar-thumb {
+  background: #3a3a3a;         /* màu xám đậm */
+  border-radius: 10px;
+  border: 2px solid #0f0f0f;   /* tạo viền tách nhẹ */
+}
+
+.admin-content::-webkit-scrollbar-thumb:hover {
+  background: #555;            /* sáng hơn khi hover */
+}
+
+
+/* ============================== CSS Dashboard Admin ============================== */
+
+.admin-dashboard-card {
+  background: #1a1a1a;
+  border-radius: 14px;
+  padding: 22px 24px; /* padding đều */
+  border: 1px solid rgba(255,255,255,0.07);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* khoảng cách hợp lý */
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.admin-dashboard-icon {
+  font-size: 36px;
+  color: #1db954; /* xanh Spotify */
+  margin-bottom: 6px;
+}
+
+.admin-dashboard-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+}
+
+.admin-dashboard-card p {
+  margin: 0;
+  padding: 0;
+  font-size: 15px;
+  color: #ccc;
+  line-height: 1.5;
+}
+
+.admin-dashboard-card button {
+  width: fit-content;
+  background: #1db954;
+  padding: 8px 18px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: none;
+  margin-top: 8px;
+  cursor: pointer;
+  color: white;
+  transition: 0.2s;
+}
+
+.admin-dashboard-card button:hover {
+  background: #17a74a;
+}
+

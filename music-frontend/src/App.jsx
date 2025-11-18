@@ -109,7 +109,7 @@ function App() {
       {/* ADMIN ROUTE (CÓ LAYOUT + SIDEBAR + HEADER) */}
       <Route element={<AdminRoute />}>
         <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<AdminPage />} />
+          <Route index element={<Dashboard />} />
           <Route path="users" element={<ManageUser />} />
           <Route path="artists" element={<ManageArtist />} />
           <Route path="albums" element={<ManageAlbum />} />
