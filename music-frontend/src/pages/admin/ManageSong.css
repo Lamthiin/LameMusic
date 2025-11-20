@@ -1,51 +1,393 @@
-/* Container trang */
-.admin-page {
+/* SONG COVER */
+.song-cover {
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+/* MERGED BADGE */
+.status-merged {
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.status-merged.public {
+  background: #1ed76033;
+  color: #1ed760;
+}
+
+.status-merged.hidden {
+  background: #7e7e7e33;
+  color: #b8b8b8;
+}
+
+.status-merged.pending {
+  background: #f1c40f33;
+  color: #f1c40f;
+}
+
+/* ACTION MENU BUTTON */
+.action-btn {
+  background: transparent;
+  border: none;
+  color: #ccc;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.action-btn:hover {
+  color: white;
+}
+
+/* DROPDOWN MENU */
+.action-dropdown {
+  position: absolute;
+  top: 28px;
+  right: 0;
+  background: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 8px;
+  width: 140px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  z-index: 9999; /* quan trọng */
+  box-shadow: 0 4px 8px rgba(0,0,0,0.4);
 }
 
-/* Card wrapper */
-.admin-card {
-  background: #1c1c1c;
-  padding: 20px 25px;
-  border-radius: 12px;
-  border: 1px solid #2a2a2a;
+.action-dropdown button:last-child {
+  margin-bottom: 0;
 }
 
-/* Title đẹp */
-.admin-card h1 {
-  font-size: 28px;
-  font-weight: 700;
-  margin-bottom: 8px;
+.action-dropdown button {
+  background: #2b2b2b;
+  border: none;
+  padding: 10px;
+  text-align: left;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 6px;
+}
+.action-dropdown button:hover {
+  background: #3c3c3c;
 }
 
-/* Description */
-.admin-card p {
-  color: #bdbdbd;
-  font-size: 15px;
+.action-dropdown .danger {
+  background: #a93226;
 }
 
-.admin-card:hover {
-  background: #232323;
-  transition: 0.2s ease-in-out;
+.action-dropdown .danger:hover {
+  background: #c0392b;
 }
 
-/* CARD LỚN */
-.admin-big-card {
-  background: #1b1b1b;
-  border: 1px solid #2e2e2e;
-  padding: 28px;
-  border-radius: 16px;
-  margin-bottom: 24px;
+/* Fix table cell */
+.action-menu-cell {
+  position: relative;
 }
 
-/* Hộp con */
-.admin-small-box {
-  margin-top: 12px;
-  padding: 18px;
-  border-radius: 12px;
-  background: #222;
+.admin-table {
+  position: relative;
+  overflow: visible !important;
+}
+.admin-user-container {
+  overflow: visible !important;
+}
+.action-menu-cell {
+  position: relative;
+  overflow: visible !important;
+}
+
+/* ====================================
+   POPUP OVERLAY
+==================================== */
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+}
+
+/* ====================================
+   POPUP CARD
+==================================== */
+.popup-card {
+  background: #181818;
+  width: 700px;                      /* FIX: đủ rộng cho 2 cột */
+  padding: 26px;
+  border-radius: 14px;
   border: 1px solid #333;
-  color: #ddd;
+  animation: popupShow 0.2s ease;
+}
+
+@keyframes popupShow {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.popup-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 20px;
+}
+
+/* ====================================
+   GRID 2 CỘT
+==================================== */
+.popup-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;   /* 2 cột đều nhau */
+  column-gap: 26px;                 /* khoảng cách Ngang */
+  row-gap: 18px;                    /* khoảng cách Dọc */
+  margin-bottom: 20px;
+}
+
+.popup-col {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ====================================
+   INPUT GROUP
+==================================== */
+.popup-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.popup-group label {
+  font-size: 14px;
+  margin-bottom: 6px;
+  color: #ccc;
+}
+
+.popup-group input {
+  padding: 10px 14px;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 8px;
+  color: #fff;
+  outline: none;
+  font-size: 14px;
+}
+
+.popup-group input:focus {
+  border-color: #1db954;
+}
+
+/* ====================================
+   FILE INPUT
+==================================== */
+.popup-file-input {
+  background: #111;
+  border: 1px solid #333;
+  padding: 10px;
+  border-radius: 8px;
+  color: #ccc;
+  cursor: pointer;
+}
+
+.popup-file-input::-webkit-file-upload-button {
+  background: #222;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #fff;
+  margin-right: 10px;
+}
+
+.popup-file-input::-webkit-file-upload-button:hover {
+  background: #333;
+}
+
+/* ====================================
+   FOOTER BUTTON
+==================================== */
+.popup-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.popup-cancel {
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: #333;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+.popup-save {
+  padding: 10px 18px;
+  border-radius: 8px;
+  background: #1db954;
+  color: #000;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.popup-save:hover {
+  background: #18a247;
+}
+
+/* ============================
+   SPOTIFY IMAGE UPLOADER
+============================ */
+.spotify-upload-area {
+  border: 2px dashed #333;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  background: #111;
+  position: relative;
+  cursor: pointer;
+  transition: 0.25s;
+  min-height: 180px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.spotify-upload-area:hover {
+  border-color: #1db954;
+  background: #161616;
+}
+
+.spotify-upload-input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.spotify-upload-text {
+  color: #aaa;
+  font-size: 14px;
+}
+
+/* Preview image */
+.spotify-upload-preview {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #333;
+  box-shadow: 0 0 8px rgba(0,0,0,0.4);
+}
+
+/* Remove button */
+.spotify-remove-btn {
+  margin-top: 10px;
+  background: #a93226;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.spotify-remove-btn:hover {
+  background: #c0392b;
+}
+
+/* ============================
+   AUDIO UPLOAD (SPOTIFY STYLE)
+============================ */
+.audio-upload-area {
+  background: #111;
+  border: 2px dashed #333;
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  transition: 0.25s;
+}
+
+.audio-upload-area:hover {
+  border-color: #1db954;
+  background: #161616;
+}
+
+.audio-upload-input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.audio-upload-text {
+  color: #999;
+  font-size: 14px;
+}
+
+.audio-file-name {
+  color: #1db954;
+  font-weight: 600;
+  font-size: 15px;
+  word-break: break-word;
+}
+
+/* INPUT READONLY (POPUP XEM) */
+.popup-input-readonly {
+  background: #111;
+  border: 1px solid #333;
+  padding: 10px 14px;
+  border-radius: 8px;
+  color: #888;
+  cursor: default;
+  font-size: 14px;
+}
+
+.popup-input-readonly:focus {
+  border-color: #333;
+  outline: none;
+}
+.popup-group input {
+  padding: 10px 14px;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 8px;
+  color: #fff;
+  outline: none;
+}
+
+.popup-group input:focus {
+  border-color: #1db954;
+}
+
+.popup-edit-input {
+  padding: 10px 14px;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 8px;
+  color: #fff;
+  outline: none;
+}
+
+.popup-edit-input:focus {
+  border-color: #1db954;
+}
+
+.popup-cover-view {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #333;
+  margin-top: 6px;
 }

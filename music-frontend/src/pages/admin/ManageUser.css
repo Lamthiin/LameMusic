@@ -1,0 +1,59 @@
+.user-management {
+  padding: 20px;
+}
+
+.um-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 20px;
+}
+
+.um-grid {
+  display: flex;
+  gap: 20px;
+}
+
+.um-card {
+  flex: 1;
+  background: #181818;
+  padding: 20px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.25s ease;
+  border: 1px solid transparent;
+}
+
+/* Hover */
+.um-card:hover {
+  background: #202020;
+  border: 1px solid rgba(255,255,255,0.1);
+  transform: translateY(-3px);
+}
+
+/* ACTIVE */
+.um-card.active {
+  background: #1db95422 !important;
+  border: 1px solid #1db954 !important;
+  transform: translateY(-2px);
+}
+
+/* TEXT */
+.um-card h3 {
+  font-size: 20px;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.um-card p {
+  color: #b3b3b3;
+}
+
+/* KHU VỰC BẢNG DỮ LIỆU */
+.um-table-area {
+  margin-top: 30px;
+}
+
+
+
+

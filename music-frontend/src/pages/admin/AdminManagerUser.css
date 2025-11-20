@@ -1,0 +1,215 @@
+/* ================================
+   WRAPPER
+================================ */
+.admin-user-container {
+  padding: 20px;
+  color: white;
+}
+
+
+/* ================================
+   HEADER (Search + Add Button)
+================================ */
+.admin-user-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+
+/* ================================
+   GOOGLE-STYLE SEARCH BAR
+================================ */
+.google-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  width: 380px;
+  padding: 12px 20px;
+
+  background: #2a2a2a;
+  border-radius: 45px;
+  border: 1px solid #3e3e3e;
+
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+  transition: 0.2s ease;
+}
+
+.google-search-bar:hover {
+  box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+}
+
+.google-search-icon {
+  font-size: 20px;
+  color: #70757a;
+}
+
+.google-search-input {
+  all: unset;
+  flex: 1;
+  font-size: 15px;
+  color: #e5e5e5;
+}
+
+.google-search-input::placeholder {
+  color: #9aa0a6;
+}
+
+
+/* ================================
+   ADD BUTTON
+================================ */
+.admin-add-btn {
+  padding: 10px 18px;
+  background: #1db954;
+  color: black;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.admin-add-btn:hover {
+  background: #1ed760;
+}
+
+
+/* ================================
+   TABLE
+================================ */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  background: #111;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.admin-table thead {
+  background: #181818;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #333;
+}
+
+.admin-table tr:hover {
+  background: #1a1a1a;
+}
+
+
+/* ================================
+   ACTION BUTTONS
+================================ */
+.admin-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.admin-btn {
+  padding: 5px 12px;
+  font-size: 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+  transition: 0.2s;
+}
+
+/* View button */
+.admin-btn.view {
+  background: #1e3a8a;      /* xanh navy dịu */
+  color: #e5e5e5;
+  border: 1px solid #2c4a9b;
+  border-radius: 20px;
+  padding: 6px 16px;
+
+}
+
+.admin-btn.view:hover {
+  background: #2a4fb5;
+  border-color: #3b5fcc;
+}
+
+
+/* Delete button */
+.admin-btn.delete {
+  background: #7f1d1d;      /* đỏ trầm */
+  color: #f3f3f3;
+  border: 1px solid #a22b2b;
+  border-radius: 20px;
+  padding: 6px 16px;
+
+}
+
+.admin-btn.delete:hover {
+  background: #992222; 
+  border-color: #b93232;
+}
+
+
+
+/* Edit button */
+.admin-btn.edit {
+  background: #ffffff;
+  color: #111;
+  border: 1px solid #e5e5e5;
+  border-radius: 20px;
+  padding: 6px 16px;
+
+}
+
+.admin-btn.edit:hover {
+  background: #f5f5f5;
+  border-color: #d4d4d4;
+}
+
+
+/* Role button */
+.admin-btn.role {
+  background: #1db954;
+  color: black;
+  border-radius: 20px;
+  padding: 6px 16px;
+
+}
+
+.admin-btn.role:hover {
+  background: #1ed760; /* Spotify green lighter */
+}
+
+.status-badge {
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 20px;
+  display: inline-block;
+  text-align: center;
+  min-width: 90px;
+}
+
+/* Pending */
+.status-pending {
+  background: #fbbf24;
+  color: #111;
+}
+
+/* Approved */
+.status-approved {
+  background: #1db954;
+  color: #000;
+}
+
+/* Rejected */
+.status-rejected {
+  background: #7f1d1d;
+  color: #fceaea;
+}
+
+

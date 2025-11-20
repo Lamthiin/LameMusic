@@ -8,11 +8,7 @@ import AdminRoute from './components/AdminRoute';
 import ProtectedRoute from './components/ProtectedRoute'; // <-- (1) IMPORT GUARD
 import ProfileLayout from './pages/ProfileUser/ProfileLayout'; // <-- (2) IMPORT LAYOUT MỚI
 import AdminLayout from "./components/admin/AdminLayout";
-import Dashboard from "./pages/admin/Dashboard";
-import ManageUser from "./pages/admin/ManageUser";
-import ManageArtist from "./pages/admin/ManageArtist";
-import ManageAlbum from "./pages/admin/ManageAlbum";
-import ManageSong from "./pages/admin/ManageSong";
+
 // Import Trang
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -26,7 +22,17 @@ import ArtistDetail from './pages/ArtistDetail';
 import LikedSongsPage from './pages/LikedSongsPage';
 import GenreDetailPage from './pages/GenreDetailPage';
 import AllSongsPage from './pages/AllSongsPage'; 
-import AllArtistsPage from './pages/AllArtistsPage'; 
+import AllArtistsPage from './pages/AllArtistsPage';
+//Import Admin Pages
+import Dashboard from "./pages/admin/Dashboard";
+import ManageUser from "./pages/admin/ManageUser";
+import ManageArtist from "./pages/admin/ManageArtist";
+import ManageAlbum from "./pages/admin/ManageAlbum";
+import ManageSong from "./pages/admin/ManageSong";
+import AdminCustomerPage from "./pages/admin/AdminCustomerPage";
+import AdminArtistPage from "./pages/admin/AdminArtistPage";
+import AdminAccountPage from "./pages/admin/AdminAccountPage";
+
 
 // (3) IMPORT CÁC TRANG CON CỦA PROFILE
 import ProfileInfo from './pages/ProfileUser/ProfileInfo';
@@ -109,11 +115,23 @@ function App() {
       {/* ADMIN ROUTE (CÓ LAYOUT + SIDEBAR + HEADER) */}
       <Route element={<AdminRoute />}>
         <Route path="/admin" element={<AdminLayout />}>
+
+          {/* Dashboard mặc định */}
           <Route index element={<Dashboard />} />
+
+          {/* Trang chọn 3 mục */}
           <Route path="users" element={<ManageUser />} />
+
+          {/* 3 trang con
+          <Route path="users/customers" element={<AdminCustomerPage />} />
+          <Route path="users/artists" element={<AdminArtistPage />} />
+          <Route path="users/admins" element={<AdminAccountPage />} /> */}
+
+          {/* Các mục quản lý khác */}
           <Route path="artists" element={<ManageArtist />} />
           <Route path="albums" element={<ManageAlbum />} />
           <Route path="songs" element={<ManageSong />} />
+
         </Route>
       </Route>
 
