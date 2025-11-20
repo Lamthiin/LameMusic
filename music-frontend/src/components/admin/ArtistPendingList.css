@@ -1,0 +1,144 @@
+.pending-container {
+  padding: 10px 0;
+  width: 100%;
+}
+
+/* Tiêu đề */
+.pending-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #f5f5f5;
+}
+
+/* Danh sách */
+.pending-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ITEM – tone sáng, dễ nhìn */
+.pending-row {
+  display: flex;
+  align-items: center;
+  background: #2a2a2a; /* sáng hơn bản cũ */
+  padding: 16px 20px;
+  border-radius: 10px;
+  box-shadow: 0px 3px 10px rgba(0,0,0,0.2);
+  transition: 0.2s ease;
+  min-height: 80px;
+}
+
+.pending-row:hover {
+  background: #333333; /* hover nhẹ nhưng rõ */
+  transform: translateY(-2px);
+}
+
+/* Avatar */
+.row-avatar {
+  width: 58px;
+  height: 58px;
+  object-fit: cover;
+  border-radius: 50%;   /* ⭐ CHỈ CẦN DÒNG NÀY */
+  margin-right: 20px;
+  flex-shrink: 0;
+}
+
+
+/* Tên nghệ sĩ */
+.row-info {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.row-info h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  color: #f1f1f1; /* sáng hơn */
+  letter-spacing: 0.2px;
+}
+
+/* Khu vực nút */
+.row-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* BUTTONS – tone sáng hơn */
+.row-actions button {
+  height: 40px;
+  padding: 0 16px;
+  border: none;
+  min-width: 95px;
+  border-radius: 8px;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.3px;
+  color: white;
+
+  transition: 0.17s ease;
+}
+
+/* Hiệu ứng nút */
+.row-actions button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0px 3px 8px rgba(0,0,0,0.25);
+}
+
+/* Màu nút */
+.btn-view {
+  background: #4aa3df; /* xanh dịu */
+}
+.btn-view:hover {
+  background: #3a92cf;
+}
+
+.btn-accept {
+  background: #30b86b; /* xanh lá pastel dễ nhìn */
+}
+.btn-accept:hover {
+  background: #28a35e;
+}
+
+.btn-reject {
+  background: #e76a5f; /* đỏ dịu, bớt gắt */
+}
+.btn-reject:hover {
+  background: #d5574c;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .pending-row {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 15px;
+    padding: 18px;
+  }
+
+  .row-info {
+    justify-content: center;
+  }
+
+  .row-actions {
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .row-actions button {
+    width: 100%;
+    max-width: 220px;
+  }
+}

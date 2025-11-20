@@ -1,0 +1,198 @@
+/* ==============================
+   TITLE
+============================== */
+.active-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #f5f5f5;
+}
+
+/* ==============================
+   TOP BAR
+============================== */
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+/* ADD BUTTON */
+.btn-add {
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+  color: #fff;
+  padding: 9px 18px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: 0.2s ease;
+}
+
+.btn-add:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 255, 100, 0.25);
+}
+
+/* ==============================
+   EMPTY STATE
+============================== */
+.empty-active {
+  background: #2a2a2a;
+  padding: 20px;
+  text-align: center;
+  font-size: 16px;
+  color: #ccc;
+  border-radius: 10px;
+  box-shadow: 0px 3px 10px rgba(0,0,0,0.2);
+  border: 1px solid rgba(255,255,255,0.05);
+  margin-top: 10px;
+}
+
+/* ==============================
+   LIST & ROW
+============================== */
+.active-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.active-row {
+  display: flex;
+  align-items: center;
+
+  background: #2a2a2a;  /* giống pending */
+  padding: 16px 20px;   /* giống pending */
+  border-radius: 10px;  /* giống pending */
+  box-shadow: 0px 3px 10px rgba(0,0,0,0.2);
+  border: 1px solid rgba(255,255,255,0.05);
+
+  transition: 0.2s ease;
+}
+
+.active-row:hover {
+  background: #333333;
+  transform: translateY(-2px);
+}
+
+/* AVATAR */
+.row-avatar {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 20px;
+  flex-shrink: 0;
+}
+
+/* NAME */
+.row-info {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.row-info h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  color: #f1f1f1;
+}
+
+/* BUTTONS */
+.row-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.row-actions button {
+  height: 40px;
+  padding: 0 16px;
+  border: none;
+  min-width: 95px;
+  border-radius: 8px;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-weight: 600;
+  font-size: 15px;
+  color: white;
+  transition: 0.17s ease;
+}
+
+/* BUTTON COLORS – đồng bộ với pending */
+.btn-edit {
+  background: #4aa3df;
+}
+.btn-edit:hover {
+  background: #3a92cf;
+  transform: translateY(-2px);
+}
+
+.btn-delete {
+  background: #e76a5f;
+}
+.btn-delete:hover {
+  background: #d5574c;
+  transform: translateY(-2px);
+}
+
+/* ==============================
+   MODAL — giữ nguyên
+============================== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(4px);
+}
+
+.modal-box {
+  background: #202020;
+  padding: 22px;
+  border-radius: 14px;
+  width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.modal-box input,
+.modal-box textarea {
+  width: 100%;
+  padding: 12px;
+  background: #2c2c2c;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #fff;
+  font-size: 14px;
+  transition: 0.15s ease;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.btn-save {
+  background: #2ecc71;
+  padding: 9px 18px;
+  border-radius: 10px;
+}
+
+.btn-cancel {
+  background: #555;
+  padding: 9px 18px;
+  border-radius: 10px;
+}

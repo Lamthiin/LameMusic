@@ -1,0 +1,20 @@
+.manage-artist-page {
+  color: white;
+}
+
+.manage-title {
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.manage-desc {
+  margin-top: 8px;
+  opacity: 0.9;
+}
+
+.manage-card {
+  margin-top: 20px;
+  background: #1f1f1f;
+  padding: 16px;
+  border-radius: 8px;
+}
