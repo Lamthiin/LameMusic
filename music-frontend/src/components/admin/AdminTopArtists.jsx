@@ -39,7 +39,7 @@ const AdminTopArtists = () => {
     <div className="artist-section">
       <h3 className="artist-section-title">Nghệ sĩ được yêu thích nhất</h3>
 
-      <div className="artist-grid">
+      <div className="top-artist-grid">
         {artists.map((artist) => (
           <div key={artist.id} className="artist-card">
             <div className="artist-image-wrapper">
@@ -51,6 +51,7 @@ const AdminTopArtists = () => {
         ))}
       </div>
     </div>
+
   );
 };
 

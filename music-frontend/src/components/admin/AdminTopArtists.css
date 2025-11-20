@@ -1,8 +1,9 @@
-.artist-grid {
+.top-artist-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr); /* HIỂN THỊ 5 NGHỆ SĨ / HÀNG */
+  grid-template-columns: repeat(5, 1fr); /* 5 nghệ sĩ / hàng */
   gap: 18px;
 }
+
 
 .artist-card {
   padding: 18px;
