@@ -391,3 +391,85 @@
   border: 1px solid #333;
   margin-top: 6px;
 }
+
+/* SUCCESS POPUP OVERLAY */
+.success-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999999;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* POPUP CARD */
+.success-card {
+  background: #181818;
+  padding: 24px 30px;
+  border-radius: 14px;
+  width: 360px;
+  text-align: center;
+  border: 1px solid #333;
+  animation: scaleIn 0.2s ease;
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.success-card h3 {
+  color: #1db954;
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.success-card p {
+  color: #ccc;
+  margin-bottom: 20px;
+  font-size: 15px;
+}
+
+/* ACTION BUTTONS */
+.success-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.success-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* OK BUTTON */
+.success-btn.cancel {
+  background: #333;
+  color: white;
+}
+
+.success-btn.cancel:hover {
+  background: #444;
+}
+
+/* THÊM BÀI KHÁC */
+.success-btn.add-more {
+  background: #1db954;
+  color: black;
+}
+
+.success-btn.add-more:hover {
+  background: #18a247;
+}
+

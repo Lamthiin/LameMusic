@@ -140,6 +140,10 @@ const ManageSong = () => {
   const [editAlbum, setEditAlbum] = useState("");
   const [editGenre, setEditGenre] = useState("");
   const [editDuration, setEditDuration] = useState("");
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+
+  const [errorMessage, setErrorMessage] = useState("");
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
 
 
   // Click ra ngoài thì đóng menu
@@ -183,17 +187,55 @@ const ManageSong = () => {
     }
   };
 
+  // const handleSaveSong = () => {
+  //   console.log("Tiêu đề:", newTitle);
+  //   console.log("Nghệ sĩ:", newArtist);
+  //   console.log("Album:", newAlbum);
+  //   console.log("Thể loại:", newGenre);
+  //   console.log("Thời lượng:", newDuration);
+
+  //   console.log("File ảnh:", coverFile);
+  //   console.log("File nhạc:", audioFile);
+
+  //   alert("Đã nhận dữ liệu :)");
+  // };
+
   const handleSaveSong = () => {
-    console.log("Tiêu đề:", newTitle);
-    console.log("Nghệ sĩ:", newArtist);
-    console.log("Album:", newAlbum);
-    console.log("Thể loại:", newGenre);
-    console.log("Thời lượng:", newDuration);
+    let error = "";
 
-    console.log("File ảnh:", coverFile);
-    console.log("File nhạc:", audioFile);
+    // ⚠️ KIỂM TRA NẾU CHƯA NHẬP BẤT CỨ GÌ
+    const allEmpty =
+      !newTitle.trim() &&
+      !newArtist.trim() &&
+      !newAlbum.trim() &&
+      !newGenre.trim() &&
+      !coverFile &&
+      !audioFile &&
+      (!newDuration || newDuration <= 0);
 
-    alert("Đã nhận dữ liệu :)");
+    if (allEmpty) {
+      error = "Bạn chưa nhập thông tin bài hát!";
+    }
+
+    // VALIDATION CHI TIẾT
+    else if (!newTitle.trim()) error = "Tiêu đề bài hát không được để trống.";
+    else if (!newArtist.trim()) error = "Tên nghệ sĩ không được để trống.";
+    else if (!newAlbum.trim()) error = "Tên album không được để trống.";
+    else if (!newGenre.trim()) error = "Thể loại bài hát không được để trống.";
+    else if (!coverFile) error = "Bạn chưa chọn ảnh bìa.";
+    else if (!audioFile) error = "Bạn chưa chọn file nhạc.";
+    else if (!newDuration || newDuration <= 0)
+      error = "Thời lượng bài hát không hợp lệ.";
+
+    // Nếu có lỗi → hiện popup lỗi
+    if (error) {
+      setErrorMessage(error);
+      setShowErrorPopup(true);
+      return;
+    }
+
+    // Nếu mọi thứ hợp lệ → bật popup SUCCESS
+    setShowSuccessPopup(true);
   };
 
   const resetAddPopup = () => {
@@ -524,7 +566,6 @@ const ManageSong = () => {
 
                   <div
                     className="audio-upload-area"
-                    onClick={() => document.getElementById("audioUpload").click()}
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={(e) => {
                       e.preventDefault();
@@ -535,6 +576,7 @@ const ManageSong = () => {
                       }
                     }}
                   >
+
                     {audioName ? (
                       <p className="audio-file-name">{audioName}</p>
                     ) : (
@@ -567,6 +609,7 @@ const ManageSong = () => {
                 onClick={() => {
                   resetAddPopup();
                   setShowAddPopup(false);
+                  fetchSongs();
                 }}
               >
                 Hủy
@@ -580,6 +623,59 @@ const ManageSong = () => {
           </div>
         </div>
       )}
+
+      {/* POPUP LỖI */}
+      {showErrorPopup && (
+        <div className="success-overlay">
+          <div className="success-card">
+            <h3 style={{ color: "#ff4d4d" }}>⚠️ Không thể lưu bài hát</h3>
+            <p>{errorMessage}</p>
+
+            <div className="success-actions">
+              <button
+                className="success-btn cancel"
+                onClick={() => setShowErrorPopup(false)}
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+    
+      {/* POPUP THÀNH CÔNG */}
+      {showSuccessPopup && (
+      <div className="success-overlay">
+        <div className="success-card">
+          <h3>🎵 Thêm bài hát thành công!</h3>
+
+          <div className="success-actions">
+            <button
+              className="success-btn cancel"
+              onClick={() => {
+                setShowSuccessPopup(false);
+                setShowAddPopup(false); // đóng popup thêm bài hát
+                resetAddPopup();        // reset form
+              }}
+            >
+              OK
+            </button>
+
+            <button
+              className="success-btn add-more"
+              onClick={() => {
+                setShowSuccessPopup(false);
+                resetAddPopup();        // reset form để thêm bài khác
+              }}
+            >
+              Thêm bài hát khác
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+
 
     {/* POPUP XEM BÀI HÁT */}
     {showViewPopup && (
