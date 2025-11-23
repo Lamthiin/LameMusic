@@ -26,39 +26,39 @@ export class AlbumService {
     return artist;
   }
 
-  /**
-     * API: Lấy chi tiết 1 Album (Chỉ hiển thị bài hát APPROVED)
-     */
-    async findOne(id: number): Promise<Album> {
-        // === SỬ DỤNG QUERY BUILDER ĐỂ LỌC BÀI HÁT ===
-        const album = await this.albumRepository.createQueryBuilder('album')
-            // Load Album theo ID
-            .where('album.id = :albumId', { albumId: id })
+  // /**
+  //    * API: Lấy chi tiết 1 Album (Chỉ hiển thị bài hát APPROVED)
+  //    */
+  //   async findOne(id: number): Promise<Album> {
+  //       // === SỬ DỤNG QUERY BUILDER ĐỂ LỌC BÀI HÁT ===
+  //       const album = await this.albumRepository.createQueryBuilder('album')
+  //           // Load Album theo ID
+  //           .where('album.id = :albumId', { albumId: id })
             
-            // JOIN Artist
-            .leftJoinAndSelect('album.artist', 'artist')
+  //           // JOIN Artist
+  //           .leftJoinAndSelect('album.artist', 'artist')
             
-            // JOIN Songs VÀ LỌC THEO STATUS
-            .leftJoinAndSelect('album.songs', 'song', 
-                // CHỈ LẤY CÁC BÀI HÁT CÓ STATUS LÀ APPROVED
-                'song.status = :status AND song.active = :active', 
-                { status: 'APPROVED', active: true }
-            )
-            // JOIN Artist của Bài hát (cho tên nghệ sĩ)
-            .leftJoinAndSelect('song.artist', 'songArtist')
+  //           // JOIN Songs VÀ LỌC THEO STATUS
+  //           .leftJoinAndSelect('album.songs', 'song', 
+  //               // CHỈ LẤY CÁC BÀI HÁT CÓ STATUS LÀ APPROVED
+  //               'song.status = :status AND song.active = :active', 
+  //               { status: 'APPROVED', active: true }
+  //           )
+  //           // JOIN Artist của Bài hát (cho tên nghệ sĩ)
+  //           .leftJoinAndSelect('song.artist', 'songArtist')
             
-            // Sắp xếp bài hát theo track_number
-            .orderBy('song.track_number', 'ASC')
+  //           // Sắp xếp bài hát theo track_number
+  //           .orderBy('song.track_number', 'ASC')
             
-            .getOne();
-        // ===========================================
+  //           .getOne();
+  //       // ===========================================
 
-        if (!album) {
-            throw new NotFoundException(`Album with ID ${id} not found.`);
-        }
+  //       if (!album) {
+  //           throw new NotFoundException(`Album with ID ${id} not found.`);
+  //       }
 
-        return album;
-    }
+  //       return album;
+  //   }
   /**
    * HÀM MỚI: Lấy tất cả Album
    */
@@ -155,4 +155,45 @@ export class AlbumService {
     await this.albumRepository.delete(albumId);
     return { message: 'Xóa Album thành công.' };
   }
+
+  /**
+     * API: Lấy chi tiết 1 Album (Chỉ hiển thị bài hát APPROVED)
+     */
+    async findOne(id: number): Promise<Album> {
+        // === SỬ DỤNG QUERY BUILDER ĐỂ LỌC BÀI HÁT ===
+        const album = await this.albumRepository.createQueryBuilder('album')
+            .where('album.id = :albumId', { albumId: id })
+            
+            // 1. JOIN Artist
+            .leftJoinAndSelect('album.artist', 'artist')
+            
+            // 🚨 FIX LỖI: BẮT BUỘC JOIN USER CỦA ARTIST 🚨
+            .leftJoinAndSelect('artist.user', 'user') 
+            
+            // JOIN Songs VÀ LỌC THEO STATUS
+            .leftJoinAndSelect('album.songs', 'song', 
+                'song.status = :status AND song.active = :active', 
+                { status: 'APPROVED', active: true }
+            )
+            // JOIN Artist của Bài hát (cho tên nghệ sĩ)
+            .leftJoinAndSelect('song.artist', 'songArtist')
+            
+            // Sắp xếp bài hát theo track_number
+            .orderBy('song.track_number', 'ASC')
+            
+            .getOne();
+        // ===========================================
+
+        if (!album) {
+            throw new NotFoundException(`Album with ID ${id} not found.`);
+        }
+        
+        // Kiểm tra logic để đảm bảo trường user.id luôn tồn tại khi album.artist tồn tại
+        if (!album.artist || !album.artist.user) {
+             throw new NotFoundException('Dữ liệu Artist không hợp lệ.');
+        }
+
+
+        return album;
+    }
 }

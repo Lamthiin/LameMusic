@@ -1,115 +1,196 @@
-// music-frontend/src/pages/AlbumDetailPage.jsx
-import React, { useEffect, useState } from 'react';
+// music-frontend/src/pages/AlbumDetailPage.jsx (BẢN SỬA LỖI FINAL)
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { fetchAlbumDetailApi } from '../../utils/api';
+// API
+import { fetchAlbumDetailApi, removeSongFromAlbumApi } from '../../utils/api'; 
 import { usePlayer } from '../../context/PlayerContext';
+import { useAuth } from '../../context/AuthContext'; 
+// Components
 import SongListTable from '../../components/user/SongListTable';
-import './AlbumDetailPage.css';
-import { FaPlay } from 'react-icons/fa';
+import AddSinglesToAlbumModal from '../../components/user/AddSinglesToAlbumModal';
+import AlbumFormModal from '../../components/user/AlbumFormModal';
+// CSS
+import './AlbumDetailPage.css'; 
+import '../ArtistDashboard/ArtistDashboard.css'; 
+// Icons
+import { FaPlay, FaPlus, FaEdit, FaTimes } from 'react-icons/fa'; 
 
-// HÀM HELPER (BẮT BUỘC)
+const showToast = (msg) => alert(msg);
+
+// Helper fix URL
 const fixUrl = (url, type = 'image') => {
-    if (!url) {
-        if (type === 'artist') return '/images/default-artist.png';
-        if (type === 'audio') return '';
-        return '/images/default-album.png';
-    }
+    if (!url) return '/images/default-album.png';
     if (url.startsWith('http')) return url;
     const prefix = type === 'image' ? '/media/images' : '/media/audio';
-    const originalPath = type === 'image' ? '/images' : '/audio';
-   
-    if (url.startsWith(prefix)) {
-        return `http://localhost:3000${url}`;
-    }
-    return `http://localhost:3000${url.replace(originalPath, prefix)}`;
+    return `http://localhost:3000${url.startsWith(prefix) ? url : url.replace(/\/images|\/audio/, prefix)}`;
 };
 
 const AlbumDetailPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { playTrack } = usePlayer();
+    const { user } = useAuth();
 
     const [album, setAlbum] = useState(null);
+    const [songs, setSongs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    useEffect(() => {
-        const loadAlbum = async () => {
-            setLoading(true);
-            setError('');
-            try {
-                const data = await fetchAlbumDetailApi(id);
+    // --- Modal state ---
+    const [showEditAlbumModal, setShowEditAlbumModal] = useState(false);
+    const [showSinglesModal, setShowSinglesModal] = useState(false);
+    const [targetAlbum, setTargetAlbum] = useState(null); // album đích để thêm bài
 
-                // Fix URL cho ảnh bìa
-                data.cover_url = fixUrl(data.cover_url, 'image');
-
-                // Fix URL cho tất cả bài hát
-                const fixedSongs = data.songs.map(song => ({
-                    ...song,
-                    image_url: fixUrl(data.cover_url, 'image'), // Dùng ảnh album
-                    cover_url: fixUrl(data.cover_url, 'image'), // SongListTable dùng cover_url
-                    file_url: fixUrl(song.file_url, 'audio'),
-                    // Đảm bảo có các field cần thiết
-                    album: { title: data.title },
-                    artist: { stage_name: data.artist?.stage_name || 'Nghệ sĩ' }
-                }));
-
-                data.songs = fixedSongs;
-                setAlbum(data);
-            } catch (err) {
-                setError('Không tìm thấy Album này.');
-            } finally {
+    // Load Album
+    const loadAlbum = useCallback(async () => {
+        setLoading(true);
+        try {
+            if (!id) {
+                setError('ID Album không hợp lệ.');
                 setLoading(false);
+                return;
             }
-        };
-        loadAlbum();
+            
+            const data = await fetchAlbumDetailApi(id); 
+            const albumCoverUrl = fixUrl(data.cover_url, 'image');
+
+            const fixedSongs = (data.songs || []).map(song => ({
+                ...song,
+                cover_url: song.image_url ? fixUrl(song.image_url, 'image') : albumCoverUrl,
+                file_url: fixUrl(song.file_url, 'audio'),
+                album: { id: data.id, title: data.title },
+                artist: song.artist || data.artist, 
+            }));
+            
+            setAlbum({ ...data, cover_url: albumCoverUrl });
+            setSongs(fixedSongs);
+        } catch (err) {
+            setError('Không thể tải Album.');
+            setSongs([]);
+        } finally {
+            setLoading(false);
+        }
     }, [id]);
 
-    const handlePlayAll = () => {
-        if (album?.songs?.length > 0) {
-            playTrack(album.songs[0], album.songs, 0);
+    useEffect(() => {
+        loadAlbum();
+    }, [loadAlbum]);
+
+    // Play tất cả
+    const playAll = () => {
+        if (songs.length > 0) playTrack(songs[0], songs, 0);
+    };
+
+    // Handle modal complete
+    const handleModalComplete = () => {
+        setShowEditAlbumModal(false);
+        setShowSinglesModal(false);
+        setTargetAlbum(null);
+        loadAlbum();
+    };
+
+    // --- Xóa bài hát khỏi Album ---
+    const handleRemoveSong = async (songId, songTitle) => {
+        if (!window.confirm(`Bạn có chắc muốn xóa "${songTitle}" khỏi Album không? Bài hát sẽ trở thành Single.`)) return;
+        
+        try {
+            await removeSongFromAlbumApi(songId); 
+            showToast(`Đã gỡ "${songTitle}" khỏi Album thành công.`);
+            loadAlbum();
+        } catch (error) {
+            showToast(error.response?.data?.message || 'Xóa thất bại.', 'error');
         }
     };
 
-    if (loading) return <div className="loading-message">Đang tải Album...</div>;
-    if (error || !album) return <div className="error-message">{error}</div>;
+    // --- Check owner ---
+    const isOwner = user && album && album.artist?.user?.id === user.userId;
 
-    const releaseYear = new Date(album.release_date).getFullYear();
+    // --- Mở modal Thêm bài hát ---
+    const handleAddSingles = (album) => {
+        setTargetAlbum(album);
+        setShowSinglesModal(true);
+    };
+
+    if (loading) return <div className="loading-message">Đang tải album...</div>;
+    if (error || !album) return <div className="error-message">{error || 'Album không tồn tại'}</div>;
+
+    const releaseYear = album.release_date ? new Date(album.release_date).getFullYear() : 'N/A';
 
     return (
         <div className="album-detail-container">
+
             {/* HEADER ALBUM */}
             <div className="playlist-header">
-                <img src={album.cover_url} alt={album.title} />
+                <img src={album.cover_url} alt={album.title} className="album-cover-large" />
                 <div className="playlist-info">
                     <p className="playlist-type">ALBUM</p>
-                    <h1>{album.title}</h1>
-                    <p className="playlist-owner">
-                        <span 
-                            className="artist-name" 
+                    <h1 className="playlist-title">{album.title}</h1>
+                    <p className="playlist-meta">
+                        <span
+                            className="artist-link"
                             onClick={() => navigate(`/artist/${album.artist?.id}`)}
                             style={{ cursor: 'pointer', color: '#fff' }}
                         >
                             {album.artist?.stage_name || 'Nghệ sĩ'}
                         </span>
-                        • {releaseYear} • {album.songs.length} bài hát
+                        {' • '}
+                        {releaseYear}
+                        {' • '}
+                        {songs.length} bài hát
                     </p>
-                    <button className="playlist-play-button" onClick={handlePlayAll}>
-                        <FaPlay size={20} /> PHÁT TẤT CẢ
-                    </button>
+
+                    <div className="album-controls">
+                        <button className="play-all-btn" onClick={playAll}>
+                            <FaPlay size={24} /> Phát tất cả
+                        </button>
+
+                        {isOwner && (
+                            <>
+                                <button
+                                    className="btn-outline"
+                                    onClick={() => setShowEditAlbumModal(true)}
+                                >
+                                    <FaEdit /> Sửa Album
+                                </button>
+
+                                <button
+                                    className="btn-primary"
+                                    onClick={() => handleAddSingles(album)}
+                                >
+                                    <FaPlus /> Thêm bài hát
+                                </button>
+                            </>
+                        )}
+                    </div>
                 </div>
             </div>
 
-            {/* DANH SÁCH BÀI HÁT - DÙNG SongListTable */}
-            <div className="song-list-wrapper">
+            {/* SONG LIST */}
+            <div className="song-list-section">
                 <SongListTable 
-                    songs={album.songs} 
-                    onSelectionChange={(selected) => {
-                        console.log('Đã chọn:', selected.size, 'bài hát');
-                        // Có thể thêm hành động: thêm vào playlist, xóa, v.v.
-                    }}
+                    songs={songs} 
+                    onRemoveSongFromAlbum={isOwner ? handleRemoveSong : null} 
                 />
             </div>
+
+            {/* MODAL THÊM SINGLES */}
+            {showSinglesModal && targetAlbum && (
+                <AddSinglesToAlbumModal
+                    targetAlbumId={targetAlbum.id}
+                    targetAlbumTitle={targetAlbum.title}
+                    onClose={() => setShowSinglesModal(false)}
+                    onComplete={handleModalComplete}
+                />
+            )}
+
+            {/* MODAL SỬA ALBUM */}
+            {showEditAlbumModal && (
+                <AlbumFormModal
+                    albumToEdit={album}
+                    onClose={() => setShowEditAlbumModal(false)}
+                    onComplete={handleModalComplete}
+                />
+            )}
         </div>
     );
 };

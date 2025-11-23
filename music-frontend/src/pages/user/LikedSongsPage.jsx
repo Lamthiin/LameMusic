@@ -1,12 +1,14 @@
-// music-frontend/src/pages/LikedSongsPage.jsx
-import React, { useEffect, useState } from 'react';
+// music-frontend/src/pages/ProfileUser/LikedSongsPage.jsx
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchLikedSongs } from '../../utils/api';
+import { fetchLikedSongs, toggleLikeSongApi } from '../../utils/api';
 import { usePlayer } from '../../context/PlayerContext';
 import { useAuth } from '../../context/AuthContext';
 import './LikedSongsPage.css';
 import { FaPlay, FaHeart } from 'react-icons/fa';
-import SongListTable from '../../components/user/SongListTable'; // <-- IMPORT MỚI
+import SongListTable from '../../components/user/SongListTable'; 
+
+const showToast = (message) => { alert(message); };
 
 const fixImageUrl = (url) => {
   if (!url) return '/images/default-album.png';
@@ -22,39 +24,43 @@ const LikedSongsPage = () => {
   const { playTrack } = usePlayer();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const loadLikedSongs = async () => {
-      setLoading(true);
-      const data = await fetchLikedSongs();
+  const loadLikedSongs = useCallback(async () => {
+    setLoading(true);
+    const data = await fetchLikedSongs();
 
-      const songsOnly = data
-        .map((item) => {
-          const song = item.song;
-          if (song) {
-            if (song.album) {
-              song.album.cover_url = fixImageUrl(song.album.cover_url);
-            }
-            song.image_url = song.image_url
-              ? fixImageUrl(song.image_url)
-              : song.album?.cover_url;
+    const songsOnly = data
+      .map((item) => {
+        const song = item.song;
+        if (!song) return null;
 
-            if (song.file_url) {
-              song.file_url = `http://localhost:3000${song.file_url.replace(
-                '/audio',
-                '/media/audio'
-              )}`;
-            }
-          }
-          return song;
-        })
-        .filter(Boolean);
+        const coverUrl = song.image_url 
+          ? fixImageUrl(song.image_url) 
+          : (song.album?.cover_url ? fixImageUrl(song.album.cover_url) : '/images/default-album.png');
 
-      setLikedSongs(songsOnly);
-      setLoading(false);
-    };
+        return {
+          ...song,
+          cover_url: coverUrl,
+          is_liked: true
+        };
+      })
+      .filter(Boolean);
 
-    loadLikedSongs();
+    setLikedSongs(songsOnly);
+    setLoading(false);
   }, []);
+
+  useEffect(() => { loadLikedSongs(); }, [loadLikedSongs]);
+
+  const handleUnlikeSong = async (songId) => {
+    if (!window.confirm('Bạn có muốn xóa bài hát này khỏi danh sách yêu thích?')) return;
+    try {
+      await toggleLikeSongApi(songId);
+      showToast('Đã xóa bài hát khỏi danh sách yêu thích.');
+      loadLikedSongs();
+    } catch (error) {
+      showToast('Lỗi hủy yêu thích.', 'error');
+    }
+  };
 
   const playAllLiked = () => {
     if (likedSongs.length > 0) {
@@ -68,7 +74,7 @@ const LikedSongsPage = () => {
 
   return (
     <div className="liked-songs-container">
-      {/* Header Playlist */}
+      {/* Header Playlist (giữ nguyên) */}
       <div className="playlist-header">
         <div className="playlist-cover-art">
           <FaHeart size={60} />
@@ -85,53 +91,12 @@ const LikedSongsPage = () => {
         </div>
       </div>
 
-      {/* === Header cột === */}
-      <div className="song-list-header">
-        <div className="song-col-header">Bài hát</div>
-        <div className="artist-col-header">Nghệ sĩ</div>
-        <div className="album-col-header">Album</div>
-      </div>
-
-      {/* === Danh sách bài hát === */}
-      <div className="song-list-detail">
-        {likedSongs.length > 0 ? (
-          likedSongs.map((song, index) => (
-            <div
-              key={song.id}
-              className="song-row"
-              onClick={() => playTrack(song, likedSongs, index)}
-            >
-              {/* Cột 1: Bài hát */}
-              <div className="song-title-col">
-                <span className="song-index">{index + 1}.</span>
-                <img
-                  src={
-                    song.image_url ||
-                    song.album?.cover_url ||
-                    '/images/default-album.png'
-                  }
-                  alt={song.title}
-                />
-                <p className="song-row-title">{song.title}</p>
-              </div>
-
-              {/* Cột 2: Nghệ sĩ */}
-              <div className="song-artist-col">
-                <p>{song.artist?.stage_name}</p>
-              </div>
-
-              {/* Cột 3: Album */}
-              <div className="song-album-col">
-                <p>{song.album?.title}</p>
-              </div>
-
-              {/* Icon tim */}
-              <FaHeart className="song-row-liked" />
-            </div>
-          ))
-        ) : (
-          <p className="subtle-text">Bạn chưa thích bài hát nào.</p>
-        )}
+      {/* Song List - tái sử dụng SongListTable */}
+      <div className="song-list-wrapper">
+        <SongListTable 
+          songs={likedSongs} 
+          onUnlike={handleUnlikeSong} 
+        />
       </div>
     </div>
   );

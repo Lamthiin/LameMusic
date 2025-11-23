@@ -76,7 +76,6 @@ const ProfilePlaylists = () => {
 
                             <div className="pp-card-info">
                                 <p className="pp-title">{pl.name}</p>
-                               0
                             </div>
 
                             <button 

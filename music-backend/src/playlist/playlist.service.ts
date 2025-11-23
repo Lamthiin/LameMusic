@@ -148,4 +148,56 @@ export class PlaylistService {
 
     return { message: 'Xóa playlist thành công.' };
   }
+
+  /**
+   * HÀM MỚI: Xóa một bài hát khỏi Playlist (Protected)
+   */
+  async removeSongFromPlaylist(userId: number, playlistId: number, songId: number): Promise<{ message: string }> {
+    const playlist = await this.playlistRepository.findOne({
+      where: { id: playlistId, is_active: 1 },
+      relations: ['user', 'songs'] // Phải load songs và user
+    });
+
+    if (!playlist) throw new NotFoundException('Playlist không tồn tại.');
+    if (playlist.user.id !== userId) {
+      throw new UnauthorizedException('Bạn không có quyền sửa playlist này.');
+    }
+
+    // Lọc bài hát ra khỏi mảng songs
+    const initialLength = playlist.songs.length;
+    playlist.songs = playlist.songs.filter(song => song.id !== songId);
+
+    if (playlist.songs.length === initialLength) {
+        throw new NotFoundException('Bài hát không có trong playlist.');
+    }
+
+    await this.playlistRepository.save(playlist);
+
+    return { message: 'Bài hát đã được xóa khỏi playlist.' };
+  }
+
+  /**
+     * HÀM MỚI: Lấy chi tiết Playlist của CHỦ SỞ HỮU (Protected)
+     * Đây là hàm Controller đang gọi để kiểm tra quyền truy cập Playlist Riêng tư.
+     */
+    async findMyPlaylistById(userId: number, playlistId: number): Promise<Playlist> {
+        const playlist = await this.playlistRepository.findOne({
+          where: { 
+              id: playlistId, 
+              is_active: 1, 
+              user: { id: userId } // Chỉ lấy Playlist thuộc về User này
+          },
+          relations: [
+              'user', 'songs', 'songs.artist', 'songs.album'
+          ],
+          order: { songs: { track_number: 'ASC' } as any },
+        });
+
+        if (!playlist) {
+          // Ném NotFoundException để Controller biết và chuyển sang tìm Public
+          throw new NotFoundException('Playlist không tồn tại.'); 
+        }
+        return playlist;
+    }
+
 }

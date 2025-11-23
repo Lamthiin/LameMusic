@@ -89,8 +89,10 @@ const AddSinglesToAlbumModal = ({ onClose, onComplete, targetAlbum }) => {
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                 <button className="modal-close-btn" onClick={onClose}><FaTimes /></button>
                 <h2>Thêm Singles vào Album</h2>
-                <p style={{textAlign: 'center', margin: '15px 0'}}>Album đích: <strong>{targetAlbum.title}</strong></p>
-
+                <p style={{textAlign: 'center'}}>Đang thêm bài hát vào: 
+                    {/* SỬA TỪ targetAlbum.title SANG targetAlbum?.title */}
+                    <strong>{targetAlbum?.title || 'Đang tải...'}</strong>
+                </p>
                 {error && <p className="modal-error">{error}</p>}
                 
                 <form onSubmit={handleSubmit} className="single-selection-form">

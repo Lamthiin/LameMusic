@@ -521,3 +521,27 @@ export const logPlaybackApi = async (songId, duration = 30) => {
         console.error('Lỗi khi ghi log lịch sử nghe:', error);
     }
 };
+
+export const removeSongFromPlaylistApi = async (playlistId, songId) => {
+    try {
+        const response = await api.delete(`/playlists/${playlistId}/song/${songId}`);
+        return response.data; 
+    } catch (error) {
+        console.error('Lỗi khi xóa bài hát khỏi playlist:', error);
+        throw error;
+    }
+};
+
+/**
+ * Xóa liên kết Album khỏi Bài hát (biến thành Single)
+ */
+export const removeSongFromAlbumApi = async (songId) => {
+    try {
+        // API DELETE /song/my/album/:songId (Backend đã tạo ở bước trước)
+        const response = await api.delete(`/song/my/album/${songId}`);
+        return response.data; 
+    } catch (error) {
+        console.error('Lỗi khi xóa bài hát khỏi album:', error);
+        throw error;
+    }
+};

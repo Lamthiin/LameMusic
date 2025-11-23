@@ -4,12 +4,13 @@ import {
   UseGuards, Req, HttpStatus, HttpCode, 
   ValidationPipe, ParseIntPipe, Param, 
   UnauthorizedException,
-  BadRequestException,Delete
+  BadRequestException,Delete, NotFoundException
 } from '@nestjs/common';
 import { PlaylistService } from './playlist.service';
 import { CreatePlaylistDto } from './dto/create-playlist.dto';
 import { AuthGuard } from '@nestjs/passport'; 
 import { JwtPayload } from '../auth/jwt.strategy';
+import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
 
 
 @Controller('playlists')
@@ -65,14 +66,58 @@ export class PlaylistController {
   }
 
   /**
+   * API MỚI: DELETE /playlists/:playlistId/song/:songId
+   * Xóa một bài hát khỏi playlist (chỉ chủ sở hữu)
+   */
+  @UseGuards(AuthGuard('jwt'))
+  @Delete(':playlistId/song/:songId')
+  async removeSongFromPlaylist(
+    @Req() req: any,
+    @Param('playlistId', ParseIntPipe) playlistId: number,
+    @Param('songId', ParseIntPipe) songId: number,
+  ) {
+    const userId = (req.user as JwtPayload).userId;
+    return this.playlistService.removeSongFromPlaylist(userId, playlistId, songId);
+  }
+
+  /**
    * === API MỚI: Lấy chi tiết 1 Playlist (Công khai) ===
    * GET /playlists/:id
    */
-  @Get(':id') // <-- API MỚI (Public)
-  async getPlaylistById(@Param('id', ParseIntPipe) id: number) {
-    // Service sẽ kiểm tra quyền riêng tư
-    return this.playlistService.findPublicById(id);
-  }
+  // @Get(':id') // <-- API MỚI (Public)
+  // async getPlaylistById(@Param('id', ParseIntPipe) id: number) {
+  //   // Service sẽ kiểm tra quyền riêng tư
+  //   return this.playlistService.findPublicById(id);
+  // }
+
+  /**
+     * API CHUNG: GET /playlists/:id (Decision Maker)
+     * Quyết định gọi hàm Public hay Private dựa trên Token và quyền sở hữu.
+     */
+    @UseGuards(OptionalJwtAuthGuard) // Cho phép Token có hoặc không
+    @Get(':id') 
+    async getPlaylistById(@Param('id', ParseIntPipe) id: number, @Req() req: any) {
+        const user = (req.user as JwtPayload) || null;
+
+        if (user) {
+            // === FIX LỖI: THỬ TÌM VỚI QUYỀN SỞ HỮU TRƯỚC ===
+            try {
+                // Hàm này sẽ trả về Playlist nếu: (id khớp) VÀ (userId khớp)
+                return await this.playlistService.findMyPlaylistById(user.userId, id);
+            } catch (error) {
+                // Nếu findMyPlaylistById thất bại (bị 404 vì không phải playlist của họ),
+                // ta tiếp tục tìm kiếm Public.
+                if (error instanceof NotFoundException) {
+                    return this.playlistService.findPublicById(id);
+                }
+                throw error;
+            }
+        }
+        
+        // Nếu không có Token, chỉ tìm Public
+        return this.playlistService.findPublicById(id);
+    }
+
 
   /**
    * API MỚI: DELETE /playlists/my/:id (Xóa Playlist)

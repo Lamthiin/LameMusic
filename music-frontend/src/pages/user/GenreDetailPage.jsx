@@ -1,10 +1,13 @@
-// music-frontend/src/pages/GenreDetailPage.jsx (FINAL VERSION)
+// music-frontend/src/pages/GenreDetailPage.jsx
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { fetchSongsByGenre } from '../../utils/api';
 import { usePlayer } from '../../context/PlayerContext';
-import './GenreDetailPage.css'; // Dùng chung CSS
+import './GenreDetailPage.css';
 import { FaPlay } from 'react-icons/fa';
+
+// ✅ Import SongListTable
+import SongListTable from '../../components/user/SongListTable';
 
 // === HÀM FIX ẢNH ===
 const fixImageUrl = (url) => {
@@ -59,7 +62,7 @@ const GenreDetailPage = () => {
       <div
         className="playlist-header"
         style={{
-          background: 'linear-gradient(210deg, #007525ff 0%, var(--color-background) 100%)',
+          background: 'linear-gradient(210deg, #444444ff 0%, var(--color-background) 100%)',
         }}
       >
         <div className="playlist-info">
@@ -72,41 +75,11 @@ const GenreDetailPage = () => {
         </div>
       </div>
 
-      {/* Danh sách bài hát */}
+      {/* Song List */}
       <div className="song-list-detail">
-        {/* === DÒNG TIÊU ĐỀ CỘT === */}
-        <div className="song-list-header">
-          <span className="col-song">BÀI HÁT</span>
-          <span className="col-artist">NGHỆ SĨ</span>
-          <span className="col-album">ALBUM</span>
-        </div>
-
-        {/* === NỘI DUNG === */}
         {songs.length > 0 ? (
-          songs.map((song, index) => (
-            <div
-              key={song.id}
-              className="song-row"
-              onClick={() => playTrack(song, songs, index)}
-            >
-              <div className="col-song">
-                <span className="song-index">{index + 1}.</span>
-                <img
-                  src={song.image_url || song.album?.cover_url || '/images/default-album.png'}
-                  alt={song.title}
-                />
-                <p className="song-row-title">{song.title}</p>
-              </div>
-
-              <div className="col-artist">
-                <p className="song-row-artist">{song.artist?.stage_name || 'Không rõ'}</p>
-              </div>
-
-              <div className="col-album">
-                <p className="song-row-album">{song.album?.title || 'Không có'}</p>
-              </div>
-            </div>
-          ))
+          // ✅ Tái sử dụng SongListTable, slice nếu muốn giới hạn số bài
+          <SongListTable songs={songs} />
         ) : (
           <p className="subtle-text">Không tìm thấy bài hát nào thuộc thể loại này.</p>
         )}

@@ -1,217 +1,224 @@
-/* ===================== */
-/* BẢNG DANH SÁCH BÀI HÁT */
-/* ===================== */
-
+/* SongListTable.css – ĐẸP CHUẨN SPOTIFY 2025 */
 .song-list-table {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+  width: 100%;
+  user-select: none;
 }
 
-
-
-/* ===================== */
 /* HEADER */
-/* ===================== */
-
 .table-header {
-    display: grid;
-    grid-template-columns: 30px 60px 1fr 1fr 120px 80px 40px;
-    padding: 12px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.15);
-    font-weight: 600;
-    font-size: 13px;
-    text-transform: uppercase;
-    align-items: center;
-    letter-spacing: 0.5px;
+  display: grid;
+  grid-template-columns: 40px 50px 4fr 3fr 1fr 100px 60px;
+  align-items: center;
+  padding: 0 16px;
+  height: 56px;
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #b3b3b3;
+  border-bottom: 1px solid #282828;
+  position: sticky;
+  top: 0;
+  background: #0d0d0d;
+  z-index: 10;
 }
 
 .table-header.has-selection {
-    grid-template-columns: 30px 1fr auto;
+  grid-template-columns: 40px 1fr auto;
+  background: #1a1a1a;
+  height: 64px;
 }
 
-.header-checkbox {
-    cursor: pointer;
-    user-select: none;
-}
-
-.selection-message {
-    font-size: 14px;
-}
-
-.action-button-group {
-    display: flex;
-    gap: 12px;
-}
-
-.action-btn {
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    color: #f0f0f0;
-    font-size: 16px;
-}
-
-.action-btn:hover {
-    opacity: 0.7;
-}
-
-
-
-/* ===================== */
-/* TABLE BODY */
-/* ===================== */
-
-.table-body {
-    display: flex;
-    flex-direction: column;
-}
-
-
-
-/* ===================== */
-/* TỪNG DÒNG */
-/* ===================== */
-
+/* ROWS */
 .table-row {
-    display: grid;
-    grid-template-columns: 30px 60px 1fr 1fr 120px 80px 40px;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-    cursor: pointer;
-    transition: background 0.15s ease;
+  display: grid;
+  grid-template-columns: 40px 50px 4fr 3fr 1fr 100px 60px;
+  align-items: center;
+  height: 64px;
+  padding: 0 16px;
+  border-bottom: 1px solid #1e1e1e;
+  transition: background 0.25s;
+  border-radius: 4px;
+  margin: 0 8px;
 }
 
 .table-row:hover {
-    background: rgba(255,255,255,0.06);
+  background: #2a2a2a !important;
+  border-radius: 8px;
 }
 
 .table-row.selected {
-    background: rgba(255,255,255,0.12);
+  background: #3a3a3a !important;
+  border-radius: 8px;
 }
 
 .table-row.current {
-    background: rgba(255,255,255,0.08);
+  background: #1db95420;
+  border-radius: 8px;
 }
 
-
-
-/* ===================== */
-/* CHECKBOX */
-/* ===================== */
-
+/* CÁC CỘT CĂN CHỈNH HOÀN HẢO */
 .row-checkbox {
-    width: 16px;
-    height: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  justify-self: center;
+  color: #1db954;
+  font-weight: bold;
 }
-
-
-
-/* ===================== */
-/* THUMBNAIL */
-/* ===================== */
 
 .col-img {
-    position: relative;
-    width: 50px;
-    height: 50px;
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 6px;
+  overflow: hidden;
+  justify-self: center;
 }
 
 .song-thumbnail {
-    width: 50px;
-    height: 50px;
-    object-fit: cover;
-    border-radius: 6px;
-    display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .play-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 50px;
-    height: 50px;
-    background: rgba(0,0,0,0.35);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    border-radius: 6px;
-    transition: opacity 0.2s ease;
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+  color: #fff;
+  border-radius: 6px;
 }
 
-.col-img:hover .play-overlay {
-    opacity: 1;
+.col-img:hover .play-overlay,
+.table-row.current .play-overlay {
+  opacity: 1;
 }
-
-
-
-/* ===================== */
-/* TÊN BÀI HÁT + NGHỆ SĨ */
-/* ===================== */
 
 .col-title {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* quan trọng để text-overflow hoạt động */
 }
 
 .song-title {
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.song-title:hover {
-    text-decoration: underline;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .song-artist {
-    font-size: 13px;
-    color: #bbb;
-    pointer-events: none; /* Không click redirect */
+  color: #a7a7a7;
+  font-size: 13.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
+.col-album {
+  color: #a7a7a7;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
+.col-plays {
+  color: #a7a7a7;
+  font-size: 14px;
+  text-align: right;
+  padding-right: 20px;
+}
 
-/* ===================== */
-/* ALBUM - LƯỢT NGHE - THỜI GIAN */
-/* ===================== */
-
-.col-album,
-.col-plays,
 .col-duration {
-    font-size: 14px;
-    opacity: 0.85;
-    user-select: none;
-    pointer-events: none; /* Không redirect khi click */
+  color: #fff;
+  font-size: 14px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
-
-
-/* ===================== */
-/* OPTIONS (Nút 3 chấm) */
-/* ===================== */
-
+/* CỘT OPTIONS – CĂN ĐẸP NHẤT */
 .col-options {
-    display: flex;
-    justify-content: center;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  padding-right: 8px;
 }
 
 .btn-icon {
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    padding: 6px;
-    border-radius: 4px;
-    color: #eee;
+  background: none;
+  border: none;
+  color: #b3b3b3;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
 }
 
 .btn-icon:hover {
-    background: rgba(255,255,255,0.1);
+  color: #fff;
+  background: #ffffff1a;
+  transform: scale(1.1);
+}
+
+.btn-unlike {
+  color: #ff4d4d;
+}
+
+.btn-unlike:hover {
+  background: #ff4d4d33;
+  transform: scale(1.15);
+}
+
+/* KHI CHỌN NHIỀU */
+.selection-message {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.action-button-group {
+  display: flex;
+  gap: 16px;
+}
+
+.action-btn {
+  background: #1db954;
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 30px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.2s;
+}
+
+.action-btn:hover {
+  background: #1ed760;
+  transform: scale(1.04);
+}
+
+/* Responsive mobile */
+@media (max-width: 768px) {
+  .table-header,
+  .table-row {
+    grid-template-columns: 40px 50px 1fr 80px 50px;
+  }
+  .col-album,
+  .col-plays {
+    display: none;
+  }
 }
