@@ -1,0 +1,106 @@
+/* Overlay mờ */
+.edit-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+/* Card */
+.edit-card {
+  width: 640px;
+  background: #111;
+  border-radius: 14px;
+  padding: 28px;
+  color: white;
+  animation: popIn 0.25s ease;
+}
+
+@keyframes popIn {
+  from { transform: scale(0.94); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Title */
+.edit-title {
+  margin-bottom: 22px;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+/* GRID 2 cột */
+.edit-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 24px;
+}
+
+/* INPUT GROUP */
+.edit-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.edit-group label {
+  margin-bottom: 6px;
+  font-size: 15px;
+  opacity: 0.85;
+}
+
+/* Input style */
+.edit-group input,
+.edit-group select {
+  background: #1c1c1c;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: white;
+  font-size: 15px;
+  outline: none;
+}
+
+.edit-group input:focus,
+.edit-group select:focus {
+  border-color: #1db954;
+}
+
+/* Footer buttons */
+.edit-footer {
+  margin-top: 26px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.btn-cancel {
+  padding: 10px 22px;
+  background: #444;
+  border: none;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-cancel:hover {
+  background: #555;
+}
+
+.btn-save {
+  padding: 10px 24px;
+  background: #1db954;
+  color: black;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-save:hover {
+  background: #1ed760;
+}

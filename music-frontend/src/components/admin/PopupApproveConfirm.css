@@ -1,0 +1,42 @@
+.btn-approve {
+  background: #1DB954;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.btn-approve:hover {
+  background: #1ed760;
+}
+/* Nút hủy */
+.popup-btn-cancel {
+  background: #3e3e3e;
+  color: #fff;
+  padding: 10px 24px;
+  border-radius: 10px;
+  border: none;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.popup-btn-cancel:hover {
+  background: #5a5a5a;
+  transform: scale(1.03);
+}
+
+/* Nút duyệt */
+.popup-btn-approve {
+  background: #1DB954;
+  color: #fff;
+  padding: 10px 28px;
+  border-radius: 10px;
+  border: none;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+

@@ -1,0 +1,76 @@
+.view-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.view-card {
+  width: 460px;
+  background: #121212;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.45);
+  animation: popupFade 0.25s ease;
+}
+
+@keyframes popupFade {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.view-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.view-title {
+  font-size: 22px;
+  color: #fff;
+  font-weight: 600;
+}
+
+.view-close {
+  background: #2a2a2a;
+  color: #fff;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.view-close:hover {
+  background: #3c3c3c;
+}
+
+.view-body {
+  display: flex;
+  gap: 20px;
+}
+
+.view-avatar img {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.view-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: #ddd;
+  gap: 6px;
+}
+
+.view-info span {
+  font-weight: 600;
+  color: #fff;
+}
