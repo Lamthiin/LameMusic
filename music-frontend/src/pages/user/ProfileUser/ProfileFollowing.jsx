@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchMyFollowingApi } from '../../utils/api'; 
+import { fetchMyFollowingApi } from '../../../utils/api'; 
 import './Profile.css';
 import { FaUserCircle } from 'react-icons/fa';
 
