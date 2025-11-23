@@ -1,0 +1,67 @@
+/* Overlay */
+.success-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(3px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+/* Card */
+.success-card {
+  background: #181818;
+  padding: 28px 34px;
+  border-radius: 18px;
+  border: 1px solid #2c2c2c;
+  text-align: center;
+  width: 360px;
+  animation: fadeUp 0.25s ease-out;
+  color: white;
+  box-shadow: 0 0 30px rgba(0,0,0,0.4);
+}
+
+/* Icon */
+.success-icon {
+  font-size: 48px;
+  color: #1db954;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+/* Title */
+.success-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 18px;
+}
+
+/* Button */
+.success-btn {
+  background: #1db954;
+  color: black;
+  padding: 10px 22px;
+  border-radius: 28px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.success-btn:hover {
+  background: #1ed760;
+}
+
+/* Animation */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

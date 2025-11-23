@@ -1,0 +1,74 @@
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.popup-delete-card {
+  width: 420px;
+  background: #181818;
+  padding: 28px;
+  border-radius: 18px;
+  border: 1px solid #2c2c2c;
+  animation: premiumFade 0.25s ease-out;
+  box-shadow: 0 0 40px rgba(0,0,0,0.4);
+  color: white;
+}
+
+.popup-delete-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.popup-delete-message {
+  color: #ccc;
+  line-height: 1.4;
+  margin-bottom: 24px;
+  font-size: 15px;
+}
+
+.popup-delete-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.btn-cancel {
+  background: #333;
+  color: #ccc;
+  padding: 10px 20px;
+  border-radius: 30px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-confirm {
+  background: #c92a2a;
+  color: white;
+  padding: 10px 26px;
+  border-radius: 30px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-confirm:hover {
+  background: #e03131;
+}
+
+@keyframes premiumFade {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
