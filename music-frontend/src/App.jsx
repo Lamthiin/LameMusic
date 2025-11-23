@@ -3,26 +3,26 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 
 // Import Layouts
-import MainAppLayout from './components/MainAppLayout'; 
-import AdminRoute from './components/AdminRoute'; 
-import ProtectedRoute from './components/ProtectedRoute'; // <-- (1) IMPORT GUARD
-import ProfileLayout from './pages/ProfileUser/ProfileLayout'; // <-- (2) IMPORT LAYOUT MỚI
+import MainAppLayout from './components/user/MainAppLayout'; 
+import AdminRoute from './components/user/AdminRoute'; 
+import ProtectedRoute from './components/user/ProtectedRoute'; // <-- (1) IMPORT GUARD
+import ProfileLayout from './pages/user/ProfileUser/ProfileLayout'; // <-- (2) IMPORT LAYOUT MỚI
 import AdminLayout from "./components/admin/AdminLayout";
 
 // Import Trang
-import Home from './pages/Home';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import VerifyOtp from './pages/VerifyOtp';
-import ForgotPassword from './pages/ForgotPassword';
-import ResetPassword from './pages/ResetPassword';
-import AdminPage from './pages/AdminPage';
-import SongDetail from './pages/SongDetail'; 
-import ArtistDetail from './pages/ArtistDetail'; 
-import LikedSongsPage from './pages/LikedSongsPage';
-import GenreDetailPage from './pages/GenreDetailPage';
-import AllSongsPage from './pages/AllSongsPage'; 
-import AllArtistsPage from './pages/AllArtistsPage';
+import Home from './pages/user/Home';
+import Login from './pages/user/Login';
+import Register from './pages/user/Register';
+import VerifyOtp from './pages/user/VerifyOtp';
+import ForgotPassword from './pages/user/ForgotPassword';
+import ResetPassword from './pages/user/ResetPassword';
+import AdminPage from './pages/user/AdminPage';
+import SongDetail from './pages/user/SongDetail'; 
+import ArtistDetail from './pages/user/ArtistDetail'; 
+import LikedSongsPage from './pages/user/LikedSongsPage';
+import GenreDetailPage from './pages/user/GenreDetailPage';
+import AllSongsPage from './pages/user/AllSongsPage'; 
+import AllArtistsPage from './pages/user/AllArtistsPage';
 //Import Admin Pages
 import Dashboard from "./pages/admin/Dashboard";
 import ManageUser from "./pages/admin/ManageUser";
@@ -35,17 +35,17 @@ import AdminAccountPage from "./pages/admin/AdminAccountPage";
 
 
 // (3) IMPORT CÁC TRANG CON CỦA PROFILE
-import ProfileInfo from './pages/ProfileUser/ProfileInfo';
-import ProfilePlaylists from './pages/ProfileUser/ProfilePlaylists';
-import ProfileFollowing from './pages/ProfileUser/ProfileFollowing'; // <-- (1) IMPORT MỚI
-import PlaylistDetailPage from './pages/PlaylistDetailPage'; // <-- (2) IMPORT MỚI
-import PublicProfileLayout from './pages/ProfileUser/PublicProfileLayout';
-import PublicProfileFollowing from './pages/ProfileUser/PublicProfileFollowing';
-import PublicProfileLikes from './pages/ProfileUser/PublicProfileLikes';
-import PublicProfilePlaylists from './pages/ProfileUser/PublicProfilePlaylists';
-import AlbumDetailPage from './pages/AlbumDetailPage'; // <-- (1) IMPORT ALBUM DETAIL MỚI
-import AllAlbumsPage from './pages/AllAlbumsPage'; // <-- (2) LỖI ĐÃ SỬA: IMPORT ALL ALBUMS MỚI
-import ArtistRegistrationPage from './pages/ArtistRegistrationPage'; // <-- (2) IMPORT MỚI
+import ProfileInfo from './pages/user/ProfileUser/ProfileInfo';
+import ProfilePlaylists from './pages/user/ProfileUser/ProfilePlaylists';
+import ProfileFollowing from './pages/user/ProfileUser/ProfileFollowing'; // <-- (1) IMPORT MỚI
+import PlaylistDetailPage from './pages/user/PlaylistDetailPage'; // <-- (2) IMPORT MỚI
+import PublicProfileLayout from './pages/user/ProfileUser/PublicProfileLayout';
+import PublicProfileFollowing from './pages/user/ProfileUser/PublicProfileFollowing';
+import PublicProfileLikes from './pages/user/ProfileUser/PublicProfileLikes';
+import PublicProfilePlaylists from './pages/user/ProfileUser/PublicProfilePlaylists';
+import AlbumDetailPage from './pages/user/AlbumDetailPage'; // <-- (1) IMPORT ALBUM DETAIL MỚI
+import AllAlbumsPage from './pages/user/AllAlbumsPage'; // <-- (2) LỖI ĐÃ SỬA: IMPORT ALL ALBUMS MỚI
+import ArtistRegistrationPage from './pages/user/ArtistRegistrationPage'; // <-- (2) IMPORT MỚI
 import ArtistDashboardLayout from './pages/ArtistDashboard/ArtistDashboardLayout'; // <-- (1) IMPORT MỚI
 import ArtistInfo from './pages/ArtistDashboard/ArtistInfo'; // <-- (2) IMPORT MỚI
 import ArtistAlbums from './pages/ArtistDashboard/ArtistAlbums'; // <-- (1) IMPORT MỚI

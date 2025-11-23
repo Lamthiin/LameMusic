@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { getMySongsApi, deleteMySongApi } from '../../utils/api';
 import './ArtistDashboard.css'; 
 import { FaPlus, FaEdit, FaTrash, FaPlay } from 'react-icons/fa';
-import SongFormModal from '../../components/SongFormModal'; // <-- (1) IMPORT MODAL MỚI
+import SongFormModal from '../../components/user/SongFormModal'; // <-- (1) IMPORT MODAL MỚI
 
 // (Hàm Toast Helper)
 const showToast = (message, type = 'success') => { alert(message); };

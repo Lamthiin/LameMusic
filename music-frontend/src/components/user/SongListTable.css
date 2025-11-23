@@ -1,0 +1,217 @@
+/* ===================== */
+/* BẢNG DANH SÁCH BÀI HÁT */
+/* ===================== */
+
+.song-list-table {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+
+
+/* ===================== */
+/* HEADER */
+/* ===================== */
+
+.table-header {
+    display: grid;
+    grid-template-columns: 30px 60px 1fr 1fr 120px 80px 40px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    align-items: center;
+    letter-spacing: 0.5px;
+}
+
+.table-header.has-selection {
+    grid-template-columns: 30px 1fr auto;
+}
+
+.header-checkbox {
+    cursor: pointer;
+    user-select: none;
+}
+
+.selection-message {
+    font-size: 14px;
+}
+
+.action-button-group {
+    display: flex;
+    gap: 12px;
+}
+
+.action-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #f0f0f0;
+    font-size: 16px;
+}
+
+.action-btn:hover {
+    opacity: 0.7;
+}
+
+
+
+/* ===================== */
+/* TABLE BODY */
+/* ===================== */
+
+.table-body {
+    display: flex;
+    flex-direction: column;
+}
+
+
+
+/* ===================== */
+/* TỪNG DÒNG */
+/* ===================== */
+
+.table-row {
+    display: grid;
+    grid-template-columns: 30px 60px 1fr 1fr 120px 80px 40px;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.table-row:hover {
+    background: rgba(255,255,255,0.06);
+}
+
+.table-row.selected {
+    background: rgba(255,255,255,0.12);
+}
+
+.table-row.current {
+    background: rgba(255,255,255,0.08);
+}
+
+
+
+/* ===================== */
+/* CHECKBOX */
+/* ===================== */
+
+.row-checkbox {
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+
+/* ===================== */
+/* THUMBNAIL */
+/* ===================== */
+
+.col-img {
+    position: relative;
+    width: 50px;
+    height: 50px;
+}
+
+.song-thumbnail {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 6px;
+    display: block;
+}
+
+.play-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50px;
+    height: 50px;
+    background: rgba(0,0,0,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    border-radius: 6px;
+    transition: opacity 0.2s ease;
+}
+
+.col-img:hover .play-overlay {
+    opacity: 1;
+}
+
+
+
+/* ===================== */
+/* TÊN BÀI HÁT + NGHỆ SĨ */
+/* ===================== */
+
+.col-title {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.song-title {
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.song-title:hover {
+    text-decoration: underline;
+}
+
+.song-artist {
+    font-size: 13px;
+    color: #bbb;
+    pointer-events: none; /* Không click redirect */
+}
+
+
+
+/* ===================== */
+/* ALBUM - LƯỢT NGHE - THỜI GIAN */
+/* ===================== */
+
+.col-album,
+.col-plays,
+.col-duration {
+    font-size: 14px;
+    opacity: 0.85;
+    user-select: none;
+    pointer-events: none; /* Không redirect khi click */
+}
+
+
+
+/* ===================== */
+/* OPTIONS (Nút 3 chấm) */
+/* ===================== */
+
+.col-options {
+    display: flex;
+    justify-content: center;
+}
+
+.btn-icon {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 4px;
+    color: #eee;
+}
+
+.btn-icon:hover {
+    background: rgba(255,255,255,0.1);
+}

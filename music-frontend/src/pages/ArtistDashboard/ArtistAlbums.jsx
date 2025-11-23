@@ -2,11 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getMyAlbumsApi, deleteMyAlbumApi } from '../../utils/api'; 
-import '../ProfileUser/Profile.css'; 
+import '../user/ProfileUser/Profile.css'; 
 import './ArtistDashboard.css'; 
 import { FaPlus, FaEdit, FaTrash, FaMusic } from 'react-icons/fa';
-import AlbumFormModal from '../../components/AlbumFormModal'; 
-import AddSinglesToAlbumModal from '../../components/AddSinglesToAlbumModal'; // <-- (1) IMPORT MODAL MỚI
+import AlbumFormModal from '../../components/user/AlbumFormModal'; 
+import AddSinglesToAlbumModal from '../../components/user/AddSinglesToAlbumModal'; // <-- (1) IMPORT MODAL MỚI
 
 // (Hàm Toast Helper)
 const showToast = (message, type = 'success') => { alert(message); };
