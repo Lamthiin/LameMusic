@@ -1,8 +1,8 @@
 // music-frontend/src/pages/Profile/ProfileInfo.jsx
 import React, { useState, useEffect } from 'react';
-import { getMyProfileApi, updateMyProfileApi } from '../../../utils/api';
-import { useAuth } from '../../../context/AuthContext';
-import ChangePasswordModal from '../../../components/user/ChangePasswordModal';
+import { getMyProfileApi, updateMyProfileApi } from '../../utils/api';
+import { useAuth } from '../../context/AuthContext';
+import ChangePasswordModal from '../../components/user/ChangePasswordModal';
 import './Profile.css';
 
 const showToast = (message, type = 'success') => {

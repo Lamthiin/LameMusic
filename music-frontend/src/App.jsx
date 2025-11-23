@@ -6,7 +6,7 @@ import { Routes, Route } from 'react-router-dom';
 import MainAppLayout from './components/user/MainAppLayout'; 
 import AdminRoute from './components/user/AdminRoute'; 
 import ProtectedRoute from './components/user/ProtectedRoute'; // <-- (1) IMPORT GUARD
-import ProfileLayout from './pages/user/ProfileUser/ProfileLayout'; // <-- (2) IMPORT LAYOUT MỚI
+import ProfileLayout from './pages/ProfileUser/ProfileLayout'; // <-- (2) IMPORT LAYOUT MỚI
 import AdminLayout from "./components/admin/AdminLayout";
 
 // Import Trang
@@ -35,14 +35,14 @@ import AdminAccountPage from "./pages/admin/AdminAccountPage";
 
 
 // (3) IMPORT CÁC TRANG CON CỦA PROFILE
-import ProfileInfo from './pages/user/ProfileUser/ProfileInfo';
-import ProfilePlaylists from './pages/user/ProfileUser/ProfilePlaylists';
-import ProfileFollowing from './pages/user/ProfileUser/ProfileFollowing'; // <-- (1) IMPORT MỚI
+import ProfileInfo from './pages/ProfileUser/ProfileInfo';
+import ProfilePlaylists from './pages/ProfileUser/ProfilePlaylists';
+import ProfileFollowing from './pages/ProfileUser/ProfileFollowing'; // <-- (1) IMPORT MỚI
 import PlaylistDetailPage from './pages/user/PlaylistDetailPage'; // <-- (2) IMPORT MỚI
-import PublicProfileLayout from './pages/user/ProfileUser/PublicProfileLayout';
-import PublicProfileFollowing from './pages/user/ProfileUser/PublicProfileFollowing';
-import PublicProfileLikes from './pages/user/ProfileUser/PublicProfileLikes';
-import PublicProfilePlaylists from './pages/user/ProfileUser/PublicProfilePlaylists';
+import PublicProfileLayout from './pages/ProfileUser/PublicProfileLayout';
+import PublicProfileFollowing from './pages/ProfileUser/PublicProfileFollowing';
+import PublicProfileLikes from './pages/ProfileUser/PublicProfileLikes';
+import PublicProfilePlaylists from './pages/ProfileUser/PublicProfilePlaylists';
 import AlbumDetailPage from './pages/user/AlbumDetailPage'; // <-- (1) IMPORT ALBUM DETAIL MỚI
 import AllAlbumsPage from './pages/user/AllAlbumsPage'; // <-- (2) LỖI ĐÃ SỬA: IMPORT ALL ALBUMS MỚI
 import ArtistRegistrationPage from './pages/user/ArtistRegistrationPage'; // <-- (2) IMPORT MỚI

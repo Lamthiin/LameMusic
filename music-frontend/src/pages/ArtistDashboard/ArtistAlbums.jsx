@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getMyAlbumsApi, deleteMyAlbumApi } from '../../utils/api'; 
-import '../user/ProfileUser/Profile.css'; 
+import '../ProfileUser/Profile.css'; 
 import './ArtistDashboard.css'; 
 import { FaPlus, FaEdit, FaTrash, FaMusic } from 'react-icons/fa';
 import AlbumFormModal from '../../components/user/AlbumFormModal'; 

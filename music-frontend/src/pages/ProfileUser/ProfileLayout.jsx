@@ -2,7 +2,7 @@
 import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import './Profile.css';
-import { useAuth } from '../../../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 
 const ProfileLayout = () => {
   const { user } = useAuth();

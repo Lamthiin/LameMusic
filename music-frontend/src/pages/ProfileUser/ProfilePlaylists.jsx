@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { fetchMyPlaylists, deleteMyPlaylistApi } from '../../../utils/api'; 
+import { fetchMyPlaylists, deleteMyPlaylistApi } from '../../utils/api'; 
 import { useNavigate } from 'react-router-dom';
 import './Profile.css';
 import { FaLock, FaGlobe, FaTrash, FaPlus } from 'react-icons/fa';
-import CreatePlaylistModal from '../../../components/user/CreatePlaylistModal';
+import CreatePlaylistModal from '../../components/user/CreatePlaylistModal';
 
 const showToast = (message, type = 'success') => { alert(message); };
 const fixUrl = (url) => { 

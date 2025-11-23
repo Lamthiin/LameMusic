@@ -1,8 +1,8 @@
 // music-frontend/src/pages/Profile/PublicProfileLayout.jsx (TẠO MỚI)
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, NavLink, Outlet } from 'react-router-dom';
-import { getPublicProfileApi } from '../../../utils/api'; 
-import '../ProfileUser/Profile.css'; // Dùng chung CSS
+import { getPublicProfileApi } from '../../utils/api'; 
+import './Profile.css'; // Dùng chung CSS
 
 // HÀM HELPER: Fix URL ảnh (BẮT BUỘC)
 const fixUrl = (url, type = 'image') => {

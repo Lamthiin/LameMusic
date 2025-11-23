@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { getMyArtistProfileApi, updateMyArtistProfileApi } from '../../utils/api';
-import '../user/ProfileUser/Profile.css'; // Dùng chung CSS Form
+import '../ProfileUser/Profile.css'; // Dùng chung CSS Form
 import './ArtistDashboard.css'; // CSS riêng
 
 // (Hàm Toast Helper)

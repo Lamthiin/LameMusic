@@ -1,7 +1,7 @@
 // music-frontend/src/pages/ArtistDashboard/ArtistDashboardLayout.jsx (TẠO MỚI)
 import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import '../user/ProfileUser/Profile.css'; // Dùng chung CSS Profile (Tabs)
+import '../ProfileUser/Profile.css'; // Dùng chung CSS Profile (Tabs)
 import './ArtistDashboard.css'; // CSS riêng
 import { useAuth } from '../../context/AuthContext';
 import { FaUserEdit, FaMusic, FaCompactDisc, FaHeart, FaUsers } from 'react-icons/fa';
