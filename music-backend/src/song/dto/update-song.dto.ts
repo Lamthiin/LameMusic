@@ -11,8 +11,11 @@ export class UpdateSongDto {
   genre?: string; // <-- KHÔNG CÓ @IsNumberString
 
   @IsOptional()
-  @IsNumberString() 
+    // FIX QUAN TRỌNG: Validation phải là điều kiện OR (Là chuỗi số HOẶC là chuỗi rỗng)
+    // Cách an toàn nhất là loại bỏ @IsNumberString và xử lý parse/validation trong Service.
+  @IsString() 
   albumId?: string;
+  
 
   @IsOptional()
   @IsNumberString()
