@@ -3,50 +3,65 @@
   width: 100%;
 }
 
-/* Tiêu đề */
+/* Tiêu đề giống topbar-title */
 .pending-title {
-  font-size: 20px;
-  font-weight: 700;
-  margin-bottom: 12px;
-  color: #f5f5f5;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #ddd;
 }
 
-/* Danh sách */
+/* List chung */
 .pending-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-/* ITEM – tone sáng, dễ nhìn */
+/* ITEM – giống active-row của album */
 .pending-row {
   display: flex;
   align-items: center;
-  background: #2a2a2a; /* sáng hơn bản cũ */
+  background: #2a2a2a;
   padding: 16px 20px;
-  border-radius: 10px;
-  box-shadow: 0px 3px 10px rgba(0,0,0,0.2);
+  border-radius: 12px;           /* ⭐ giống album */
+  border: 1px solid rgba(255,255,255,0.05);
+  box-shadow: 0px 2px 8px rgba(0,0,0,0.25);
   transition: 0.2s ease;
   min-height: 80px;
 }
 
 .pending-row:hover {
-  background: #333333; /* hover nhẹ nhưng rõ */
+  background: #333;
   transform: translateY(-2px);
 }
 
-/* Avatar */
+/* Avatar – giống album (vuông bo 12px) */
 .row-avatar {
-  width: 58px;
-  height: 58px;
+  width: 60px;
+  height: 60px;
   object-fit: cover;
-  border-radius: 50%;   /* ⭐ CHỈ CẦN DÒNG NÀY */
+  border-radius: 12px;           /* ⭐ đồng bộ */
   margin-right: 20px;
   flex-shrink: 0;
+  .album-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #e0fffa;
+  margin: 0 0 8px;
+  background: linear-gradient(90deg, #00e6c8, #00f0d0);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 15px rgba(0,230,200,0.5);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
+}
 
-/* Tên nghệ sĩ */
+/* Info */
 .row-info {
   flex: 1;
   display: flex;
@@ -55,20 +70,19 @@
 
 .row-info h3 {
   margin: 0;
-  font-size: 17px;
-  font-weight: 600;
-  color: #f1f1f1; /* sáng hơn */
-  letter-spacing: 0.2px;
+  font-size: 18px;               /* giống album */
+  font-weight: 700;
+  color: #f1f1f1;
 }
 
-/* Khu vực nút */
+/* ACTION */
 .row-actions {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   align-items: center;
 }
 
-/* BUTTONS – tone sáng hơn */
+/* Buttons – dùng chuẩn album */
 .row-actions button {
   height: 40px;
   padding: 0 16px;
@@ -83,47 +97,42 @@
 
   font-weight: 600;
   font-size: 15px;
-  letter-spacing: 0.3px;
-  color: white;
-
+  color: #fff;
   transition: 0.17s ease;
 }
 
-/* Hiệu ứng nút */
-.row-actions button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0px 3px 8px rgba(0,0,0,0.25);
-}
-
-/* Màu nút */
+/* Button colors – đồng bộ tone pastel */
 .btn-view {
-  background: #4aa3df; /* xanh dịu */
+  background: #4aa3df;
 }
 .btn-view:hover {
-  background: #3a92cf;
+  background: #3793cc;
+  transform: translateY(-2px);
 }
 
 .btn-accept {
-  background: #30b86b; /* xanh lá pastel dễ nhìn */
+  background: #2ecc71;
 }
 .btn-accept:hover {
-  background: #28a35e;
+  background: #28b866;
+  transform: translateY(-2px);
 }
 
 .btn-reject {
-  background: #e76a5f; /* đỏ dịu, bớt gắt */
+  background: #e76a5f;
 }
 .btn-reject:hover {
-  background: #d5574c;
+  background: #d5584c;
+  transform: translateY(-2px);
 }
 
-/* Mobile */
+/* Mobile giống album */
 @media (max-width: 768px) {
   .pending-row {
     flex-direction: column;
     align-items: center;
-    text-align: center;
     gap: 15px;
+    text-align: center;
     padding: 18px;
   }
 

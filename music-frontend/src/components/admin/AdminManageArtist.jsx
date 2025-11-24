@@ -6,14 +6,10 @@ import "./AdminManageArtist.css";
 import ArtistPendingList from "./ArtistPendingList.jsx";
 import ArtistActiveList from "./ArtistActiveList.jsx";
 
-
-
 const AdminManageArtist = () => {
   const [tab, setTab] = useState("pending");
   const [artistsPending, setArtistsPending] = useState([]);
   const [artistsActive, setArtistsActive] = useState([]);
-  const [showModal, setShowModal] = useState(false);
-  const [editingArtist, setEditingArtist] = useState(null);
 
   useEffect(() => {
     loadPending();
@@ -21,29 +17,44 @@ const AdminManageArtist = () => {
   }, []);
 
   // ===========================
-  // LOAD PENDING
+  // LOAD PENDING (ADMIN)
   // ===========================
   const loadPending = async () => {
     try {
-      const res = await axios.get("/artists/pending");
-      setArtistsPending(Array.isArray(res.data) ? res.data : []);
+      const res = await axios.get("http://localhost:3000/admin/artists/pending");
+
+      console.log("PENDING RES:", res.data);
+
+      if (Array.isArray(res.data)) {
+        setArtistsPending(res.data);
+      } else {
+        console.warn("API pending không trả về mảng:", res.data);
+        setArtistsPending([]);
+      }
     } catch (err) {
       console.error("LOAD PENDING ERROR:", err);
+      setArtistsPending([]);
     }
   };
 
   // ===========================
-  // LOAD ACTIVE
+  // LOAD ACTIVE (ADMIN)
   // ===========================
   const loadActive = async () => {
     try {
-      const res = await axios.get("/artists/all");
-      const approved = (res.data || []).filter(
-        (a) => a.registrationStatus === "APPROVED"
-      );
-      setArtistsActive(approved);
+      const res = await axios.get("http://localhost:3000/admin/artists/active");
+
+      console.log("ACTIVE RES:", res.data);
+
+      if (Array.isArray(res.data)) {
+        setArtistsActive(res.data);
+      } else {
+        console.warn("API active không trả về mảng:", res.data);
+        setArtistsActive([]);
+      }
     } catch (err) {
       console.error("LOAD ACTIVE ERROR:", err);
+      setArtistsActive([]);
     }
   };
 
@@ -52,23 +63,12 @@ const AdminManageArtist = () => {
   // ===========================
   const approve = async (id) => {
     try {
-      await axios.post(`/artists/approve/${id}`);
-      await loadPending();
-      await loadActive();
+      await axios.patch(`http://localhost:3000/admin/artists/${id}/approve`);
+      loadPending();
+      loadActive();
     } catch (err) {
       console.error("APPROVE ERROR:", err);
     }
-  };
-
-  // Modal mở thêm / sửa
-  const openAdd = () => {
-    setEditingArtist(null);
-    setShowModal(true);
-  };
-
-  const openEdit = (artist) => {
-    setEditingArtist(artist);
-    setShowModal(true);
   };
 
   return (
@@ -94,29 +94,12 @@ const AdminManageArtist = () => {
 
       {/* TAB PENDING */}
       {tab === "pending" && (
-        <ArtistPendingList
-          artists={artistsPending}
-          approve={approve}
-        />
+        <ArtistPendingList artists={artistsPending} approve={approve} />
       )}
 
-      {/* TAB ACTIVE (component riêng) */}
+      {/* TAB ACTIVE */}
       {tab === "active" && (
-        <ArtistActiveList
-          artists={artistsActive}
-          refresh={loadActive}
-          openAdd={openAdd}
-          openEdit={openEdit}
-        />
-      )}
-
-      {/* Modal thêm / sửa */}
-      {showModal && (
-        <ArtistModal
-          artist={editingArtist}
-          close={() => setShowModal(false)}
-          reload={loadActive}
-        />
+        <ArtistActiveList artists={artistsActive} refresh={loadActive} />
       )}
     </div>
   );

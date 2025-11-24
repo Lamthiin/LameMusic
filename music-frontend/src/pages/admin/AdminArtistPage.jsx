@@ -1,40 +1,46 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./AdminManagerUser.css";
 import { FiSearch } from "react-icons/fi";
-
-const sampleArtists = [
-  { id: 1, name: "Taylor Swift", email: "taylor@gmail.com", songs: 150, status: "approved" },
-  { id: 2, name: "The Weeknd", email: "weeknd@gmail.com", songs: 90, status: "pending" },
-  { id: 3, name: "Taylor Swift", email: "taylor@gmail.com", songs: 150, status: "approved" },
-  { id: 4, name: "The Weeknd", email: "weeknd@gmail.com", songs: 90, status: "pending" },
-  { id: 5, name: "Taylor Swift", email: "taylor@gmail.com", songs: 150, status: "approved" },
-  { id: 6, name: "The Weeknd", email: "weeknd@gmail.com", songs: 90, status: "pending" },
-  { id: 7, name: "Taylor Swift", email: "taylor@gmail.com", songs: 150, status: "approved" },
-  { id: 8, name: "The Weeknd", email: "weeknd@gmail.com", songs: 90, status: "pending" },
-  { id: 9, name: "Taylor Swift", email: "taylor@gmail.com", songs: 150, status: "approved" },
-  { id: 10, name: "The Weeknd", email: "weeknd@gmail.com", songs: 90, status: "pending" },
-  { id: 11, name: "Taylor Swift", email: "taylor@gmail.com", songs: 150, status: "approved" },
-  { id: 12, name: "The Weeknd", email: "weeknd@gmail.com", songs: 90, status: "pending" },
-  { id: 13, name: "Taylor Swift", email: "taylor@gmail.com", songs: 150, status: "approved" },
-  { id: 14, name: "The Weeknd", email: "weeknd@gmail.com", songs: 90, status: "pending" },
-];
+import axios from "axios";
 
 const AdminArtistPage = () => {
+  const [artists, setArtists] = useState([]);
   const [searchValue, setSearchValue] = useState("");
 
-  // Lọc theo tên + email
-  const filteredArtists = sampleArtists.filter((artist) =>
-    (artist.name + artist.email)
+  // ===============================
+  // LOAD ARTISTS TỪ BACKEND
+  // ===============================
+  const loadArtists = async () => {
+    try {
+      const res = await axios.get("/admin/artists/active"); // ⭐ KHÔNG /api !!!
+      console.log("ACTIVE FROM BE:", res.data);
+
+      if (Array.isArray(res.data)) {
+        setArtists(res.data);
+      } else {
+        console.warn("❗ API không trả về array:", res.data);
+        setArtists([]);
+      }
+    } catch (err) {
+      console.error("LOAD ACTIVE ARTISTS ERROR:", err);
+    }
+  };
+
+  useEffect(() => {
+    loadArtists();
+  }, []);
+
+  // FILTER SEARCH
+  const filteredArtists = artists.filter((artist) =>
+    (artist.stage_name + artist.user?.email)
       .toLowerCase()
       .includes(searchValue.toLowerCase())
   );
 
   return (
     <div className="admin-user-container">
-
       {/* HEADER */}
       <div className="admin-user-header">
-
         <div className="google-search-bar">
           <FiSearch className="google-search-icon" />
           <input
@@ -54,7 +60,7 @@ const AdminArtistPage = () => {
         <thead>
           <tr>
             <th>ID</th>
-            <th>Tên nghệ sĩ</th>
+            <th>Nghệ danh</th>
             <th>Email</th>
             <th>Số bài hát</th>
             <th>Trạng thái</th>
@@ -73,25 +79,25 @@ const AdminArtistPage = () => {
             filteredArtists.map((a) => (
               <tr key={a.id}>
                 <td>{a.id}</td>
-                <td>{a.name}</td>
-                <td>{a.email}</td>
-                <td>{a.songs}</td>
+                <td>{a.stage_name}</td>
+                <td>{a.user?.email}</td>
+                <td>{a.songs?.length || 0}</td>
 
                 {/* STATUS BADGE */}
                 <td>
                   <span
                     className={
                       "status-badge " +
-                      (a.status === "pending"
+                      (a.registrationStatus === "PENDING"
                         ? "status-pending"
-                        : a.status === "approved"
+                        : a.registrationStatus === "APPROVED"
                         ? "status-approved"
                         : "status-rejected")
                     }
                   >
-                    {a.status === "pending"
+                    {a.registrationStatus === "PENDING"
                       ? "Pending"
-                      : a.status === "approved"
+                      : a.registrationStatus === "APPROVED"
                       ? "Artist"
                       : "Rejected"}
                   </span>
@@ -103,8 +109,7 @@ const AdminArtistPage = () => {
                     <button className="admin-btn view">Xem</button>
                     <button className="admin-btn edit">Edit</button>
 
-                    {/* ROLE BUTTON CHỈ HIỆN KHI PENDING */}
-                    {a.status === "pending" && (
+                    {a.registrationStatus === "PENDING" && (
                       <button className="admin-btn role">
                         Duyệt
                       </button>
@@ -118,7 +123,6 @@ const AdminArtistPage = () => {
           )}
         </tbody>
       </table>
-
     </div>
   );
 };

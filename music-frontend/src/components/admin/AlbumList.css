@@ -1,0 +1,112 @@
+/* ==============================
+   NAMESPACE – chống đè CSS
+============================== */
+.admin-album-container .album-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ============================
+   ALBUM ROW
+============================ */
+.admin-album-container .album-row {
+  display: flex;
+  align-items: center;
+  background: #2b2b2b;
+  padding: 16px 20px;
+  border-radius: 12px;
+  box-shadow: 0px 3px 10px rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.05);
+  transition: 0.2s ease;
+}
+
+.admin-album-container .album-row:hover {
+  background: #333333;
+  transform: translateY(-2px);
+}
+
+/* ============================
+   AVATAR (COVER)
+============================ */
+.admin-album-container .album-cover {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 20px;
+  flex-shrink: 0;
+}
+
+/* ============================
+   TEXT INFO
+============================ */
+.admin-album-container .album-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-album-container .album-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 5px;
+}
+
+.admin-album-container .album-artist {
+  font-size: 14px;
+  color: #c9c9c9;
+  letter-spacing: 0.2px;
+}
+
+/* ============================
+   ACTION BUTTON GROUP
+============================ */
+.admin-album-container .album-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* Button Base */
+.admin-album-container .album-actions button {
+  min-width: 90px;
+  height: 40px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: 0.2s ease;
+  padding: 0 14px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ============================
+   BUTTON COLORS (Tone đẹp)
+============================ */
+.admin-album-container .btn-edit {
+  background: #4aa3df;
+}
+.admin-album-container .btn-edit:hover {
+  background: #3a92cf;
+  transform: translateY(-2px);
+}
+
+.admin-album-container .btn-addsong {
+  background: #9b59b6;
+}
+.admin-album-container .btn-addsong:hover {
+  background: #884ea0;
+  transform: translateY(-2px);
+}
+
+.admin-album-container .btn-delete {
+  background: #e76a5f;
+}
+.admin-album-container .btn-delete:hover {
+  background: #d5574c;
+  transform: translateY(-2px);
+}

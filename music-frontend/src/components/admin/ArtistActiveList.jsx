@@ -1,75 +1,35 @@
 import React, { useState } from "react";
 import "./ArtistActiveList.css";
+import ArtistFormModal from "../admin/ArtistFormModal.jsx";
 
-const ArtistActiveList = () => {
-  // ============================
-  //   MOCK DATA FE
-  // ============================
-  const [artists, setArtists] = useState([
-    {
-      id: 1,
-      stage_name: "Sơn Tùng M-TP",
-      avatar_url: "https://i.imgur.com/0ZfFQGh.jpeg",
-      bio: "Ca sĩ, nhạc sĩ"
-    },
-    {
-      id: 2,
-      stage_name: "AMEE",
-      avatar_url: "https://i.imgur.com/xJpUZKz.jpeg",
-      bio: "Ca sĩ trẻ"
-    },
-    {
-      id: 3,
-      stage_name: "Đen Vâu",
-      avatar_url: "https://i.imgur.com/CXQHGxB.jpeg",
-      bio: "Rapper"
-    }
-  ]);
-
+const ArtistActiveList = ({ artists = [], refresh }) => {
   const [showModal, setShowModal] = useState(false);
   const [editArtist, setEditArtist] = useState(null);
 
-  // ============================
-  //   DELETE (FE ONLY)
-  // ============================
+  // SẮP XẾP A → Z
+  const sortedArtists = [...artists].sort((a, b) =>
+    a.stage_name.localeCompare(b.stage_name, "vi", { sensitivity: "base" })
+  );
+
   const deleteArtist = (id) => {
     if (!window.confirm("Bạn chắc chắn muốn xoá nghệ sĩ này?")) return;
-
-    setArtists((prev) => prev.filter((a) => a.id !== id));
+    alert("Chức năng xoá BE sẽ làm sau. FE xoá tạm thôi.");
+    refresh();
   };
 
-  // ============================
-  //   SAVE (ADD / EDIT)
-  // ============================
-  const saveArtist = () => {
-    if (!editArtist.stage_name.trim()) {
-      alert("Tên nghệ sĩ không được để trống!");
-      return;
-    }
-
-    if (editArtist.id) {
-      // EDIT
-      setArtists((prev) =>
-        prev.map((a) => (a.id === editArtist.id ? editArtist : a))
-      );
-    } else {
-      // ADD NEW
-      const newArtist = {
-        ...editArtist,
-        id: Date.now() // tạo id giả
-      };
-
-      setArtists((prev) => [...prev, newArtist]);
-    }
-
+  // Khi submit form từ ArtistFormModal
+  const saveArtist = async (formData) => {
+    alert("Chức năng lưu/sửa BE sẽ làm sau. FE đang mô phỏng");
     setShowModal(false);
     setEditArtist(null);
+    refresh();
   };
 
   return (
     <div className="active-container">
       <div className="top-bar">
         <h2 className="active-title">Nghệ sĩ đang hoạt động</h2>
+
         <button
           className="btn-add"
           onClick={() => {
@@ -81,12 +41,11 @@ const ArtistActiveList = () => {
         </button>
       </div>
 
-      {/* EMPTY */}
-      {artists.length === 0 ? (
+      {sortedArtists.length === 0 ? (
         <div className="empty-active">Không có nghệ sĩ nào hoạt động</div>
       ) : (
         <div className="active-list">
-          {artists.map((a) => (
+          {sortedArtists.map((a) => (
             <div className="active-row" key={a.id}>
               <img className="row-avatar" src={a.avatar_url} alt={a.stage_name} />
 
@@ -114,47 +73,13 @@ const ArtistActiveList = () => {
         </div>
       )}
 
-      {/* MODAL */}
-      {showModal && (
-        <div className="modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-            <h3>{editArtist.id ? "Chỉnh sửa nghệ sĩ" : "Thêm nghệ sĩ mới"}</h3>
-
-            <input
-              type="text"
-              placeholder="Tên nghệ sĩ"
-              value={editArtist.stage_name}
-              onChange={(e) =>
-                setEditArtist({ ...editArtist, stage_name: e.target.value })
-              }
-            />
-
-            <textarea
-              placeholder="Mô tả / Tiểu sử"
-              value={editArtist.bio}
-              onChange={(e) =>
-                setEditArtist({ ...editArtist, bio: e.target.value })
-              }
-            />
-
-            <input
-              type="text"
-              placeholder="URL avatar"
-              value={editArtist.avatar_url}
-              onChange={(e) =>
-                setEditArtist({ ...editArtist, avatar_url: e.target.value })
-              }
-            />
-
-            <div className="modal-actions">
-              <button className="btn-save" onClick={saveArtist}>Lưu</button>
-              <button className="btn-cancel" onClick={() => setShowModal(false)}>
-                Hủy
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* ⭐ DÙNG ARTIST FORM MODAL — KHÔNG DÙNG MODAL CŨ NỮA */}
+      <ArtistFormModal
+        isOpen={showModal}
+        initialArtist={editArtist}
+        onSubmit={saveArtist}
+        onClose={() => setShowModal(false)}
+      />
     </div>
   );
 };

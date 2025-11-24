@@ -20,6 +20,7 @@ import { FollowModule } from './follow/follow.module'; // <-- IMPORT MỚI
 import { AlbumModule } from './album/album.module';
 import { History } from './history/history.entity'; // <-- IMPORT MỚI
 import { HistoryModule } from './history/history.module'; // <-- IMPORT MỚI
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -29,7 +30,7 @@ import { HistoryModule } from './history/history.module'; // <-- IMPORT MỚI
       host: 'localhost',
       port: 3306,
       username: 'root', // Đảm bảo đúng username
-      password: '123456',     // Đảm bảo đúng password
+      password: 'root',     // Đảm bảo đúng password
       database: 'musicdb',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: false, 
@@ -49,6 +50,7 @@ import { HistoryModule } from './history/history.module'; // <-- IMPORT MỚI
     FollowModule,
     AlbumModule,
     HistoryModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],
