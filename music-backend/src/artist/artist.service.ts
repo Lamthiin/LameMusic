@@ -79,30 +79,30 @@ async findFeaturedArtists(): Promise<Artist[]> {
 /**
    * 1. HÀM ĐĂNG KÝ (Tạo Artist với trạng thái PENDING)
    */
-  async registerArtistProfile(userId: number, stageName: string): Promise<Artist> {
-    const user = await this.userRepository.findOne({ where: { id: userId }, relations: ['artist', 'role'] });
+  // async registerArtistProfile(userId: number, stageName: string): Promise<Artist> {
+  //   const user = await this.userRepository.findOne({ where: { id: userId }, relations: ['artist', 'role'] });
 
-    if (!user) throw new NotFoundException('Người dùng không tồn tại.');
-    if (user.artist) throw new ConflictException('Hồ sơ Nghệ sĩ đã tồn tại.');
-    if (user.role.name !== 'listener') throw new BadRequestException('Bạn không phải là Listener.');
+  //   if (!user) throw new NotFoundException('Người dùng không tồn tại.');
+  //   if (user.artist) throw new ConflictException('Hồ sơ Nghệ sĩ đã tồn tại.');
+  //   if (user.role.name !== 'listener') throw new BadRequestException('Bạn không phải là Listener.');
 
-    // 1. Kiểm tra nghệ danh đã tồn tại chưa
-    const existingArtist = await this.artistRepository.findOne({ where: { stage_name: stageName } });
-    if (existingArtist) throw new ConflictException(`Nghệ danh "${stageName}" đã có người sử dụng.`);
+  //   // 1. Kiểm tra nghệ danh đã tồn tại chưa
+  //   const existingArtist = await this.artistRepository.findOne({ where: { stage_name: stageName } });
+  //   if (existingArtist) throw new ConflictException(`Nghệ danh "${stageName}" đã có người sử dụng.`);
 
-    // 2. Tạo Entity Artist 
-    const newArtist = this.artistRepository.create({
-      user: user,
-      stage_name: stageName,
-      // === SỬA LỖI: DÙNG LOGIC CỦA BẠN ===
-      active: 1, // <-- Mới đăng ký thì active (visible), Admin có thể ẩn sau
-      registrationStatus: 'PENDING', // <-- SỬ DỤNG CỘT TRẠNG THÁI
-      // ===================================
-      bio: 'Hồ sơ đang chờ Admin duyệt...',
-    });
+  //   // 2. Tạo Entity Artist 
+  //   const newArtist = this.artistRepository.create({
+  //     user: user,
+  //     stage_name: stageName,
+  //     // === SỬA LỖI: DÙNG LOGIC CỦA BẠN ===
+  //     active: 1, // <-- Mới đăng ký thì active (visible), Admin có thể ẩn sau
+  //     registrationStatus: 'PENDING', // <-- SỬ DỤNG CỘT TRẠNG THÁI
+  //     // ===================================
+  //     bio: 'Hồ sơ đang chờ Admin duyệt...',
+  //   });
 
-    return this.artistRepository.save(newArtist);
-  }
+  //   return this.artistRepository.save(newArtist);
+  // }
 
   /**
    * 2. HÀM LẤY DANH SÁCH CHỜ DUYỆT (ADMIN)
@@ -198,5 +198,59 @@ async findFeaturedArtists(): Promise<Artist[]> {
 
     return this.artistRepository.save(artist);
   }
+
+  /**
+ * 1. HÀM ĐĂNG KÝ (Tạo/Tái liên kết Artist với trạng thái PENDING)
+ */
+async registerArtistProfile(userId: number, stageName: string): Promise<Artist> {
+    const user = await this.userRepository.findOne({ where: { id: userId }, relations: ['artist', 'role'] });
+
+    if (!user) throw new NotFoundException('Người dùng không tồn tại.');
+    // Kiểm tra: Nếu user đã có hồ sơ Artist đã được duyệt, từ chối (dù logic này nên được check ở Frontend)
+    if (user.artist && user.artist.registrationStatus === 'APPROVED') {
+        throw new ConflictException('Hồ sơ Nghệ sĩ đã được tạo và duyệt cho tài khoản này.');
+    }
+    if (user.role.name !== 'listener') throw new BadRequestException('Bạn không phải là Listener.');
+
+    // === LOGIC NÂNG CAO: TÌM KIẾM THEO STAGE NAME ===
+    
+    // 1. Tìm hồ sơ Artist đã tồn tại với nghệ danh này
+    let existingArtist = await this.artistRepository.findOne({ 
+        where: { stage_name: stageName },
+        relations: ['user'] // Load user để kiểm tra liên kết
+    });
+
+    if (existingArtist) {
+        // Kịch bản A: CONFLICT/KHÔNG THỂ KẾ THỪA
+        if (existingArtist.user_id && existingArtist.user.id !== userId) {
+            // Đã có user_id khác liên kết -> CONFLICT
+            throw new ConflictException(`Nghệ danh "${stageName}" đã được sử dụng bởi tài khoản khác.`);
+        }
+        
+        // Kịch bản B: TÁI LIÊN KẾT (KẾ THỪA)
+        // Hồ sơ Artist đã tồn tại nhưng chưa có user_id (hoặc user_id là của chính mình)
+        // Chúng ta có thể gắn tài khoản mới vào đây.
+        console.log(`[ArtistReg] Tái liên kết User ${userId} với hồ sơ Artist ID ${existingArtist.id}`);
+        existingArtist.user = user; // Gán User Object
+        existingArtist.user_id = userId; // Gán Khóa ngoại
+        existingArtist.registrationStatus = 'PENDING';
+        existingArtist.active = 1; // Kích hoạt hồ sơ
+        
+        return this.artistRepository.save(existingArtist);
+        
+    } else {
+        // Kịch bản C: TẠO MỚI BÌNH THƯỜNG
+        const newArtist = this.artistRepository.create({
+            user: user,
+            user_id: userId, // Khóa ngoại
+            stage_name: stageName,
+            active: 1, 
+            registrationStatus: 'PENDING', 
+            bio: 'Hồ sơ đang chờ Admin duyệt...',
+        });
+
+        return this.artistRepository.save(newArtist);
+    }
+}
 
 }
