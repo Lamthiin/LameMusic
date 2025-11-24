@@ -39,7 +39,7 @@ export class FollowService {
     }
 
     // Kiểm tra tự follow: so sánh User ID của người theo dõi với User ID của Artist
-    if (userId === targetArtist.user.id) {
+    if (targetArtist.user && userId === targetArtist.user.id) {
       throw new BadRequestException('Bạn không thể tự theo dõi chính mình.');
     }
     // ===============================================

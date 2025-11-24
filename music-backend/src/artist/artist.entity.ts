@@ -20,7 +20,7 @@ export class Artist {
   id: number;
 
   @Column({ unique: true })
-  user_id: number; // Foreign Key
+  user_id: number | null; // Foreign Key
 
   @Column({ length: 100 })
   stage_name: string;
@@ -46,7 +46,7 @@ export class Artist {
   // Quan hệ 1:1 với User (User là Artist này)
   @OneToOne(() => User, (user) => user.artist, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' }) // Chỉ định cột user_id là FK
-  user: User;
+  user: User | null;
   
   // Quan hệ 1:N với Album
   @OneToMany(() => Album, (album) => album.artist)

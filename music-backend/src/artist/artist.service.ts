@@ -115,38 +115,76 @@ async findFeaturedArtists(): Promise<Artist[]> {
     });
   }
 
+  // /**
+  //  * 3. HÀM DUYỆT HỒ SƠ (ADMIN)
+  //  */
+  // async approveArtist(artistId: number): Promise<Artist> {
+  //   const artist = await this.artistRepository.findOne({ 
+  //     where: { id: artistId, registrationStatus: 'PENDING' }, 
+  //     relations: ['user', 'user.role'] 
+  //   });
+
+  //   if (!artist) {
+  //     throw new NotFoundException('Hồ sơ không tìm thấy hoặc không ở trạng thái chờ duyệt.');
+  //   }
+
+  //   // 1. CẬP NHẬT TRẠNG THÁI DUYỆT CỦA HỒ SƠ
+  //   artist.registrationStatus = 'APPROVED'; 
+    
+  //   // 2. CẬP NHẬT ROLE CỦA USER TỪ 'listener' SANG 'artist'
+  //   const artistRole = await this.userRepository.manager
+  //     .getRepository(Role) 
+  //     .findOne({ where: { name: 'artist' } });
+
+  //   if (artistRole) {
+  //     artist.user.role = artistRole;
+  //     await this.userRepository.save(artist.user);
+  //   }
+    
+  //   // Xóa password trước khi trả về
+  //   delete artist.user.password; 
+
+  //   return this.artistRepository.save(artist);
+  // }
   /**
-   * 3. HÀM DUYỆT HỒ SƠ (ADMIN)
-   */
-  async approveArtist(artistId: number): Promise<Artist> {
-    const artist = await this.artistRepository.findOne({ 
-      where: { id: artistId, registrationStatus: 'PENDING' }, 
-      relations: ['user', 'user.role'] 
-    });
+   * 3. HÀM DUYỆT HỒ SƠ (ADMIN)
+   */
+  async approveArtist(artistId: number): Promise<Artist> {
+    const artist = await this.artistRepository.findOne({ 
+      where: { id: artistId, registrationStatus: 'PENDING' }, 
+      relations: ['user', 'user.role'] // Bắt buộc load user
+    });
 
-    if (!artist) {
-      throw new NotFoundException('Hồ sơ không tìm thấy hoặc không ở trạng thái chờ duyệt.');
-    }
-
-    // 1. CẬP NHẬT TRẠNG THÁI DUYỆT CỦA HỒ SƠ
-    artist.registrationStatus = 'APPROVED'; 
+    if (!artist) {
+      throw new NotFoundException('Hồ sơ không tìm thấy hoặc không ở trạng thái chờ duyệt.');
+    }
     
-    // 2. CẬP NHẬT ROLE CỦA USER TỪ 'listener' SANG 'artist'
-    const artistRole = await this.userRepository.manager
-      .getRepository(Role) 
-      .findOne({ where: { name: 'artist' } });
-
-    if (artistRole) {
-      artist.user.role = artistRole;
-      await this.userRepository.save(artist.user);
+    // === FIX TS18047: KIỂM TRA artist.user TỒN TẠI ===
+    if (!artist.user) {
+        throw new NotFoundException('Không tìm thấy người dùng liên kết với hồ sơ này.');
     }
-    
-    // Xóa password trước khi trả về
-    delete artist.user.password; 
+    // ===============================================
 
-    return this.artistRepository.save(artist);
-  }
-  
+    // 1. CẬP NHẬT TRẠNG THÁI DUYỆT CỦA HỒ SƠ
+    artist.registrationStatus = 'APPROVED'; 
+    
+    // 2. CẬP NHẬT ROLE CỦA USER TỪ 'listener' SANG 'artist'
+    const artistRole = await this.userRepository.manager
+      .getRepository(Role) 
+      .findOne({ where: { name: 'artist' } });
+
+    if (artistRole) {
+      artist.user.role = artistRole;
+      await this.userRepository.save(artist.user); // FIX TS2769: Đã kiểm tra artist.user != null
+    }
+    
+    // === FIX TS18047: KIỂM TRA TRƯỚC KHI DELETE PASSWORD ===
+    delete artist.user.password; 
+    // ====================================================
+
+    return this.artistRepository.save(artist);
+  }
+
 /**
    * 4. HÀM MỚI: Lấy hồ sơ Artist CÁ NHÂN (cho Dashboard)
    */
@@ -199,50 +237,60 @@ async findFeaturedArtists(): Promise<Artist[]> {
     return this.artistRepository.save(artist);
   }
 
-  /**
+/**
  * 1. HÀM ĐĂNG KÝ (Tạo/Tái liên kết Artist với trạng thái PENDING)
+ * Xử lý 3 kịch bản: Tạo mới, Tái liên kết, Xung đột (Conflict).
  */
 async registerArtistProfile(userId: number, stageName: string): Promise<Artist> {
     const user = await this.userRepository.findOne({ where: { id: userId }, relations: ['artist', 'role'] });
 
     if (!user) throw new NotFoundException('Người dùng không tồn tại.');
-    // Kiểm tra: Nếu user đã có hồ sơ Artist đã được duyệt, từ chối (dù logic này nên được check ở Frontend)
     if (user.artist && user.artist.registrationStatus === 'APPROVED') {
         throw new ConflictException('Hồ sơ Nghệ sĩ đã được tạo và duyệt cho tài khoản này.');
     }
     if (user.role.name !== 'listener') throw new BadRequestException('Bạn không phải là Listener.');
 
-    // === LOGIC NÂNG CAO: TÌM KIẾM THEO STAGE NAME ===
-    
-    // 1. Tìm hồ sơ Artist đã tồn tại với nghệ danh này
+    // 1. TÌM KIẾM THEO STAGE NAME (Hồ sơ Artist đã tồn tại?)
     let existingArtist = await this.artistRepository.findOne({ 
         where: { stage_name: stageName },
-        relations: ['user'] // Load user để kiểm tra liên kết
+        // PHẢI LOAD USER DÙ CÓ THỂ LÀ NULL
+        relations: ['user'] 
     });
 
     if (existingArtist) {
-        // Kịch bản A: CONFLICT/KHÔNG THỂ KẾ THỪA
-        if (existingArtist.user_id && existingArtist.user.id !== userId) {
-            // Đã có user_id khác liên kết -> CONFLICT
+        // === FIX LỖI TS18047: KIỂM TRA TRƯỚC KHI TRUY CẬP ID USER KHÁC ===
+        
+        // 2a. XUNG ĐỘT: Nếu Stage Name đã tồn tại VÀ đã được gán cho User khác (không phải User hiện tại)
+        // Chúng ta kiểm tra user_id (number | null)
+        if (existingArtist.user_id && existingArtist.user_id !== userId) {
             throw new ConflictException(`Nghệ danh "${stageName}" đã được sử dụng bởi tài khoản khác.`);
         }
         
-        // Kịch bản B: TÁI LIÊN KẾT (KẾ THỪA)
-        // Hồ sơ Artist đã tồn tại nhưng chưa có user_id (hoặc user_id là của chính mình)
-        // Chúng ta có thể gắn tài khoản mới vào đây.
+        // 2b. TÁI LIÊN KẾT: Hồ sơ Artist đã tồn tại nhưng chưa có user_id hoặc user_id là của chính mình
+        
+        // Nếu user này đã có hồ sơ cũ (chưa duyệt), xóa nó đi để liên kết với hồ sơ mới
+        if (user.artist) {
+            await this.artistRepository.remove(user.artist); 
+        }
+
         console.log(`[ArtistReg] Tái liên kết User ${userId} với hồ sơ Artist ID ${existingArtist.id}`);
-        existingArtist.user = user; // Gán User Object
-        existingArtist.user_id = userId; // Gán Khóa ngoại
+        existingArtist.user = user; 
+        existingArtist.user_id = userId; 
         existingArtist.registrationStatus = 'PENDING';
-        existingArtist.active = 1; // Kích hoạt hồ sơ
+        existingArtist.active = 1; 
         
         return this.artistRepository.save(existingArtist);
         
     } else {
-        // Kịch bản C: TẠO MỚI BÌNH THƯỜNG
+        // 3. TẠO MỚI BÌNH THƯỜNG
+        
+        if (user.artist) {
+            await this.artistRepository.remove(user.artist); 
+        }
+
         const newArtist = this.artistRepository.create({
             user: user,
-            user_id: userId, // Khóa ngoại
+            user_id: userId, 
             stage_name: stageName,
             active: 1, 
             registrationStatus: 'PENDING', 
@@ -252,5 +300,4 @@ async registerArtistProfile(userId: number, stageName: string): Promise<Artist> 
         return this.artistRepository.save(newArtist);
     }
 }
-
 }
