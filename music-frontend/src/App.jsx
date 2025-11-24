@@ -30,7 +30,6 @@ import ManageArtist from "./pages/admin/ManageArtist";
 import ManageAlbum from "./pages/admin/ManageAlbum";
 import ManageSong from "./pages/admin/ManageSong";
 import AdminCustomerPage from "./pages/admin/AdminCustomerPage";
-import AdminArtistPage from "./pages/admin/AdminArtistPage";
 import AdminAccountPage from "./pages/admin/AdminAccountPage";
 
 

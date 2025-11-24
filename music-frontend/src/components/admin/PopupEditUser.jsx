@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import "./PopupEditUser.css";
 
 export default function PopupEditUser({ user, onClose, onSubmit }) {
@@ -8,10 +9,26 @@ export default function PopupEditUser({ user, onClose, onSubmit }) {
   const [birthYear, setBirthYear] = useState(user.birthYear);
   const [gender, setGender] = useState(user.gender);
 
+  // NEW: password fields
+  const [password, setPassword] = useState("");
+  const [confirmPass, setConfirmPass] = useState("");
+
+  // Toggle show/hide
+  const [showPass, setShowPass] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
   const handleSave = () => {
     if (!name.trim() || !email.trim()) {
       alert("Vui lòng nhập đầy đủ thông tin!");
       return;
+    }
+
+    // Nếu admin không đổi mật khẩu → không bắt buộc nhập
+    if (password) {
+      if (password !== confirmPass) {
+        alert("Mật khẩu nhập lại không khớp!");
+        return;
+      }
     }
 
     onSubmit({
@@ -20,13 +37,15 @@ export default function PopupEditUser({ user, onClose, onSubmit }) {
       email,
       birthYear,
       gender,
+      password: password ? password : user.password, // nếu không đổi thì giữ mật khẩu cũ
     });
+
+    onClose();
   };
 
   return (
     <div className="edit-overlay" onClick={onClose}>
       <div className="edit-card" onClick={(e) => e.stopPropagation()}>
-        
         <h2 className="edit-title">Chỉnh Sửa Người Dùng</h2>
 
         <div className="edit-grid">
@@ -72,6 +91,41 @@ export default function PopupEditUser({ user, onClose, onSubmit }) {
               <option value="female">Nữ</option>
               <option value="other">Khác</option>
             </select>
+          </div>
+
+          {/* PASSWORD */}
+          <div className="edit-group">
+            <label>Mật khẩu mới</label>
+            <div className="password-wrapper">
+              <input
+                type={showPass ? "text" : "password"}
+                value={password}
+                placeholder="Để trống nếu không đổi..."
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <span className="eye-icon" onClick={() => setShowPass(!showPass)}>
+                {showPass ? <FiEyeOff /> : <FiEye />}
+              </span>
+            </div>
+          </div>
+
+          {/* CONFIRM PASSWORD */}
+          <div className="edit-group">
+            <label>Xác nhận mật khẩu</label>
+            <div className="password-wrapper">
+              <input
+                type={showConfirm ? "text" : "password"}
+                value={confirmPass}
+                placeholder="Nhập lại mật khẩu..."
+                onChange={(e) => setConfirmPass(e.target.value)}
+              />
+              <span
+                className="eye-icon"
+                onClick={() => setShowConfirm(!showConfirm)}
+              >
+                {showConfirm ? <FiEyeOff /> : <FiEye />}
+              </span>
+            </div>
           </div>
 
         </div>

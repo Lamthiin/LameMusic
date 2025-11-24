@@ -11,9 +11,9 @@ import PopupDeleteConfirm from "../../components/admin/PopupDeleteConfirm";
 
 
 const initialUsers = [
-  { id: 1, name: "Nguyễn Văn A", email: "a@gmail.com", birthYear: 2000, gender: "male", createdAt: "2024-01-03", role: "user" },
-  { id: 2, name: "Trần Thị B", email: "b@gmail.com", birthYear: 1999, gender: "female", createdAt: "2024-01-20", role: "user" },
-  { id: 3, name: "Brian", email: "brian@admin.com", birthYear: 2003, gender: "male", createdAt: "2024-02-15", role: "user" },
+  { id: 1, name: "Nguyễn Văn A", email: "a@gmail.com", birthYear: 2000, gender: "male", createdAt: "2024-01-03", role: "artist" },
+  { id: 2, name: "Trần Thị B", email: "b@gmail.com", birthYear: 1999, gender: "female", createdAt: "2024-01-20", role: "listener" },
+  { id: 3, name: "Brian", email: "brian@admin.com", birthYear: 2003, gender: "male", createdAt: "2024-02-15", role: "listener" },
 ];
 
 const AdminCustomerPage = () => {
@@ -33,8 +33,10 @@ const AdminCustomerPage = () => {
   const [selectedUser, setSelectedUser] = useState(null);
 
   const filteredUsers = users.filter((u) =>
+    u.role !== "admin" &&
     (u.name + u.email).toLowerCase().includes(searchValue.toLowerCase())
   );
+
 
   return (
     <div className="admin-user-container">
@@ -66,6 +68,7 @@ const AdminCustomerPage = () => {
             <th>Email</th>
             <th>Năm sinh</th>
             <th>Giới tính</th>
+            <th>Role</th>       {/* THÊM CỘT ROLE */}
             <th>Ngày tạo</th>
             <th>Hành động</th>
           </tr>
@@ -79,11 +82,27 @@ const AdminCustomerPage = () => {
               <td>{u.email}</td>
               <td>{u.birthYear}</td>
               <td>{u.gender}</td>
+
+              {/* ROLE BADGE */}
+              <td>
+                <span
+                  className={`status-badge ${
+                    u.role === "admin"
+                      ? "status-approved"
+                      : u.role === "artist"
+                      ? "status-pending"
+                      : "status-rejected"
+                  }`}
+                >
+                  {u.role}
+                </span>
+              </td>
+
               <td>{u.createdAt}</td>
+
               <td>
                 <div className="admin-actions">
 
-                  {/* XEM */}
                   <button
                     className="admin-btn view"
                     onClick={() => { setSelectedUser(u); setShowView(true); }}
@@ -91,7 +110,6 @@ const AdminCustomerPage = () => {
                     Xem
                   </button>
 
-                  {/* SỬA */}
                   <button
                     className="admin-btn edit"
                     onClick={() => { setSelectedUser(u); setShowEdit(true); }}
@@ -99,15 +117,18 @@ const AdminCustomerPage = () => {
                     Edit
                   </button>
 
-                  {/* ROLE */}
-                  <button
-                    className="admin-btn role"
-                    onClick={() => { setSelectedUser(u); setShowRole(true); }}
-                  >
-                    Role
-                  </button>
+                  {/* ROLE chỉ hiện nếu là listener */}
+                  {u.role === "listener" && (
+                    <button
+                      className="admin-btn role"
+                      onClick={() => { setSelectedUser(u); setShowRole(true); }}
+                    >
+                      Role
+                    </button>
+                  )}
 
-                  {/* XOÁ */}
+
+
                   <button
                     className="admin-btn delete"
                     onClick={() => { setSelectedUser(u); setShowDelete(true); }}
@@ -121,6 +142,7 @@ const AdminCustomerPage = () => {
           ))}
         </tbody>
       </table>
+
 
 
       {/* ADD */}
@@ -163,16 +185,17 @@ const AdminCustomerPage = () => {
         <PopupRoleUser
           user={selectedUser}
           onClose={() => setShowRole(false)}
-          onSubmit={() => {
+          onSubmit={(newRole) => {
             setUsers(users.map((u) =>
-              u.id === selectedUser.id ? { ...u, role: "artist" } : u
+              u.id === selectedUser.id ? { ...u, role: newRole } : u
             ));
-            setShowRole(false);
             setSuccessMessage("Nâng quyền thành công!");
             setShowSuccess(true);
+            setShowRole(false);
           }}
         />
       )}
+
 
 
       {/* DELETE USER */}

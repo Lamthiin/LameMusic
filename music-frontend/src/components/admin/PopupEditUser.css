@@ -104,3 +104,19 @@
 .btn-save:hover {
   background: #1ed760;
 }
+
+.password-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.eye-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #bbb;
+  font-size: 18px;
+}
+
