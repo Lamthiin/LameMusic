@@ -1,0 +1,168 @@
+.admin-album-container {
+  padding: 20px;
+  width: 100%;
+}
+
+/* PAGE TITLE */
+.page-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: #fff;
+}
+
+/* WRAPPER CHIA 2 BÊN */
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;     /* ⭐ giúp chữ và nút cùng hàng */
+  margin-bottom: 20px;
+}
+
+.topbar-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #f5f5f5;
+}
+
+/* NÚT ADD */
+.btn-add {
+  background: linear-gradient(135deg, #27ae60, #1e8449);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: 0.2s ease;
+  white-space: nowrap; /* tránh bị xuống hàng */
+}
+.btn-add:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,255,100,0.25);
+}
+
+/* LIST */
+.active-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ITEM */
+.active-row {
+  display: flex;
+  align-items: center;
+  background: #2a2a2a;
+  padding: 16px 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.05);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  transition: 0.2s ease;
+}
+.active-row:hover {
+  background: #333;
+  transform: translateY(-2px);
+}
+
+/* ẢNH */
+.row-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 20px;
+  flex-shrink: 0;
+
+}
+
+/* INFO */
+.row-info h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #f1f1f1;
+}
+.row-info p {
+  margin: 4px 0 0;
+  color: #aaa;
+}
+
+/* ACTION */
+.row-actions {
+  display: flex;
+  gap: 10px;
+}
+.row-actions button {
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  color: #fff;
+  transition: 0.2s ease;
+}
+.btn-edit { background: #4aa3df; }
+.btn-edit:hover { background: #3793cc; transform: translateY(-2px); }
+.btn-delete { background: #e76a5f; }
+.btn-delete:hover { background: #d55b4f; transform: translateY(-2px); }
+.btn-addsong { background: #8e44ad; }
+.btn-addsong:hover { background: #7e3da0; transform: translateY(-2px); }
+
+/* EMPTY */
+.empty-album {
+  background: #2a2a2a;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  color: #ccc;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+/* MODAL */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+.modal-box {
+  width: 380px;
+  background: #202020;
+  padding: 22px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #fff;
+}
+.modal-box input,
+.modal-box textarea {
+  width: 100%;
+  padding: 12px;
+  background: #2c2c2c;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #fff;
+  transition: 0.15s ease;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.btn-save {
+  background: #2ecc71;
+  padding: 9px 18px;
+  border-radius: 10px;
+}
+.btn-cancel {
+  background: #555;
+  padding: 9px 18px;
+  border-radius: 10px;
+}

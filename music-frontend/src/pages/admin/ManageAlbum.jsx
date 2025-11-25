@@ -1,12 +1,13 @@
 import React from "react";
+import "./ManageArtist.css"; // nếu cần CSS chung cho trang
 
-const ManageAlbum = () => {
+// Component cha xử lý toàn bộ logic quản lý Album
+import AdminManageAlbum from "../../components/admin/AdminManageAlbum";
+
+export default function ManageAlbum() {
   return (
-    <div style={{ color: "white" }}>
-      <h1>Quản lý Album</h1>
-      <p>Trang đang được xây dựng...</p>
+    <div className="album-page">
+      <AdminManageAlbum />
     </div>
   );
-};
-
-export default ManageAlbum;
+}
