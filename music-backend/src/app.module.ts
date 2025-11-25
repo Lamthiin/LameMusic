@@ -30,7 +30,7 @@ import { AdminModule } from './admin/admin.module';
       host: 'localhost',
       port: 3306,
       username: 'root', // Đảm bảo đúng username
-      password: 'root',     // Đảm bảo đúng password
+      password: '123456',     // Đảm bảo đúng password
       database: 'musicdb',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: false, 
