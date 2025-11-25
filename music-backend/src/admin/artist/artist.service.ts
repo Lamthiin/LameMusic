@@ -65,6 +65,10 @@ export class AdminArtistService {
       where: { name: 'artist' },
     });
 
+    if (!artist.user) {
+      throw new Error('Artist chưa có user liên kết'); // Hoặc xử lý logic khác
+    }
+
     if (artistRole) {
       artist.user.role = artistRole;
       await this.userRepository.save(artist.user);
