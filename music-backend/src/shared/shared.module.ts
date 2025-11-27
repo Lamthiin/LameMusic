@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { join } from 'path';
+import { R2Service } from './r2.service';  // <-- thêm dòng này
 
 const templatePath =
   process.env.NODE_ENV === 'production'
@@ -30,6 +31,7 @@ const templatePath =
       },
     }),
   ],
-  exports: [MailerModule],
+  providers: [R2Service],        // <-- thêm dòng này
+  exports: [MailerModule, R2Service], // <-- thêm dòng này
 })
 export class SharedModule {}

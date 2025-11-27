@@ -200,7 +200,7 @@ const ManageSong = () => {
   //   alert("Đã nhận dữ liệu :)");
   // };
 
-  const handleSaveSong = () => {
+  const handleSaveSong = async () => {
     let error = "";
 
     // ⚠️ KIỂM TRA NẾU CHƯA NHẬP BẤT CỨ GÌ
@@ -220,7 +220,7 @@ const ManageSong = () => {
     // VALIDATION CHI TIẾT
     else if (!newTitle.trim()) error = "Tiêu đề bài hát không được để trống.";
     else if (!newArtist.trim()) error = "Tên nghệ sĩ không được để trống.";
-    else if (!newAlbum.trim()) error = "Tên album không được để trống.";
+
     else if (!newGenre.trim()) error = "Thể loại bài hát không được để trống.";
     else if (!coverFile) error = "Bạn chưa chọn ảnh bìa.";
     else if (!audioFile) error = "Bạn chưa chọn file nhạc.";
@@ -234,9 +234,42 @@ const ManageSong = () => {
       return;
     }
 
-    // Nếu mọi thứ hợp lệ → bật popup SUCCESS
-    setShowSuccessPopup(true);
+    // 🔥 TẠO FORM DATA ĐỂ GỬI LÊN BACKEND
+    const formData = new FormData();
+    formData.append("title", newTitle);
+    formData.append("artist", newArtist);
+    if (newAlbum && newAlbum.trim() !== "") {
+      formData.append("album", newAlbum);
+    } else {
+      formData.append("album", ""); // hoặc không append, backend sẽ hiểu album = null
+    }
+
+    formData.append("genre", newGenre);
+    formData.append("duration", newDuration);
+    formData.append("imageFile", coverFile);
+    formData.append("audioFile", audioFile);
+
+    try {
+      const res = await fetch("http://localhost:3000/admin/manage-song/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error("Upload failed");
+
+      const data = await res.json();
+      console.log("Upload thành công:", data);
+
+      // 🟩 HIỆN POPUP THÀNH CÔNG
+      setShowSuccessPopup(true);
+
+    } catch (err) {
+      console.error(err);
+      setErrorMessage("Upload thất bại! Kiểm tra backend hoặc file.");
+      setShowErrorPopup(true);
+    }
   };
+
 
   const resetAddPopup = () => {
     setCoverFile(null);
@@ -317,7 +350,14 @@ const ManageSong = () => {
                 <img src={song.coverUrl} alt="" className="song-cover" />
               </td>
 
-              <td>{song.title}</td>
+              <td
+                className="song-title-clickable"
+                onClick={() => setShowViewPopup(song)}
+                style={{ cursor: "pointer", color: "#ffffff" }}
+              >
+                {song.title}
+              </td>
+
               <td>{song.artistName}</td>
               <td>{song.albumName}</td>
               <td>{formatDuration(song.duration)}</td>
@@ -561,7 +601,7 @@ const ManageSong = () => {
                 </div>
 
                 {/* FILE NHẠC */}
-                <div className="popup-group">
+                <div className="audio-upload-group">
                   <label>File nhạc</label>
 
                   <div
@@ -598,6 +638,7 @@ const ManageSong = () => {
                     />
                   </div>
                 </div>
+
 
               </div>
             </div>
@@ -679,68 +720,76 @@ const ManageSong = () => {
 
     {/* POPUP XEM BÀI HÁT */}
     {showViewPopup && (
-      <div className="popup-overlay" onClick={() => setShowViewPopup(null)}>
-        <div className="popup-card" onClick={(e) => e.stopPropagation()}>
-          <h3 className="popup-title">Thông tin bài hát</h3>
+    <div className="popup-overlay" onClick={() => setShowViewPopup(null)}>
+      <div className="popup-card" onClick={(e) => e.stopPropagation()}>
+        <h3 className="popup-title">Thông tin bài hát</h3>
 
-          <div className="popup-grid">
-            
-            <div className="popup-col">
+        <div className="popup-grid">
+          
+          <div className="popup-col">
 
-              <div className="popup-group">
-                <label>Tiêu đề</label>
-                <input type="text" value={showViewPopup.title} readOnly />
-              </div>
-
-              <div className="popup-group">
-                <label>Nghệ sĩ</label>
-                <input type="text" value={showViewPopup.artistName} readOnly />
-              </div>
-
-              <div className="popup-group">
-                <label>Ảnh bìa</label>
-
-                <img
-                  src={showViewPopup.coverUrl}
-                  alt="Cover"
-                  className="popup-cover-view"
-                />
-              </div>
-
-              <div className="popup-group">
-                <label>Thời lượng</label>
-                <input type="text" value={formatDuration(showViewPopup.duration)} readOnly />
-              </div>
-
+            <div className="popup-group">
+              <label>Tiêu đề</label>
+              <input type="text" value={showViewPopup.title} readOnly />
             </div>
 
-            <div className="popup-col">
+            <div className="popup-group">
+              <label>Nghệ sĩ</label>
+              <input type="text" value={showViewPopup.artistName} readOnly />
+            </div>
 
-              <div className="popup-group">
-                <label>Album</label>
-                <input type="text" value={showViewPopup.albumName} readOnly />
-              </div>
+            <div className="popup-group">
+              <label>Ảnh bìa</label>
+              <img
+                src={showViewPopup.coverUrl}
+                alt="Cover"
+                className="popup-cover-view"
+              />
+            </div>
 
-              <div className="popup-group">
-                <label>Thể loại</label>
-                <input type="text" value={showViewPopup.genre} readOnly />
-              </div>
-
-              <div className="popup-group">
-                <label>Trạng thái</label>
-                <input type="text" value={showViewPopup.active ? "Public" : "Hidden"} readOnly />
-              </div>
-
+            <div className="popup-group">
+              <label>Thời lượng</label>
+              <input type="text" value={formatDuration(showViewPopup.duration)} readOnly />
             </div>
 
           </div>
 
-          <div className="popup-footer">
-            <button className="popup-cancel" onClick={() => setShowViewPopup(null)}>Đóng</button>
+          <div className="popup-col">
+
+            <div className="popup-group">
+              <label>Album</label>
+              <input type="text" value={showViewPopup.albumName} readOnly />
+            </div>
+
+            <div className="popup-group">
+              <label>Thể loại</label>
+              <input type="text" value={showViewPopup.genre} readOnly />
+            </div>
+
+            <div className="popup-group">
+              <label>Trạng thái</label>
+              <input type="text" value={showViewPopup.active ? "Public" : "Hidden"} readOnly />
+            </div>
+
+            {/* NEW: AUDIO PLAYER */}
+            <div className="popup-group">
+              <label>Nghe thử bài hát</label>
+              <audio controls style={{ width: "100%" }}>
+                <source src={showViewPopup.audioUrl} type="audio/mpeg" />
+              </audio>
+            </div>
+
           </div>
+
+        </div>
+
+        <div className="popup-footer">
+          <button className="popup-cancel" onClick={() => setShowViewPopup(null)}>Đóng</button>
         </div>
       </div>
-    )}
+    </div>
+  )}
+
 
     {/* POPUP SỬA BÀI HÁT */}
     {showEditPopup && (

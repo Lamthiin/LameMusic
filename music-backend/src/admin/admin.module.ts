@@ -8,9 +8,13 @@ import { Role } from '../role/role.entity';
 import { AdminArtistController } from './artist/admin-artist.controller';
 import { AdminArtistService } from './artist/admin-artist.service';
 
+// MODULE QUẢN LÝ BÀI HÁT (code mới)
+import { ManageSongModule } from './manage-song/manage-song.module';
+
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Artist, User, Role]) // ⭐ QUAN TRỌNG
+    TypeOrmModule.forFeature([Artist, User, Role]), // ⭐ QUAN TRỌNG
+    ManageSongModule,
   ],
   controllers: [AdminArtistController],
   providers: [AdminArtistService],

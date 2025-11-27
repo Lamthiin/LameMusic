@@ -3,7 +3,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ServeStaticModule } from '@nestjs/serve-static';
+import { ConfigModule } from '@nestjs/config';
 import { join } from 'path';
 
 // Import các module tính năng
@@ -26,10 +26,8 @@ import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
-    //upload ảnh
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'uploads'),
-      serveRoot: '/uploads',  // FE xem ảnh qua http://localhost:3000/uploads/avatars/xxx.jpg
+    ConfigModule.forRoot({
+      isGlobal: true,
     }),
 
     // 1. Cấu hình kết nối Database

@@ -473,3 +473,7 @@
   background: #18a247;
 }
 
+.song-title-clickable:hover {
+  text-decoration: underline;
+}
+
