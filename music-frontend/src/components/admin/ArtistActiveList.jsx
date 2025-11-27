@@ -1,39 +1,70 @@
 import React, { useState } from "react";
+import axios from "axios";
 import "./ArtistActiveList.css";
 import ArtistFormModal from "../admin/ArtistFormModal.jsx";
 
 const ArtistActiveList = ({ artists = [], refresh }) => {
-  const [showModal, setShowModal] = useState(false);
+
+  const [showModal, setShowModal] = useState(false);   // ⭐ FIX DUY NHẤT NÊN CẦN
   const [editArtist, setEditArtist] = useState(null);
 
-  // SẮP XẾP A → Z
   const sortedArtists = [...artists].sort((a, b) =>
     a.stage_name.localeCompare(b.stage_name, "vi", { sensitivity: "base" })
   );
 
-  const deleteArtist = (id) => {
+  const deleteArtist = async (id) => {
     if (!window.confirm("Bạn chắc chắn muốn xoá nghệ sĩ này?")) return;
-    alert("Chức năng xoá BE sẽ làm sau. FE xoá tạm thôi.");
-    refresh();
+
+    try {
+      await axios.delete(`http://localhost:3000/admin/artists/${id}`);
+
+      alert("Đã xoá nghệ sĩ!");
+      refresh(); // load lại danh sách
+    } catch (err) {
+      console.error("DELETE ARTIST ERROR:", err);
+      alert("Lỗi xoá nghệ sĩ!");
+    }
   };
 
-  // Khi submit form từ ArtistFormModal
+
   const saveArtist = async (formData) => {
-    alert("Chức năng lưu/sửa BE sẽ làm sau. FE đang mô phỏng");
-    setShowModal(false);
-    setEditArtist(null);
-    refresh();
+    try {
+      if (editArtist && editArtist.id) {
+        await axios.patch(
+          `http://localhost:3000/admin/artists/${editArtist.id}`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+        alert("Đã cập nhật nghệ sĩ!");
+      } else {
+        await axios.post(
+          "http://localhost:3000/admin/artists",
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+        alert("Đã thêm nghệ sĩ mới!");
+      }
+
+      setShowModal(false);
+      setEditArtist(null);
+      refresh();
+
+    } catch (err) {
+      console.error("SAVE ARTIST ERROR:", err);
+      alert("Lỗi lưu nghệ sĩ!");
+    }
   };
 
   return (
     <div className="active-container">
+
       <div className="top-bar">
         <h2 className="active-title">Nghệ sĩ đang hoạt động</h2>
 
         <button
           className="btn-add"
           onClick={() => {
-            setEditArtist({ stage_name: "", bio: "", avatar_url: "" });
+            setEditArtist(null);
             setShowModal(true);
           }}
         >
@@ -73,7 +104,6 @@ const ArtistActiveList = ({ artists = [], refresh }) => {
         </div>
       )}
 
-      {/* ⭐ DÙNG ARTIST FORM MODAL — KHÔNG DÙNG MODAL CŨ NỮA */}
       <ArtistFormModal
         isOpen={showModal}
         initialArtist={editArtist}

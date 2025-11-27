@@ -3,6 +3,8 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 // Import các module tính năng
 import { RoleModule } from './role/role.module';
@@ -24,6 +26,12 @@ import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
+    //upload ảnh
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads',  // FE xem ảnh qua http://localhost:3000/uploads/avatars/xxx.jpg
+    }),
+
     // 1. Cấu hình kết nối Database
     TypeOrmModule.forRoot({
       type: 'mysql', // <-- DÒNG NÀY SẼ SỬA LỖI CỦA BẠN
@@ -52,6 +60,7 @@ import { AdminModule } from './admin/admin.module';
     HistoryModule,
     AdminModule,
   ],
+  
   controllers: [AppController],
   providers: [AppService],
 })

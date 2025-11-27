@@ -35,7 +35,7 @@ export class Artist {
   active: number; // 0=Inactive, 1=Active
 
   @Column({ type: 'varchar', length: 20, default: 'PENDING', name: 'registration_status' }) 
-  registrationStatus: 'PENDING' | 'APPROVED' | 'REJECTED';
+  registrationStatus: 'PENDING' | 'APPROVED' | 'REJECTED' ;
 
   @CreateDateColumn()
   created_at: Date;
