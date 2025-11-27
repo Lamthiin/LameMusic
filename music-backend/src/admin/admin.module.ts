@@ -5,8 +5,8 @@ import { Artist } from '../artist/artist.entity';
 import { User } from '../user/user.entity';
 import { Role } from '../role/role.entity';
 
-import { AdminArtistController } from './artist/artist.controller';
-import { AdminArtistService } from './artist/artist.service';
+import { AdminArtistController } from './artist/admin-artist.controller';
+import { AdminArtistService } from './artist/admin-artist.service';
 
 @Module({
   imports: [

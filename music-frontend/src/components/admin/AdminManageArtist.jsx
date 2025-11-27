@@ -5,32 +5,28 @@ import "./AdminManageArtist.css";
 
 import ArtistPendingList from "./ArtistPendingList.jsx";
 import ArtistActiveList from "./ArtistActiveList.jsx";
+import ArtistRejectedList from "./ArtistRejectedList.jsx";
 
 const AdminManageArtist = () => {
   const [tab, setTab] = useState("pending");
+
   const [artistsPending, setArtistsPending] = useState([]);
   const [artistsActive, setArtistsActive] = useState([]);
+  const [artistsRejected, setArtistsRejected] = useState([]);
 
   useEffect(() => {
     loadPending();
     loadActive();
+    loadRejected();
   }, []);
 
   // ===========================
-  // LOAD PENDING (ADMIN)
+  // LOAD PENDING
   // ===========================
   const loadPending = async () => {
     try {
       const res = await axios.get("http://localhost:3000/admin/artists/pending");
-
-      console.log("PENDING RES:", res.data);
-
-      if (Array.isArray(res.data)) {
-        setArtistsPending(res.data);
-      } else {
-        console.warn("API pending không trả về mảng:", res.data);
-        setArtistsPending([]);
-      }
+      Array.isArray(res.data) ? setArtistsPending(res.data) : setArtistsPending([]);
     } catch (err) {
       console.error("LOAD PENDING ERROR:", err);
       setArtistsPending([]);
@@ -38,23 +34,28 @@ const AdminManageArtist = () => {
   };
 
   // ===========================
-  // LOAD ACTIVE (ADMIN)
+  // LOAD ACTIVE
   // ===========================
   const loadActive = async () => {
     try {
       const res = await axios.get("http://localhost:3000/admin/artists/active");
-
-      console.log("ACTIVE RES:", res.data);
-
-      if (Array.isArray(res.data)) {
-        setArtistsActive(res.data);
-      } else {
-        console.warn("API active không trả về mảng:", res.data);
-        setArtistsActive([]);
-      }
+      Array.isArray(res.data) ? setArtistsActive(res.data) : setArtistsActive([]);
     } catch (err) {
       console.error("LOAD ACTIVE ERROR:", err);
       setArtistsActive([]);
+    }
+  };
+
+  // ===========================
+  // LOAD REJECTED
+  // ===========================
+  const loadRejected = async () => {
+    try {
+      const res = await axios.get("http://localhost:3000/admin/artists/rejected");
+      Array.isArray(res.data) ? setArtistsRejected(res.data) : setArtistsRejected([]);
+    } catch (err) {
+      console.error("LOAD REJECTED ERROR:", err);
+      setArtistsRejected([]);
     }
   };
 
@@ -66,8 +67,25 @@ const AdminManageArtist = () => {
       await axios.patch(`http://localhost:3000/admin/artists/${id}/approve`);
       loadPending();
       loadActive();
+      loadRejected();
     } catch (err) {
       console.error("APPROVE ERROR:", err);
+    }
+  };
+
+  // ===========================
+  // REJECT — ⭐ BỔ SUNG
+  // ===========================
+  const reject = async (id) => {
+    if (!window.confirm("Bạn có chắc muốn từ chối hồ sơ nghệ sĩ này?")) return;
+
+    try {
+      await axios.patch(`http://localhost:3000/admin/artists/${id}/reject`);
+      loadPending();
+      loadRejected();
+      loadActive();
+    } catch (err) {
+      console.error("REJECT ERROR:", err);
     }
   };
 
@@ -90,16 +108,32 @@ const AdminManageArtist = () => {
         >
           Hoạt động
         </button>
+
+        <button
+          className={`artist-tab ${tab === "rejected" ? "active" : ""}`}
+          onClick={() => setTab("rejected")}
+        >
+          Bị từ chối
+        </button>
       </div>
 
       {/* TAB PENDING */}
       {tab === "pending" && (
-        <ArtistPendingList artists={artistsPending} approve={approve} />
+        <ArtistPendingList 
+          artists={artistsPending} 
+          approve={approve} 
+          reject={reject}      // ⭐ TRUYỀN XUỐNG LIST
+        />
       )}
 
       {/* TAB ACTIVE */}
       {tab === "active" && (
         <ArtistActiveList artists={artistsActive} refresh={loadActive} />
+      )}
+
+      {/* TAB REJECTED */}
+      {tab === "rejected" && (
+        <ArtistRejectedList artists={artistsRejected} refresh={loadRejected} />
       )}
     </div>
   );
