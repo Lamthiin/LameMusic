@@ -1,0 +1,137 @@
+/* ===== Overlay ===== */
+.alb-view-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(3px);
+  z-index: 2000;
+}
+
+/* ===== Modal Box ===== */
+.alb-view-box {
+  background: #222;               /* mềm hơn #1f1f1f */
+  width: 520px;
+  padding: 26px;
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+  color: #f5f5f5;
+  animation: fadeIn 0.25s ease;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
+.alb-view-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 18px;
+}
+
+/* ===== Cover ===== */
+.alb-view-cover {
+  width: 100%;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.35);
+}
+
+/* ===== Info Section ===== */
+.alb-view-info p {
+  margin: 8px 0;
+  font-size: 15px;
+  color: #ddd;
+}
+
+.alb-view-info strong {
+  color: #fff;
+}
+
+.alb-view-subtitle {
+  margin-top: 22px;
+  margin-bottom: 12px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #f0f0f0;
+}
+
+/* ===== Song List ===== */
+.alb-song-list {
+  background: #2b2b2b;
+  padding: 14px;
+  border-radius: 10px;
+  max-height: 260px;
+  overflow-y: auto;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.alb-song-item {
+  padding: 10px 6px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #eaeaea;
+  font-size: 15px;
+}
+
+.alb-song-item:last-child {
+  border-bottom: none;
+}
+
+.alb-song-item:hover {
+  background: rgba(255,255,255,0.06);
+  border-radius: 6px;
+}
+
+.alb-empty-song {
+  color: #bbb;
+  padding: 10px 0;
+  font-style: italic;
+}
+
+/* ===== Actions ===== */
+.alb-view-actions {
+  margin-top: 24px;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* ADD SONG BTN */
+.btn-addsong {
+  background: #27ae60;
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  color: white;
+  font-weight: 600;
+  transition: 0.2s ease;
+}
+
+.btn-addsong:hover {
+  background: #1f8f54;
+  transform: translateY(-1px);
+}
+
+/* CLOSE BTN */
+.btn-delete {
+  background: #e74c3c;
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  color: white;
+  font-weight: 600;
+  transition: 0.2s ease;
+}
+
+.btn-delete:hover {
+  background: #c0392b;
+  transform: translateY(-1px);
+}

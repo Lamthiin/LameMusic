@@ -1,23 +1,18 @@
 import React from "react";
 import axios from "axios";
-import "./ArtistActiveList.css"; // dùng chung CSS
+import "./ArtistActiveList.css"; // dùng chung CSS bảng
 
 const ArtistRejectedList = ({ artists = [], refresh }) => {
 
-  // SẮP XẾP A → Z
   const sortedArtists = [...artists].sort((a, b) =>
     a.stage_name.localeCompare(b.stage_name, "vi", { sensitivity: "base" })
   );
 
-  // ============================
-  // API: Khôi phục nghệ sĩ
-  // ============================
   const restoreArtist = async (id) => {
-    if (!window.confirm("Khôi phục nghệ sĩ này?")) return;
+    if (!window.confirm("Khôi phục nghệ sĩ này về trạng thái chờ duyệt?")) return;
 
     try {
-      await axios.patch(`http://localhost:3000/admin/artists/${id}/approve`);
-      alert("Đã khôi phục nghệ sĩ!");
+      await axios.patch(`http://localhost:3000/admin/artists/${id}/pending`);
       refresh && refresh();
     } catch (err) {
       console.error("RESTORE ERROR:", err);
@@ -25,9 +20,6 @@ const ArtistRejectedList = ({ artists = [], refresh }) => {
     }
   };
 
-  // ============================
-  // API: Xóa vĩnh viễn (active = 0)
-  // ============================
   const purgeArtist = async (id) => {
     if (!window.confirm("Bạn chắc chắn muốn xoá vĩnh viễn?")) return;
 
@@ -50,27 +42,73 @@ const ArtistRejectedList = ({ artists = [], refresh }) => {
       {sortedArtists.length === 0 ? (
         <div className="empty-active">Không có nghệ sĩ nào bị từ chối</div>
       ) : (
-        <div className="active-list">
-          {sortedArtists.map((a) => (
-            <div className="active-row" key={a.id}>
-              <img className="row-avatar" src={a.avatar_url} alt={a.stage_name} />
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>STT</th>
+              <th>Ảnh</th>
+              <th>Tên nghệ sĩ</th>
+              <th>Ngày tạo</th>
+              <th>Trạng thái</th>
+              <th>Hành động</th>
+            </tr>
+          </thead>
 
-              <div className="row-info">
-                <h3>{a.stage_name}</h3>
-              </div>
+          <tbody>
+            {sortedArtists.map((a, index) => (
+              <tr key={a.id}>
+                {/* STT */}
+                <td>{index + 1}</td>
 
-              <div className="row-actions">
-                <button className="btn-edit" onClick={() => restoreArtist(a.id)}>
-                  Khôi phục
-                </button>
+                {/* Avatar */}
+                <td>
+                  <img
+                    className="artist-avatar-table"
+                    src={a.avatar_url}
+                    alt={a.stage_name}
+                  />
+                </td>
 
-                <button className="btn-delete" onClick={() => purgeArtist(a.id)}>
-                  Xoá vĩnh viễn
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+                {/* Tên nghệ sĩ */}
+                <td>{a.stage_name}</td>
+
+                {/* Ngày tạo */}
+                <td>
+                  {a.created_at
+                    ? new Date(a.created_at).toLocaleDateString("vi-VN")
+                    : "—"}
+                </td>
+
+                {/* Trạng thái */}
+                <td className="status-cell">
+                  <span className="artist-status-rejected">Rejected</span>
+                </td>
+
+                {/* Hành động */}
+                <td>
+                  <div className="admin-actions">
+
+                    <button
+                      className="btn-edit"
+                      onClick={() => restoreArtist(a.id)}
+                    >
+                      Khôi phục
+                    </button>
+
+                    <button
+                      className="btn-delete"
+                      onClick={() => purgeArtist(a.id)}
+                    >
+                      Xoá vĩnh viễn
+                    </button>
+
+                  </div>
+                </td>
+
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
     </div>
   );

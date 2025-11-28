@@ -1,0 +1,24 @@
+.album-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.album-form label {
+  font-weight: 600;
+  margin-bottom: -6px;
+}
+
+.album-form input {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #444;
+  background: #2b2b2b;
+  color: white;
+  outline: none;
+  transition: 0.2s;
+}
+
+.album-form input:focus {
+  border-color: #3498db;
+}

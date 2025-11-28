@@ -10,10 +10,22 @@ import { AdminArtistService } from './artist/admin-artist.service';
 
 // MODULE QUẢN LÝ BÀI HÁT (code mới)
 import { ManageSongModule } from './manage-song/manage-song.module';
+import { MulterModule } from '@nestjs/platform-express/multer/multer.module';
+import { diskStorage } from 'multer';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Artist, User, Role]), // ⭐ QUAN TRỌNG
+    TypeOrmModule.forFeature([Artist, User, Role]),
+    MulterModule.register({
+      storage: diskStorage({
+        destination: './uploads/avatars',         // thư mục lưu
+        filename: (req, file, cb) => {
+          const unique = Date.now() + '-' + file.originalname;
+          cb(null, unique);                      // tên file
+        },
+      }),
+    }),
+
     ManageSongModule,
   ],
   controllers: [AdminArtistController],
