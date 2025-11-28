@@ -74,13 +74,13 @@ const ArtistFormModal = ({
 
   return (
     <div
-    className="modal-overlay"
-    onClick={(e) => {
-      if (e.target.classList.contains("modal-overlay")) {
-        onClose();
-      }
-    }}
-  >
+  className="modal-overlay"
+  onClick={(e) => {
+    if (e.target.classList.contains("modal-overlay")) {
+      onClose();
+    }
+  }}
+>
 
     <div
         className="modal-box"

@@ -4,8 +4,7 @@ import "./ArtistActiveList.css";
 import ArtistFormModal from "../admin/ArtistFormModal.jsx";
 
 const ArtistActiveList = ({ artists = [], refresh }) => {
-
-  const [showModal, setShowModal] = useState(false);   // ⭐ FIX DUY NHẤT NÊN CẦN
+  const [showModal, setShowModal] = useState(false);
   const [editArtist, setEditArtist] = useState(null);
 
   const sortedArtists = [...artists].sort((a, b) =>
@@ -17,19 +16,17 @@ const ArtistActiveList = ({ artists = [], refresh }) => {
 
     try {
       await axios.delete(`http://localhost:3000/admin/artists/${id}`);
-
       alert("Đã xoá nghệ sĩ!");
-      refresh(); // load lại danh sách
+      refresh();
     } catch (err) {
       console.error("DELETE ARTIST ERROR:", err);
       alert("Lỗi xoá nghệ sĩ!");
     }
   };
 
-
   const saveArtist = async (data) => {
     try {
-      if (editArtist && editArtist.id) {
+      if (editArtist?.id) {
         await axios.patch(
           `http://localhost:3000/admin/artists/${editArtist.id}`,
           data,
@@ -37,11 +34,9 @@ const ArtistActiveList = ({ artists = [], refresh }) => {
         );
         alert("Đã cập nhật nghệ sĩ!");
       } else {
-        await axios.post(
-          "http://localhost:3000/admin/artists",
-          data,
-          { headers: { "Content-Type": "multipart/form-data" } }
-        );
+        await axios.post("http://localhost:3000/admin/artists", data, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
         alert("Đã thêm nghệ sĩ mới!");
       }
 
@@ -54,8 +49,6 @@ const ArtistActiveList = ({ artists = [], refresh }) => {
     }
   };
 
-
-
   return (
     <div className="active-container">
 
@@ -63,7 +56,7 @@ const ArtistActiveList = ({ artists = [], refresh }) => {
         <h2 className="active-title">Nghệ sĩ đang hoạt động</h2>
 
         <button
-          className="btn-add"
+          className="am-btn-add"
           onClick={() => {
             setEditArtist(null);
             setShowModal(true);
@@ -76,33 +69,69 @@ const ArtistActiveList = ({ artists = [], refresh }) => {
       {sortedArtists.length === 0 ? (
         <div className="empty-active">Không có nghệ sĩ nào hoạt động</div>
       ) : (
-        <div className="active-list">
-          {sortedArtists.map((a) => (
-            <div className="active-row" key={a.id}>
-              <img className="row-avatar" src={a.avatar_url} alt={a.stage_name} />
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>STT</th>
+              <th>Ảnh</th>
+              <th>Tên nghệ sĩ</th>
+              <th>Ngày tạo</th>
+              <th>Trạng thái</th>
+              <th>Hành động</th>
+            </tr>
+          </thead>
 
-              <div className="row-info">
-                <h3>{a.stage_name}</h3>
-              </div>
+          <tbody>
+            {sortedArtists.map((a, index) => (
+              <tr key={a.id}>
+                <td>{index + 1}</td>
 
-              <div className="row-actions">
-                <button
-                  className="btn-edit"
-                  onClick={() => {
-                    setEditArtist(a);
-                    setShowModal(true);
-                  }}
-                >
-                  Sửa
-                </button>
+                <td>
+                  <img
+                    src={a.avatar_url}
+                    className="artist-avatar-table"
+                    alt={a.stage_name}
+                  />
+                </td>
 
-                <button className="btn-delete" onClick={() => deleteArtist(a.id)}>
-                  Xoá
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+                <td>{a.stage_name}</td>
+
+                <td>
+                  {a.created_at
+                    ? new Date(a.created_at).toLocaleDateString("vi-VN")
+                    : "—"}
+                </td>
+
+                <td className="status-cell">
+                  <span className="artist-status-active">Active</span>
+                </td>
+
+                <td>
+                  <div className="admin-actions">
+
+                    <button
+                      className="btn-edit"
+                      onClick={() => {
+                        setEditArtist(a);
+                        setShowModal(true);
+                      }}
+                    >
+                      Sửa
+                    </button>
+
+                    <button
+                      className="btn-delete"
+                      onClick={() => deleteArtist(a.id)}
+                    >
+                      Xoá
+                    </button>
+
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
 
       <ArtistFormModal

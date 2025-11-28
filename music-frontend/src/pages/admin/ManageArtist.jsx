@@ -14,6 +14,7 @@ export default function ManageArtist() {
   const [artistsActive, setArtistsActive] = useState([]);
   const [artistsRejected, setArtistsRejected] = useState([]);
 
+  /* LOAD DATA */
   useEffect(() => {
     loadPending();
     loadActive();
@@ -63,43 +64,62 @@ export default function ManageArtist() {
   };
 
   return (
-    <div className="artist-page">
-      <h1 className="page-title">Quản lý nghệ sĩ</h1>
+    <div className="album-management">{/* DÙNG LẠI CLASS CỦA ALBUM */}
+      <h2 className="am-title">Quản lý Nghệ sĩ</h2>
 
-      <div className="artist-tabs">
-        <button
-          className={`artist-tab ${tab === "pending" ? "active" : ""}`}
+      {/* 🔥 TAB – GIỐNG Y HỆT ALBUM */}
+      <div className="am-grid">
+
+        <div
+          className={`am-card ${tab === "pending" ? "active" : ""}`}
           onClick={() => setTab("pending")}
         >
-          Chờ duyệt
-        </button>
+          <h3>Chờ duyệt</h3>
+          <p>Nghệ sĩ mới đăng ký</p>
+        </div>
 
-        <button
-          className={`artist-tab ${tab === "active" ? "active" : ""}`}
+        <div
+          className={`am-card ${tab === "active" ? "active" : ""}`}
           onClick={() => setTab("active")}
         >
-          Hoạt động
-        </button>
+          <h3>Hoạt động</h3>
+          <p>Đang hiển thị công khai</p>
+        </div>
 
-        <button
-          className={`artist-tab ${tab === "rejected" ? "active" : ""}`}
+        <div
+          className={`am-card ${tab === "rejected" ? "active" : ""}`}
           onClick={() => setTab("rejected")}
         >
-          Bị từ chối
-        </button>
+          <h3>Bị từ chối</h3>
+          <p>Hồ sơ không hợp lệ</p>
+        </div>
+
       </div>
 
-      {tab === "pending" && (
-        <ArtistPendingList artists={artistsPending} approve={approve} reject={reject} />
-      )}
+      {/* TABLE */}
+      <div className="am-table-area">
+        {tab === "pending" && (
+          <ArtistPendingList
+            artists={artistsPending}
+            approve={approve}
+            reject={reject}
+          />
+        )}
 
-      {tab === "active" && (
-        <ArtistActiveList artists={artistsActive} refresh={loadActive} />
-      )}
+        {tab === "active" && (
+          <ArtistActiveList
+            artists={artistsActive}
+            refresh={loadActive}
+          />
+        )}
 
-      {tab === "rejected" && (
-        <ArtistRejectedList artists={artistsRejected} refresh={loadRejected} />
-      )}
+        {tab === "rejected" && (
+          <ArtistRejectedList
+            artists={artistsRejected}
+            refresh={loadRejected}
+          />
+        )}
+      </div>
     </div>
   );
 }

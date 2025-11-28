@@ -1,16 +1,12 @@
-/* ==============================
-   TITLE
-============================== */
+/* TITLE */
 .active-title {
   font-size: 20px;
   font-weight: 700;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
   color: #f5f5f5;
 }
 
-/* ==============================
-   TOP BAR
-============================== */
+/* TOP BAR */
 .top-bar {
   display: flex;
   justify-content: space-between;
@@ -18,26 +14,7 @@
   margin-bottom: 18px;
 }
 
-/* ADD BUTTON */
-.btn-add {
-  background: linear-gradient(135deg, #2ecc71, #27ae60);
-  color: #fff;
-  padding: 9px 18px;
-  border-radius: 10px;
-  font-weight: 600;
-  cursor: pointer;
-  border: none;
-  transition: 0.2s ease;
-}
-
-.btn-add:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 255, 100, 0.25);
-}
-
-/* ==============================
-   EMPTY STATE
-============================== */
+/* EMPTY STATE */
 .empty-active {
   background: #2a2a2a;
   padding: 20px;
@@ -45,87 +22,129 @@
   font-size: 16px;
   color: #ccc;
   border-radius: 10px;
-  box-shadow: 0px 3px 10px rgba(0,0,0,0.2);
   border: 1px solid rgba(255,255,255,0.05);
   margin-top: 10px;
 }
 
-/* ==============================
-   LIST & ROW
-============================== */
-.active-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+/* ==========================
+      TABLE LAYOUT
+========================== */
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  background: #1e1e1e;
+  border-radius: 10px;
+  overflow: hidden;
 }
 
-.active-row {
-  display: flex;
-  align-items: center;
-
-  background: #2a2a2a;  /* giống pending */
-  padding: 16px 20px;   /* giống pending */
-  border-radius: 10px;  /* giống pending */
-  box-shadow: 0px 3px 10px rgba(0,0,0,0.2);
-  border: 1px solid rgba(255,255,255,0.05);
-
-  transition: 0.2s ease;
+.admin-table thead {
+  background: #2c2c2c;
 }
 
-.active-row:hover {
-  background: #333333;
-  transform: translateY(-2px);
-}
-
-/* AVATAR */
-.row-avatar {
-  width: 58px;
-  height: 58px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-right: 20px;
-  flex-shrink: 0;
-}
-
-/* NAME */
-.row-info {
-  flex: 1;
-  display: flex;
-  align-items: center;
-}
-
-.row-info h3 {
-  margin: 0;
-  font-size: 17px;
+.admin-table th {
+  padding: 14px 16px;
+  font-size: 15px;
   font-weight: 600;
-  color: #f1f1f1;
+  color: #e0e0e0;
+  border-bottom: 1px solid #333;
+  text-align: left;
+  vertical-align: middle;
 }
 
-/* BUTTONS */
-.row-actions {
-  display: flex;
-  gap: 12px;
+.admin-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #2c2c2c;
+  color: #ddd;
+  font-size: 15px;
+  vertical-align: middle;
 }
 
-.row-actions button {
-  height: 40px;
-  padding: 0 16px;
-  border: none;
-  min-width: 95px;
+/* Avatar trong bảng */
+.artist-avatar-table {
+  width: 55px;
+  height: 55px;
   border-radius: 8px;
-  cursor: pointer;
+  object-fit: cover;
+  border: 2px solid rgba(255,255,255,0.08);
+}
 
+/* ==========================
+   STATUS COLORS
+========================== */
+
+/* Căn giữa hoàn hảo cho toàn cột trạng thái */
+/* ==========================
+      STATUS COLORS
+========================== */
+
+/* Căn giữa trong cột trạng thái */
+.admin-table td.artist-status-cell {
   display: flex;
   align-items: center;
   justify-content: center;
-
-  font-weight: 600;
-  font-size: 15px;
-  color: white;
-  transition: 0.17s ease;
 }
 
-/* BUTTON COLORS – đồng bộ với pending */
+/* Badge trạng thái – namespace artist-status */
+.active-container .artist-status-pending,
+.active-container .artist-status-active,
+.active-container .artist-status-rejected {
+  align-items: center;
+
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  min-width: 90px;
+  text-transform: capitalize;
+}
+
+/* Pending */
+.active-container .artist-status-pending {
+  color: #f1c40f;
+}
+
+/* Active */
+.active-container .artist-status-active {
+  color: #2ecc71;
+  padding-top: 2px;      /* cùng độ lệch để đều */
+}
+
+/* Rejected */
+.active-container .artist-status-rejected {
+  color: #e74c3c;
+  padding-top: 2px;      /* đẩy xuống giống nhau */
+}
+
+/* ==========================
+   ACTION BUTTONS
+========================== */
+
+.admin-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* chung */
+.admin-actions button,
+.row-actions button {
+  height: 36px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  color: white;
+  font-size: 14px;
+  transition: 0.18s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Xem */
 .btn-edit {
   background: #4aa3df;
 }
@@ -134,6 +153,16 @@
   transform: translateY(-2px);
 }
 
+/* Duyệt */
+.btn-save {
+  background: #2ecc71;
+}
+.btn-save:hover {
+  background: #29b765;
+  transform: translateY(-2px);
+}
+
+/* Từ chối */
 .btn-delete {
   background: #e76a5f;
 }
@@ -142,9 +171,10 @@
   transform: translateY(-2px);
 }
 
-/* ==============================
-   MODAL — giữ nguyên
-============================== */
+/* ==========================
+   MODAL GIỮ NGUYÊN
+========================== */
+
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -160,9 +190,6 @@
   padding: 22px;
   border-radius: 14px;
   width: 360px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
   color: #fff;
   border: 1px solid rgba(255,255,255,0.06);
 }
@@ -176,19 +203,12 @@
   border: 1px solid rgba(255,255,255,0.08);
   color: #fff;
   font-size: 14px;
-  transition: 0.15s ease;
 }
 
 .modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-}
-
-.btn-save {
-  background: #2ecc71;
-  padding: 9px 18px;
-  border-radius: 10px;
 }
 
 .btn-cancel {

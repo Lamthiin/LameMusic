@@ -1,11 +1,12 @@
 import React from "react";
-import "./ArtistActiveList.css"; // ⭐ Dùng chung CSS
+import "./ArtistActiveList.css"; // vẫn dùng CSS cũ
 
 const ArtistPendingList = ({ artists = [], approve, reject, view }) => {
   const safeArtists = Array.isArray(artists) ? artists : [];
 
   return (
     <div className="active-container">
+
       <div className="top-bar">
         <h2 className="active-title">Nghệ sĩ chờ duyệt</h2>
       </div>
@@ -13,48 +14,62 @@ const ArtistPendingList = ({ artists = [], approve, reject, view }) => {
       {safeArtists.length === 0 ? (
         <div className="empty-active">Không có nghệ sĩ nào chờ duyệt</div>
       ) : (
-        <div className="active-list">
-          {safeArtists.map((a) => (
-            <div className="active-row" key={a.id}>
-              <img
-                className="row-avatar"
-                src={a.avatar_url}
-                alt={a.stage_name}
-              />
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>STT</th>
+              <th>Ảnh</th>
+              <th>Tên nghệ sĩ</th>
+              <th>Ngày tạo</th>     {/* ⭐ thêm cột mới */}
+              <th>Trạng thái</th>
+              <th>Hành động</th>
+            </tr>
+          </thead>
 
-              <div className="row-info">
-                <h3>{a.stage_name}</h3>
-              </div>
+          <tbody>
+            {safeArtists.map((a, index) => (
+              <tr key={a.id}>
+                {/* STT */}
+                <td>{index + 1}</td>
 
-              <div className="row-actions">
+                {/* Ảnh */}
+                <td>
+                  <img
+                    src={a.avatar_url}
+                    className="artist-avatar-table"
+                    alt={a.stage_name}
+                  />
+                </td>
 
-                <button
-                  className="btn-edit" // dùng style nút xanh
-                  onClick={() => view && view(a.id)}
-                >
-                  Xem
-                </button>
+                {/* Tên nghệ sĩ */}
+                <td>{a.stage_name}</td>
 
-                <button
-                  className="btn-save" // xanh lá ✔
-                  onClick={() => approve && approve(a.id)}
-                >
-                  Duyệt
-                </button>
+                {/* ⭐ Ngày tạo */}
+                <td>{a.created_at ? new Date(a.created_at).toLocaleDateString("vi-VN") : "—"}</td>
 
-                <button
-                  className="btn-delete" // đỏ
-                  onClick={() => reject && reject(a.id)}
-                >
-                  Từ chối
-                </button>
+                {/* Status */}
+                <td className="artist-status-pending">Pending</td>
 
-              </div>
+                {/* Actions */}
+                <td>
+                  <div className="admin-actions">
+        
 
-            </div>
-          ))}
-        </div>
+                    <button className="btn-save" onClick={() => approve?.(a.id)}>
+                      Duyệt
+                    </button>
+
+                    <button className="btn-delete" onClick={() => reject?.(a.id)}>
+                      Từ chối
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
+
     </div>
   );
 };

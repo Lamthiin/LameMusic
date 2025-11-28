@@ -1,0 +1,30 @@
+.song-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.song-selector .selector-search {
+  width: 100%;
+  padding: 10px 12px;
+  background: #2a2a2a;
+  border-radius: 8px;
+  border: 1px solid #444;
+  color: white;
+}
+
+.selector-list {
+  max-height: 180px;
+  overflow-y: auto;
+  border-radius: 8px;
+}
+
+.selector-item {
+  padding: 10px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.selector-item:hover {
+  background: #333;
+}
