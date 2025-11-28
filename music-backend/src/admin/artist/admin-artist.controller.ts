@@ -39,6 +39,12 @@ export class AdminArtistController {
     return list.map(a => this.fixAvatar(a));
   }
 
+  @Patch(':id/pending') // <--- URL có tham số :id và dùng PATCH
+  setPending(@Param('id') id: string) {
+  // Hàm này sẽ cập nhật trạng thái
+  return this.service.setPending(Number(id)); 
+  } 
+
   @Get('active')
   async getActive() {
     const list = await this.service.findApproved();
@@ -81,16 +87,14 @@ export class AdminArtistController {
 
   @Patch(':id')
   @UseInterceptors(FileInterceptor('avatarFile'))
-    updateArtist(
+  updateArtist(
     @Param('id') id: string,
     @UploadedFile() file: Express.Multer.File,
     @Body() body: any,
   ) {
-    return this.service.updateArtist(Number(id), {
-      ...body,
-      avatar_url: file ? `/uploads/avatars/${file.filename}` : undefined,
-    });
+    return this.service.updateArtist(Number(id), body, file);
   }
+
 
   @Delete(':id')
   deleteArtist(@Param('id') id: string) {

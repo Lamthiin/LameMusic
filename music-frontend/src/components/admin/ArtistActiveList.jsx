@@ -27,19 +27,19 @@ const ArtistActiveList = ({ artists = [], refresh }) => {
   };
 
 
-  const saveArtist = async (formData) => {
+  const saveArtist = async (data) => {
     try {
       if (editArtist && editArtist.id) {
         await axios.patch(
           `http://localhost:3000/admin/artists/${editArtist.id}`,
-          formData,
+          data,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
         alert("Đã cập nhật nghệ sĩ!");
       } else {
         await axios.post(
           "http://localhost:3000/admin/artists",
-          formData,
+          data,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
         alert("Đã thêm nghệ sĩ mới!");
@@ -48,12 +48,13 @@ const ArtistActiveList = ({ artists = [], refresh }) => {
       setShowModal(false);
       setEditArtist(null);
       refresh();
-
     } catch (err) {
       console.error("SAVE ARTIST ERROR:", err);
       alert("Lỗi lưu nghệ sĩ!");
     }
   };
+
+
 
   return (
     <div className="active-container">

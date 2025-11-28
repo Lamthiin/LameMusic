@@ -1,35 +1,21 @@
 import React from "react";
-import "./ArtistPendingList.css";
+import "./ArtistActiveList.css"; // ⭐ Dùng chung CSS
 
-// Component chỉ nhận dữ liệu từ cha, KHÔNG tự gọi axios nữa
-const ArtistPendingList = ({ artists, approve, reject, view }) => {
-  // Chắc chắn artists luôn là array
+const ArtistPendingList = ({ artists = [], approve, reject, view }) => {
   const safeArtists = Array.isArray(artists) ? artists : [];
 
-  const handleView = (id) => {
-    if (view) view(id);
-    else alert("Xem chi tiết nghệ sĩ ID: " + id);
-  };
-
-  const handleApprove = (id) => {
-    if (approve) approve(id);
-  };
-
-  const handleReject = (id) => {
-    if (reject) reject(id);
-    else alert("TODO: Từ chối nghệ sĩ ID: " + id);
-  };
-
   return (
-    <div className="pending-container">
-      <h2 className="pending-title">Danh sách nghệ sĩ chờ duyệt</h2>
+    <div className="active-container">
+      <div className="top-bar">
+        <h2 className="active-title">Nghệ sĩ chờ duyệt</h2>
+      </div>
 
-      <div className="pending-list">
-        {safeArtists.length === 0 ? (
-          <div className="empty-message">Không có nghệ sĩ nào chờ duyệt</div>
-        ) : (
-          safeArtists.map((a) => (
-            <div className="pending-row" key={a.id}>
+      {safeArtists.length === 0 ? (
+        <div className="empty-active">Không có nghệ sĩ nào chờ duyệt</div>
+      ) : (
+        <div className="active-list">
+          {safeArtists.map((a) => (
+            <div className="active-row" key={a.id}>
               <img
                 className="row-avatar"
                 src={a.avatar_url}
@@ -41,29 +27,34 @@ const ArtistPendingList = ({ artists, approve, reject, view }) => {
               </div>
 
               <div className="row-actions">
+
                 <button
-                  className="btn-view"
-                  onClick={() => handleView(a.id)}
+                  className="btn-edit" // dùng style nút xanh
+                  onClick={() => view && view(a.id)}
                 >
                   Xem
                 </button>
+
                 <button
-                  className="btn-accept"
-                  onClick={() => handleApprove(a.id)}
+                  className="btn-save" // xanh lá ✔
+                  onClick={() => approve && approve(a.id)}
                 >
                   Duyệt
                 </button>
+
                 <button
-                  className="btn-reject"
-                  onClick={() => handleReject(a.id)}
+                  className="btn-delete" // đỏ
+                  onClick={() => reject && reject(a.id)}
                 >
                   Từ chối
                 </button>
+
               </div>
+
             </div>
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

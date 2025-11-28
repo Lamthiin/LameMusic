@@ -13,17 +13,17 @@ const ArtistRejectedList = ({ artists = [], refresh }) => {
   // API: Khôi phục nghệ sĩ
   // ============================
   const restoreArtist = async (id) => {
-    if (!window.confirm("Khôi phục nghệ sĩ này?")) return;
+    if (!window.confirm("Khôi phục nghệ sĩ này về trạng thái chờ duyệt?")) return;
 
     try {
-      await axios.patch(`http://localhost:3000/admin/artists/${id}/approve`);
-      alert("Đã khôi phục nghệ sĩ!");
+      await axios.patch(`http://localhost:3000/admin/artists/${id}/pending`);
       refresh && refresh();
     } catch (err) {
       console.error("RESTORE ERROR:", err);
       alert("Lỗi khôi phục nghệ sĩ!");
     }
   };
+
 
   // ============================
   // API: Xóa vĩnh viễn (active = 0)

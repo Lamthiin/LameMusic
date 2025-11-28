@@ -51,6 +51,7 @@ const ArtistFormModal = ({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("HANDLE SUBMIT WAS CALLED!");
     if (!form.stage_name.trim()) {
       alert("Tên nghệ sĩ không được để trống!");
       return;
@@ -62,6 +63,9 @@ const ArtistFormModal = ({
     if (avatarFile) {
       data.append("avatarFile", avatarFile);
     }
+    for (let p of data.entries()) {
+      console.log("FORMDATA:", p);
+    }
 
     await onSubmit(data); // cha tự lo gọi API / cập nhật state
   };
@@ -69,8 +73,16 @@ const ArtistFormModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div
+    <div
+    className="modal-overlay"
+    onClick={(e) => {
+      if (e.target.classList.contains("modal-overlay")) {
+        onClose();
+      }
+    }}
+  >
+
+    <div
         className="modal-box"
         onClick={(e) => e.stopPropagation()}
       >

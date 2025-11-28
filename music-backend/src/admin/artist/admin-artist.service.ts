@@ -96,19 +96,20 @@ export class AdminArtistService {
   }
 
   // UPDATE ARTIST
-  async updateArtist(id: number, data: any) {
+  async updateArtist(id: number, data: any, file?: Express.Multer.File) {
     const artist = await this.artistRepository.findOne({ where: { id } });
     if (!artist) throw new NotFoundException('Artist không tồn tại');
 
-    artist.stage_name = data.stage_name ?? artist.stage_name;
-    artist.bio = data.bio ?? artist.bio;
+    if (data.stage_name !== undefined) artist.stage_name = data.stage_name;
+    if (data.bio !== undefined) artist.bio = data.bio;
 
-    if (data.avatar_url !== undefined) {
-      artist.avatar_url = data.avatar_url;
+    if (file) {
+      artist.avatar_url = `/uploads/avatars/${file.filename}`;
     }
 
     return this.artistRepository.save(artist);
   }
+
 
   // XOÁ HỒ SƠ (soft delete)
   async deleteArtist(id: number) {
@@ -118,6 +119,22 @@ export class AdminArtistService {
 
     artist.active = 0; // ⭐ XÓA = active=0, giữ nguyên status
 
+    return this.artistRepository.save(artist);
+  }
+
+  async setPending(id: number) {
+    // 1. Tìm Artist
+    const artist = await this.artistRepository.findOne({ where: { id } });
+
+    if (!artist) {
+      throw new NotFoundException('Artist không tồn tại');
+    }
+
+    // 2. Cập nhật trạng thái
+    artist.registrationStatus = 'PENDING';
+    artist.active = 1; // Đảm bảo active = 1 (trừ khi bạn muốn active=0 khi pending)
+
+    // 3. Lưu thay đổi
     return this.artistRepository.save(artist);
   }
 }
