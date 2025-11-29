@@ -21,7 +21,7 @@ export class Album {
   title: string;
 
   @Column({ type: 'date', nullable: true })
-  release_date: Date;
+  release_date: Date | null
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   cover_url: string | null;

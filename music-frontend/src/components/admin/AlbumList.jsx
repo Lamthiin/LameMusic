@@ -2,7 +2,7 @@ import React from "react";
 import "./AlbumList.css";
 
 export default function AlbumList({ albums = [], onView, onEdit, onDelete }) {
-  const sortedAlbums = [...albums].sort((a, b) =>
+   const sortedAlbums = [...albums].sort((a, b) =>
     a.name.localeCompare(b.name, "vi", { sensitivity: "base" })
   );
 
@@ -31,7 +31,7 @@ export default function AlbumList({ albums = [], onView, onEdit, onDelete }) {
 
                 <td>
                   <img
-                    src={album.cover_url}
+                    src={album.cover_url || "/default-album.png"}
                     alt={album.name}
                     className="album-cover-table"
                   />
@@ -51,31 +51,17 @@ export default function AlbumList({ albums = [], onView, onEdit, onDelete }) {
 
                 <td>
                   <div className="admin-actions">
-
-                    {/* Xem */}
-                    <button
-                      className="alb-btn-view"
-                      onClick={() => onView(album)}
-                    >
+                    <button className="alb-btn-view" onClick={() => onView(album)}>
                       Xem
                     </button>
 
-                    {/* Sửa */}
-                    <button
-                      className="btn-edit"
-                      onClick={() => onEdit(album)}
-                    >
+                    <button className="btn-edit" onClick={() => onEdit(album)}>
                       Sửa
                     </button>
 
-                    {/* Xóa */}
-                    <button
-                      className="btn-delete"
-                      onClick={() => onDelete(album.id)}
-                    >
+                    <button className="btn-delete" onClick={() => onDelete(album.id)}>
                       Xoá
                     </button>
-
                   </div>
                 </td>
               </tr>

@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
 import "./ManageAlbum.css";
 
@@ -10,32 +11,11 @@ import AlbumViewModal from "../../components/admin/AlbumViewModal";
 export default function ManageAlbum() {
   const [tab, setTab] = useState("all");
 
-  const [albumsAll, setAlbumsAll] = useState([
-    {
-      id: 1,
-      name: "Sky Tour",
-      cover_url: "https://i.imgur.com/0ZfFQGh.jpeg",
-      artist: { id: 10, name: "Sơn Tùng M-TP" },
-      songs: 12,
-      release_date: "2022-11-20",
-      songs_list: [
-        { id: 1, title: "Intro" },
-        { id: 2, title: "Lạc trôi Live" }
-      ]
-    },
-    {
-      id: 2,
-      name: "DreAmee",
-      cover_url: "https://i.imgur.com/xJpUZKz.jpeg",
-      artist: { id: 11, name: "AMEE" },
-      songs: 8,
-      release_date: "2020-05-10",
-      songs_list: []
-    }
-  ]);
+  // Dữ liệu album từ BE
+  const [albumsAll, setAlbumsAll] = useState([]);
+  const [albumsHidden, setAlbumsHidden] = useState([]);
 
-  const [albumsHidden] = useState([]);
-
+  // Modal
   const [showForm, setShowForm] = useState(false);
   const [editingAlbum, setEditingAlbum] = useState(null);
 
@@ -45,6 +25,34 @@ export default function ManageAlbum() {
   const [showView, setShowView] = useState(false);
   const [viewAlbum, setViewAlbum] = useState(null);
 
+  // ==========================================================
+  // FETCH ALL ALBUM
+  // ==========================================================
+  const loadAlbums = async () => {
+    try {
+      const res = await axios.get("http://localhost:3000/admin/albums");
+      setAlbumsAll(res.data);
+    } catch (err) {
+      console.error("LOAD ALBUM ERROR:", err);
+    }
+  };
+
+  // FETCH HIDDEN ALBUM
+  const loadHiddenAlbums = async () => {
+    try {
+      const res = await axios.get("http://localhost:3000/admin/albums/hidden");
+      setAlbumsHidden(res.data);
+    } catch (err) {
+      console.error("LOAD HIDDEN ALBUM ERROR:", err);
+    }
+  };
+
+  useEffect(() => {
+    loadAlbums();
+    loadHiddenAlbums();
+  }, []);
+
+  // ==========================================================
   const openCreate = () => {
     setEditingAlbum(null);
     setShowForm(true);
@@ -65,9 +73,19 @@ export default function ManageAlbum() {
     setShowAddSong(true);
   };
 
-  const handleDelete = (id) => {
-    if (!window.confirm("Xóa album này?")) return;
-    setAlbumsAll(albumsAll.filter((a) => a.id !== id));
+  // ==========================================================
+  // DELETE ALBUM
+  // ==========================================================
+  const handleDelete = async (id) => {
+    if (!window.confirm("Bạn chắc chắn muốn xóa album này?")) return;
+
+    try {
+      await axios.delete(`http://localhost:3000/admin/albums/${id}`);
+      loadAlbums();
+      loadHiddenAlbums();
+    } catch (err) {
+      console.error("DELETE ALBUM ERROR:", err);
+    }
   };
 
   return (
@@ -119,7 +137,11 @@ export default function ManageAlbum() {
       {showForm && (
         <AlbumFormModal
           show={showForm}
-          onClose={() => setShowForm(false)}
+          onClose={() => {
+            setShowForm(false);
+            loadAlbums();
+            loadHiddenAlbums();
+          }}
           initialData={editingAlbum}
         />
       )}
