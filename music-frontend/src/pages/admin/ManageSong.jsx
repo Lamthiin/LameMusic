@@ -4,107 +4,6 @@ import "./ManageSong.css";
 import { FiSearch } from "react-icons/fi";
 import { BsThreeDotsVertical } from "react-icons/bs";
 
-
-
-const initialSongs = [
-  {
-    id: 1,
-    title: "Call Out My Name",
-    artistName: "The Weeknd",
-    albumName: "My Dear Melancholy",
-    duration: 420,
-    playCount: 80023,
-    genre: "R&B",
-    coverUrl: "/images/TheWeeknd.avif",
-    status: "APPROVED",
-    active: 1,
-  },
-  {
-    id: 2,
-    title: "Hè",
-    artistName: "Brian",
-    albumName: "Summer Chill",
-    duration: 280,
-    playCount: 120022,
-    genre: "Pop",
-    coverUrl: "/images/covers/summer.jpg",
-    status: "APPROVED",
-    active: 1,
-  },
-  {
-    id: 3,
-    title: "Hi",
-    artistName: "New Artist",
-    albumName: "Demo Tracks",
-    duration: 268,
-    playCount: 0,
-    genre: "Pop",
-    coverUrl: "/images/covers/demo.jpg",
-    status: "PENDING",
-    active: 1,
-  },
-  {
-    id: 4,
-    title: "Hidden Track",
-    artistName: "Secret Artist",
-    albumName: "Unreleased",
-    duration: 210,
-    playCount: 10,
-    genre: "Indie",
-    coverUrl: "/images/covers/hidden.jpg",
-    status: "APPROVED",
-    active: 0,
-  },
-  {
-    id: 5,
-    title: "Call Out My Name",
-    artistName: "The Weeknd",
-    albumName: "My Dear Melancholy",
-    duration: 420,
-    playCount: 80023,
-    genre: "R&B",
-    coverUrl: "/images/TheWeeknd.avif",
-    status: "APPROVED",
-    active: 1,
-  },
-  {
-    id: 6,
-    title: "Hè",
-    artistName: "Brian",
-    albumName: "Summer Chill",
-    duration: 280,
-    playCount: 120022,
-    genre: "Pop",
-    coverUrl: "/images/covers/summer.jpg",
-    status: "APPROVED",
-    active: 1,
-  },
-  {
-    id: 7,
-    title: "Hi",
-    artistName: "New Artist",
-    albumName: "Demo Tracks",
-    duration: 268,
-    playCount: 0,
-    genre: "Pop",
-    coverUrl: "/images/covers/demo.jpg",
-    status: "PENDING",
-    active: 1,
-  },
-  {
-    id: 8,
-    title: "Hidden Track",
-    artistName: "Secret Artist",
-    albumName: "Unreleased",
-    duration: 210,
-    playCount: 10,
-    genre: "Indie",
-    coverUrl: "/images/covers/hidden.jpg",
-    status: "APPROVED",
-    active: 0,
-  },
-];
-
 // Format thời lượng 420 -> 07:00
 const formatDuration = (seconds) => {
   const m = Math.floor(seconds / 60).toString().padStart(2, "0");
@@ -113,9 +12,42 @@ const formatDuration = (seconds) => {
 };
 
 const ManageSong = () => {
-  const [songs, setSongs] = useState(initialSongs);
+  const [songs, setSongs] = useState([]);
+  const fetchSongs = async () => {
+    try {
+      const res = await fetch("http://localhost:3000/admin/manage-song");
+      const data = await res.json();
+
+      setSongs(
+        data.map(s => ({
+          id: s.id,
+          title: s.title,
+          artistName: s.artist?.stage_name ?? "",
+          albumName: s.album?.title ?? "",
+          duration: s.duration,
+          playCount: s.play_count,
+          genre: s.genre,
+          coverUrl: s.image_url,
+          audioUrl: s.file_url,
+          status: s.status,
+          active: s.active,
+        }))
+      );
+    } catch (err) {
+      console.error("Fetch songs failed:", err);
+    }
+  };
+
+  // Fetch once when component opened
+  useEffect(() => {
+    fetchSongs();
+  }, []);
+
+
+
   const [searchValue, setSearchValue] = useState("");
   const [openMenu, setOpenMenu] = useState(null);
+  const [showEditSuccessPopup, setShowEditSuccessPopup] = useState(false);
 
   const dropdownRef = useRef(null);
   const [showAddPopup, setShowAddPopup] = useState(false);
@@ -175,17 +107,91 @@ const ManageSong = () => {
     );
   };
 
-  const handleToggleActive = (id) => {
-    setSongs((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, active: s.active ? 0 : 1 } : s))
-    );
-  };
+  const handleToggleActive = async (id) => {
+    try {
+      const res = await fetch(
+        `http://localhost:3000/admin/manage-song/${id}/toggle-active`,
+        { method: "PATCH" }
+      );
 
-  const handleDelete = (id) => {
-    if (window.confirm("Bạn muốn xóa bài hát này?")) {
-      setSongs((prev) => prev.filter((s) => s.id !== id));
+      if (!res.ok) throw new Error("Toggle failed");
+
+      // load lại danh sách từ backend để chắc chắn đồng bộ
+      fetchSongs();
+
+    } catch (err) {
+      console.error(err);
+      alert("Không thể thay đổi trạng thái bài hát!");
     }
   };
+
+  const handleUpdateSong = async () => {
+    const id = showEditPopup.id;
+
+    const formData = new FormData();
+    formData.append("title", editTitle);
+    formData.append("artist", editArtist);
+    formData.append("album", editAlbum ?? "");
+    formData.append("genre", editGenre);
+    formData.append("duration", editDuration);
+
+    if (editCoverFile) {
+      formData.append("imageFile", editCoverFile);
+    }
+
+    if (editAudioFile) {
+      formData.append("audioFile", editAudioFile);
+    }
+
+    try {
+      const res = await fetch(`http://localhost:3000/admin/manage-song/${id}`, {
+        method: "PATCH",
+        body: formData
+      });
+
+      if (!res.ok) throw new Error("Update failed");
+
+      await fetchSongs(); // load lại danh sách
+
+      // Thay alert thành popup success
+      setShowEditSuccessPopup(true);
+
+      resetEditPopup();
+      setShowEditPopup(null);
+
+    } catch (err) {
+      console.error(err);
+      setErrorMessage("Sửa bài hát thất bại, vui lòng kiểm tra backend.");
+      setShowErrorPopup(true);
+    }
+  };
+
+
+
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Bạn có chắc muốn xóa bài hát này?")) return;
+
+    try {
+      const res = await fetch(`http://localhost:3000/admin/manage-song/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        alert("Xóa thất bại! Backend trả lỗi.");
+        return;
+      }
+
+      // Xóa khỏi UI
+      setSongs(prev => prev.filter(s => s.id !== id));
+      alert("Đã xóa bài hát!");
+
+    } catch (err) {
+      console.error("Delete failed:", err);
+      alert("Không thể kết nối backend, kiểm tra server.");
+    }
+  };
+
 
   // const handleSaveSong = () => {
   //   console.log("Tiêu đề:", newTitle);
@@ -507,7 +513,7 @@ const ManageSong = () => {
                           setPreviewCover(null);
 
                           // reset input để chọn lại cùng file
-                          const input = document.getElementById("coverUpload");
+                          const input = document.getElementById("addcoverUpload");
                           if (input) input.value = "";
                         }}
                       >
@@ -520,7 +526,7 @@ const ManageSong = () => {
                       className="spotify-upload-area"
                       onMouseDown={(e) => e.stopPropagation()} // CHẶN BUBBLE SỚM
                       onClick={() => {
-                        const input = document.getElementById("coverUpload");
+                        const input = document.getElementById("addcoverUpload");
                         if (input) {
                           input.value = ""; // reset value để upload cùng file
                           input.click();
@@ -541,7 +547,7 @@ const ManageSong = () => {
                       </p>
 
                       <input
-                        id="coverUpload"
+                        id="addcoverUpload"
                         type="file"
                         accept="image/*"
                         className="spotify-upload-input"
@@ -717,6 +723,24 @@ const ManageSong = () => {
       </div>
     )}
 
+    {showEditSuccessPopup && (
+      <div className="success-overlay">
+        <div className="success-card">
+          <h3>✅ Cập nhật bài hát thành công!</h3>
+
+          <div className="success-actions">
+            <button
+              className="success-btn cancel"
+              onClick={() => setShowEditSuccessPopup(false)}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+
+
 
     {/* POPUP XEM BÀI HÁT */}
     {showViewPopup && (
@@ -833,13 +857,17 @@ const ManageSong = () => {
               <label>Ảnh bìa</label>
 
               {editCoverPreview ? (
-                <div className="spotify-preview-wrapper" onMouseDown={(e) => e.stopPropagation()}>
+                // ==== TRƯỜNG HỢP ĐÃ CÓ ẢNH ====
+                <div
+                  className="spotify-preview-wrapper"
+                  onClick={(e) => e.stopPropagation()}   // chặn click lên overlay
+                >
                   <img src={editCoverPreview} className="spotify-upload-preview" />
 
                   <button
                     className="spotify-remove-btn"
-                    onMouseDown={(e) => e.stopPropagation()}
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       setEditCoverPreview(null);
                       setEditCoverFile(null);
                       document.getElementById("editCoverInput").value = "";
@@ -849,13 +877,24 @@ const ManageSong = () => {
                   </button>
                 </div>
               ) : (
+                // ==== TRƯỜNG HỢP CHƯA CÓ ẢNH ====
                 <div
                   className="spotify-upload-area"
-                  onMouseDown={(e) => e.stopPropagation()}
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();                // chặn bubble
                     const input = document.getElementById("editCoverInput");
                     input.value = "";
-                    input.click();
+                    input.click();                      // MỞ CHỌN FILE 1 LẦN
+                  }}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const file = e.dataTransfer.files[0];
+                    if (file) {
+                      setEditCoverFile(file);
+                      setEditCoverPreview(URL.createObjectURL(file));
+                    }
                   }}
                 >
                   <p className="spotify-upload-text">Kéo thả hoặc nhấn để chọn ảnh</p>
@@ -865,7 +904,8 @@ const ManageSong = () => {
                     type="file"
                     accept="image/*"
                     className="spotify-upload-input"
-                    onMouseDown={(e) => e.stopPropagation()}
+                    style={{ display: "none" }}           // ẨN INPUT
+                    onClick={(e) => e.stopPropagation()}  // chặn click xuyên
                     onChange={(e) => {
                       const file = e.target.files[0];
                       if (file) {
@@ -878,6 +918,7 @@ const ManageSong = () => {
                 </div>
               )}
             </div>
+
 
             <div className="popup-group">
               <label>Thời lượng (giây)</label>
@@ -911,18 +952,21 @@ const ManageSong = () => {
               />
             </div>
 
-            {/* FILE NHẠC */}
             <div className="popup-group">
               <label>File nhạc</label>
 
               {editAudioName ? (
-                <div className="spotify-preview-wrapper" onMouseDown={(e) => e.stopPropagation()}>
+                // ==== ĐÃ CÓ FILE (hiện tên + nút xóa) ====
+                <div
+                  className="spotify-preview-wrapper"
+                  onClick={(e) => e.stopPropagation()}  // chặn click nổi bọt
+                >
                   <p className="audio-file-name">{editAudioName}</p>
 
                   <button
                     className="spotify-remove-btn"
-                    onMouseDown={(e) => e.stopPropagation()}
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();              // chặn click ra overlay
                       setEditAudioFile(null);
                       setEditAudioName("");
                       document.getElementById("editAudioUpload").value = "";
@@ -932,37 +976,48 @@ const ManageSong = () => {
                   </button>
                 </div>
               ) : (
+                // ==== CHƯA CÓ FILE (upload mới) ====
                 <div
                   className="audio-upload-area"
-                  onMouseDown={(e) => e.stopPropagation()}
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();               // chặn click lên overlay
                     const input = document.getElementById("editAudioUpload");
                     input.value = "";
-                    input.click();
+                    input.click();                     // MỞ 1 LẦN DUY NHẤT
+                  }}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const file = e.dataTransfer.files[0];
+                    if (file) {
+                      setEditAudioFile(file);
+                      setEditAudioName(file.name);
+                    }
                   }}
                 >
-                  <p className="audio-upload-text">
-                    Kéo thả hoặc nhấn để chọn file nhạc
-                  </p>
+                  <p className="audio-upload-text">Kéo thả hoặc nhấn để chọn file nhạc</p>
 
                   <input
                     id="editAudioUpload"
                     type="file"
                     accept="audio/*"
                     className="audio-upload-input"
-                    onMouseDown={(e) => e.stopPropagation()}
+                    style={{ display: "none" }}          // ẨN INPUT
+                    onClick={(e) => e.stopPropagation()} // NGĂN CLICK XUYÊN
                     onChange={(e) => {
                       const file = e.target.files[0];
                       if (file) {
                         setEditAudioFile(file);
                         setEditAudioName(file.name);
                       }
-                      e.target.value = "";
+                      e.target.value = "";               // cho phép chọn lại cùng file
                     }}
                   />
                 </div>
               )}
             </div>
+
 
           </div>
 
@@ -979,31 +1034,10 @@ const ManageSong = () => {
             Hủy
           </button>
 
-          <button
-            className="popup-save"
-            onClick={() => {
-              setSongs(prev =>
-                prev.map(s => 
-                  s.id === showEditPopup.id
-                    ? {
-                        ...s,
-                        title: editTitle,
-                        artistName: editArtist,
-                        albumName: editAlbum,
-                        genre: editGenre,
-                        duration: editDuration,
-                        coverUrl: editCoverPreview || s.coverUrl
-                      }
-                    : s
-                )
-              );
-
-              resetEditPopup();
-              setShowEditPopup(null);
-            }}
-          >
+          <button className="popup-save" onClick={handleUpdateSong}>
             Lưu chỉnh sửa
           </button>
+
         </div>
 
       </div>

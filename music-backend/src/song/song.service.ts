@@ -418,6 +418,15 @@ export class SongService {
     );
   }
 
+  async getPublicSongs() {
+    return this.songRepository.find({
+      where: { active: true, status: 'APPROVED' }, // Chỉ bài public & đã duyệt
+      relations: ['artist', 'album'],
+      order: { id: 'DESC' },
+    });
+  }
+
+
 /**
    * HÀM HELPER: Tính Cosine Similarity giữa hai vector
    */
@@ -582,6 +591,8 @@ export class SongService {
     // Fallback nếu không tìm được bài phù hợp
     return this.getFallbackSong();
 }
+
+
 
 /**
  * Hàm fallback: Trả về 1 bài phổ biến ngẫu nhiên từ top 10

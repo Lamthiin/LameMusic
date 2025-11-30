@@ -1,0 +1,26 @@
+// src/admin/manage-song/dto/update-song.dto.ts
+
+import { IsOptional, IsString, IsNumberString } from 'class-validator';
+
+export class UpdateSongDto {
+  
+  @IsOptional()
+  @IsString()
+  title?: string;
+
+  @IsOptional()
+  @IsString()
+  artist?: string;   // stage_name
+
+  @IsOptional()
+  @IsString()
+  album?: string;    // title album (có thể rỗng hoặc null)
+
+  @IsOptional()
+  @IsString()
+  genre?: string;
+
+  @IsOptional()
+  @IsNumberString()
+  duration?: string;  // FE đang gửi string, backend convert sang number
+}

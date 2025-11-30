@@ -19,6 +19,7 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { CreateSongDto } from './dto/create-song.dto';
 import { UpdateSongDto } from './dto/update-song.dto';
 
+
 @Controller('song') 
 export class SongController {
   constructor(private readonly songService: SongService) {}
@@ -205,6 +206,16 @@ export class SongController {
     await this.songService.incrementPlayCount(id);
     return { message: 'Play count incremented.' };
   }
+
+    /**
+   * API CHO USER: Lấy danh sách bài hát PUBLIC
+   * GET /song/public
+   */
+  @Get('public')
+  async getPublicSongs() {
+    return this.songService.getPublicSongs();
+  }
+
 
  // (findOne - giữ nguyên)
   @Get(':id') 
