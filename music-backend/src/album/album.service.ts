@@ -156,6 +156,47 @@ export class AlbumService {
     return { message: 'Xóa Album thành công.' };
   }
 
+  // /**
+  //    * API: Lấy chi tiết 1 Album (Chỉ hiển thị bài hát APPROVED)
+  //    */
+  //   async findOne(id: number): Promise<Album> {
+  //       // === SỬ DỤNG QUERY BUILDER ĐỂ LỌC BÀI HÁT ===
+  //       const album = await this.albumRepository.createQueryBuilder('album')
+  //           .where('album.id = :albumId', { albumId: id })
+            
+  //           // 1. JOIN Artist
+  //           .leftJoinAndSelect('album.artist', 'artist')
+            
+  //           // 🚨 FIX LỖI: BẮT BUỘC JOIN USER CỦA ARTIST 🚨
+  //           .leftJoinAndSelect('artist.user', 'user') 
+            
+  //           // JOIN Songs VÀ LỌC THEO STATUS
+  //           .leftJoinAndSelect('album.songs', 'song', 
+  //               'song.status = :status AND song.active = :active', 
+  //               { status: 'APPROVED', active: true }
+  //           )
+  //           // JOIN Artist của Bài hát (cho tên nghệ sĩ)
+  //           .leftJoinAndSelect('song.artist', 'songArtist')
+            
+  //           // Sắp xếp bài hát theo track_number
+  //           .orderBy('song.track_number', 'ASC')
+            
+  //           .getOne();
+  //       // ===========================================
+
+  //       if (!album) {
+  //           throw new NotFoundException(`Album with ID ${id} not found.`);
+  //       }
+        
+  //       // Kiểm tra logic để đảm bảo trường user.id luôn tồn tại khi album.artist tồn tại
+  //       if (!album.artist || !album.artist.user) {
+  //            throw new NotFoundException('Dữ liệu Artist không hợp lệ.');
+  //       }
+
+
+  //       return album;
+  //   }
+
   /**
      * API: Lấy chi tiết 1 Album (Chỉ hiển thị bài hát APPROVED)
      */
@@ -168,6 +209,7 @@ export class AlbumService {
             .leftJoinAndSelect('album.artist', 'artist')
             
             // 🚨 FIX LỖI: BẮT BUỘC JOIN USER CỦA ARTIST 🚨
+            // Dòng này cần load user, ngay cả khi user_id là NULL
             .leftJoinAndSelect('artist.user', 'user') 
             
             // JOIN Songs VÀ LỌC THEO STATUS
@@ -184,15 +226,17 @@ export class AlbumService {
             .getOne();
         // ===========================================
 
+        // 1. Kiểm tra Album có tồn tại không
         if (!album) {
             throw new NotFoundException(`Album with ID ${id} not found.`);
         }
         
-        // Kiểm tra logic để đảm bảo trường user.id luôn tồn tại khi album.artist tồn tại
-        if (!album.artist || !album.artist.user) {
-             throw new NotFoundException('Dữ liệu Artist không hợp lệ.');
+        // 2. FIX LỖI: Chỉ báo lỗi nếu không tìm thấy Artist Profile (bản thân album bị lỗi liên kết)
+        if (!album.artist) {
+             throw new NotFoundException('Dữ liệu Artist liên kết bị thiếu.');
         }
-
+        
+        // Bỏ kiểm tra album.artist.user: Cho phép user là NULL (Đã Fix)
 
         return album;
     }

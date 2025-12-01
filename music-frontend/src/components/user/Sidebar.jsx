@@ -162,7 +162,7 @@ const Sidebar = () => {
                             : `http://localhost:3000${artist.avatar_url || '/images/default-avatar.png'}`}
                           alt={artist.stage_name}
                           className="artist-mini-avatar"
-                          onError={e => e.target.src = '/images/default-avatar.png'}
+                          // onError={e => e.target.src = '/images/default-avatar.png'}
                         />
                         <span>{artist.stage_name}</span>
                         <div className="mini-wave">
