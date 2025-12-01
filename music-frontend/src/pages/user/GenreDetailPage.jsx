@@ -6,16 +6,29 @@ import { usePlayer } from '../../context/PlayerContext';
 import './GenreDetailPage.css';
 import { FaPlay } from 'react-icons/fa';
 
-// ✅ Import SongListTable
+// Import SongListTable
 import SongListTable from '../../components/user/SongListTable';
 
-// === HÀM FIX ẢNH ===
-const fixImageUrl = (url) => {
-  if (!url) return '/images/default-album.png';
-  if (url.startsWith('http')) return url;
-  const correctedUrl = url.replace('/images', '/media/images');
-  return `http://localhost:3000${correctedUrl}`;
+// === DÙNG CHÍNH XÁC HÀM fixUrl CỦA BẠN ===
+const fixUrl = (url, type = 'image') => {
+  if (!url) {
+    if (type === 'artist') return '/images/default-artist.png';
+    if (type === 'audio') return ''; // Trả về rỗng nếu không có file nhạc
+    return '/images/default-album.png';
+  }
+  if (url.startsWith('http')) {
+    return url;
+  }
+  const prefix = type === 'image' ? '/media/images' : '/media/audio';
+  const originalPath = type === 'image' ? '/images' : '/audio';
+
+  if (url.startsWith(prefix)) {
+    return `http://localhost:3000${url}`;
+  }
+
+  return `http://localhost:3000${url.replace(originalPath, prefix)}`;
 };
+// ====================================================================
 
 const GenreDetailPage = () => {
   const { genreName } = useParams();
@@ -26,30 +39,37 @@ const GenreDetailPage = () => {
   useEffect(() => {
     const loadSongs = async () => {
       setLoading(true);
-      const data = await fetchSongsByGenre(genreName);
+      try {
+        const data = await fetchSongsByGenre(genreName);
 
-      const songsWithUrls = data.map((song) => ({
-        ...song,
-        album: song.album
-          ? { ...song.album, cover_url: fixImageUrl(song.album.cover_url) }
-          : null,
-        image_url: song.image_url
-          ? fixImageUrl(song.image_url)
-          : fixImageUrl(song.album?.cover_url),
-        file_url: song.file_url
-          ? `http://localhost:3000${song.file_url.replace('/audio', '/media/audio')}`
-          : null,
-      }));
+        // Dùng fixUrl thay vì xử lý thủ công
+        const songsWithUrls = data.map((song) => ({
+          ...song,
+          image_url: fixUrl(song.image_url || song.album?.cover_url, 'image'),
+          file_url: fixUrl(song.file_url, 'audio'), // Chuẩn, sạch, không lỗi
+          album: song.album
+            ? {
+                ...song.album,
+                cover_url: fixUrl(song.album.cover_url, 'image'),
+              }
+            : null,
+        }));
 
-      setSongs(songsWithUrls);
-      setLoading(false);
+        setSongs(songsWithUrls);
+      } catch (err) {
+        console.error("Lỗi tải bài hát theo thể loại:", err);
+      } finally {
+        setLoading(false);
+      }
     };
 
     loadSongs();
   }, [genreName]);
 
   const playAll = () => {
-    if (songs.length > 0) playTrack(songs[0], songs, 0);
+    if (songs.length > 0) {
+      playTrack(songs[0], songs, 0);
+    }
   };
 
   if (loading) {
@@ -67,7 +87,7 @@ const GenreDetailPage = () => {
       >
         <div className="playlist-info">
           <p className="playlist-type">THỂ LOẠI</p>
-          <h1>{genreName}</h1>
+          <h1 className="playlist-title">{genreName}</h1>
           <p className="playlist-owner">{songs.length} bài hát</p>
           <button className="playlist-play-button" onClick={playAll}>
             <FaPlay size={20} /> PHÁT TẤT CẢ
@@ -78,7 +98,6 @@ const GenreDetailPage = () => {
       {/* Song List */}
       <div className="song-list-detail">
         {songs.length > 0 ? (
-          // ✅ Tái sử dụng SongListTable, slice nếu muốn giới hạn số bài
           <SongListTable songs={songs} />
         ) : (
           <p className="subtle-text">Không tìm thấy bài hát nào thuộc thể loại này.</p>

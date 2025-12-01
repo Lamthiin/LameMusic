@@ -1,110 +1,157 @@
-// music-frontend/src/pages/PlaylistDetailPage.jsx (BẢN SỬA LỖI FINAL)
+// music-frontend/src/pages/PlaylistDetailPage.jsx
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-// IMPORT API MỚI
-import { getPublicPlaylistApi, removeSongFromPlaylistApi } from '../../utils/api'; 
+import { getPublicPlaylistApi, removeSongFromPlaylistApi } from '../../utils/api';
 import { usePlayer } from '../../context/PlayerContext';
+import { useAuth } from '../../context/AuthContext';
 import SongListTable from '../../components/user/SongListTable';
-import { useAuth } from '../../context/AuthContext'; // Cần để kiểm tra quyền
-import './LikedSongsPage.css'; 
-import './AlbumDetailPage.css'; // Dùng chung CSS grid/header
+import './LikedSongsPage.css';
+import './AlbumDetailPage.css';
 import { FaPlay } from 'react-icons/fa';
 
-// (Hàm helper fix URL)
-const fixUrl = (url, type = 'image') => { /* ... */ return `http://localhost:3000${url.replace('/images', '/media/images')}`; };
-const showToast = (message) => { alert(message); };
+// ──────────────────────────────────────────────────────────────
+// HÀM fixUrl CHÍNH XÁC NHƯ BẠN ĐÃ DÙNG Ở CÁC TRANG KHÁC
+// ──────────────────────────────────────────────────────────────
+const fixUrl = (url, type = 'image') => {
+  if (!url) {
+    if (type === 'artist') return '/images/default-artist.png';
+    if (type === 'audio') return ''; // Không có file nhạc
+    return '/images/default-album.png';
+  }
+  if (url.startsWith('http')) return url;
 
+  const prefix = type === 'image' ? '/media/images' : '/media/audio';
+  const originalPath = type === 'image' ? '/images' : '/audio';
+
+  if (url.startsWith(prefix)) {
+    return `http://localhost:3000${url}`;
+  }
+  return `http://localhost:3000${url.replace(originalPath, prefix)}`;
+};
+
+const showToast = (message) => alert(message);
+// ──────────────────────────────────────────────────────────────
 
 const PlaylistDetailPage = () => {
-  const { id } = useParams();
-  const [playlist, setPlaylist] = useState(null);
-  const [songs, setSongs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const { playTrack } = usePlayer();
-  const { user } = useAuth(); // Lấy user
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { playTrack } = usePlayer();
 
-  // Hàm tải lại dữ liệu (Dùng useCallback)
+  const [playlist, setPlaylist] = useState(null);
+  const [songs, setSongs] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Tải lại playlist (có thể gọi lại khi xóa bài)
   const loadPlaylist = useCallback(async () => {
-    setLoading(true);
-    let data;
-    try {
-        // API này đã được sửa để quyết định Public/Private ở Controller
-        data = await getPublicPlaylistApi(id); 
+    setLoading(true);
+    try {
+      const data = await getPublicPlaylistApi(id);
 
-        // Fix URL ảnh/audio (Giữ nguyên logic mapping của bạn)
-        data.songs.forEach(song => {
-            if (song.album) song.album.cover_url = fixUrl(song.album.cover_url, 'album');
-            song.cover_url = song.image_url ? fixUrl(song.image_url, 'song') : song.album?.cover_url;
-            song.file_url = fixUrl(song.file_url, 'audio');
-        });
-        
-        setPlaylist(data);
-        setSongs(data.songs);
-    } catch (error) {
-        showToast('Không tìm thấy Playlist hoặc không có quyền truy cập.', 'error');
-        setPlaylist(null);
-    } finally {
-        setLoading(false);
-    }
+      // Fix toàn bộ URL một cách sạch sẽ và nhất quán
+      const fixedSongs = (data.songs || []).map((song) => ({
+        ...song,
+        // Ảnh bài hát hoặc album
+        image_url: fixUrl(song.image_url || song.album?.cover_url, 'image'),
+        // File nhạc – BẮT BUỘC phải fix để phát/tải được
+        file_url: fixUrl(song.file_url, 'audio'),
+        // Fix cover album nếu có
+        album: song.album
+          ? { ...song.album, cover_url: fixUrl(song.album.cover_url, 'image') }
+          : null,
+      }));
+
+      setPlaylist(data);
+      setSongs(fixedSongs);
+    } catch (err) {
+      console.error(err);
+      showToast('Không tìm thấy playlist hoặc bạn không có quyền truy cập');
+      setPlaylist(null);
+    } finally {
+      setLoading(false);
+    }
   }, [id]);
 
-  useEffect(() => {
-    loadPlaylist();
-  }, [loadPlaylist]);
+  useEffect(() => {
+    loadPlaylist();
+  }, [loadPlaylist]);
 
-
-  // === HÀM MỚI: XỬ LÝ XÓA BÀI HÁT KHỎI PLAYLIST ===
+  // XÓA BÀI KHỎI PLAYLIST (chỉ chủ sở hữu mới được)
   const handleRemoveSong = async (songId) => {
-    if (!window.confirm('Bạn có chắc muốn xóa bài hát này khỏi Playlist?')) return;
-    
+    if (!window.confirm('Xóa bài hát này khỏi playlist?')) return;
+
     try {
-        await removeSongFromPlaylistApi(playlist.id, songId);
-        showToast('Bài hát đã được xóa khỏi Playlist.', 'success');
-        loadPlaylist(); // Tải lại dữ liệu
-    } catch (error) {
-        showToast(error.response?.data?.message || 'Xóa thất bại.', 'error');
+      await removeSongFromPlaylistApi(playlist.id, songId);
+      showToast('Đã xóa bài hát khỏi playlist');
+      loadPlaylist(); // Refresh lại danh sách
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Xóa thất bại');
     }
   };
-  // ===============================================
 
-  const playAll = () => {
-    if (songs.length > 0) {
-      playTrack(songs[0], songs, 0);
-    }
-  };
+  const playAll = () => {
+    if (songs.length > 0) {
+      playTrack(songs[0], songs, 0);
+    }
+  };
 
-  // Quyền: Chỉ chủ sở hữu mới có quyền xóa
+  // Kiểm tra quyền sở hữu
   const isOwner = user && playlist?.user?.id === user.userId;
 
-  if (loading) return <div className="loading-message">Đang tải playlist...</div>;
-  if (!playlist) return <div className="error-message">Playlist không tồn tại hoặc đã bị xóa.</div>;
+  // ─────────────────────── RENDER ───────────────────────
+  if (loading) {
+    return <div className="loading-message">Đang tải playlist...</div>;
+  }
 
-  return (
-    <div className="liked-songs-container">
-      {/* Header Playlist */}
-      <div className="playlist-header">
-        {/* ... (Ảnh và thông tin giữ nguyên) ... */}
-        <div className="playlist-info">
-          <p className="playlist-type">PLAYLIST {playlist.is_private ? '(RIÊNG TƯ)' : '(CÔNG KHAI)'}</p>
-          <h1>{playlist.name}</h1>
-          <p className="playlist-owner">
-            Tạo bởi {playlist.user?.username} • {songs.length} bài hát
-          </p>
-          <button className="playlist-play-button" onClick={playAll}>
-            <FaPlay size={20} /> PHÁT TẤT CẢ
-          </button>
-        </div>
-      </div>
+  if (!playlist) {
+    return <div className="error-message">Playlist không tồn tại hoặc đã bị xóa.</div>;
+  }
 
-      {/* Song list - tái sử dụng SongListTable */}
-      <SongListTable 
-        songs={songs} 
-        // === TRUYỀN HÀM XÓA VÀ CHECK QUYỀN SỞ HỮU ===
-        onRemoveSong={isOwner ? handleRemoveSong : null} 
-        // ==============================================
-      />
-    </div>
-  );
+  return (
+    <div className="liked-songs-container">
+      {/* HEADER PLAYLIST */}
+      <div className="playlist-header">
+        <div className="playlist-cover-art">
+          {playlist.cover_url ? (
+            <img src={fixUrl(playlist.cover_url, 'image')} alt={playlist.name} />
+          ) : (
+            <div className="default-cover">
+              <FaPlay size={60} />
+            </div>
+          )}
+        </div>
+
+        <div className="playlist-info">
+          <p className="playlist-type">
+            PLAYLIST {playlist.is_private ? '(RIÊNG TƯ)' : '(CÔNG KHAI)'}
+          </p>
+          <h1 className="playlist-title">{playlist.name}</h1>
+          <p className="playlist-owner">
+            Tạo bởi <strong>{playlist.user?.username || 'Ẩn danh'}</strong> •{' '}
+            {songs.length} bài hát
+          </p>
+          <button className="playlist-play-button" onClick={playAll}>
+            <FaPlay size={20} /> PHÁT TẤT CẢ
+          </button>
+        </div>
+      </div>
+
+      {/* DANH SÁCH BÀI HÁT */}
+      <div className="song-list-wrapper">
+        {songs.length > 0 ? (
+          <SongListTable
+            songs={songs}
+            // Chỉ hiện nút xóa nếu là chủ sở hữu
+            onRemoveSong={isOwner ? handleRemoveSong : null}
+          />
+        ) : (
+          <div className="empty-state">
+            <p>Playlist này chưa có bài hát nào</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default PlaylistDetailPage;

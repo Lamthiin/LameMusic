@@ -120,34 +120,34 @@ export class PlaylistService {
     return playlist;
   }
 
-  /**
-   * HÀM MỚI: Xóa Playlist của User hiện tại
-   */
-  async deleteMyPlaylist(userId: number, playlistId: number): Promise<{ message: string }> {
-    // 1. Tìm Playlist và User
-    const playlist = await this.playlistRepository.findOne({
-      where: { id: playlistId, is_active: 1 },
-      relations: ['user'] // Cần load user để kiểm tra quyền sở hữu
-    });
+  // /**
+  //  * HÀM MỚI: Xóa Playlist của User hiện tại
+  //  */
+  // async deleteMyPlaylist(userId: number, playlistId: number): Promise<{ message: string }> {
+  //   // 1. Tìm Playlist và User
+  //   const playlist = await this.playlistRepository.findOne({
+  //     where: { id: playlistId, is_active: 1 },
+  //     relations: ['user'] // Cần load user để kiểm tra quyền sở hữu
+  //   });
 
-    if (!playlist) {
-      throw new NotFoundException('Playlist không tồn tại.');
-    }
+  //   if (!playlist) {
+  //     throw new NotFoundException('Playlist không tồn tại.');
+  //   }
 
-    // 2. Kiểm tra quyền sở hữu
-    if (playlist.user.id !== userId) {
-      throw new UnauthorizedException('Bạn không có quyền xóa playlist này.');
-    }
+  //   // 2. Kiểm tra quyền sở hữu
+  //   if (playlist.user.id !== userId) {
+  //     throw new UnauthorizedException('Bạn không có quyền xóa playlist này.');
+  //   }
 
-    // 3. Xóa (Sử dụng delete của TypeORM)
-    const result = await this.playlistRepository.delete(playlistId);
+  //   // 3. Xóa (Sử dụng delete của TypeORM)
+  //   const result = await this.playlistRepository.delete(playlistId);
 
-    if (result.affected === 0) {
-        throw new NotFoundException('Xóa thất bại (Có thể playlist không tồn tại).');
-    }
+  //   if (result.affected === 0) {
+  //       throw new NotFoundException('Xóa thất bại (Có thể playlist không tồn tại).');
+  //   }
 
-    return { message: 'Xóa playlist thành công.' };
-  }
+  //   return { message: 'Xóa playlist thành công.' };
+  // }
 
   /**
    * HÀM MỚI: Xóa một bài hát khỏi Playlist (Protected)
@@ -199,5 +199,28 @@ export class PlaylistService {
         }
         return playlist;
     }
+/**
+   * (USER) Xóa Playlist (Soft Delete: Đặt is_active = 0)
+   */
+  async deleteMyPlaylist(userId: number, playlistId: number): Promise<{ message: string }> {
+    // 1. Tìm Playlist để kiểm tra quyền sở hữu
+    const playlist = await this.playlistRepository.findOne({
+      where: { id: playlistId, user: { id: userId }, is_active: 1 }, // Chỉ tìm playlist đang active
+    });
 
+    if (!playlist) {
+      throw new NotFoundException('Playlist không tồn tại hoặc bạn không có quyền xóa.');
+    }
+
+    // 2. THỰC HIỆN SOFT DELETE (Chuyển is_active = 0)
+    // Dùng update để chỉ cập nhật cột này
+    const updateResult = await this.playlistRepository.update(playlistId, { is_active: 0 }); 
+
+    if (updateResult.affected === 0) {
+         // Trường hợp lỗi bất ngờ (có thể đã bị xóa/ẩn rồi)
+         throw new NotFoundException('Xóa thất bại (Không tìm thấy bản ghi active).');
+    }
+
+    return { message: 'Playlist đã được ẩn thành công (Soft Deleted).' };
+  }
 }

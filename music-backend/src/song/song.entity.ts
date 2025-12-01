@@ -47,9 +47,8 @@ export class Song {
   @Column({ length: 50, nullable: true })
   genre: string;
 
-  @Column({ length: 255, nullable: true, name: 'image_url' })
-  image_url?: string; // <-- sửa null thành undefined / optional
-
+  @Column({ type: 'varchar', length: 255, nullable: true, name: 'image_url' })
+  image_url: string | null;
 
   // === CỘT MỚI: TRẠNG THÁI DUYỆT ===
   @Column({ type: 'varchar', length: 20, default: 'PENDING' }) 

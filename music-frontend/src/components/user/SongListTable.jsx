@@ -1,4 +1,4 @@
-// music-frontend/src/components/SongListTable.jsx
+// src/components/SongListTable.jsx
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePlayer } from '../../context/PlayerContext';
@@ -17,28 +17,34 @@ import {
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 
-const showToast = (msg) => alert(msg);
+// ==================== FIX URL THÔNG MINH (LOCAL + R2) ====================
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:3000";
+const R2_BASE = import.meta.env.VITE_R2_BASE || "https://pub-1f9b74cb44204e84b3dd30bb4df6a1e2.r2.dev";
+
+const fixAudioUrl = (url) => {
+  if (!url) return null;
+  if (url.startsWith('http')) return url;
+
+  // Ưu tiên R2 nếu có cấu hình production
+  const base = R2_BASE.includes('r2.dev') ? R2_BASE : API_BASE;
+  const prefix = base.includes('r2.dev') ? '/songs' : '/media/audio';
+
+  if (url.startsWith(prefix) || url.startsWith('/audio') || url.startsWith('/songs')) {
+    const clean = url.startsWith('/audio') ? url.replace('/audio', prefix) : url;
+    return `${base}${clean.startsWith('/') ? '' : '/'}${clean}`;
+  }
+
+  return `${base}${prefix}/${url}`;
+};
+// ====================================================================
+
+const showToast = (msg) => alert(msg); // Có thể thay bằng toast library sau
 
 const formatDuration = (seconds) => {
   if (!seconds) return '0:00';
   const m = Math.floor(seconds / 60);
   const s = Math.floor(seconds % 60);
   return `${m}:${s.toString().padStart(2, '0')}`;
-};
-
-const downloadSingle = async (song) => {
-  if (!song?.file_url) return showToast('Không có link tải');
-  try {
-    const url = song.file_url.startsWith('http')
-      ? song.file_url
-      : `http://localhost:3000${song.file_url}`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error();
-    const blob = await res.blob();
-    saveAs(blob, `${song.title}.mp3`);
-  } catch {
-    showToast(`Lỗi tải: ${song.title}`);
-  }
 };
 
 const forceLikeSong = async (songId) => {
@@ -51,10 +57,10 @@ const forceLikeSong = async (songId) => {
 
 const SongListTable = ({
   songs = [],
-  onUnlike,                    // Trang Liked Songs → bỏ thích
-  onRemoveSong,                // Playlist → xóa khỏi playlist
-  onRemoveSongFromAlbum,       // Album → xóa khỏi album
-  showOptionsMenu = true,      // Ẩn 3 chấm nếu cần
+  onUnlike,
+  onRemoveSong,
+  onRemoveSongFromAlbum,
+  showOptionsMenu = true,
 }) => {
   const navigate = useNavigate();
   const { playTrack, currentTrack, isPlaying } = usePlayer();
@@ -88,6 +94,7 @@ const SongListTable = ({
   const selectAll = () => {
     if (selectedSongs.size === localSongs.length) {
       setSelectedSongs(new Set());
+   OnClick
     } else {
       setSelectedSongs(new Set(localSongs.map((s) => s.id)));
     }
@@ -102,25 +109,25 @@ const SongListTable = ({
     }
   };
 
-  // LIKE HÀNG LOẠT
-  const handleLikeSelected = async () => {
-    const toLike = selectedSongObjects.filter((s) => !s.is_liked);
-    if (toLike.length === 0) return showToast('Đã thích hết rồi!');
+  // TẢI MỘT BÀI
+  const downloadSingle = async (song) => {
+    const audioUrl = fixAudioUrl(song.file_url);
+    if (!audioUrl) return showToast('Không có file nhạc');
 
     try {
-      await Promise.all(toLike.map((s) => forceLikeSong(s.id).catch(() => {})));
-      setLocalSongs((prev) =>
-        prev.map((s) =>
-          toLike.some((x) => x.id === s.id) ? { ...s, is_liked: true } : s
-        )
-      );
-      showToast(`Đã thích ${toLike.length} bài`);
-    } catch {
-      showToast('Lỗi khi thích');
+      const res = await fetch(audioUrl);
+      if (!res.ok) throw new Error('Fetch failed');
+      const blob = await res.blob();
+      const filename = `${song.artist?.stage_name || 'Unknown'} - ${song.title}.mp3`.replace(/[/\\?%*:|"<>]/g, '_');
+      saveAs(blob, filename);
+      showToast('Tải thành công!');
+    } catch (err) {
+      console.error(err);
+      showToast(`Lỗi tải: ${song.title}`);
     }
   };
 
-  // TẢI XUỐNG HÀNG LOẠT + ZIP
+  // TẢI NHIỀU + ZIP
   const handleDownloadSelected = async () => {
     if (selectedSongObjects.length === 0) return;
 
@@ -134,27 +141,26 @@ const SongListTable = ({
     let loaded = 0;
 
     try {
-      await Promise.all(
-        selectedSongObjects.map(async (song) => {
-          if (!song.file_url) return;
-          const url = song.file_url.startsWith('http')
-            ? song.file_url
-            : `http://localhost:3000${song.file_url}`;
-          const res = await fetch(url);
-          const blob = await res.blob();
-          const name = `${song.artist?.stage_name || 'Unknown'} - ${song.title}.mp3`
-            .replace(/[/\\?%*:|"<>]/g, '_');
-          zip.file(name, blob);
-          loaded++;
-          showToast(`Đang nén ${loaded}/${selectedSongObjects.length}...`);
-        })
-      );
+      for (const song of selectedSongObjects) {
+        const audioUrl = fixAudioUrl(song.file_url);
+        if (!audioUrl) continue;
+
+        const res = await fetch(audioUrl);
+        if (!res.ok) continue;
+
+        const blob = await res.blob();
+        const name = `${song.artist?.stage_name || 'Unknown'} - ${song.title}.mp3`.replace(/[/\\?%*:|"<>]/g, '_');
+        zip.file(name, blob);
+        loaded++;
+        showToast(`Đang nén ${loaded}/${selectedSongObjects.length}...`);
+      }
 
       const content = await zip.generateAsync({ type: 'blob' });
-      saveAs(content, 'My_Music_Download.zip');
-      showToast('Tải thành công!');
-    } catch {
-      showToast('Lỗi tạo ZIP');
+      saveAs(content, `LameMusic_Download_${new Date().toISOString().slice(0,10)}.zip`);
+      showToast('Tải ZIP thành công!');
+    } catch (err) {
+      console.error(err);
+      showToast('Lỗi tạo file ZIP');
     } finally {
       setSelectedSongs(new Set());
     }
@@ -173,7 +179,6 @@ const SongListTable = ({
 
   return (
     <div className="song-list-table">
-
       {/* HEADER */}
       <div className={`table-header ${hasSelection ? 'has-selection' : ''}`}>
         <span className="header-checkbox" onClick={selectAll}>
@@ -184,18 +189,9 @@ const SongListTable = ({
           <>
             <span className="selection-message">Đã chọn {selectedSongs.size} bài</span>
             <div className="action-button-group">
-              {/* <button className="action-btn" onClick={handleLikeSelected}>
-                <FaHeart size={16} /> Thích
-              </button> */}
               <button className="action-btn" onClick={handleDownloadSelected}>
-                <FaDownload size={16} /> Tải
+                <FaDownload size={16} /> Tải xuống
               </button>
-              {/* <button
-                className="action-btn"
-                onClick={(e) => { e.stopPropagation(); setIsAddModalOpen(true); }}
-              >
-                Playlist
-              </button> */}
             </div>
           </>
         ) : (
@@ -205,7 +201,6 @@ const SongListTable = ({
             <span className="col-album">ALBUM</span>
             <span className="col-plays">LƯỢT NGHE</span>
             <span className="col-duration">THỜI GIAN</span>
-            {/* <span className="col-options-header"></span> */}
           </>
         )}
       </div>
@@ -216,8 +211,7 @@ const SongListTable = ({
           const isSelected = selectedSongs.has(song.id);
           const isCurrent = currentTrack?.id === song.id;
           const isPlayingThis = isCurrent && isPlaying;
-          const isHovered = hoveredRow === song.id;
-          const thumb = song.cover_url || song.image_url || '/default.jpg';
+          const thumb = song.image_url || song.album?.cover_url || '/images/default-album.png';
 
           return (
             <div
@@ -259,47 +253,23 @@ const SongListTable = ({
               <span className="col-plays">{(song.play_count || 0).toLocaleString()}</span>
               <span className="col-duration">{formatDuration(song.duration)}</span>
 
-              {/* CỘT OPTIONS - 4 CHẾ ĐỘ HOÀN HẢO */}
+              {/* CÁC NÚT XÓA / BỎ THÍCH */}
               <div className="col-options" onClick={(e) => e.stopPropagation()}>
-                {/* 1. XÓA KHỎI ALBUM */}
                 {onRemoveSongFromAlbum && (
-                  <button
-                    className="btn-icon btn-remove"
-                    title="Xóa khỏi album"
-                    onClick={() => onRemoveSongFromAlbum(song.id, song.title)}
-                  >
+                  <button className="btn-icon btn-remove" title="Xóa khỏi album" onClick={() => onRemoveSongFromAlbum(song.id, song.title)}>
                     <FaTimes size={14} />
                   </button>
                 )}
-
-                {/* 2. XÓA KHỎI PLAYLIST */}
                 {onRemoveSong && !onRemoveSongFromAlbum && (
-                  <button
-                    className="btn-icon btn-remove"
-                    title="Xóa khỏi playlist"
-                    onClick={() => onRemoveSong(song.id)}
-                  >
+                  <button className="btn-icon btn-remove" title="Xóa khỏi playlist" onClick={() => onRemoveSong(song.id)}>
                     <FaTimes size={14} />
                   </button>
                 )}
-
-                {/* 3. BỎ THÍCH (Liked Songs) */}
                 {onUnlike && !onRemoveSong && !onRemoveSongFromAlbum && (
-                  <button
-                    className="btn-icon btn-unlike"
-                    title="Bỏ thích"
-                    onClick={() => onUnlike(song.id)}
-                  >
+                  <button className="btn-icon btn-unlike" title="Bỏ thích" onClick={() => onUnlike(song.id)}>
                     <FaTimes size={14} />
                   </button>
                 )}
-
-                {/* 4. NÚT 3 CHẤM (trang thường)
-                {showOptionsMenu && !onUnlike && !onRemoveSong && !onRemoveSongFromAlbum && (isHovered || isSelected) && (
-                  <button className="btn-icon" onClick={(e) => openMenu(e, song)}>
-                    <FaEllipsisV size={14} />
-                  </button>
-                )} */}
               </div>
             </div>
           );
@@ -320,10 +290,10 @@ const SongListTable = ({
         />
       )}
 
-      {/* MODAL THÊM PLAYLIST */}
+      {/* MODAL THÊM VÀO PLAYLIST */}
       {isAddModalOpen && (
         <AddToPlaylistModal
-          songIds={selectedSongObjects.map((s) => s.id)}
+          songIds={Array.from(selectedSongs)}
           onClose={() => {
             setIsAddModalOpen(false);
             setSelectedSongs(new Set());

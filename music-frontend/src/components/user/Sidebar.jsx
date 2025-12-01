@@ -108,21 +108,13 @@ const Sidebar = () => {
       <div className="sidebar-section sidebar-library">
         
         <ul className="sidebar-library-items">
+          
 
           <li onClick={() => navigate('/profile/info')}>
           <VscLibrary />
           <span>Thư viện</span>
           </li>
-          {/* <li onClick={() => setIsModalOpen(true)}>
-            <GoPlus />
-            <span>Tạo playlist</span>
-           */}
-          <li onClick={() => navigate('/liked-songs')}>
-            <GoHeartFill />
-            <span>Bài hát yêu thích</span>
-          </li>
-
-        {isAuthenticated && (
+                  {isAuthenticated && (
           <div className="sidebar-dropdown-parent">
             <li
               ref={triggerRef}
@@ -190,7 +182,16 @@ const Sidebar = () => {
               </div>
             </div>
           </div>
-        )}
+          )}
+
+          {/* <li onClick={() => setIsModalOpen(true)}>
+            <GoPlus />
+            <span>Tạo playlist</span>
+           */}
+          <li onClick={() => navigate('/liked-songs')}>
+            <GoHeartFill />
+            <span>Bài hát yêu thích</span>
+          </li>
         </ul>
       </div>
 
