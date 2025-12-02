@@ -1,7 +1,8 @@
 // music-backend/src/playlist/entities/playlist.entity.ts (FULL CODE FINAL)
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, ManyToMany, JoinColumn, JoinTable, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column,OneToMany, ManyToOne, ManyToMany, JoinColumn, JoinTable, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { User } from '../user/user.entity'; 
 import { Song } from '../song/song.entity'; 
+import { PlaylistSong } from './playlist-song.entity';
 
 @Entity('Playlist')
 export class Playlist {
@@ -38,4 +39,7 @@ export class Playlist {
     inverseJoinColumn: { name: 'song_id', referencedColumnName: 'id' },
   })
   songs: Song[];
+  // 2. Mối quan hệ One-to-Many với Bảng trung gian PlaylistSong
+    @OneToMany(() => PlaylistSong, playlistSong => playlistSong.playlist)
+    playlistSongs: PlaylistSong[]; // <-- Thay thế cho 'songs: Song[]' cũ
 }

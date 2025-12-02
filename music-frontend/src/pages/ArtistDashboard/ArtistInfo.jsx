@@ -8,19 +8,24 @@ import './ArtistDashboard.css'; // CSS riêng
 // (Hàm Toast Helper)
 const showToast = (message, type = 'success') => { alert(message); };
 
-// HÀM HELPER (BẮT BUỘC)
-const fixUrl = (url, type = 'image') => { 
-    if (!url) { 
+const fixUrl = (url, type = 'image') => {
+    if (!url) { // Xử lý NULL
         if (type === 'artist') return '/images/default-artist.png';
-        return '/images/default-album.png'; 
+        if (type === 'audio') return ''; // Trả về rỗng nếu không có file nhạc
+        return '/images/default-album.png'; // Mặc định cho album/song
     }
-    if (url.startsWith('http')) return url;
+    if (url.startsWith('http')) { // Nếu đã là URL tuyệt đối
+        return url;
+    }
+    // Mặc định (ví dụ: /images/artist-1.jpg)
     const prefix = type === 'image' ? '/media/images' : '/media/audio';
     const originalPath = type === 'image' ? '/images' : '/audio';
     
+    // Đảm bảo không thay thế 2 lần
     if (url.startsWith(prefix)) {
         return `http://localhost:3000${url}`;
     }
+    
     return `http://localhost:3000${url.replace(originalPath, prefix)}`;
 };
 

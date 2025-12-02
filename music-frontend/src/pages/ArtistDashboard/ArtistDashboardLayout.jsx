@@ -6,12 +6,25 @@ import './ArtistDashboard.css'; // CSS riêng
 import { useAuth } from '../../context/AuthContext';
 import { FaUserEdit, FaMusic, FaCompactDisc, FaHeart, FaUsers } from 'react-icons/fa';
 
-// HÀM HELPER (BẮT BUỘC)
-const fixUrl = (url, type = 'image') => { 
-  if (!url) return "/images/default-album.png";
-  if (url.startsWith("http")) return url;
-  const correctedUrl = url.replace("/images", "/media/images");
-  return `http://localhost:3000${correctedUrl}`;
+const fixUrl = (url, type = 'image') => {
+    if (!url) { // Xử lý NULL
+        if (type === 'artist') return '/images/default-artist.png';
+        if (type === 'audio') return ''; // Trả về rỗng nếu không có file nhạc
+        return '/images/default-album.png'; // Mặc định cho album/song
+    }
+    if (url.startsWith('http')) { // Nếu đã là URL tuyệt đối
+        return url;
+    }
+    // Mặc định (ví dụ: /images/artist-1.jpg)
+    const prefix = type === 'image' ? '/media/images' : '/media/audio';
+    const originalPath = type === 'image' ? '/images' : '/audio';
+    
+    // Đảm bảo không thay thế 2 lần
+    if (url.startsWith(prefix)) {
+        return `http://localhost:3000${url}`;
+    }
+    
+    return `http://localhost:3000${url.replace(originalPath, prefix)}`;
 };
 
 const ArtistDashboardLayout = () => {

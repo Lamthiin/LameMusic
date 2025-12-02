@@ -15,6 +15,7 @@ import { Artist } from '../artist/artist.entity';
 import { Lyrics } from '../lyrics/lyrics.entity';
 import { UserLikedSongs } from '../like/user-liked-songs.entity'; // <-- THÊM DÒNG NÀY
 import { History } from '../history/history.entity'; // <-- (1) IMPORT HISTORY
+import { PlaylistSong } from '../playlist/playlist-song.entity'; // <-- IMPORT MỚI
 
 @Entity('Song') // Ánh xạ với bảng 'Song'
 export class Song {
@@ -47,9 +48,8 @@ export class Song {
   genre: string;
   
 
-  @Column({ length: 255, nullable: true, name: 'image_url' })
-  image_url?: string; // <-- sửa null thành undefined / optional
-
+  @Column({ type: 'varchar', length: 255, nullable: true, name: 'image_url' })
+  image_url: string | null;
 
   // === CỘT MỚI: TRẠNG THÁI DUYỆT ===
   @Column({ type: 'varchar', length: 20, default: 'PENDING' }) 
@@ -91,4 +91,8 @@ export class Song {
   // === (2) THÊM QUAN HỆ NGƯỢC LẠI (FIX LỖI TS2339) ===
   @OneToMany(() => History, history => history.song)
   history: History[];
+
+  @OneToMany(() => PlaylistSong, playlistSong => playlistSong.song)
+    playlistSongs: PlaylistSong[]; 
+    // ====
 }

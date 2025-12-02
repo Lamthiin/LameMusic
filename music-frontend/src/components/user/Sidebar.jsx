@@ -108,21 +108,13 @@ const Sidebar = () => {
       <div className="sidebar-section sidebar-library">
         
         <ul className="sidebar-library-items">
+          
 
           <li onClick={() => navigate('/profile/info')}>
           <VscLibrary />
           <span>Thư viện</span>
           </li>
-          {/* <li onClick={() => setIsModalOpen(true)}>
-            <GoPlus />
-            <span>Tạo playlist</span>
-           */}
-          <li onClick={() => navigate('/liked-songs')}>
-            <GoHeartFill />
-            <span>Bài hát yêu thích</span>
-          </li>
-
-        {isAuthenticated && (
+                  {isAuthenticated && (
           <div className="sidebar-dropdown-parent">
             <li
               ref={triggerRef}
@@ -162,7 +154,7 @@ const Sidebar = () => {
                             : `http://localhost:3000${artist.avatar_url || '/images/default-avatar.png'}`}
                           alt={artist.stage_name}
                           className="artist-mini-avatar"
-                          onError={e => e.target.src = '/images/default-avatar.png'}
+                          // onError={e => e.target.src = '/images/default-avatar.png'}
                         />
                         <span>{artist.stage_name}</span>
                         <div className="mini-wave">
@@ -183,14 +175,23 @@ const Sidebar = () => {
                     </div>
                   </>
                 ) : (
-                  <div style={{padding: '32px 20px', textAlign: 'center', color: '#80d8d0', fontSize: '14px'}}>
+                  <div style={{padding: '20px 20px', textAlign: 'center', color: '#80d8d0', fontSize: '11px'}}>
                     Chưa theo dõi Artist nào
                   </div>
                 )}
               </div>
             </div>
           </div>
-        )}
+          )}
+
+          {/* <li onClick={() => setIsModalOpen(true)}>
+            <GoPlus />
+            <span>Tạo playlist</span>
+           */}
+          <li onClick={() => navigate('/liked-songs')}>
+            <GoHeartFill />
+            <span>Bài hát yêu thích</span>
+          </li>
         </ul>
       </div>
 

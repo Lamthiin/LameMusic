@@ -6,16 +6,30 @@ import { usePlayer } from '../../context/PlayerContext';
 import { useAuth } from '../../context/AuthContext';
 import './LikedSongsPage.css';
 import { FaPlay, FaHeart } from 'react-icons/fa';
-import SongListTable from '../../components/user/SongListTable'; 
+import SongListTable from '../../components/user/SongListTable';
+
+// === DÙNG CHÍNH XÁC HÀM fixUrl CỦA BẠN (NHƯ CÁC TRANG KHÁC) ===
+const fixUrl = (url, type = 'image') => {
+  if (!url) {
+    if (type === 'artist') return '/images/default-artist.png';
+    if (type === 'audio') return ''; // Trả về rỗng nếu không có file nhạc
+    return '/images/default-album.png';
+  }
+  if (url.startsWith('http')) {
+    return url;
+  }
+  const prefix = type === 'image' ? '/media/images' : '/media/audio';
+  const originalPath = type === 'image' ? '/images' : '/audio';
+
+  if (url.startsWith(prefix)) {
+    return `http://localhost:3000${url}`;
+  }
+
+  return `http://localhost:3000${url.replace(originalPath, prefix)}`;
+};
+// ====================================================================
 
 const showToast = (message) => { alert(message); };
-
-const fixImageUrl = (url) => {
-  if (!url) return '/images/default-album.png';
-  if (url.startsWith('http')) return url;
-  const correctedUrl = url.replace('/images', '/media/images');
-  return `http://localhost:3000${correctedUrl}`;
-};
 
 const LikedSongsPage = () => {
   const [likedSongs, setLikedSongs] = useState([]);
@@ -26,39 +40,50 @@ const LikedSongsPage = () => {
 
   const loadLikedSongs = useCallback(async () => {
     setLoading(true);
-    const data = await fetchLikedSongs();
+    try {
+      const data = await fetchLikedSongs();
 
-    const songsOnly = data
-      .map((item) => {
-        const song = item.song;
-        if (!song) return null;
+      const songsOnly = data
+        .map((item) => {
+          const song = item.song;
+          if (!song) return null;
 
-        const coverUrl = song.image_url 
-          ? fixImageUrl(song.image_url) 
-          : (song.album?.cover_url ? fixImageUrl(song.album.cover_url) : '/images/default-album.png');
+          return {
+            ...song,
+            // Ảnh: ưu tiên image_url → album.cover_url → default
+            image_url: fixUrl(song.image_url || song.album?.cover_url, 'image'),
+            // File nhạc: BẮT BUỘC phải fix để tải được
+            file_url: fixUrl(song.file_url, 'audio'),
+            // Giữ lại album cover nếu cần (cho SongListTable)
+            album: song.album
+              ? { ...song.album, cover_url: fixUrl(song.album.cover_url, 'image') }
+              : null,
+            is_liked: true,
+          };
+        })
+        .filter(Boolean);
 
-        return {
-          ...song,
-          cover_url: coverUrl,
-          is_liked: true
-        };
-      })
-      .filter(Boolean);
-
-    setLikedSongs(songsOnly);
-    setLoading(false);
+      setLikedSongs(songsOnly);
+    } catch (err) {
+      console.error("Lỗi tải danh sách yêu thích:", err);
+      showToast("Không thể tải danh sách yêu thích");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  useEffect(() => { loadLikedSongs(); }, [loadLikedSongs]);
+  useEffect(() => {
+    loadLikedSongs();
+  }, [loadLikedSongs]);
 
   const handleUnlikeSong = async (songId) => {
     if (!window.confirm('Bạn có muốn xóa bài hát này khỏi danh sách yêu thích?')) return;
     try {
       await toggleLikeSongApi(songId);
-      showToast('Đã xóa bài hát khỏi danh sách yêu thích.');
-      loadLikedSongs();
+      showToast('Đã xóa khỏi danh sách yêu thích');
+      loadLikedSongs(); // Refresh lại danh sách
     } catch (error) {
-      showToast('Lỗi hủy yêu thích.', 'error');
+      showToast('Lỗi khi bỏ thích');
     }
   };
 
@@ -74,16 +99,16 @@ const LikedSongsPage = () => {
 
   return (
     <div className="liked-songs-container">
-      {/* Header Playlist (giữ nguyên) */}
+      {/* Header */}
       <div className="playlist-header">
         <div className="playlist-cover-art">
-          <FaHeart size={60} />
+          <FaHeart size={80} color="#ff4d8d" />
         </div>
         <div className="playlist-info">
           <p className="playlist-type">PLAYLIST</p>
-          <h1>Bài hát đã thích</h1>
+          <h1 className="playlist-title">Bài hát đã thích</h1>
           <p className="playlist-owner">
-            {user?.username} • {likedSongs.length} bài hát
+            {user?.username || 'Bạn'} • {likedSongs.length} bài hát
           </p>
           <button className="playlist-play-button" onClick={playAllLiked}>
             <FaPlay size={20} /> PHÁT TẤT CẢ
@@ -91,12 +116,20 @@ const LikedSongsPage = () => {
         </div>
       </div>
 
-      {/* Song List - tái sử dụng SongListTable */}
+      {/* Danh sách bài hát */}
       <div className="song-list-wrapper">
-        <SongListTable 
-          songs={likedSongs} 
-          onUnlike={handleUnlikeSong} 
-        />
+        {likedSongs.length > 0 ? (
+          <SongListTable
+            songs={likedSongs}
+            onUnlike={handleUnlikeSong} // Hiển thị nút bỏ thích
+          />
+        ) : (
+          <div className="empty-state">
+            <FaHeart size={60} color="#666" />
+            <p>Chưa có bài hát nào được thích</p>
+            <p className="subtle-text">Nhấn trái tim để thêm bài hát vào đây nhé!</p>
+          </div>
+        )}
       </div>
     </div>
   );

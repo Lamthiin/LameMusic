@@ -25,10 +25,10 @@ const fixPlayerImageUrl = (track) => {
   return `http://localhost:3000${url.startsWith('/media') ? url : url.replace('/images', '/media/images')}`;
 };
 
-const fixAudioUrl = (url) => {
-  if (!url) return '';
-  return url.startsWith('http') ? url : `http://localhost:3000${url}`;
-};
+  const fixAudioUrl = (url) => {
+    if (!url) return '';
+    return url.startsWith('http') ? url : `http://localhost:3000${url}`;
+  };
 
 const PlayerBar = () => {
   const navigate = useNavigate();
