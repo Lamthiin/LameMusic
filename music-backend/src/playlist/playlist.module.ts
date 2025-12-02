@@ -7,10 +7,11 @@ import { PlaylistService } from './playlist.service';
 import { User } from '../user/user.entity'; 
 import { Song } from '../song/song.entity'; // <-- (1) IMPORT SONG
 import { AuthModule } from '../auth/auth.module'; 
+import { PlaylistSong } from './playlist-song.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Playlist, User, Song]), // <-- (2) THÊM SONG
+    TypeOrmModule.forFeature([Playlist, User, Song,PlaylistSong]), // <-- (2) THÊM SONG
     AuthModule,
   ],
   controllers: [PlaylistController],

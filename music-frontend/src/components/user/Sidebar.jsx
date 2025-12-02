@@ -175,7 +175,7 @@ const Sidebar = () => {
                     </div>
                   </>
                 ) : (
-                  <div style={{padding: '32px 20px', textAlign: 'center', color: '#80d8d0', fontSize: '14px'}}>
+                  <div style={{padding: '20px 20px', textAlign: 'center', color: '#80d8d0', fontSize: '11px'}}>
                     Chưa theo dõi Artist nào
                   </div>
                 )}

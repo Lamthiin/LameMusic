@@ -16,6 +16,7 @@ import { Lyrics } from '../lyrics/lyrics.entity';
 import { UserLikedSongs } from '../like/user-liked-songs.entity'; // <-- THÊM DÒNG NÀY
 import { Category } from '../category/category.entity';
 import { History } from '../history/history.entity'; // <-- (1) IMPORT HISTORY
+import { PlaylistSong } from '../playlist/playlist-song.entity'; // <-- IMPORT MỚI
 
 @Entity('Song') // Ánh xạ với bảng 'Song'
 export class Song {
@@ -88,4 +89,8 @@ export class Song {
   // === (2) THÊM QUAN HỆ NGƯỢC LẠI (FIX LỖI TS2339) ===
   @OneToMany(() => History, history => history.song)
   history: History[];
+
+  @OneToMany(() => PlaylistSong, playlistSong => playlistSong.song)
+    playlistSongs: PlaylistSong[]; 
+    // ====
 }

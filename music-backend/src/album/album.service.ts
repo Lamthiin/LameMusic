@@ -29,10 +29,11 @@ export class AlbumService {
    * HÀM MỚI: Lấy tất cả Album
    */
   async findAllAlbums(): Promise<Album[]> {
-    return this.albumRepository.find({
-      relations: ['artist'], 
-      order: { release_date: 'DESC' }, 
-    });
+  return this.albumRepository.find({
+    where: { active: true },   // ✔ chỉ lấy album chưa xóa
+    relations: ['artist'],
+    order: { release_date: 'DESC' },
+  });
   }
 
 
@@ -42,7 +43,7 @@ export class AlbumService {
   async findMyAlbums(userId: number): Promise<Album[]> {
     const artist = await this.getArtistByUserId(userId);
     return this.albumRepository.find({
-      where: { artist: { id: artist.id } },
+      where: { artist: { id: artist.id }, active: true },
       relations: ['songs'], 
       order: { release_date: 'DESC' },
     });
@@ -76,7 +77,7 @@ export class AlbumService {
   async updateMyAlbum(userId: number, albumId: number, dto: UpdateAlbumDto, coverFile?: Express.Multer.File): Promise<Album> {
     const artist = await this.getArtistByUserId(userId);
     const album = await this.albumRepository.findOne({ 
-      where: { id: albumId },
+      where: { id: albumId, active: true },
       relations: ['artist'] 
     });
 
@@ -107,8 +108,10 @@ export class AlbumService {
     async findOne(id: number): Promise<Album> {
         // === SỬ DỤNG QUERY BUILDER ĐỂ LỌC BÀI HÁT ===
         const album = await this.albumRepository.createQueryBuilder('album')
-            .where('album.id = :albumId', { albumId: id })
-            
+            .where('album.id = :albumId AND album.active = :active', { 
+                albumId: id,
+                active: true 
+            })
             // 1. JOIN Artist
             .leftJoinAndSelect('album.artist', 'artist')
             
