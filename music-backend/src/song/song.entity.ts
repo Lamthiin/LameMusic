@@ -17,6 +17,7 @@ import { UserLikedSongs } from '../like/user-liked-songs.entity'; // <-- THÊM D
 import { History } from '../history/history.entity'; // <-- (1) IMPORT HISTORY
 import { PlaylistSong } from '../playlist/playlist-song.entity'; // <-- IMPORT MỚI
 
+
 @Entity('Song') // Ánh xạ với bảng 'Song'
 export class Song {
   @PrimaryGeneratedColumn()

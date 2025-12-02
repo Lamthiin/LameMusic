@@ -14,11 +14,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { Song } from '../../song/song.entity';
 import { CategoryModule } from '../../category/category.module';
+import { Lyrics } from '../../lyrics/lyrics.entity';   // ⭐ THÊM DÒNG NÀY
 
 @Module({
   imports: [
     SharedModule,
-    TypeOrmModule.forFeature([Song, Artist, Album]),
+    TypeOrmModule.forFeature([Song, Artist, Album, Lyrics]),
     CategoryModule,
 
     // Upload file vào RAM để gửi lên R2

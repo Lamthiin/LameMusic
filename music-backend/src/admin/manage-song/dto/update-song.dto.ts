@@ -24,4 +24,14 @@ export class UpdateSongDto {
   @IsOptional()
   @IsNumberString()
   duration?: string;  // FE đang gửi string, backend convert sang number
+
+  // ⭐ Thêm field lyrics
+  @IsOptional()
+  @IsString()
+  lyrics?: string;
+
+  // ⭐ Thêm field language của lyrics
+  @IsOptional()
+  @IsString()
+  lyricsLanguage?: string;
 }

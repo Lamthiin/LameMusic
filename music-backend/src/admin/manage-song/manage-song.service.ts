@@ -3,6 +3,7 @@ import {
   Injectable,
   BadRequestException,
   NotFoundException,
+
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -13,6 +14,7 @@ import { Album } from '../../album/album.entity';
 import { R2Service } from '../../shared/r2.service';
 import { UpdateSongDto } from './dto/update-song.dto';
 import { Category } from '../../category/category.entity';
+import { Lyrics } from '../../lyrics/lyrics.entity';
 
 
 @Injectable()
@@ -26,6 +28,10 @@ export class ManageSongService {
 
     @InjectRepository(Album)
     private readonly albumRepo: Repository<Album>,
+
+    @InjectRepository(Lyrics)
+    private readonly lyricsRepo: Repository<Lyrics>,
+
 
     @InjectRepository(Category)
     private readonly categoryRepo: Repository<Category>,
@@ -88,6 +94,7 @@ export class ManageSongService {
       }
     }
 
+
     // =============================
     // 🟢 Xử lý thể loại Category
     // =============================
@@ -143,7 +150,24 @@ export class ManageSongService {
     });
 
 
-    return await this.songRepo.save(song);
+    // Lưu vào DB trước
+    const savedSong = await this.songRepo.save(song);
+
+    // =============================
+    // 🟢 LƯU LYRICS nếu FE gửi
+    // =============================
+    if (body.lyrics && body.lyrics.trim() !== "") {
+      const lyricsRecord = this.lyricsRepo.create({
+        song: savedSong,               // relation 1-1
+        song_id: savedSong.id,         // foreign key
+        lyrics: body.lyrics.trim(),
+        language: body.lyricsLanguage || "vi",
+      });
+
+      await this.lyricsRepo.save(lyricsRecord);
+    }
+
+    return savedSong;
   }
 
   // ==============================================
@@ -154,6 +178,7 @@ export class ManageSongService {
       .createQueryBuilder('song')
       .leftJoinAndSelect('song.artist', 'artist')
       .leftJoinAndSelect('song.album', 'album')
+      .leftJoinAndSelect('song.lyrics', 'lyrics')
       .select([
         'song.id',
         'song.title',
@@ -169,6 +194,10 @@ export class ManageSongService {
         'album.id',
         'album.title',
 
+        'lyrics.id',         // ⭐ THÊM
+        'lyrics.lyrics',     // ⭐ THÊM
+        'lyrics.language',   // ⭐ THÊM
+
       ])
       .orderBy('song.id', 'DESC')
       .getMany();
@@ -180,7 +209,7 @@ export class ManageSongService {
   async getSongDetail(id: number) {
     const song = await this.songRepo.findOne({
       where: { id },
-      relations: ['artist', 'album'],
+      relations: ['artist', 'album', 'lyrics'],
     });
     if (!song) throw new NotFoundException('Không tìm thấy bài hát');
     return song;
@@ -196,7 +225,7 @@ export class ManageSongService {
   ) {
     const song = await this.songRepo.findOne({
       where: { id },
-      relations: ['artist', 'album'],
+      relations: ['artist', 'album', 'lyrics'],
     });
     if (!song) throw new NotFoundException('Không tìm thấy bài hát');
 
@@ -220,37 +249,57 @@ export class ManageSongService {
 
     if (body.duration) song.duration = Number(body.duration);
 
-    // nghệ sĩ
-    if (body.artist && body.artist.trim() !== '') {
-      let artist = await this.artistRepo.findOne({
-        where: { stage_name: body.artist },
-      });
-      if (!artist) {
-        artist = this.artistRepo.create({ stage_name: body.artist });
-        await this.artistRepo.save(artist);
-      }
+    //  UPDATE NGHỆ SĨ (NHẬN ID)
+    if (body.artist) {
+      const artistId = Number(body.artist);
+
+      if (isNaN(artistId)) throw new BadRequestException("Artist ID không hợp lệ");
+
+      const artist = await this.artistRepo.findOne({ where: { id: artistId } });
+      if (!artist) throw new NotFoundException("Artist không tồn tại");
+
       song.artist = artist;
     }
 
-    // album
+    //  UPDATE ALBUM (NHẬN ID hoặc null)
     if (body.album !== undefined) {
-      const albumName = body.album.trim();
-      if (albumName === '') {
+      if (body.album === "" || body.album === null) {
         song.album = null;
       } else {
-        let album = await this.albumRepo.findOne({
-          where: { title: albumName },
-        });
-        if (!album) {
-          album = this.albumRepo.create({
-            title: albumName,
-            artist: song.artist,
-          });
-          await this.albumRepo.save(album);
-        }
+        const albumId = Number(body.album);
+
+        if (isNaN(albumId)) throw new BadRequestException("Album ID không hợp lệ");
+
+        const album = await this.albumRepo.findOne({ where: { id: albumId } });
+        if (!album) throw new NotFoundException("Album không tồn tại");
+
         song.album = album;
       }
     }
+
+    // 🎵 UPDATE LYRICS (nếu FE gửi lên)
+    if (body.lyrics !== undefined) {
+      const normalizedLyrics = body.lyrics.trim();
+
+      if (song.lyrics) {
+        song.lyrics.lyrics = normalizedLyrics;
+        song.lyrics.language = body.lyricsLanguage || "vi";
+        await this.lyricsRepo.save(song.lyrics);
+      } else if (normalizedLyrics !== "") {
+        const newLyrics = this.lyricsRepo.create({
+          song: song,
+          song_id: song.id,
+          lyrics: normalizedLyrics,
+          language: body.lyricsLanguage || "vi",
+        });
+
+        await this.lyricsRepo.save(newLyrics);
+        song.lyrics = newLyrics;
+      }
+    }
+
+
+
 
     // ảnh mới
     const newImage = files?.imageFile?.[0];

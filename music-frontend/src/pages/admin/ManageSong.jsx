@@ -26,15 +26,18 @@ const ManageSong = () => {
           id: s.id,
           title: s.title,
           artistName: s.artist?.stage_name ?? "",
+          artistId: s.artist?.id ?? null,
           albumName: s.album?.title ?? "",
           duration: s.duration,
           playCount: s.play_count,
-          genre: s.genre ?? "",          // ⭐ LẤY ĐÚNG DỮ LIỆU
-          genreId: null,                 // ⭐ Category đã bỏ
+          genre: s.genre ?? "",
+          genreId: genres.find(g => g.name === s.genre)?.id ?? null,
           coverUrl: s.image_url,
           audioUrl: s.file_url,
           status: s.status,
           active: s.active,
+          lyrics: s.lyrics?.lyrics ?? "",
+          lyricsLanguage: s.lyrics?.language ?? "vi",
         }))
       );
 
@@ -76,6 +79,7 @@ const ManageSong = () => {
   const [editArtist, setEditArtist] = useState("");
   const [editAlbum, setEditAlbum] = useState("");
   const [editDuration, setEditDuration] = useState("");
+  const [editLyrics, setEditLyrics] = useState("");
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
   const [errorMessage, setErrorMessage] = useState("");
@@ -87,9 +91,10 @@ const ManageSong = () => {
   const [selectedEditAlbum, setSelectedEditAlbum] = useState(null);
   const [editCategory, setEditCategory] = useState("");
   const [selectedEditCategory, setSelectedEditCategory] = useState(null);
-
-
-
+  const [activeTab, setActiveTab] = useState("active"); // "active" | "pending"
+  const [newLyrics, setNewLyrics] = useState("");
+  const [newLyricsLanguage, setNewLyricsLanguage] = useState("vi");
+  const [editLyricsLanguage, setEditLyricsLanguage] = useState("vi");
 
   useEffect(() => {
     // Lấy nghệ sĩ đã được duyệt
@@ -131,11 +136,24 @@ const ManageSong = () => {
   }, []);
 
   // Lọc bài hát
-  const filteredSongs = songs.filter((song) =>
-    (song.title + song.artistName + song.albumName + song.genre)
-      .toLowerCase()
-      .includes(searchValue.toLowerCase())
-  );
+  const filteredSongs = songs.filter(song => {
+    const matchSearch =
+      (song.title + song.artistName + song.albumName + song.genre)
+        .toLowerCase()
+        .includes(searchValue.toLowerCase());
+
+    if (!matchSearch) return false;
+
+    if (activeTab === "active") {
+      return song.status !== "PENDING" && song.active === true;
+    }
+
+    if (activeTab === "pending") {
+      return song.status === "PENDING";
+    }
+
+    return true;
+  });
 
   const toggleMenu = (id) => {
     setOpenMenu(openMenu === id ? null : id);
@@ -174,6 +192,11 @@ const ManageSong = () => {
     formData.append("album", editAlbum ?? "");
     formData.append("category", editCategory);
     formData.append("duration", editDuration);
+    formData.append("lyrics", editLyrics);
+    formData.append("lyricsLanguage", editLyricsLanguage);
+
+
+
 
     if (editCoverFile) {
       formData.append("imageFile", editCoverFile);
@@ -285,6 +308,10 @@ const ManageSong = () => {
     formData.append("artist", newArtist);    // ID nghệ sĩ (number)
     formData.append("category", newCategory); // ID thể loại
     formData.append("duration", newDuration);
+    formData.append("lyrics", newLyrics);
+    formData.append("lyricsLanguage", newLyricsLanguage);
+
+
 
     // Album có thể không chọn
     if (newAlbum) {
@@ -332,6 +359,7 @@ const ManageSong = () => {
     setNewAlbum("");
     setNewCategory("");
     setNewDuration("");
+    setNewLyrics("");
   };
 
   const resetEditPopup = () => {
@@ -346,6 +374,7 @@ const ManageSong = () => {
     setEditAlbum("");
     setEditCategory("");   // ✔ đúng state
     setEditDuration("");
+    setEditLyrics("");
   };
 
 
@@ -354,149 +383,178 @@ const ManageSong = () => {
   return (
     <div className="admin-user-container">
       {/* HEADER */}
-      <h2 className="um-title">Quản lý bài hát</h2>
-      <div className="admin-user-header">
-        <div className="google-search-bar">
-          <FiSearch className="google-search-icon" />
-          <input
-            type="text"
-            placeholder="Tìm kiếm bài hát, nghệ sĩ, album..."
-            className="google-search-input"
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-          />
+      <div className="admin-user-header"></div>
+        <h2 className="um-title">Quản lý bài hát</h2>
+        <div className="um-grid">
+          {/* ACTIVE SONGS */}
+          <div
+            className={`um-card ${activeTab === "active" ? "active" : ""}`}
+            onClick={() => setActiveTab("active")}
+          >
+            <h3>Active</h3>
+            <p>Bài hát đang hiển thị</p>
+          </div>
+
+          {/* PENDING SONGS */}
+          <div
+            className={`um-card ${activeTab === "pending" ? "active" : ""}`}
+            onClick={() => setActiveTab("pending")}
+          >
+            <h3>Pending</h3>
+            <p>Bài hát đang chờ duyệt</p>
+          </div>
         </div>
 
-        <button className="admin-add-btn" onClick={() => setShowAddPopup(true)}>+ Thêm bài hát </button>
+        <div className="admin-user-header">
+          <div className="google-search-bar">
+            <FiSearch className="google-search-icon" />
+            <input
+              type="text"
+              placeholder="Tìm kiếm bài hát, nghệ sĩ, album..."
+              className="google-search-input"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+            />
+          </div>
 
+          <button className="admin-add-btn" onClick={() => setShowAddPopup(true)}>+ Thêm bài hát </button>
+
+        </div>
+      <div className="um-table-area">
+        {/* TABLE */}
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Cover</th>
+              <th>Bài hát</th>
+              <th>Nghệ sĩ</th>
+              <th>Album</th>
+              <th>Thời lượng</th>
+              <th>Thể loại</th>
+              <th>Lượt nghe</th>
+              <th>Trạng thái</th>
+              <th>More</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {filteredSongs.map((song) => (
+              <tr key={song.id}>
+                <td>{song.id}</td>
+
+                {/* Cover */}
+                <td>
+                  <img src={song.coverUrl} alt="" className="song-cover" />
+                </td>
+
+                <td
+                  className="song-title-clickable"
+                  onClick={() => setShowViewPopup(song)}
+                  style={{ cursor: "pointer", color: "#ffffff" }}
+                >
+                  {song.title}
+                </td>
+
+                <td>{song.artistName}</td>
+                <td>{song.albumName}</td>
+                <td>{formatDuration(song.duration)}</td>
+                <td>{song.genre}</td>
+                <td>{song.playCount.toLocaleString("vi-VN")}</td>
+
+                {/* GỘP TRẠNG THÁI + HIỂN THỊ */}
+                <td>
+                  <span
+                    className={
+                      "status-merged " +
+                      (song.status === "PENDING"
+                        ? "pending"
+                        : song.active
+                        ? "public"
+                        : "hidden")
+                    }
+                  >
+                    {song.status === "PENDING"
+                      ? "Pending"
+                      : song.active
+                      ? "Public"
+                      : "Hidden"}
+                  </span>
+                </td>
+
+                {/* ACTION MENU */}
+                <td className="action-menu-cell">
+                  <button
+                    className="action-btn"
+                    onClick={() => toggleMenu(song.id)}
+                  >
+                    <BsThreeDotsVertical />
+                  </button>
+
+                  {openMenu === song.id && (
+                    <div className="action-dropdown" ref={dropdownRef}>
+                      <button onClick={() => setShowViewPopup(song)}>Xem</button>
+                      <button onClick={() => {
+                          setShowEditPopup(song);
+
+                          setEditTitle(song.title);
+                          setEditDuration(song.duration);
+                          setEditLyrics(song.lyrics?.lyrics || "");
+                          setEditLyricsLanguage(song.lyrics?.language || "vi");
+
+
+
+                          // Nghệ sĩ object
+                          const artistObj = artists.find(a => a.id === song.artistId);
+                          setSelectedEditArtist(artistObj || null);
+                          setEditArtist(artistObj?.id || "");
+
+
+                          // Album object
+                          const albumObj = albums.find(a => a.title === song.albumName);
+                          setSelectedEditAlbum(albumObj || null);
+                          setEditAlbum(albumObj?.id || "");
+
+                          // Thể loại object
+                          // Thể loại object - MATCH BẰNG TÊN
+                          const categoryObj = genres.find(g => g.name === song.genre);
+                          setSelectedEditCategory(categoryObj || null);
+                          setEditCategory(categoryObj?.id || "");
+
+
+                          // Ảnh + nhạc
+                          setEditCoverPreview(song.coverUrl);
+                          setEditCoverFile(null);
+
+                          setEditAudioFile(null);
+                          setEditAudioName("");
+                      }}>
+                          Sửa
+                      </button>
+
+                      <button onClick={() => handleToggleActive(song.id)}>
+                        {song.active ? "Ẩn" : "Hiện"}
+                      </button>
+
+                      {song.status === "PENDING" && (
+                        <button onClick={() => handleApprove(song.id)}>Duyệt</button>
+                      )}
+
+                      <button
+                        className="danger"
+                        onClick={() => handleDelete(song.id)}
+                      >
+                        Xóa
+                      </button>
+                    </div>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
-      {/* TABLE */}
-      <table className="admin-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Cover</th>
-            <th>Bài hát</th>
-            <th>Nghệ sĩ</th>
-            <th>Album</th>
-            <th>Thời lượng</th>
-            <th>Thể loại</th>
-            <th>Lượt nghe</th>
-            <th>Trạng thái</th>
-            <th>More</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {filteredSongs.map((song) => (
-            <tr key={song.id}>
-              <td>{song.id}</td>
-
-              {/* Cover */}
-              <td>
-                <img src={song.coverUrl} alt="" className="song-cover" />
-              </td>
-
-              <td
-                className="song-title-clickable"
-                onClick={() => setShowViewPopup(song)}
-                style={{ cursor: "pointer", color: "#ffffff" }}
-              >
-                {song.title}
-              </td>
-
-              <td>{song.artistName}</td>
-              <td>{song.albumName}</td>
-              <td>{formatDuration(song.duration)}</td>
-              <td>{song.genre}</td>
-              <td>{song.playCount.toLocaleString("vi-VN")}</td>
-
-              {/* GỘP TRẠNG THÁI + HIỂN THỊ */}
-              <td>
-                <span
-                  className={
-                    "status-merged " +
-                    (song.status === "PENDING"
-                      ? "pending"
-                      : song.active
-                      ? "public"
-                      : "hidden")
-                  }
-                >
-                  {song.status === "PENDING"
-                    ? "Pending"
-                    : song.active
-                    ? "Public"
-                    : "Hidden"}
-                </span>
-              </td>
-
-              {/* ACTION MENU */}
-              <td className="action-menu-cell">
-                <button
-                  className="action-btn"
-                  onClick={() => toggleMenu(song.id)}
-                >
-                  <BsThreeDotsVertical />
-                </button>
-
-                {openMenu === song.id && (
-                  <div className="action-dropdown" ref={dropdownRef}>
-                    <button onClick={() => setShowViewPopup(song)}>Xem</button>
-                    <button onClick={() => {
-                        setShowEditPopup(song);
-
-                        setEditTitle(song.title);
-                        setEditDuration(song.duration);
-
-                        // Nghệ sĩ object
-                        const artistObj = artists.find(a => a.stage_name === song.artistName);
-                        setSelectedEditArtist(artistObj || null);
-                        setEditArtist(artistObj?.id || "");
-
-                        // Album object
-                        const albumObj = albums.find(a => a.title === song.albumName);
-                        setSelectedEditAlbum(albumObj || null);
-                        setEditAlbum(albumObj?.id || "");
-
-                        // Thể loại object
-                        const categoryObj = genres.find(g => g.id == song.genreId);
-                        setSelectedEditCategory(categoryObj || null);
-                        setEditCategory(categoryObj?.id || "");
-
-                        // Ảnh + nhạc
-                        setEditCoverPreview(song.coverUrl);
-                        setEditCoverFile(null);
-
-                        setEditAudioFile(null);
-                        setEditAudioName("");
-                    }}>
-                        Sửa
-                    </button>
-
-                    <button onClick={() => handleToggleActive(song.id)}>
-                      {song.active ? "Ẩn" : "Hiện"}
-                    </button>
-
-                    {song.status === "PENDING" && (
-                      <button onClick={() => handleApprove(song.id)}>Duyệt</button>
-                    )}
-
-                    <button
-                      className="danger"
-                      onClick={() => handleDelete(song.id)}
-                    >
-                      Xóa
-                    </button>
-                  </div>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      
       {/* POPUP THÊM BÀI HÁT */}
       {showAddPopup && (
         <div
@@ -554,7 +612,7 @@ const ManageSong = () => {
 
                       <button
                         className="spotify-remove-btn"
-                        onClick={(e) => {                     // ❗ chỉ dùng onClick
+                        onClick={(e) => {                     
                           e.stopPropagation();
                           setCoverFile(null);
                           setPreviewCover(null);
@@ -568,7 +626,7 @@ const ManageSong = () => {
                   ) : (
                     <div
                       className="spotify-upload-area"
-                      onClick={() => {                         // ❌ Bỏ onMouseDown
+                      onClick={() => {                         
                         const input = document.getElementById("addcoverUpload");
                         if (input) {
                           input.value = "";
@@ -687,6 +745,31 @@ const ManageSong = () => {
                     </div>
                   </div>
                 </div>
+
+                {/* LYRICS */}
+                <div className="popup-group">
+                  <label>Lyrics (không bắt buộc)</label>
+
+                  {/* dropdown chọn ngôn ngữ */}
+                  <select
+                    className="lyrics-language-select"
+                    value={newLyricsLanguage}
+                    onChange={(e) => setNewLyricsLanguage(e.target.value)}
+                  >
+                    <option value="vi">Tiếng Việt (vi)</option>
+                    <option value="en">English (en)</option>
+                  </select>
+
+                  <textarea
+                    placeholder="Nhập lyric bài hát..."
+                    value={newLyrics}
+                    onChange={(e) => setNewLyrics(e.target.value)}
+                    className="lyrics-textarea"
+                    rows={8}
+                  ></textarea>
+                </div>
+
+
 
               </div>
             </div>
@@ -844,6 +927,19 @@ const ManageSong = () => {
                 <source src={showViewPopup.audioUrl} type="audio/mpeg" />
               </audio>
             </div>
+
+            {/* LYRICS */}
+            {showViewPopup.lyrics && (
+              <div className="popup-group">
+                <label>Lyrics</label>
+                <div className="lyrics-view-box">
+                  {showViewPopup.lyrics.split("\n").map((line, idx) => (
+                    <p key={idx}>{line}</p>
+                  ))}
+                </div>
+              </div>
+            )}
+
 
           </div>
 
@@ -1071,6 +1167,29 @@ const ManageSong = () => {
                 </div>
               )}
             </div>
+
+            <div className="popup-group">
+              <label>Lyrics (không bắt buộc)</label>
+
+              {/* chọn ngôn ngữ */}
+              <select
+                className="lyrics-language-select"
+                value={editLyricsLanguage}
+                onChange={(e) => setEditLyricsLanguage(e.target.value)}
+              >
+                <option value="vi">Tiếng Việt (vi)</option>
+                <option value="en">English (en)</option>
+              </select>
+
+              <textarea
+                placeholder="Nhập lyric bài hát..."
+                value={editLyrics}
+                onChange={(e) => setEditLyrics(e.target.value)}
+                className="lyrics-textarea"
+                rows={8}
+              ></textarea>
+            </div>
+
 
 
           </div>
