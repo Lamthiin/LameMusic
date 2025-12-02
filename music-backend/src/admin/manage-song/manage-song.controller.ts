@@ -15,6 +15,7 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { ManageSongService } from './manage-song.service';
 import { UpdateSongDto } from './dto/update-song.dto';
 
+
 @Controller('admin/manage-song')
 export class ManageSongController {
   constructor(private readonly manageSongService: ManageSongService) {}
@@ -77,9 +78,10 @@ export class ManageSongController {
   ) {
     return this.manageSongService.updateSong(id, body, files);
   }
+  
 
   // ================================
-  // 📌 5. ẨN / HIỆN BÀI HÁT
+  // 5. ẨN / HIỆN BÀI HÁT
   // ================================
   @Patch(':id/toggle-active')
   toggleActive(@Param('id', ParseIntPipe) id: number) {
@@ -87,7 +89,7 @@ export class ManageSongController {
   }
 
   // ================================
-  // 📌 6. DUYỆT BÀI HÁT PENDING
+  // 6. DUYỆT BÀI HÁT PENDING
   // ================================
   @Patch(':id/approve')
   approve(@Param('id', ParseIntPipe) id: number) {
@@ -95,10 +97,36 @@ export class ManageSongController {
   }
 
   // ================================
-  // 📌 7. XOÁ BÀI HÁT
+  // 6b. TỪ CHỐI BÀI HÁT PENDING
+  // ================================
+  @Patch(':id/reject')
+  reject(@Param('id', ParseIntPipe) id: number) {
+    return this.manageSongService.rejectSong(id);
+  }
+
+  // ================================
+  // 8. XOÁ MỀM
+  // ================================
+  @Patch(':id/soft-delete')
+  softDelete(@Param('id', ParseIntPipe) id: number) {
+    return this.manageSongService.softDeleteSong(id);
+  }
+
+
+
+  // ================================
+  // 7. XOÁ BÀI HÁT
   // ================================
   @Delete(':id')
   delete(@Param('id', ParseIntPipe) id: number) {
     return this.manageSongService.deleteSong(id);
   }
+
+  @Get('page/:page')
+  getPaginated(
+    @Param('page', ParseIntPipe) page: number
+  ) {
+    return this.manageSongService.getPaginatedSongs(page);
+  }
+
 }

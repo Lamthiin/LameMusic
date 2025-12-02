@@ -356,6 +356,34 @@ export class ManageSongService {
   }
 
   // ==============================================
+  // 🟡 REJECT SONG
+  // ==============================================
+  async rejectSong(id: number) {
+    const song = await this.songRepo.findOne({ where: { id } });
+    if (!song) throw new NotFoundException('Không tìm thấy bài hát');
+
+    song.status = 'REJECTED';
+    song.active = false; // từ chối thì ẩn luôn
+
+    return this.songRepo.save(song);
+  }
+
+
+  // ==============================================
+  // SOFT DELETE
+  // ==============================================
+  async softDeleteSong(id: number) {
+    const song = await this.songRepo.findOne({ where: { id } });
+    if (!song) throw new NotFoundException("Không tìm thấy bài hát");
+
+    song.status = "REJECTED";  // đánh dấu bị từ chối / không hợp lệ
+    song.active = false;       // ẩn khỏi hệ thống
+
+    return this.songRepo.save(song);
+  }
+
+
+  // ==============================================
   // 🟡 DELETE
   // ==============================================
   async deleteSong(id: number) {
@@ -368,4 +396,24 @@ export class ManageSongService {
     await this.songRepo.delete(id);
     return { success: true };
   }
+
+  async getPaginatedSongs(page: number) {
+    const take = 15; // số bài mỗi trang
+    const skip = (page - 1) * take;
+
+    const [songs, total] = await this.songRepo.findAndCount({
+      take,
+      skip,
+      order: { id: 'DESC' },
+      relations: ['artist', 'album', 'lyrics']
+    });
+
+    return {
+      data: songs,
+      currentPage: page,
+      totalPages: Math.ceil(total / take),
+      totalItems: total
+    };
+  }
+
 }

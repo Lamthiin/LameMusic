@@ -16,7 +16,7 @@ const formatDuration = (seconds) => {
 
 const ManageSong = () => {
   const [songs, setSongs] = useState([]);
-  const fetchSongs = async () => {
+  const fetchSongs = async (pageNumber = 1) => {
     try {
       const res = await fetch("http://localhost:3000/admin/manage-song");
       const data = await res.json();
@@ -52,7 +52,8 @@ const ManageSong = () => {
   }, []);
 
 
-
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [searchValue, setSearchValue] = useState("");
   const [openMenu, setOpenMenu] = useState(null);
   const [showEditSuccessPopup, setShowEditSuccessPopup] = useState(false);
@@ -136,6 +137,7 @@ const ManageSong = () => {
   }, []);
 
   // Lọc bài hát
+  // Lọc bài hát
   const filteredSongs = songs.filter(song => {
     const matchSearch =
       (song.title + song.artistName + song.albumName + song.genre)
@@ -145,7 +147,8 @@ const ManageSong = () => {
     if (!matchSearch) return false;
 
     if (activeTab === "active") {
-      return song.status !== "PENDING" && song.active === true;
+      // ⭐ CHỈ LẤY BÀI ĐÃ DUYỆT
+      return song.status === "APPROVED";
     }
 
     if (activeTab === "pending") {
@@ -155,14 +158,64 @@ const ManageSong = () => {
     return true;
   });
 
+
   const toggleMenu = (id) => {
     setOpenMenu(openMenu === id ? null : id);
   };
 
-  const handleApprove = (id) => {
-    setSongs((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, status: "APPROVED" } : s))
-    );
+  const handleApprove = async (id) => {
+    try {
+      const res = await fetch(
+        `http://localhost:3000/admin/manage-song/${id}/approve`,
+        { method: "PATCH" }
+      );
+
+      if (!res.ok) throw new Error("Approve failed");
+
+      fetchSongs(); // reload lại danh sách từ backend
+    } catch (err) {
+      console.error(err);
+      alert("Không thể duyệt bài hát!");
+    }
+  };
+
+  const handleReject = async (id) => {
+    try {
+      const res = await fetch(
+        `http://localhost:3000/admin/manage-song/${id}/reject`,
+        { method: "PATCH" }
+      );
+
+      if (!res.ok) throw new Error("Reject failed");
+
+      fetchSongs(); // cập nhật lại danh sách
+    } catch (err) {
+      console.error(err);
+      alert("Không thể từ chối bài hát!");
+    }
+  };
+
+  const handleSoftDelete = async (id) => {
+    if (!window.confirm("Bạn có chắc muốn XÓA bài hát này?")) return;
+
+    try {
+      const res = await fetch(
+        `http://localhost:3000/admin/manage-song/${id}/soft-delete`,
+        { method: "PATCH" }
+      );
+
+      if (!res.ok) throw new Error("Soft delete failed");
+
+      // load lại danh sách
+      await fetchSongs();
+
+      // THÔNG BÁO XÓA THÀNH CÔNG
+      alert("Đã xóa bài hát thành công!");
+
+    } catch (err) {
+      console.error(err);
+      alert("Xoá bài hát không thành công!");
+    }
   };
 
   const handleToggleActive = async (id) => {
@@ -232,28 +285,28 @@ const ManageSong = () => {
 
 
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Bạn có chắc muốn xóa bài hát này?")) return;
+  // const handleDelete = async (id) => {
+  //   if (!window.confirm("Bạn có chắc muốn xóa bài hát này?")) return;
 
-    try {
-      const res = await fetch(`http://localhost:3000/admin/manage-song/${id}`, {
-        method: "DELETE",
-      });
+  //   try {
+  //     const res = await fetch(`http://localhost:3000/admin/manage-song/${id}`, {
+  //       method: "DELETE",
+  //     });
 
-      if (!res.ok) {
-        alert("Xóa thất bại! Backend trả lỗi.");
-        return;
-      }
+  //     if (!res.ok) {
+  //       alert("Xóa thất bại! Backend trả lỗi.");
+  //       return;
+  //     }
 
-      // Xóa khỏi UI
-      setSongs(prev => prev.filter(s => s.id !== id));
-      alert("Đã xóa bài hát!");
+  //     // Xóa khỏi UI
+  //     setSongs(prev => prev.filter(s => s.id !== id));
+  //     alert("Đã xóa bài hát!");
 
-    } catch (err) {
-      console.error("Delete failed:", err);
-      alert("Không thể kết nối backend, kiểm tra server.");
-    }
-  };
+  //   } catch (err) {
+  //     console.error("Delete failed:", err);
+  //     alert("Không thể kết nối backend, kiểm tra server.");
+  //   }
+  // };
 
   const handleSaveSong = async () => {
     let error = "";
@@ -518,17 +571,31 @@ const ManageSong = () => {
                           Sửa
                       </button>
 
-                      <button onClick={() => handleToggleActive(song.id)}>
-                        {song.active ? "Ẩn" : "Hiện"}
-                      </button>
+                      {/* Chỉ hiển thị nút Hiện/Ẩn khi bài đã APPROVED */}
+                      {song.status === "APPROVED" && (
+                        <button onClick={() => handleToggleActive(song.id)}>
+                          {song.active ? "Ẩn" : "Hiện"}
+                        </button>
+                      )}
 
                       {song.status === "PENDING" && (
                         <button onClick={() => handleApprove(song.id)}>Duyệt</button>
                       )}
 
+                      {/* Hiện nút TỪ CHỐI chỉ khi Pending */}
+                      {song.status === "PENDING" && (
+                        <button
+                          className="Reject"
+                          onClick={() => handleReject(song.id)}
+                        >
+                          Từ chối
+                        </button>
+                      )}
+
+
                       <button
                         className="danger"
-                        onClick={() => handleDelete(song.id)}
+                        onClick={() => handleSoftDelete(song.id)}
                       >
                         Xóa
                       </button>
@@ -539,6 +606,32 @@ const ManageSong = () => {
             ))}
           </tbody>
         </table>
+        
+        {/* PAGINATION */}
+        <div className="song-pagination-clean">
+          <button
+            className="circle-btn"
+            disabled={page === 1}
+            onClick={() => fetchSongs(page - 1)}
+          >
+            ←
+          </button>
+
+          <span className="page-center-text">
+            Trang {page} / {totalPages}
+          </span>
+
+          <button
+            className="circle-btn"
+            disabled={page === totalPages}
+            onClick={() => fetchSongs(page + 1)}
+          >
+            →
+          </button>
+        </div>
+
+
+
       </div>
 
       {/* POPUP THÊM BÀI HÁT */}
@@ -638,7 +731,7 @@ const ManageSong = () => {
                         type="file"
                         accept="image/*"
                         className="spotify-upload-input"
-                        onClick={(e) => e.stopPropagation()}       // ❗ giữ lại onClick
+                        onClick={(e) => e.stopPropagation()}       
                         onChange={(e) => {
                           const file = e.target.files[0];
                           if (file) {

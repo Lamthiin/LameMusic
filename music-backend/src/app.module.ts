@@ -23,6 +23,7 @@ import { AlbumModule } from './album/album.module';
 import { History } from './history/history.entity'; // <-- IMPORT MỚI
 import { HistoryModule } from './history/history.module'; // <-- IMPORT MỚI
 import { AdminModule } from './admin/admin.module';
+import { ManageUserModule } from './admin/manage-user/manage-user.module';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { AdminModule } from './admin/admin.module';
     AlbumModule,
     HistoryModule,
     AdminModule,
+    ManageUserModule, 
   ],
   
   controllers: [AppController],

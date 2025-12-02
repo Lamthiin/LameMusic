@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./AdminManagerUser.css";
 import { FiSearch } from "react-icons/fi";
 
@@ -9,12 +9,7 @@ import PopupViewAdmin from "../../components/admin/PopupViewAdmin";
 import PopupEditAdmin from "../../components/admin/PopupEditAdmin";
 
 const AdminAccountPage = () => {
-
-  const [admins, setAdmins] = useState([
-    { id: 1, name: "Brian", email: "brian@admin.com", role: "Super Admin" },
-    { id: 2, name: "Nam", email: "nam@admin.com", role: "Moderator" },
-  ]);
-
+  const [admins, setAdmins] = useState([]);
   const [searchValue, setSearchValue] = useState("");
 
   const [showAddAdmin, setShowAddAdmin] = useState(false);
@@ -27,13 +22,40 @@ const AdminAccountPage = () => {
 
   const [selectedAdmin, setSelectedAdmin] = useState(null);
 
+  // FETCH ADMIN FROM BACKEND
+  useEffect(() => {
+    fetchAdmins();
+  }, []);
+
+  const fetchAdmins = async () => {
+    try {
+      const res = await fetch("http://localhost:3000/admin/users/admins");
+      const data = await res.json();
+
+      const mapped = data.map((u) => ({
+        id: u.id,
+        name: u.username,
+        email: u.email,
+        role: "Super Admin",          // LUÔN LÀ SUPER ADMIN
+        createdAt: u.created_at?.split("T")[0],
+      }));
+
+      setAdmins(mapped);
+    } catch (err) {
+      console.error("Fetch admins failed:", err);
+    }
+  };
+
   const filteredAdmins = admins.filter((ad) =>
-    (ad.name + ad.email + ad.role).toLowerCase().includes(searchValue.toLowerCase())
+    (ad.name + ad.email + ad.role)
+      .toLowerCase()
+      .includes(searchValue.toLowerCase())
   );
 
   return (
     <div className="admin-user-container">
 
+      {/* HEADER */}
       <div className="admin-user-header">
         <div className="google-search-bar">
           <FiSearch className="google-search-icon" />
@@ -54,6 +76,7 @@ const AdminAccountPage = () => {
         </button>
       </div>
 
+      {/* TABLE */}
       <table className="admin-table">
         <thead>
           <tr>
@@ -74,7 +97,6 @@ const AdminAccountPage = () => {
               <td>{ad.role}</td>
               <td>
                 <div className="admin-actions">
-
                   <button
                     className="admin-btn view"
                     onClick={() => {
@@ -104,7 +126,6 @@ const AdminAccountPage = () => {
                   >
                     Xóa
                   </button>
-
                 </div>
               </td>
             </tr>
@@ -117,7 +138,7 @@ const AdminAccountPage = () => {
         <PopupAddAdmin
           onClose={() => setShowAddAdmin(false)}
           onSubmit={(data) => {
-            setAdmins(prev => [...prev, { id: prev.length + 1, ...data }]);
+            setAdmins((prev) => [...prev, { id: prev.length + 1, ...data }]);
             setShowAddAdmin(false);
             setSuccessMessage("Thêm Admin thành công!");
             setShowSuccess(true);
@@ -139,8 +160,8 @@ const AdminAccountPage = () => {
           admin={selectedAdmin}
           onClose={() => setShowEdit(false)}
           onSubmit={(updated) => {
-            setAdmins(prev =>
-              prev.map(item =>
+            setAdmins((prev) =>
+              prev.map((item) =>
                 item.id === updated.id ? updated : item
               )
             );
@@ -157,7 +178,9 @@ const AdminAccountPage = () => {
           message={`Bạn có chắc muốn xoá admin "${selectedAdmin.name}"?`}
           onCancel={() => setShowDelete(false)}
           onConfirm={() => {
-            setAdmins(prev => prev.filter(item => item.id !== selectedAdmin.id));
+            setAdmins((prev) =>
+              prev.filter((item) => item.id !== selectedAdmin.id)
+            );
             setShowDelete(false);
             setSuccessMessage("Xoá Admin thành công!");
             setShowSuccess(true);
@@ -172,7 +195,6 @@ const AdminAccountPage = () => {
           onClose={() => setShowSuccess(false)}
         />
       )}
-
     </div>
   );
 };

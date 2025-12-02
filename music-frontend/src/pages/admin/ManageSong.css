@@ -616,3 +616,17 @@ textarea::placeholder {
   max-height: unset;      /* bỏ limit chiều cao */
   overflow: visible;      /* không scroll */
 }
+
+/* Container pagination */
+.song-pagination-clean {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 25px;
+
+  margin: 40px 0 60px 0;
+  background: transparent;
+}
+
+/* Nút mũi tên
+

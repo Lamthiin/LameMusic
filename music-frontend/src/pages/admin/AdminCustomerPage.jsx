@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./AdminManagerUser.css";
 import { FiSearch } from "react-icons/fi";
 
@@ -9,17 +9,42 @@ import PopupRoleUser from "../../components/admin/PopupRoleUser";
 import PopupSuccess from "../../components/admin/PopupSuccess";
 import PopupDeleteConfirm from "../../components/admin/PopupDeleteConfirm";
 
-
-const initialUsers = [
-  { id: 1, name: "Nguyễn Văn A", email: "a@gmail.com", birthYear: 2000, gender: "male", createdAt: "2024-01-03", role: "artist" },
-  { id: 2, name: "Trần Thị B", email: "b@gmail.com", birthYear: 1999, gender: "female", createdAt: "2024-01-20", role: "listener" },
-  { id: 3, name: "Brian", email: "brian@admin.com", birthYear: 2003, gender: "male", createdAt: "2024-02-15", role: "listener" },
-];
-
 const AdminCustomerPage = () => {
-  const [users, setUsers] = useState(initialUsers);
-
+  const [users, setUsers] = useState([]);
   const [searchValue, setSearchValue] = useState("");
+
+  useEffect(() => {
+    fetchCustomers();
+  }, []);
+
+  const fetchCustomers = async () => {
+    try {
+      const res = await fetch("http://localhost:3000/admin/users/customers");
+      const data = await res.json();
+      
+      console.log("DATA FROM API:", data);
+
+
+      const mapped = data.map((u) => ({
+        id: u.id,
+        name: u.username ?? "",
+        email: u.email ?? "",
+        birthYear: u.birth_year,
+        gender: u.gender,
+        createdAt: u.created_at?.split("T")[0],
+        role:
+          u.role_id === 2
+            ? "artist"
+            : u.role_id === 3
+            ? "listener"
+            : "admin",
+      }));
+
+      setUsers(mapped);
+    } catch (err) {
+      console.error("Fetch users failed:", err);
+    }
+  };
 
   const [showAdd, setShowAdd] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
@@ -32,15 +57,17 @@ const AdminCustomerPage = () => {
 
   const [selectedUser, setSelectedUser] = useState(null);
 
-  const filteredUsers = users.filter((u) =>
-    u.role !== "admin" &&
-    (u.name + u.email).toLowerCase().includes(searchValue.toLowerCase())
-  );
+  // FIX chính: tránh lỗi whitespace và toLowerCase
+  const filteredUsers = users.filter((u) => {
+    const name = u.name.toLowerCase();
+    const email = u.email.toLowerCase();
+    const keyword = searchValue.toLowerCase();
 
+    return u.role !== "admin" && (name + email).includes(keyword);
+  });
 
   return (
     <div className="admin-user-container">
-
       {/* HEADER */}
       <div className="admin-user-header">
         <div className="google-search-bar">
@@ -68,7 +95,7 @@ const AdminCustomerPage = () => {
             <th>Email</th>
             <th>Năm sinh</th>
             <th>Giới tính</th>
-            <th>Role</th>       {/* THÊM CỘT ROLE */}
+            <th>Role</th>
             <th>Ngày tạo</th>
             <th>Hành động</th>
           </tr>
@@ -82,8 +109,6 @@ const AdminCustomerPage = () => {
               <td>{u.email}</td>
               <td>{u.birthYear}</td>
               <td>{u.gender}</td>
-
-              {/* ROLE BADGE */}
               <td>
                 <span
                   className={`status-badge ${
@@ -97,55 +122,24 @@ const AdminCustomerPage = () => {
                   {u.role}
                 </span>
               </td>
-
               <td>{u.createdAt}</td>
-
               <td>
                 <div className="admin-actions">
-
-                  <button
-                    className="admin-btn view"
-                    onClick={() => { setSelectedUser(u); setShowView(true); }}
-                  >
-                    Xem
-                  </button>
-
-                  <button
-                    className="admin-btn edit"
-                    onClick={() => { setSelectedUser(u); setShowEdit(true); }}
-                  >
-                    Edit
-                  </button>
-
-                  {/* ROLE chỉ hiện nếu là listener */}
+                  <button className="admin-btn view" onClick={() => { setSelectedUser(u); setShowView(true); }}>Xem</button>
+                  <button className="admin-btn edit" onClick={() => { setSelectedUser(u); setShowEdit(true); }}>Edit</button>
                   {u.role === "listener" && (
-                    <button
-                      className="admin-btn role"
-                      onClick={() => { setSelectedUser(u); setShowRole(true); }}
-                    >
-                      Role
-                    </button>
+                    <button className="admin-btn role" onClick={() => { setSelectedUser(u); setShowRole(true); }}>Role</button>
                   )}
-
-
-
-                  <button
-                    className="admin-btn delete"
-                    onClick={() => { setSelectedUser(u); setShowDelete(true); }}
-                  >
-                    Xóa
-                  </button>
-
+                  <button className="admin-btn delete" onClick={() => { setSelectedUser(u); setShowDelete(true); }}>Xóa</button>
                 </div>
               </td>
             </tr>
           ))}
         </tbody>
+
       </table>
 
-
-
-      {/* ADD */}
+      {/* POPUPS */}
       {showAdd && (
         <PopupAddUser
           onClose={() => setShowAdd(false)}
@@ -158,7 +152,6 @@ const AdminCustomerPage = () => {
         />
       )}
 
-      {/* VIEW */}
       {showView && (
         <PopupViewUser
           user={selectedUser}
@@ -166,7 +159,6 @@ const AdminCustomerPage = () => {
         />
       )}
 
-      {/* EDIT */}
       {showEdit && (
         <PopupEditUser
           user={selectedUser}
@@ -180,25 +172,23 @@ const AdminCustomerPage = () => {
         />
       )}
 
-      {/* CHANGE ROLE */}
       {showRole && (
         <PopupRoleUser
           user={selectedUser}
           onClose={() => setShowRole(false)}
           onSubmit={(newRole) => {
-            setUsers(users.map((u) =>
-              u.id === selectedUser.id ? { ...u, role: newRole } : u
-            ));
-            setSuccessMessage("Nâng quyền thành công!");
+            setUsers(
+              users.map((u) =>
+                u.id === selectedUser.id ? { ...u, role: newRole } : u
+              )
+            );
             setShowSuccess(true);
+            setSuccessMessage("Nâng quyền thành công!");
             setShowRole(false);
           }}
         />
       )}
 
-
-
-      {/* DELETE USER */}
       {showDelete && (
         <PopupDeleteConfirm
           title="Xoá Người Dùng"
@@ -213,7 +203,6 @@ const AdminCustomerPage = () => {
         />
       )}
 
-      {/* SUCCESS */}
       {showSuccess && (
         <PopupSuccess
           message={successMessage}
