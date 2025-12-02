@@ -3,6 +3,9 @@ import React, { useState, useEffect, useRef } from "react";
 import "./ManageSong.css";
 import { FiSearch } from "react-icons/fi";
 import { BsThreeDotsVertical } from "react-icons/bs";
+import ArtistDropdown from "../../components/admin/ArtistDropdown";
+import AlbumDropdown from "../../components/admin/AlbumDropdown";
+import GenreDropdown from "../../components/admin/GenreDropdown";
 
 // Format thời lượng 420 -> 07:00
 const formatDuration = (seconds) => {
@@ -26,13 +29,15 @@ const ManageSong = () => {
           albumName: s.album?.title ?? "",
           duration: s.duration,
           playCount: s.play_count,
-          genre: s.genre,
+          genre: s.genre ?? "",          // ⭐ LẤY ĐÚNG DỮ LIỆU
+          genreId: null,                 // ⭐ Category đã bỏ
           coverUrl: s.image_url,
           audioUrl: s.file_url,
           status: s.status,
           active: s.active,
         }))
       );
+
     } catch (err) {
       console.error("Fetch songs failed:", err);
     }
@@ -65,17 +70,52 @@ const ManageSong = () => {
   const [newTitle, setNewTitle] = useState("");
   const [newArtist, setNewArtist] = useState("");
   const [newAlbum, setNewAlbum] = useState("");
-  const [newGenre, setNewGenre] = useState("");
+  const [newCategory, setNewCategory] = useState("");
   const [newDuration, setNewDuration] = useState("");
   const [editTitle, setEditTitle] = useState("");
   const [editArtist, setEditArtist] = useState("");
   const [editAlbum, setEditAlbum] = useState("");
-  const [editGenre, setEditGenre] = useState("");
   const [editDuration, setEditDuration] = useState("");
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
   const [errorMessage, setErrorMessage] = useState("");
   const [showErrorPopup, setShowErrorPopup] = useState(false);
+  const [albums, setAlbums] = useState([]);
+  const [genres, setGenres] = useState([]);
+  const [artists, setArtists] = useState([]);
+  const [selectedEditArtist, setSelectedEditArtist] = useState(null);
+  const [selectedEditAlbum, setSelectedEditAlbum] = useState(null);
+  const [editCategory, setEditCategory] = useState("");
+  const [selectedEditCategory, setSelectedEditCategory] = useState(null);
+
+
+
+
+  useEffect(() => {
+    // Lấy nghệ sĩ đã được duyệt
+    fetch("http://localhost:3000/admin/artists/active")
+      .then(res => res.json())
+      .then(setArtists);
+
+    // Lấy album
+    fetch("http://localhost:3000/admin/albums")
+    .then(res => res.json())
+    .then(data =>
+      setAlbums(
+        data.map(a => ({
+          ...a,
+          title: a.name // nếu FE muốn tiếp tục dùng title
+        }))
+      )
+    );
+
+
+    // Lấy thể loại
+    fetch("http://localhost:3000/admin/genres")
+      .then(res => res.json())
+      .then(setGenres);
+  }, []);
+
 
 
   // Click ra ngoài thì đóng menu
@@ -132,7 +172,7 @@ const ManageSong = () => {
     formData.append("title", editTitle);
     formData.append("artist", editArtist);
     formData.append("album", editAlbum ?? "");
-    formData.append("genre", editGenre);
+    formData.append("category", editCategory);
     formData.append("duration", editDuration);
 
     if (editCoverFile) {
@@ -209,12 +249,12 @@ const ManageSong = () => {
   const handleSaveSong = async () => {
     let error = "";
 
-    // ⚠️ KIỂM TRA NẾU CHƯA NHẬP BẤT CỨ GÌ
+    // ⚠️ KIỂM TRA NẾU CHƯA NHẬP GÌ
     const allEmpty =
       !newTitle.trim() &&
-      !newArtist.trim() &&
-      !newAlbum.trim() &&
-      !newGenre.trim() &&
+      !newArtist &&
+      !newAlbum &&
+      !newGenre &&
       !coverFile &&
       !audioFile &&
       (!newDuration || newDuration <= 0);
@@ -225,9 +265,8 @@ const ManageSong = () => {
 
     // VALIDATION CHI TIẾT
     else if (!newTitle.trim()) error = "Tiêu đề bài hát không được để trống.";
-    else if (!newArtist.trim()) error = "Tên nghệ sĩ không được để trống.";
-
-    else if (!newGenre.trim()) error = "Thể loại bài hát không được để trống.";
+    else if (!newArtist) error = "Bạn chưa chọn nghệ sĩ.";
+    else if (!newCategory) error = "Bạn chưa chọn thể loại.";
     else if (!coverFile) error = "Bạn chưa chọn ảnh bìa.";
     else if (!audioFile) error = "Bạn chưa chọn file nhạc.";
     else if (!newDuration || newDuration <= 0)
@@ -240,20 +279,22 @@ const ManageSong = () => {
       return;
     }
 
-    // 🔥 TẠO FORM DATA ĐỂ GỬI LÊN BACKEND
+    // 🔥 TẠO FORM DATA GỬI BACKEND
     const formData = new FormData();
     formData.append("title", newTitle);
-    formData.append("artist", newArtist);
-    if (newAlbum && newAlbum.trim() !== "") {
-      formData.append("album", newAlbum);
+    formData.append("artist", newArtist);    // ID nghệ sĩ (number)
+    formData.append("category", newCategory); // ID thể loại
+    formData.append("duration", newDuration);
+
+    // Album có thể không chọn
+    if (newAlbum) {
+      formData.append("album", newAlbum);    // ID album
     } else {
-      formData.append("album", ""); // hoặc không append, backend sẽ hiểu album = null
+      formData.append("album", "");
     }
 
-    formData.append("genre", newGenre);
-    formData.append("duration", newDuration);
-    formData.append("imageFile", coverFile);
-    formData.append("audioFile", audioFile);
+    formData.append("imageFile", coverFile); // ảnh
+    formData.append("audioFile", audioFile); // nhạc
 
     try {
       const res = await fetch("http://localhost:3000/admin/manage-song/upload", {
@@ -277,6 +318,7 @@ const ManageSong = () => {
   };
 
 
+
   const resetAddPopup = () => {
     setCoverFile(null);
     setPreviewCover(null);
@@ -288,7 +330,7 @@ const ManageSong = () => {
     setNewTitle("");
     setNewArtist("");
     setNewAlbum("");
-    setNewGenre("");
+    setNewCategory("");
     setNewDuration("");
   };
 
@@ -302,7 +344,7 @@ const ManageSong = () => {
     setEditTitle("");
     setEditArtist("");
     setEditAlbum("");
-    setEditGenre("");
+    setEditCategory("");   // ✔ đúng state
     setEditDuration("");
   };
 
@@ -405,25 +447,33 @@ const ManageSong = () => {
                     <button onClick={() => {
                         setShowEditPopup(song);
 
-                        // Gán dữ liệu vào state để hiển thị trong input
                         setEditTitle(song.title);
-                        setEditArtist(song.artistName);
-                        setEditAlbum(song.albumName);
-                        setEditGenre(song.genre);
                         setEditDuration(song.duration);
 
-                        // Ảnh cũ
+                        // Nghệ sĩ object
+                        const artistObj = artists.find(a => a.stage_name === song.artistName);
+                        setSelectedEditArtist(artistObj || null);
+                        setEditArtist(artistObj?.id || "");
+
+                        // Album object
+                        const albumObj = albums.find(a => a.title === song.albumName);
+                        setSelectedEditAlbum(albumObj || null);
+                        setEditAlbum(albumObj?.id || "");
+
+                        // Thể loại object
+                        const categoryObj = genres.find(g => g.id == song.genreId);
+                        setSelectedEditCategory(categoryObj || null);
+                        setEditCategory(categoryObj?.id || "");
+
+                        // Ảnh + nhạc
                         setEditCoverPreview(song.coverUrl);
                         setEditCoverFile(null);
 
-                        // Nhạc
                         setEditAudioFile(null);
                         setEditAudioName("");
                     }}>
-                      Sửa
+                        Sửa
                     </button>
-
-
 
                     <button onClick={() => handleToggleActive(song.id)}>
                       {song.active ? "Ẩn" : "Hiện"}
@@ -451,12 +501,13 @@ const ManageSong = () => {
       {showAddPopup && (
         <div
           className="popup-overlay"
-          onMouseDown={(e) => {
+          onClick={(e) => {
             if (e.target === e.currentTarget) {
               resetAddPopup();
               setShowAddPopup(false);
             }
           }}
+
         >
           <div className="popup-card" onClick={(e) => e.stopPropagation()}>
             <h3 className="popup-title">Thêm bài hát mới</h3>
@@ -482,37 +533,31 @@ const ManageSong = () => {
                 {/* NGHỆ SĨ */}
                 <div className="popup-group">
                   <label>Nghệ sĩ</label>
-                  <input
-                    type="text"
-                    placeholder="Nhập tên nghệ sĩ..."
-                    value={newArtist}
-                    onChange={(e) => setNewArtist(e.target.value)}
+                  <ArtistDropdown
+                    artists={artists}
+                    value={artists.find(a => a.id === Number(newArtist))}
+                    onChange={(artist) => setNewArtist(artist.id)}
                   />
                 </div>
+
+
 
                <div className="popup-group">
                   <label>Ảnh bìa</label>
 
-                  {/* Nếu đã có ảnh → chỉ hiện preview, không click để upload */}
                   {previewCover ? (
                     <div
                       className="spotify-preview-wrapper"
-                      onMouseDown={(e) => e.stopPropagation()} // CHẶN CLICK & MOUSEDOWN
+                      onClick={(e) => e.stopPropagation()}   // ✅ Sửa từ onMouseDown → onClick
                     >
                       <img src={previewCover} className="spotify-upload-preview" />
 
                       <button
                         className="spotify-remove-btn"
-                        onMouseDown={(e) => {
-                          e.stopPropagation(); // NGĂN MỞ UPLOAD
-                          e.preventDefault();
-                        }}
-                        onClick={(e) => {
-                          e.stopPropagation(); // NGĂN CLICK NỔI LÊN VÙNG UPLOAD
+                        onClick={(e) => {                     // ❗ chỉ dùng onClick
+                          e.stopPropagation();
                           setCoverFile(null);
                           setPreviewCover(null);
-
-                          // reset input để chọn lại cùng file
                           const input = document.getElementById("addcoverUpload");
                           if (input) input.value = "";
                         }}
@@ -521,14 +566,12 @@ const ManageSong = () => {
                       </button>
                     </div>
                   ) : (
-                    /* Khi chưa có ảnh → vùng upload hoạt động */
                     <div
                       className="spotify-upload-area"
-                      onMouseDown={(e) => e.stopPropagation()} // CHẶN BUBBLE SỚM
-                      onClick={() => {
+                      onClick={() => {                         // ❌ Bỏ onMouseDown
                         const input = document.getElementById("addcoverUpload");
                         if (input) {
-                          input.value = ""; // reset value để upload cùng file
+                          input.value = "";
                           input.click();
                         }
                       }}
@@ -551,15 +594,14 @@ const ManageSong = () => {
                         type="file"
                         accept="image/*"
                         className="spotify-upload-input"
-                        onMouseDown={(e) => e.stopPropagation()}  // NGĂN CLICK BUBBLE
-                        onClick={(e) => e.stopPropagation()}       // GIỮ input không click xuyên
+                        onClick={(e) => e.stopPropagation()}       // ❗ giữ lại onClick
                         onChange={(e) => {
                           const file = e.target.files[0];
                           if (file) {
                             setCoverFile(file);
                             setPreviewCover(URL.createObjectURL(file));
                           }
-                          e.target.value = ""; // reset input
+                          e.target.value = "";
                         }}
                       />
                     </div>
@@ -583,68 +625,68 @@ const ManageSong = () => {
                   CỘT PHẢI
               ====================== */}
               <div className="popup-col">
-
-                {/* ALBUM */}
                 <div className="popup-group">
                   <label>Album</label>
-                  <input
-                    type="text"
-                    placeholder="Nhập tên album..."
-                    value={newAlbum}
-                    onChange={(e) => setNewAlbum(e.target.value)}
+                  <AlbumDropdown
+                    albums={albums}
+                    value={albums.find(a => a.id === Number(newAlbum))}
+                    onChange={(album) => setNewAlbum(album.id)}
                   />
                 </div>
 
                 {/* THỂ LOẠI */}
                 <div className="popup-group">
                   <label>Thể loại</label>
-                  <input
-                    type="text"
-                    placeholder="Ví dụ: Pop, R&B..."
-                    value={newGenre}
-                    onChange={(e) => setNewGenre(e.target.value)}
+                  <GenreDropdown
+                    genres={genres}
+                    value={genres.find(g => g.id === Number(newCategory))}
+                    onChange={(genre) => setNewCategory(genre.id)}
                   />
+
                 </div>
 
+
                 {/* FILE NHẠC */}
-                <div className="audio-upload-group">
-                  <label>File nhạc</label>
+                <div className="popup-group">
+                  <div className="audio-upload-group">
+                    <label>File nhạc</label>
 
-                  <div
-                    className="audio-upload-area"
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      const file = e.dataTransfer.files[0];
-                      if (file) {
-                        setAudioFile(file);
-                        setAudioName(file.name);
-                      }
-                    }}
-                  >
-
-                    {audioName ? (
-                      <p className="audio-file-name">{audioName}</p>
-                    ) : (
-                      <p className="audio-upload-text">Kéo thả hoặc nhấn để chọn file nhạc</p>
-                    )}
-
-                    <input
-                      id="audioUpload"
-                      type="file"
-                      accept="audio/*"
-                      className="audio-upload-input"
-                      onChange={(e) => {
-                        const file = e.target.files[0];
+                    <div
+                      className="audio-upload-area"
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        const file = e.dataTransfer.files[0];
                         if (file) {
                           setAudioFile(file);
                           setAudioName(file.name);
                         }
                       }}
-                    />
+
+                    >
+
+                      {audioName ? (
+                        <p className="audio-file-name">{audioName}</p>
+                      ) : (
+                        <p className="audio-upload-text">Kéo thả hoặc nhấn để chọn file nhạc</p>
+                      )}
+
+                      <input
+                        id="audioUpload"
+                        type="file"
+                        accept="audio/*"
+                        className="audio-upload-input"
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            setAudioFile(file);
+                            setAudioName(file.name);
+                          }
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
-
 
               </div>
             </div>
@@ -819,14 +861,15 @@ const ManageSong = () => {
     {showEditPopup && (
     <div
       className="popup-overlay"
-      onMouseDown={(e) => {
+      onClick={(e) => {
         if (e.target === e.currentTarget) {
           resetEditPopup();
           setShowEditPopup(null);
         }
       }}
     >
-      <div className="popup-card" onMouseDown={(e) => e.stopPropagation()}>
+      <div className="popup-card" onClick={(e) => e.stopPropagation()}>
+
         <h3 className="popup-title">Chỉnh sửa bài hát</h3>
 
         <div className="popup-grid">
@@ -844,13 +887,17 @@ const ManageSong = () => {
             </div>
 
             <div className="popup-group">
-              <label>Nghệ sĩ</label>
-              <input
-                type="text"
-                value={editArtist}
-                onChange={(e) => setEditArtist(e.target.value)}
-              />
+                <label>Nghệ sĩ</label>
+                <ArtistDropdown
+                    artists={artists}
+                    value={selectedEditArtist}
+                    onChange={(artist) => {
+                        setSelectedEditArtist(artist);
+                        setEditArtist(artist.id);
+                    }}
+                />
             </div>
+
 
             {/* ẢNH BÌA */}
             <div className="popup-group">
@@ -936,20 +983,27 @@ const ManageSong = () => {
 
             <div className="popup-group">
               <label>Album</label>
-              <input
-                type="text"
-                value={editAlbum}
-                onChange={(e) => setEditAlbum(e.target.value)}
+              <AlbumDropdown
+                  albums={albums}
+                  value={selectedEditAlbum}
+                  onChange={(album) => {
+                      setSelectedEditAlbum(album);
+                      setEditAlbum(album.id);
+                  }}
               />
             </div>
 
             <div className="popup-group">
               <label>Thể loại</label>
-              <input
-                type="text"
-                value={editGenre}
-                onChange={(e) => setEditGenre(e.target.value)}
+              <GenreDropdown
+                genres={genres}
+                value={selectedEditCategory}
+                onChange={(genre) => {
+                    setSelectedEditCategory(genre);
+                    setEditCategory(genre.id);
+                }}
               />
+
             </div>
 
             <div className="popup-group">

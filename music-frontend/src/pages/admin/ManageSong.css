@@ -477,3 +477,45 @@
   text-decoration: underline;
 }
 
+
+.spotify-select {
+  background: #111 !important;
+  color: #f1f1f1 !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 15px;
+  appearance: none; /* ẩn style mặc định của browser */
+}
+
+.spotify-select option {
+  background: #1a1a1a;
+  color: #f1f1f1;
+}
+
+/* Bảo đảm mỗi row thẳng hàng */
+.popup-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 26px;
+  row-gap: 32px !important;   /* Tăng gap để các hàng đều hơn */
+  align-items: start;
+}
+
+/* Tất cả label có margin giống nhau */
+.popup-group label {
+  margin-bottom: 6px !important;
+  display: block;
+}
+
+/* Fix các dropdown có margin thừa */
+.dropdown-container {
+  margin: 0 !important;
+}
+
+/* Fix select thể loại cho cao đúng height */
+.spotify-select {
+  height: 44px !important;
+  padding: 10px 14px !important;
+  box-sizing: border-box;
+}

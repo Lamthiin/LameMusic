@@ -17,8 +17,9 @@ export class UpdateSongDto {
   album?: string;    // title album (có thể rỗng hoặc null)
 
   @IsOptional()
-  @IsString()
-  genre?: string;
+  @IsNumberString()
+  category?: string;   // FE gửi categoryId
+
 
   @IsOptional()
   @IsNumberString()

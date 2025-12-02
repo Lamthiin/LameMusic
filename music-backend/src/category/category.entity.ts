@@ -1,6 +1,5 @@
 // music-backend/src/category/category.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } from 'typeorm';
-import { Song } from '../song/song.entity'; // <-- (2) IMPORT SONG ENTITY
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
 
 @Entity('Category')
 export class Category {
@@ -27,4 +26,7 @@ export class Category {
   })
   image_url: string;
 
+  // ❌ XÓA QUAN HỆ VỚI SONG
+  // @OneToMany(() => Song, (song) => song.category)
+  // songs: Song[];
 }

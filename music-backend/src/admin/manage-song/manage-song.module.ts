@@ -13,11 +13,13 @@ import { SharedModule } from '../../shared/shared.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { Song } from '../../song/song.entity';
+import { CategoryModule } from '../../category/category.module';
 
 @Module({
   imports: [
     SharedModule,
     TypeOrmModule.forFeature([Song, Artist, Album]),
+    CategoryModule,
 
     // Upload file vào RAM để gửi lên R2
     MulterModule.register({

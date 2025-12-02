@@ -14,7 +14,6 @@ import { Album } from '../album/album.entity';
 import { Artist } from '../artist/artist.entity';
 import { Lyrics } from '../lyrics/lyrics.entity';
 import { UserLikedSongs } from '../like/user-liked-songs.entity'; // <-- THÊM DÒNG NÀY
-import { Category } from '../category/category.entity';
 import { History } from '../history/history.entity'; // <-- (1) IMPORT HISTORY
 
 @Entity('Song') // Ánh xạ với bảng 'Song'
@@ -46,6 +45,7 @@ export class Song {
   // === THÊM CỘT MỚI ===
   @Column({ length: 50, nullable: true })
   genre: string;
+  
 
   @Column({ length: 255, nullable: true, name: 'image_url' })
   image_url?: string; // <-- sửa null thành undefined / optional
@@ -77,6 +77,8 @@ export class Song {
   @ManyToOne(() => Artist, (artist) => artist.songs, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'artist_id' })
   artist: Artist;
+
+  // === THỂ LOẠI CATEGORY ===
 
   // Quan hệ: Một Song có một Lyrics (1-1)
   @OneToOne(() => Lyrics, (lyrics) => lyrics.song)

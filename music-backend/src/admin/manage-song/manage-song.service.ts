@@ -12,6 +12,8 @@ import { Artist } from '../../artist/artist.entity';
 import { Album } from '../../album/album.entity';
 import { R2Service } from '../../shared/r2.service';
 import { UpdateSongDto } from './dto/update-song.dto';
+import { Category } from '../../category/category.entity';
+
 
 @Injectable()
 export class ManageSongService {
@@ -24,6 +26,9 @@ export class ManageSongService {
 
     @InjectRepository(Album)
     private readonly albumRepo: Repository<Album>,
+
+    @InjectRepository(Category)
+    private readonly categoryRepo: Repository<Category>,
 
     private readonly r2: R2Service,
   ) {}
@@ -45,35 +50,62 @@ export class ManageSongService {
     // =============================
     // 🟢 Xử lý nghệ sĩ
     // =============================
-    let artist = await this.artistRepo.findOne({
-      where: { stage_name: body.artist },
+    // Artist ID từ FE
+    const artistId = Number(body.artist);
+
+    if (!artistId) {
+      throw new BadRequestException("Artist ID không hợp lệ");
+    }
+
+    // Tìm artist theo ID
+    const artist = await this.artistRepo.findOne({
+      where: { id: artistId },
     });
 
     if (!artist) {
-      artist = this.artistRepo.create({
-        stage_name: body.artist,
-      });
-      await this.artistRepo.save(artist);
+      throw new NotFoundException("Artist không tồn tại");
     }
+
 
     // =============================
     // 🟢 Xử lý album (optional)
     // =============================
     let album: Album | null = null;
 
-    if (body.album && body.album.trim() !== '') {
+    if (body.album && body.album !== "") {
+      const albumId = Number(body.album);
+
+      if (isNaN(albumId)) {
+        throw new BadRequestException("Album ID không hợp lệ");
+      }
+
       album = await this.albumRepo.findOne({
-        where: { title: body.album },
+        where: { id: albumId },
       });
 
       if (!album) {
-        album = this.albumRepo.create({
-          title: body.album,
-          artist: artist,
-        });
-        await this.albumRepo.save(album);
+        throw new NotFoundException("Album không tồn tại");
       }
     }
+
+    // =============================
+    // 🟢 Xử lý thể loại Category
+    // =============================
+    const categoryId = Number(body.category);
+
+    if (!categoryId || isNaN(categoryId)) {
+      throw new BadRequestException("Category ID không hợp lệ");
+    }
+
+    const category = await this.categoryRepo.findOne({
+      where: { id: categoryId },
+    });
+
+    if (!category) {
+      throw new NotFoundException("Thể loại không tồn tại");
+    }
+
+
 
     // =============================
     // 🟢 Upload audio lên R2
@@ -100,7 +132,6 @@ export class ManageSongService {
     // =============================
     const song = this.songRepo.create({
       title: body.title,
-      genre: body.genre,
       duration: Number(body.duration),
       file_url: audioUploaded.url,
       image_url: imageUploaded.url,
@@ -108,7 +139,9 @@ export class ManageSongService {
       active: true,
       artist,
       album: album ?? null,
+      genre: category.name, // ⭐ LƯU TÊN THỂ LOẠI VÀO CỘT genre
     });
+
 
     return await this.songRepo.save(song);
   }
@@ -135,6 +168,7 @@ export class ManageSongService {
         'artist.stage_name',
         'album.id',
         'album.title',
+
       ])
       .orderBy('song.id', 'DESC')
       .getMany();
@@ -167,7 +201,23 @@ export class ManageSongService {
     if (!song) throw new NotFoundException('Không tìm thấy bài hát');
 
     if (body.title) song.title = body.title.trim();
-    if (body.genre) song.genre = body.genre.trim();
+    // =============================
+    // 🟢 Update thể loại (category)
+    // =============================
+    if (body.category) {
+      const categoryId = Number(body.category);
+
+      const category = await this.categoryRepo.findOne({
+        where: { id: categoryId },
+      });
+
+      if (!category) {
+        throw new NotFoundException("Thể loại không tồn tại");
+      }
+
+      song.genre = category.name;   // ✅ GÁN TÊN CATEGORY VÀO CỘT genre
+    }
+
     if (body.duration) song.duration = Number(body.duration);
 
     // nghệ sĩ
