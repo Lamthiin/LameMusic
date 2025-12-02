@@ -255,20 +255,6 @@ const ManageSong = () => {
     }
   };
 
-
-  // const handleSaveSong = () => {
-  //   console.log("Tiêu đề:", newTitle);
-  //   console.log("Nghệ sĩ:", newArtist);
-  //   console.log("Album:", newAlbum);
-  //   console.log("Thể loại:", newGenre);
-  //   console.log("Thời lượng:", newDuration);
-
-  //   console.log("File ảnh:", coverFile);
-  //   console.log("File nhạc:", audioFile);
-
-  //   alert("Đã nhận dữ liệu :)");
-  // };
-
   const handleSaveSong = async () => {
     let error = "";
 
