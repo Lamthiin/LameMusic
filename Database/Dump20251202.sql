@@ -210,6 +210,40 @@ INSERT INTO `lyrics` VALUES (2,7,'Đây là lời bài hát test cho bài ID 6.N
 UNLOCK TABLES;
 
 --
+-- Table structure for table `notification`
+--
+
+DROP TABLE IF EXISTS `notification`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `notification` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `artist_id` int DEFAULT NULL,
+  `message` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `reference_id` int DEFAULT NULL,
+  `is_read` tinyint(1) DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  KEY `artist_id` (`artist_id`),
+  CONSTRAINT `notification_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `notification_ibfk_2` FOREIGN KEY (`artist_id`) REFERENCES `artist` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `notification`
+--
+
+LOCK TABLES `notification` WRITE;
+/*!40000 ALTER TABLE `notification` DISABLE KEYS */;
+INSERT INTO `notification` VALUES (1,28,NULL,'Tui nè','ARTIST_PROFILE_APPROVED',NULL,1,'2025-12-03 23:12:48'),(2,28,NULL,'Bài hát mới!','SONG_APPROVED',NULL,1,'2025-12-03 23:35:55');
+/*!40000 ALTER TABLE `notification` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `otp`
 --
 
@@ -441,7 +475,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (1,'admin_sys','admin@musicdb.com','$2a$10$wT8QY8Nl.f2o.2k.8mQ4y.E/gQ8M0L/eK0V0T0R0S0T0E',1,'male',2004,1,'2025-11-02 05:13:52','2025-12-04 01:06:29'),(2,'nguyenvana','van.a@listener.com','$2a$10$wT8QY8Nl.f2o.2k.8mQ4y.E/gQ8M0L/eK0V0T0R0S0T0E',2,'male',1999,1,'2025-11-02 05:13:52','2025-11-02 05:13:52'),(3,'tranthib','thi.b@listener.com','$2a$10$wT8QY8Nl.f2o.2k.8mQ4y.E/gQ8M0L/eK0V0T0R0S0T0E',2,'female',2002,1,'2025-11-02 05:13:52','2025-11-02 05:13:52'),(4,'listener_hieu','hieu@music.com','$2a$10$wT8QY8Nl.f2o.2k.8mQ4y.E/gQ8M0L/eK0V0T0R0S0T0E',3,'male',1995,1,'2025-11-02 05:13:52','2025-11-02 06:08:41'),(5,'artist_hoang','hoang@artist.com','$2a$10$wT8QY8Nl.f2o.2k.8mQ4y.E/gQ8M0L/eK0V0T0R0S0T0E',3,'male',1990,0,'2025-11-02 05:13:52','2025-11-08 02:31:23'),(6,'artist_mai','mai@artist.com','$2a$10$wT8QY8Nl.f2o.2k.8mQ4y.E/gQ8M0L/eK0V0T0R0S0T0E',3,'female',1998,1,'2025-11-02 05:13:52','2025-11-02 05:13:52'),(7,'artist_jazzman','jazzman@artist.com','$2a$10$wT8QY8Nl.f2o.2k.8mQ4y.E/gQ8M0L/eK0V0T0R0S0T0E',3,'male',1980,1,'2025-11-02 05:13:52','2025-11-02 05:13:52'),(10,'a','hien8@gmail.com','$2b$10$7kHdw.oR35vaZ69k9RKRe.w2xiQp8loYNwkJmyJI9eMGPQMf1Aqqu',2,'prefer not to say',2009,0,'2025-11-02 06:41:19','2025-12-04 04:16:43'),(11,'hi','a@gmail.com','$2b$10$RoKJpReqm4rtY9vgUX/m2u7orvVIC/xp7FdQeTOT41FLaqgaOZJs.',2,'female',2008,2,'2025-11-02 19:00:36','2025-11-04 07:46:20'),(12,'hii','hi@gmail.com','$2b$10$eG7Ul.n0fAGnn1izstzQd.7ct1l3R93aRuQCKSTCfzlkGGjWkND6a',2,'male',2009,0,'2025-11-02 19:15:36','2025-11-02 19:25:19'),(14,'1','g@gmail.com','$2b$10$WiKn66vC.1Alqzae/k.mxewh6gyoWyW.3wWep5JIqanHPkOtXWmAu',2,'prefer not to say',2009,1,'2025-11-02 20:22:33','2025-11-03 00:18:56'),(28,'a','ayame004@gmail.com','$2b$10$4LFKFqoQ5WOLBZz.oiHEoOqgD6a4Le1nvt2TvJViT.4HS7Dtxvage',3,'female',2009,1,'2025-11-04 08:18:16','2025-12-03 16:13:41'),(29,'za','ayame00a4@gmail.com','$2b$10$wp4h8hVSMzKvgBa5cuUzZOmSQ4.oGzmMI/8FD.8uaAgbIOe//lwzq',3,'prefer not to say',2012,2,'2025-11-04 08:21:12','2025-11-05 05:17:59'),(30,'A','ayame00ZZ4@gmail.com','$2b$10$xstK/w47IU4hNabYTkk98.8gJ7bkXCk8XH/w42tfkcS106KE9y8hS',2,'prefer not to say',2009,2,'2025-11-05 17:38:08','2025-11-05 17:38:08'),(32,'a','ayame004zzz@gmail.com','$2b$10$Yrll29bq/steLmCvdIBbhOZWrHGF6.mgicfnqUnA.en8eAnO6qA0.',2,'male',2010,2,'2025-11-08 02:20:51','2025-11-08 02:20:51'),(33,'hiền','thanhhien09022004@gmail.com','$2b$10$q8b.xgnOsqKo.JiZ4BQ.3.YnYzxD.GWjZut.uCHwTb9F3c88srYO2',1,'female',2012,1,'2025-11-10 02:36:17','2025-11-10 02:44:50'),(34,'Brian','dotanhung0505@gmail.com','$2b$10$y91wzTLoPbMa1UvINBqp.OGrYSBYQusRn0GOiXI6CEe/T74/PwKHq',1,'male',2004,1,'2025-11-25 18:04:18','2025-11-25 18:05:55');
+INSERT INTO `user` VALUES (1,'admin_sys','admin@musicdb.com','$2a$10$wT8QY8Nl.f2o.2k.8mQ4y.E/gQ8M0L/eK0V0T0R0S0T0E',1,'male',2004,1,'2025-11-02 05:13:52','2025-12-04 01:06:29'),(2,'nguyenvana','van.a@listener.com','$2a$10$wT8QY8Nl.f2o.2k.8mQ4y.E/gQ8M0L/eK0V0T0R0S0T0E',2,'male',1999,1,'2025-11-02 05:13:52','2025-11-02 05:13:52'),(3,'tranthib','thi.b@listener.com','$2a$10$wT8QY8Nl.f2o.2k.8mQ4y.E/gQ8M0L/eK0V0T0R0S0T0E',2,'female',2002,1,'2025-11-02 05:13:52','2025-11-02 05:13:52'),(4,'listener_hieu','hieu@music.com','$2a$10$wT8QY8Nl.f2o.2k.8mQ4y.E/gQ8M0L/eK0V0T0R0S0T0E',3,'male',1995,1,'2025-11-02 05:13:52','2025-11-02 06:08:41'),(5,'artist_hoang','hoang@artist.com','$2a$10$wT8QY8Nl.f2o.2k.8mQ4y.E/gQ8M0L/eK0V0T0R0S0T0E',3,'male',1990,0,'2025-11-02 05:13:52','2025-11-08 02:31:23'),(6,'artist_mai','mai@artist.com','$2a$10$wT8QY8Nl.f2o.2k.8mQ4y.E/gQ8M0L/eK0V0T0R0S0T0E',3,'female',1998,1,'2025-11-02 05:13:52','2025-11-02 05:13:52'),(7,'artist_jazzman','jazzman@artist.com','$2a$10$wT8QY8Nl.f2o.2k.8mQ4y.E/gQ8M0L/eK0V0T0R0S0T0E',3,'male',1980,1,'2025-11-02 05:13:52','2025-11-02 05:13:52'),(10,'a','hien8@gmail.com','$2b$10$7kHdw.oR35vaZ69k9RKRe.w2xiQp8loYNwkJmyJI9eMGPQMf1Aqqu',2,'prefer not to say',2009,1,'2025-11-02 06:41:19','2025-12-04 05:46:29'),(11,'hi','a@gmail.com','$2b$10$RoKJpReqm4rtY9vgUX/m2u7orvVIC/xp7FdQeTOT41FLaqgaOZJs.',2,'female',2008,2,'2025-11-02 19:00:36','2025-11-04 07:46:20'),(12,'hii','hi@gmail.com','$2b$10$eG7Ul.n0fAGnn1izstzQd.7ct1l3R93aRuQCKSTCfzlkGGjWkND6a',2,'male',2009,0,'2025-11-02 19:15:36','2025-11-02 19:25:19'),(14,'1','g@gmail.com','$2b$10$WiKn66vC.1Alqzae/k.mxewh6gyoWyW.3wWep5JIqanHPkOtXWmAu',2,'prefer not to say',2009,1,'2025-11-02 20:22:33','2025-11-03 00:18:56'),(28,'a','ayame004@gmail.com','$2b$10$4LFKFqoQ5WOLBZz.oiHEoOqgD6a4Le1nvt2TvJViT.4HS7Dtxvage',3,'female',2009,1,'2025-11-04 08:18:16','2025-12-03 16:13:41'),(29,'za','ayame00a4@gmail.com','$2b$10$wp4h8hVSMzKvgBa5cuUzZOmSQ4.oGzmMI/8FD.8uaAgbIOe//lwzq',3,'prefer not to say',2012,2,'2025-11-04 08:21:12','2025-11-05 05:17:59'),(30,'A','ayame00ZZ4@gmail.com','$2b$10$xstK/w47IU4hNabYTkk98.8gJ7bkXCk8XH/w42tfkcS106KE9y8hS',2,'prefer not to say',2009,2,'2025-11-05 17:38:08','2025-11-05 17:38:08'),(32,'a','ayame004zzz@gmail.com','$2b$10$Yrll29bq/steLmCvdIBbhOZWrHGF6.mgicfnqUnA.en8eAnO6qA0.',2,'male',2010,2,'2025-11-08 02:20:51','2025-11-08 02:20:51'),(33,'hiền','thanhhien09022004@gmail.com','$2b$10$q8b.xgnOsqKo.JiZ4BQ.3.YnYzxD.GWjZut.uCHwTb9F3c88srYO2',1,'female',2012,1,'2025-11-10 02:36:17','2025-11-10 02:44:50'),(34,'Brian','dotanhung0505@gmail.com','$2b$10$y91wzTLoPbMa1UvINBqp.OGrYSBYQusRn0GOiXI6CEe/T74/PwKHq',1,'male',2004,1,'2025-11-25 18:04:18','2025-11-25 18:05:55');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -490,4 +524,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-12-04  5:13:05
+-- Dump completed on 2025-12-04  6:54:21
