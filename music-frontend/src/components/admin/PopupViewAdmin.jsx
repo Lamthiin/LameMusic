@@ -11,12 +11,19 @@ export default function PopupViewAdmin({ admin, onClose }) {
 
         <div className="view-info-group">
           <div className="view-label">Tên:</div>
-          <div className="view-value">{admin.name}</div>
+          <div className="view-value">{admin.username}</div>
         </div>
 
         <div className="view-info-group">
           <div className="view-label">Email:</div>
           <div className="view-value">{admin.email}</div>
+        </div>
+
+        <div className="view-info-group">
+          <div className="view-label">Ngày tạo:</div>
+          <div className="view-value">
+            {admin.created_at?.split("T")[0]}
+          </div>
         </div>
 
         <div className="view-info-group">

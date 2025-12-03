@@ -33,13 +33,14 @@ const AdminCustomerPage = () => {
         gender: u.gender,
         createdAt: u.created_at?.split("T")[0],
         role:
-          u.role_id === 2
+          u.role_id === 3
             ? "artist"
-            : u.role_id === 3
+            : u.role_id === 2
             ? "listener"
             : "admin",
       }));
 
+      setAllUsers(mapped);
       setUsers(mapped);
     } catch (err) {
       console.error("Fetch users failed:", err);
@@ -56,15 +57,32 @@ const AdminCustomerPage = () => {
   const [successMessage, setSuccessMessage] = useState("");
 
   const [selectedUser, setSelectedUser] = useState(null);
+  const [allUsers, setAllUsers] = useState([]);
 
-  // FIX chính: tránh lỗi whitespace và toLowerCase
+
   const filteredUsers = users.filter((u) => {
     const name = u.name.toLowerCase();
     const email = u.email.toLowerCase();
     const keyword = searchValue.toLowerCase();
 
-    return u.role !== "admin" && (name + email).includes(keyword);
+    return (u.role === "artist" || u.role === "listener") 
+      && (name + email).includes(keyword);
   });
+
+  const handleSearch = (value) => {
+    setSearchValue(value);
+
+    const keyword = value.toLowerCase();
+
+    const filtered = allUsers.filter((u) => {
+      const name = u.name.toLowerCase();
+      const email = u.email.toLowerCase();
+      return (name + email).includes(keyword);
+    });
+
+    setUsers(filtered);
+  };
+
 
   return (
     <div className="admin-user-container">
@@ -75,8 +93,9 @@ const AdminCustomerPage = () => {
           <input
             type="text"
             placeholder="Tìm kiếm người dùng..."
+            autoComplete="off"     // <--- thêm dòng này
             value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
+            onChange={(e) => handleSearch(e.target.value)}
             className="google-search-input"
           />
         </div>
@@ -125,7 +144,23 @@ const AdminCustomerPage = () => {
               <td>{u.createdAt}</td>
               <td>
                 <div className="admin-actions">
-                  <button className="admin-btn view" onClick={() => { setSelectedUser(u); setShowView(true); }}>Xem</button>
+                  <button
+                    className="admin-btn view"
+                    onClick={async () => {
+                      try {
+                        const res = await fetch(`http://localhost:3000/admin/users/${u.id}`);
+                        const detail = await res.json();
+
+                        setSelectedUser(detail);   // <-- popup Xem sẽ nhận đủ dữ liệu backend trả về
+                        setShowView(true);
+                      } catch (err) {
+                        console.error("Fetch user detail failed:", err);
+                      }
+                    }}
+                  >
+                    Xem
+                  </button>
+
                   <button className="admin-btn edit" onClick={() => { setSelectedUser(u); setShowEdit(true); }}>Edit</button>
                   {u.role === "listener" && (
                     <button className="admin-btn role" onClick={() => { setSelectedUser(u); setShowRole(true); }}>Role</button>
@@ -141,16 +176,40 @@ const AdminCustomerPage = () => {
 
       {/* POPUPS */}
       {showAdd && (
-        <PopupAddUser
-          onClose={() => setShowAdd(false)}
-          onSubmit={(data) => {
-            setUsers([...users, { id: users.length + 1, ...data }]);
-            setShowAdd(false);
-            setSuccessMessage("Thêm người dùng thành công!");
-            setShowSuccess(true);
-          }}
-        />
-      )}
+      <PopupAddUser
+        onClose={() => {
+          setShowAdd(false);
+          setSearchValue("");         // NEW
+          setUsers(allUsers);         // NEW
+        }}
+
+        onSubmit={(data) => {
+          const user = data.user;
+
+          const mapped = {
+            id: user.id,
+            name: user.username,
+            email: user.email,
+            birthYear: "",
+            gender: "prefer not to say",
+            createdAt: new Date().toISOString().split("T")[0],
+            role: user.role
+          };
+
+          // Cập nhật cả allUsers và users
+          setAllUsers((prev) => [...prev, mapped]);
+          setUsers((prev) => [...prev, mapped]);
+
+          // Reset search
+          setSearchValue("");
+
+          setShowAdd(false);
+          setSuccessMessage("Thêm người dùng thành công!");
+          setShowSuccess(true);
+        }}
+
+      />
+    )}
 
       {showView && (
         <PopupViewUser

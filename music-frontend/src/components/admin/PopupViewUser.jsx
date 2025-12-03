@@ -10,12 +10,13 @@ export default function PopupViewUser({ user, onClose }) {
 
         <h3 className="view-title">Thông Tin Người Dùng</h3>
 
-        <div className="view-info"><b>Tên:</b> {user.name}</div>
+        <div className="view-info"><b>Tên:</b> {user.username}</div>
         <div className="view-info"><b>Email:</b> {user.email}</div>
-        <div className="view-info"><b>Năm sinh:</b> {user.birthYear}</div>
+        <div className="view-info"><b>Năm sinh:</b> {user.birth_year}</div>
         <div className="view-info"><b>Giới tính:</b> {user.gender}</div>
-        <div className="view-info"><b>Ngày đăng ký:</b> {user.createdAt}</div>
+        <div className="view-info"><b>Ngày đăng ký:</b> {user.created_at?.split("T")[0]}</div>
         <div className="view-info"><b>Vai trò:</b> {user.role}</div>
+
 
         <button className="view-btn" onClick={onClose}>Đóng</button>
       </div>

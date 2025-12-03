@@ -36,7 +36,7 @@ const AdminAccountPage = () => {
         id: u.id,
         name: u.username,
         email: u.email,
-        role: "Super Admin",          // LUÔN LÀ SUPER ADMIN
+        role: u.role,          // LUÔN LÀ ADMIN
         createdAt: u.created_at?.split("T")[0],
       }));
 
@@ -62,6 +62,7 @@ const AdminAccountPage = () => {
           <input
             type="text"
             placeholder="Tìm kiếm Admin..."
+            autoComplete="off"     // <--- thêm dòng này
             className="google-search-input"
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
@@ -99,13 +100,21 @@ const AdminAccountPage = () => {
                 <div className="admin-actions">
                   <button
                     className="admin-btn view"
-                    onClick={() => {
-                      setSelectedAdmin(ad);
-                      setShowView(true);
+                    onClick={async () => {
+                      try {
+                        const res = await fetch(`http://localhost:3000/admin/users/${ad.id}`);
+                        const detail = await res.json();
+
+                        setSelectedAdmin(detail);
+                        setShowView(true);
+                      } catch (err) {
+                        console.error("Fetch admin detail failed:", err);
+                      }
                     }}
                   >
                     Xem
                   </button>
+
 
                   <button
                     className="admin-btn edit"

@@ -12,6 +12,7 @@ async function bootstrap() {
   app.enableCors({
     origin: ['http://localhost:5173', 'http://localhost:3000'],
     credentials: true,
+    methods: ['GET', 'POST', 'PATCH', 'DELETE'],
   });
 
   // Áp dụng ValidationPipe toàn cục
@@ -40,9 +41,5 @@ async function bootstrap() {
   });
 
   await app.listen(3000);
-
-  app.enableCors({
-  origin: 'http://localhost:5173',
-});
 }
 bootstrap();
