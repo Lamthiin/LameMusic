@@ -25,6 +25,7 @@ import { HistoryModule } from './history/history.module'; // <-- IMPORT MỚI
 import { AdminModule } from './admin/admin.module';
 import { ManageUserModule } from './admin/manage-user/manage-user.module';
 import { DashboardModule } from './admin/dashboard/dashboard.module';
+import { ReportModule } from './report/report.module'; // <-- IMPORT MỚI
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { DashboardModule } from './admin/dashboard/dashboard.module';
     AdminModule,
     ManageUserModule, 
     DashboardModule,
+    ReportModule,
   ],
   
   controllers: [AppController],

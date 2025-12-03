@@ -8,6 +8,8 @@ import { FaPlay, FaHeart, FaPause, FaEllipsisV, FaRedo } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext'; 
 import SongOptionsMenu from '../../components/user//SongOptionsMenu'; // <-- (1) IMPORT MENU
 import AddToPlaylistModal from '../../components/user/AddToPlaylistModal'; // <-- (2) IMPORT MODAL
+import ReportModal from '../../components/user/ReportModal'; // <-- (1) IMPORT MODAL MỚI
+import { FaPlus, FaFlag } from 'react-icons/fa'; // <-- IMPORT FaFlag
 
 // === HÀM HELPER: Sửa lỗi URL (Fix NULL và Thêm Domain) ===
 const fixUrl = (url, type = 'image') => {
@@ -43,6 +45,7 @@ const SongDetail = () => {
   const [loadingLyrics, setLoadingLyrics] = useState(true); 
   const [isLiked, setIsLiked] = useState(false);
   const [error, setError] = useState(''); 
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   
   // (3) STATE MỚI ĐỂ MỞ/ĐÓNG MENU 3 CHẤM
   const [menuOpen, setMenuOpen] = useState(false);
@@ -111,11 +114,18 @@ const SongDetail = () => {
     else playTrack(song);
   };
   const handleReplay = () => {
-    if (audioRef.current?.audio?.current) {
-      audioRef.current.audio.current.currentTime = 0;
-      if (!isPlaying) playTrack(song);
-    }
-  };
+  if (audioRef.current?.audio?.current) {
+    audioRef.current.audio.current.currentTime = 0;
+    audioRef.current.audio.current.play();
+    setIsPlaying(true);
+  }
+  };
+
+
+  const handleReportSent = () => {
+          setIsReportModalOpen(false); // Đóng modal
+          // Tùy chọn: Bạn có thể cập nhật trạng thái UI (ví dụ: đổi nút Report thành "Đã báo cáo")
+      };
 
   // LIKE TOGGLE
   const handleLike = async () => {
@@ -140,85 +150,107 @@ const SongDetail = () => {
   }
   if (!song) return null;
   
-  return (
-    <div className="song-detail-container">
-      <div className="song-detail-gradient-bg" style={{ background: 'var(--color-surface)' }}></div>
+  return (
+    <div className="song-detail-container">
+      {/* BACKGROUND */}
+      <div className="song-detail-gradient-bg" style={{ background: 'var(--color-surface)' }} />
 
-      <div className="song-detail-header">
-        <img 
-          src={song.image_url || song.album?.cover_url} // <-- LOGIC ẢNH ĐÃ FIX
-          alt={song.title} 
-          className="detail-album-cover" 
-        />
-        
-        <div className="song-info">
-          <p className="song-type">BÀI HÁT</p>
-          <h1>{song.title}</h1>
-          <p className="song-artist-info">
-            <span className="artist-name">{song.artist?.stage_name}</span> • 
-            <span>{song.album?.title}</span>
-            {/* ĐÃ BỎ LƯỢT NGHE (PLAY_COUNT) */}
-          </p>
+      {/* HEADER */}
+      <div className="song-detail-header">
+        <img
+          src={song.image_url || song.album?.cover_url}
+          alt={song.title}
+          className="detail-album-cover"
+        />
 
-          <div className="detail-controls">
-            
-            <button className="detail-play-button" onClick={handleReplay}>
-               <FaRedo size={20} /> PHÁT LẠI
-            </button>
-            
-            <button 
-              className={`icon-button ${isLiked ? 'liked' : ''}`} 
-              onClick={handleLike}
-            >
-              <FaHeart size={20} />
-            </button> 
+        <div className="song-info">
+          <p className="song-type">BÀI HÁT</p>
+          <h1>{song.title}</h1>
+          <p className="song-artist-info">
+            <span className="artist-name">{song.artist?.stage_name}</span> •{' '}
+            <span>{song.album?.title}</span>
+          </p>
 
-            {/* (5) NÚT 3 CHẤM (THÊM LOGIC VÀ POSITION) */}
-            <div style={{ position: 'relative' }}>
-              <button 
-                className="icon-button" 
-                onClick={() => setMenuOpen(!menuOpen)} // Bật/tắt menu
+          <div className="detail-controls">
+            {/* Replay */}
+            <button className="detail-play-button" onClick={handleReplay}>
+              <FaRedo size={20} /> PHÁT LẠI
+            </button>
+
+            <button className={`icon-button ${isLiked ? 'liked' : ''}`} onClick={handleLike}>
+              <FaHeart size={20} />
+            </button>
+
+            <button
+              className="icon-button"
+              onClick={() => setIsAddPlaylistModalOpen(true)}
+              title="Thêm vào playlist"
+            >
+              <FaPlus size={20} />
+            </button>
+
+            {isAuthenticated && (
+              <button
+                className="icon-button"
+                onClick={() => setIsReportModalOpen(true)}
+                title="Báo cáo vi phạm"
               >
+                <FaFlag size={20} />
+              </button>
+            )}
+
+            {/* MENU 3 CHẤM */}
+            <div style={{ position: 'relative' }}>
+              <button className="icon-button" onClick={() => setMenuOpen(!menuOpen)}>
                 <FaEllipsisV size={20} />
               </button>
-
-              {/* (6) HIỂN THỊ MENU (NẾU MỞ) */}
               {menuOpen && (
-                <SongOptionsMenu 
-                  song={song} 
-                  closeMenu={() => setMenuOpen(false)} 
-                  // (7) Prop mới để mở modal AddToPlaylist
+                <SongOptionsMenu
+                  song={song}
+                  closeMenu={() => setMenuOpen(false)}
                   onAddToPlaylistClick={() => {
-                    setMenuOpen(false); // Đóng menu 3 chấm
-                    setIsAddPlaylistModalOpen(true); // Mở modal playlist
+                    setMenuOpen(false);
+                    setIsAddPlaylistModalOpen(true);
                   }}
                 />
               )}
             </div>
-          </div>
-        </div>
-      </div>
-      
-      <div className="song-detail-body">
-        <div className="lyrics-section">
-            <h3>Lời bài hát</h3>
-            {loadingLyrics ? (
-                <p className="lyrics-content">Đang tải lời...</p>
-            ) : (
-                <p className="lyrics-content">{lyrics}</p>
-            )}
-        </div>
-      </div>
 
-      {/* (8) THÊM MODAL ADD TO PLAYLIST (NẰM ẨN) */}
+            
+          </div>
+        </div>
+      </div>
+
+      {/* BODY */}
+      <div className="song-detail-body">
+        <div className="lyrics-section">
+          <h3>Lời bài hát</h3>
+          {loadingLyrics ? (
+            <p className="lyrics-content">Đang tải lời...</p>
+          ) : (
+            <p className="lyrics-content">{lyrics}</p>
+          )}
+        </div>
+      </div>
+
+      {/* MODALS */}
       {isAddPlaylistModalOpen && (
-        <AddToPlaylistModal 
-          songId={song.id} 
-          onClose={() => setIsAddPlaylistModalOpen(false)} 
+        <AddToPlaylistModal
+          songId={song.id}
+          onClose={() => setIsAddPlaylistModalOpen(false)}
         />
       )}
-    </div>
-  );
+
+      {isReportModalOpen && (
+        <ReportModal
+          songId={song.id}
+          songTitle={song.title}
+          onClose={() => setIsReportModalOpen(false)}
+          onReportSent={handleReportSent}
+        />
+      )}
+    </div>
+  );
 };
 
 export default SongDetail;
