@@ -2,9 +2,8 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDa
 import { User } from '../user/user.entity'; // <-- Khóa ngoại
 import { Song } from '../song/song.entity'; // <-- Khóa ngoại
 
-export enum ReportStatus { // <-- PHẢI EXPORT
-  PENDING = 'PENDING',        
-  IN_REVIEW = 'IN_REVIEW',    
+export enum ReportStatus { 
+  PENDING = 'PENDING',          
   RESOLVED = 'RESOLVED',      
   REJECTED = 'REJECTED',      
 }
