@@ -9,4 +9,17 @@ export class DashboardController {
   async getOverview() {
     return this.dashboardService.getOverview();
   }
+
+  @Get('top-charts')
+  async getTopCharts() {
+    return this.dashboardService.getTopCharts();
+  }
+
+  @Get('top-artists')
+  async getTopArtists() {
+    return this.dashboardService.getTopArtists();
+  }
+
+
+
 }
