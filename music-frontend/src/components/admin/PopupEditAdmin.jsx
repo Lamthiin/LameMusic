@@ -4,11 +4,10 @@ import { FiEye, FiEyeOff } from "react-icons/fi";
 import "./PopupEditAdmin.css";
 
 export default function PopupEditAdmin({ admin, onClose, onSubmit }) {
+  // ADMIN NAME
   const [name, setName] = useState(admin.name);
-  const [email, setEmail] = useState(admin.email);
-  const [role, setRole] = useState(admin.role);
 
-  // NEW: password + confirm  
+  // PASSWORD
   const [password, setPassword] = useState("");
   const [confirmPass, setConfirmPass] = useState("");
 
@@ -22,20 +21,21 @@ export default function PopupEditAdmin({ admin, onClose, onSubmit }) {
       return;
     }
 
-    onSubmit({
-      ...admin,
-      name,
-      email,
-      ...(password ? { password } : {})  // chỉ gửi password nếu nhập
-    });
+    // FE chỉ gửi những gì được phép sửa
+    const payload = {
+      id: admin.id,
+      username: name,
+      ...(password ? { password } : {}),
+    };
 
+    onSubmit(payload);
     onClose();
   };
 
   return (
     <div className="popup-overlay">
       <div className="popup-card">
-        
+
         <h3 className="popup-title">Chỉnh Sửa Admin</h3>
 
         {/* TÊN ADMIN */}
@@ -47,12 +47,14 @@ export default function PopupEditAdmin({ admin, onClose, onSubmit }) {
           />
         </div>
 
-        {/* EMAIL */}
+        {/* EMAIL (readonly) */}
         <div className="popup-group">
           <label>Email</label>
-          <input 
-            value={email} 
-            onChange={(e) => setEmail(e.target.value)}
+          <input
+            type="text"
+            value={admin.email}
+            readOnly
+            className="readonly-input"
           />
         </div>
 

@@ -84,7 +84,7 @@ const AdminAccountPage = () => {
             <th>ID</th>
             <th>Tên Admin</th>
             <th>Email</th>
-            <th>Vai trò</th>
+            <th>Role</th>
             <th>Hành động</th>
           </tr>
         </thead>
@@ -133,7 +133,7 @@ const AdminAccountPage = () => {
                       setShowDelete(true);
                     }}
                   >
-                    Xóa
+                    Khoá
                   </button>
                 </div>
               </td>
@@ -227,8 +227,8 @@ const AdminAccountPage = () => {
       {/* DELETE */}
       {showDelete && (
         <PopupDeleteConfirm
-          title="Xoá Admin"
-          message={`Bạn có chắc muốn xoá admin "${selectedAdmin.name}"?`}
+          title="Khoá Admin"
+          message={`Bạn có chắc muốn khoá admin "${selectedAdmin.name}"?`}
           onCancel={() => setShowDelete(false)}
           onConfirm={async () => {
             try {
@@ -240,22 +240,22 @@ const AdminAccountPage = () => {
               const data = await res.json();
 
               if (!res.ok) {
-                alert(data.message || "Xoá admin thất bại!");
+                alert(data.message || "Khoá admin thất bại!");
                 return;
               }
 
-              // Xóa trên FE
+              // Khoá trên FE
               setAdmins((prev) =>
                 prev.filter((item) => item.id !== selectedAdmin.id)
               );
 
               setShowDelete(false);
-              setSuccessMessage("Xoá Admin thành công!");
+              setSuccessMessage("Khoá Admin thành công!");
               setShowSuccess(true);
 
             } catch (error) {
-              console.error("Delete admin failed:", error);
-              alert("Không thể xoá admin!");
+              console.error("Block admin failed:", error);
+              alert("Không thể khoá admin!");
             }
           }}
 

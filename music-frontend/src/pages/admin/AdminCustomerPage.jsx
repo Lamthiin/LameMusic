@@ -185,11 +185,10 @@ const AdminCustomerPage = () => {
                     Xem
                   </button>
 
-                  <button className="admin-btn edit" onClick={() => { setSelectedUser(u); setShowEdit(true); }}>Edit</button>
                   {u.role === "listener" && (
                     <button className="admin-btn role" onClick={() => { setSelectedUser(u); setShowRole(true); }}>Role</button>
                   )}
-                  <button className="admin-btn delete" onClick={() => { setSelectedUser(u); setShowDelete(true); }}>Xóa</button>
+                  <button className="admin-btn delete" onClick={() => { setSelectedUser(u); setShowDelete(true); }}>Khoá</button>
                 </div>
               </td>
             </tr>
@@ -356,8 +355,8 @@ const AdminCustomerPage = () => {
 
       {showDelete && (
       <PopupDeleteConfirm
-        title="Xoá Người Dùng"
-        message={`Bạn có chắc muốn xoá người dùng "${selectedUser.name}"?`}
+        title="Khoá Người Dùng"
+        message={`Bạn có chắc muốn khoá người dùng "${selectedUser.name}"?`}
         onCancel={() => setShowDelete(false)}
         onConfirm={async () => {
 
@@ -370,21 +369,21 @@ const AdminCustomerPage = () => {
             const result = await res.json();
 
             if (!res.ok) {
-              alert(result.message || "Không thể xoá người dùng!");
+              alert(result.message || "Không thể khoá người dùng!");
               return;
             }
 
-            // Xoá khỏi FE state
+            // Khoá khỏi FE state
             setUsers((prev) => prev.filter((u) => u.id !== selectedUser.id));
             setAllUsers((prev) => prev.filter((u) => u.id !== selectedUser.id));
 
             setShowDelete(false);
-            setSuccessMessage("Xoá người dùng thành công!");
+            setSuccessMessage("khoá người dùng thành công!");
             setShowSuccess(true);
 
           } catch (err) {
-            console.error("Delete failed:", err);
-            alert("Lỗi khi xoá người dùng!");
+            console.error("Block failed:", err);
+            alert("Lỗi khi khoá người dùng!");
           }
 
         }}

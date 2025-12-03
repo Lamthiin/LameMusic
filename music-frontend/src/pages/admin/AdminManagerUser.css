@@ -289,4 +289,49 @@
   font-weight: 500;
 }
 
+.admin-btn.restore {
+  background: #0a8041;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.admin-btn.restore:hover {
+  background: #0ccf6a;
+}
+
+/* -------- ROLE BADGE BASE -------- */
+.role-badge {
+  display: inline-block;
+  padding: 6px 18px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: lowercase;
+  text-align: center;
+}
+
+/* -------- ROLE COLORS -------- */
+
+/* ARTIST — vàng */
+.role-artist {
+  background-color: #F7C32E;   /* vàng */
+  color: #000;                 /* chữ đen giống hình bạn gửi */
+}
+
+/* LISTENER — đỏ đậm */
+.role-listener {
+  background-color: #8B1E1E;   /* đỏ đậm */
+  color: #fff;
+}
+
+/* ADMIN — xanh dương */
+.role-admin {
+  background-color: #2563EB;   /* xanh dương */
+  color: #fff;
+}
+
 

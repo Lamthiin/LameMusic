@@ -74,6 +74,7 @@ export class AdminUserService {
       gender: user.gender,
       created_at: user.created_at,
       role: user.role?.name ?? 'unknown',
+      active: user.active,
     };
   }
 
@@ -232,26 +233,20 @@ export class AdminUserService {
 
     if (!admin) throw new NotFoundException('Admin không tồn tại');
 
-    // Chỉ cho update admin
+    // Đảm bảo chỉ admin mới được sửa admin
     if (admin.role.id !== 1) {
       throw new BadRequestException('Chỉ admin mới được chỉnh sửa ở chức năng này');
     }
 
-    // Kiểm tra email trùng
-    if (dto.email) {
-      const exists = await this.userRepo.findOne({
-        where: { email: dto.email, id: Not(id) },  
-      });
-      if (exists) {
-        throw new BadRequestException('Email đã tồn tại!');
-      }
+    // ⛔ Không cho phép sửa email
+    if (dto.email && dto.email !== admin.email) {
+      throw new BadRequestException('Không được phép thay đổi email của Admin');
     }
 
-    // Cập nhật cơ bản
+    // ✔ Cập nhật username
     if (dto.username) admin.username = dto.username;
-    if (dto.email) admin.email = dto.email;
 
-    // Nếu có mật khẩu mới → hash lại
+    // ✔ Nếu có mật khẩu mới → hash lại
     if (dto.password && dto.password.trim() !== '') {
       const hashed = await bcrypt.hash(dto.password, 10);
       admin.password = hashed;
@@ -260,14 +255,15 @@ export class AdminUserService {
     await this.userRepo.save(admin);
 
     return {
-      message: "Cập nhật Admin thành công",
+      message: 'Cập nhật Admin thành công',
       admin: {
         id: admin.id,
         username: admin.username,
-        email: admin.email
-      }
+        email: admin.email, // giữ nguyên, không đổi
+      },
     };
   }
+
 
   async updateUser(id: number, dto: UpdateUserDto) {
     const user = await this.userRepo.findOne({ where: { id } });
@@ -301,6 +297,35 @@ export class AdminUserService {
         gender: user.gender,
       }
     };
+  }
+
+  async getBlockedUsers() {
+    return await this.userRepo
+      .createQueryBuilder('user')
+      .leftJoin('user.role', 'role')
+      .where('user.active = :active', { active: 0 })
+      .select([
+        'user.id AS id',
+        'user.username AS username',
+        'user.email AS email',
+        'user.birth_year AS birth_year',
+        'user.gender AS gender',
+        'user.created_at AS created_at',
+        'role.name AS role_name'
+      ])
+      .orderBy('user.id', 'ASC')
+      .getRawMany();
+  }
+
+
+  async unlockUser(id: number) {
+    const user = await this.userRepo.findOne({ where: { id } });
+    if (!user) throw new NotFoundException("User không tồn tại");
+
+    user.active = 1;
+    await this.userRepo.save(user);
+
+    return { message: "Mở khóa người dùng thành công" };
   }
 
 

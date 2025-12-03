@@ -3,6 +3,7 @@ import "./ManageUser.css";
 
 import AdminCustomerPage from "./AdminCustomerPage";
 import AdminAccountPage from "./AdminAccountPage";
+import AdminBlockAccount from "./AdminBlockAccount";
 
 const ManageUser = () => {
   const [activeTab, setActiveTab] = useState("customers");
@@ -29,12 +30,23 @@ const ManageUser = () => {
           <h3>Admin</h3>
           <p>Quản lý tài khoản quản trị viên</p>
         </div>
-      </div>
 
+
+        {/* TÀI KHOẢN BỊ KHÓA – TAB THỨ 3 */}
+        <div
+          className={`um-card ${activeTab === "blocked" ? "active" : ""}`}
+          onClick={() => setActiveTab("blocked")}
+        >
+          <h3>Blocked Account</h3>
+          <p>Quản lý tài khoản bị khóa</p>
+        </div>
+     
+      </div>
       {/* BẢNG HIỂN THỊ */}
       <div className="um-table-area">
         {activeTab === "customers" && <AdminCustomerPage />}
         {activeTab === "admins" && <AdminAccountPage />}
+        {activeTab === "blocked" && <AdminBlockAccount />}
       </div>
     </div>
   );

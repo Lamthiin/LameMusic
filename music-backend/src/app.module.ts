@@ -24,6 +24,7 @@ import { History } from './history/history.entity'; // <-- IMPORT MỚI
 import { HistoryModule } from './history/history.module'; // <-- IMPORT MỚI
 import { AdminModule } from './admin/admin.module';
 import { ManageUserModule } from './admin/manage-user/manage-user.module';
+import { DashboardModule } from './admin/dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { ManageUserModule } from './admin/manage-user/manage-user.module';
     HistoryModule,
     AdminModule,
     ManageUserModule, 
+    DashboardModule,
   ],
   
   controllers: [AppController],

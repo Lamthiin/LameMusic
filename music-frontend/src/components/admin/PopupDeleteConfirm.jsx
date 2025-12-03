@@ -1,7 +1,7 @@
 "use client";
 import "./PopupDeleteConfirm.css";
 
-export default function PopupDeleteConfirm({ title, message, onCancel, onConfirm }) {
+export default function PopupDeleteConfirm({ title, message, onCancel, onConfirm, confirmText }) {
   return (
     <div className="popup-overlay" onClick={onCancel}>
       <div className="popup-delete-card" onClick={(e) => e.stopPropagation()}>
@@ -11,7 +11,9 @@ export default function PopupDeleteConfirm({ title, message, onCancel, onConfirm
 
         <div className="popup-delete-actions">
           <button className="btn-cancel" onClick={onCancel}>Hủy</button>
-          <button className="btn-confirm" onClick={onConfirm}>Xoá</button>
+          <button className="btn-confirm" onClick={onConfirm}>
+            {confirmText || "Xoá"}
+          </button>
         </div>
 
       </div>

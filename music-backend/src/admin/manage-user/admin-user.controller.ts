@@ -22,6 +22,11 @@ export class AdminUserController {
     return this.adminUserService.getAdmins();
   }
 
+  @Get('blocked')
+  async getBlockedUsers() {
+    return this.adminUserService.getBlockedUsers();
+  }
+
   @Get(':id')
   getUserDetail(@Param('id') id: string) {
     return this.adminUserService.getUserDetail(Number(id));
@@ -67,5 +72,12 @@ export class AdminUserController {
   ) {
     return this.adminUserService.updateAdmin(id, dto);
   }
+
+
+  @Patch(':id/unlock')
+  async unlock(@Param('id', ParseIntPipe) id: number) {
+    return await this.adminUserService.unlockUser(id);
+  }
+
 
 }
