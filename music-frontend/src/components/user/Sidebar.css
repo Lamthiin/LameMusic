@@ -127,8 +127,8 @@
 /* Dropdown box – dùng CSS variable + fixed */
 .dropdown-content {
   position: fixed;
-  left: 280px;
-  width: 300px;
+  left: 260px;
+  width: 250px;
   background: rgba(0, 30, 30, 0.98);
   backdrop-filter: blur(24px);
   border: 2px solid rgba(0, 230, 200, 0.45);

@@ -31,14 +31,6 @@ export class Playlist {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  // 2. Mối quan hệ Many-to-Many với Song
-  @ManyToMany(() => Song)
-  @JoinTable({ 
-    name: 'Playlist_Songs', 
-    joinColumn: { name: 'playlist_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'song_id', referencedColumnName: 'id' },
-  })
-  songs: Song[];
   // 2. Mối quan hệ One-to-Many với Bảng trung gian PlaylistSong
     @OneToMany(() => PlaylistSong, playlistSong => playlistSong.playlist)
     playlistSongs: PlaylistSong[]; // <-- Thay thế cho 'songs: Song[]' cũ

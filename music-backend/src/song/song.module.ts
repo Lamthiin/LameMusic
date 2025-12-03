@@ -18,7 +18,6 @@ import { AiModule } from '../ai/ai.module'; // <-- THÊM AI MODULE
 import { HistoryModule } from '../history/history.module'; // <-- (1) IMPORT THIẾU
 import { SharedModule } from '../shared/shared.module'; // <-- import module chứa R2Service
 
-
 @Module({
   imports: [
     // === ĐĂNG KÝ TẤT CẢ CÁC ENTITY CẦN THIẾT ===
@@ -29,7 +28,7 @@ import { SharedModule } from '../shared/shared.module'; // <-- import module ch�
     SharedModule,
     forwardRef(() => AuthModule),
     forwardRef(() => LikeModule),
-  // === (2) CẤU HÌNH UPLOAD (NHẠC VÀ ẢNH) ===
+    // === (2) CẤU HÌNH UPLOAD (NHẠC VÀ ẢNH) ===
     // MulterModule.register({
     //   storage: diskStorage({
     //     destination: (req, file, cb) => {

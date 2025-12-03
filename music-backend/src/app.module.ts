@@ -26,6 +26,7 @@ import { AdminModule } from './admin/admin.module';
 import { ManageUserModule } from './admin/manage-user/manage-user.module';
 import { DashboardModule } from './admin/dashboard/dashboard.module';
 import { ReportModule } from './report/report.module'; // <-- IMPORT MỚI
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { ReportModule } from './report/report.module'; // <-- IMPORT MỚI
     ManageUserModule, 
     DashboardModule,
     ReportModule,
+    NotificationModule,
   ],
   
   controllers: [AppController],

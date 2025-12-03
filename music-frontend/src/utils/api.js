@@ -545,3 +545,29 @@ export const removeSongFromAlbumApi = async (songId) => {
         throw error;
     }
 };
+
+/**
+ * Lấy danh sách thông báo của User.
+ */
+export const fetchNotificationsApi = async (take = 10) => {
+    try {
+        // API GET /notifications (Protected)
+        const response = await api.get(`/notifications?take=${take}`);
+        return response.data;
+    } catch (error) {
+        console.error('Lỗi khi tải thông báo:', error);
+        return []; // Trả về mảng rỗng an toàn
+    }
+};
+
+/**
+ * Đánh dấu thông báo đã đọc.
+ */
+export const markNotificationAsReadApi = async (notificationId) => {
+    try {
+        // API PATCH /notifications/:id/read
+        await api.patch(`/notifications/${notificationId}/read`);
+    } catch (error) {
+        console.error('Lỗi khi đánh dấu đã đọc:', error);
+    }
+};

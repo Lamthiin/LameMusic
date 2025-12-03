@@ -206,32 +206,6 @@ async createAlbum(
   return await this.albumRepository.save(newAlbum);
 }
 
-// /**
-//    * (ARTIST) Tạo Album mới (Upload lên R2)
-//    */
-//   async createAlbum(userId: number, dto: any, coverFile?: Express.Multer.File): Promise<Album> {
-//     const artist = await this.getArtistByUserId(userId);
-
-//     let coverUrl: string | null = null;
-//     if (coverFile) {
-//         // 1. Upload file lên R2
-//         const uploadResult = await this.r2Service.uploadFile('albums', coverFile.originalname, coverFile.buffer, coverFile.mimetype);
-//         coverUrl = uploadResult.url; // <-- LƯU R2 PUBLIC URL
-//     }
-
-//     // 2. Tạo Entity Album
-//     const newAlbum = this.albumRepository.create({
-//       ...dto,
-//       artist: artist,
-//       cover_url: coverUrl, 
-//       active: true,
-//     });
-    
-//     // === FIX LỖI: Đảm bảo chỉ save 1 object ===
-//     const savedAlbum = await this.albumRepository.save(newAlbum);
-//     return savedAlbum; // Trả về Album (số ít)
-//     // ============================================
-//   }
 
   /**
    * (ARTIST) Cập nhật Album (Update/Replace Cover trên R2)
