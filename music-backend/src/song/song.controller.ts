@@ -18,7 +18,9 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { CreateSongDto } from './dto/create-song.dto';
 import { UpdateSongDto } from './dto/update-song.dto';
-
+import fetch from 'node-fetch'; // npm i node-fetch@2
+import { Res } from '@nestjs/common';
+import type { Response } from 'express';
 
 @Controller('song') 
 export class SongController {
@@ -39,7 +41,31 @@ export class SongController {
     return this.songService.findAll(user);
   }
 
+/**
+   * API tải về bài hát
+   * GET /song/download/:id
+   */
+  @Get('download/:id')
+  async downloadSong(@Param('id', ParseIntPipe) id: number, @Res() res: Response) {
+    const song = await this.songService.findOne(id);
+    if (!song) throw new NotFoundException('Bài hát không tồn tại');
 
+    // Lấy URL R2
+    const fileUrl = song.file_url;
+
+    // Fetch từ R2 server-to-server
+    const response = await fetch(fileUrl);
+    if (!response.ok) throw new Error('Không thể tải file từ R2');
+
+    const buffer = await response.arrayBuffer();
+
+    // Gửi về client
+    res.set({
+      'Content-Type': 'audio/mpeg',
+      'Content-Disposition': `attachment; filename="${song.title}.mp3"`,
+    });
+    res.send(Buffer.from(buffer));
+  }
   
   // (findAllWithFilters - giữ nguyên)
   @Get('all')

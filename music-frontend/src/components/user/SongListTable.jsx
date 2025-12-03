@@ -5,40 +5,13 @@ import { usePlayer } from '../../context/PlayerContext';
 import SongOptionsMenu from './SongOptionsMenu';
 import AddToPlaylistModal from './AddToPlaylistModal';
 import './SongListTable.css';
-import {
-  FaPlay,
-  FaPause,
-  FaCheck,
-  FaHeart,
-  FaDownload,
-  FaTimes,
-  FaEllipsisV,
-} from 'react-icons/fa';
+import { FaPlay, FaPause, FaCheck, FaTimes, FaDownload } from 'react-icons/fa';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 
-// ==================== FIX URL THÔNG MINH (LOCAL + R2) ====================
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:3000";
-const R2_BASE = import.meta.env.VITE_R2_BASE || "https://pub-1f9b74cb44204e84b3dd30bb4df6a1e2.r2.dev";
 
-const fixAudioUrl = (url) => {
-  if (!url) return null;
-  if (url.startsWith('http')) return url;
-
-  // Ưu tiên R2 nếu có cấu hình production
-  const base = R2_BASE.includes('r2.dev') ? R2_BASE : API_BASE;
-  const prefix = base.includes('r2.dev') ? '/songs' : '/media/audio';
-
-  if (url.startsWith(prefix) || url.startsWith('/audio') || url.startsWith('/songs')) {
-    const clean = url.startsWith('/audio') ? url.replace('/audio', prefix) : url;
-    return `${base}${clean.startsWith('/') ? '' : '/'}${clean}`;
-  }
-
-  return `${base}${prefix}/${url}`;
-};
-// ====================================================================
-
-const showToast = (msg) => alert(msg); // Có thể thay bằng toast library sau
+const showToast = (msg) => alert(msg);
 
 const formatDuration = (seconds) => {
   if (!seconds) return '0:00';
@@ -47,21 +20,7 @@ const formatDuration = (seconds) => {
   return `${m}:${s.toString().padStart(2, '0')}`;
 };
 
-const forceLikeSong = async (songId) => {
-  await fetch(`http://localhost:3000/api/songs/${songId}/like`, {
-    method: 'POST',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-  });
-};
-
-const SongListTable = ({
-  songs = [],
-  onUnlike,
-  onRemoveSong,
-  onRemoveSongFromAlbum,
-  showOptionsMenu = true,
-}) => {
+const SongListTable = ({ songs = [], onRemoveSong }) => {
   const navigate = useNavigate();
   const { playTrack, currentTrack, isPlaying } = usePlayer();
 
@@ -92,31 +51,23 @@ const SongListTable = ({
   };
 
   const selectAll = () => {
-    if (selectedSongs.size === localSongs.length) {
-      setSelectedSongs(new Set());
-   OnClick
-    } else {
-      setSelectedSongs(new Set(localSongs.map((s) => s.id)));
-    }
+    if (selectedSongs.size === localSongs.length) setSelectedSongs(new Set());
+    else setSelectedSongs(new Set(localSongs.map((s) => s.id)));
   };
 
   const playSong = (song, index) => {
     const isCurrent = currentTrack?.id === song.id;
-    if (isCurrent) {
-      playTrack(song);
-    } else {
-      playTrack(song, localSongs, index);
-    }
+    if (isCurrent) playTrack(song);
+    else playTrack(song, localSongs, index);
   };
 
   // TẢI MỘT BÀI
   const downloadSingle = async (song) => {
-    const audioUrl = fixAudioUrl(song.file_url);
-    if (!audioUrl) return showToast('Không có file nhạc');
-
     try {
-      const res = await fetch(audioUrl);
+      const url = `${API_BASE}/song/download/${song.id}`;
+      const res = await fetch(url);
       if (!res.ok) throw new Error('Fetch failed');
+
       const blob = await res.blob();
       const filename = `${song.artist?.stage_name || 'Unknown'} - ${song.title}.mp3`.replace(/[/\\?%*:|"<>]/g, '_');
       saveAs(blob, filename);
@@ -142,10 +93,8 @@ const SongListTable = ({
 
     try {
       for (const song of selectedSongObjects) {
-        const audioUrl = fixAudioUrl(song.file_url);
-        if (!audioUrl) continue;
-
-        const res = await fetch(audioUrl);
+        const url = `${API_BASE}/song/download/${song.id}`;
+        const res = await fetch(url);
         if (!res.ok) continue;
 
         const blob = await res.blob();
@@ -221,9 +170,7 @@ const SongListTable = ({
               onMouseEnter={() => setHoveredRow(song.id)}
               onMouseLeave={() => setHoveredRow(null)}
             >
-              <span className="row-checkbox">
-                {isSelected && <FaCheck size={12} />}
-              </span>
+              <span className="row-checkbox">{isSelected && <FaCheck size={12} />}</span>
 
               <div
                 className="col-img"
@@ -233,9 +180,7 @@ const SongListTable = ({
                 }}
               >
                 <img src={thumb} alt={song.title} className="song-thumbnail" />
-                <div className="play-overlay">
-                  {isPlayingThis ? <FaPause size={14} /> : <FaPlay size={14} />}
-                </div>
+                <div className="play-overlay">{isPlayingThis ? <FaPause size={14} /> : <FaPlay size={14} />}</div>
               </div>
 
               <div
@@ -255,18 +200,8 @@ const SongListTable = ({
 
               {/* CÁC NÚT XÓA / BỎ THÍCH */}
               <div className="col-options" onClick={(e) => e.stopPropagation()}>
-                {onRemoveSongFromAlbum && (
-                  <button className="btn-icon btn-remove" title="Xóa khỏi album" onClick={() => onRemoveSongFromAlbum(song.id, song.title)}>
-                    <FaTimes size={14} />
-                  </button>
-                )}
-                {onRemoveSong && !onRemoveSongFromAlbum && (
-                  <button className="btn-icon btn-remove" title="Xóa khỏi playlist" onClick={() => onRemoveSong(song.id)}>
-                    <FaTimes size={14} />
-                  </button>
-                )}
-                {onUnlike && !onRemoveSong && !onRemoveSongFromAlbum && (
-                  <button className="btn-icon btn-unlike" title="Bỏ thích" onClick={() => onUnlike(song.id)}>
+                {onRemoveSong && (
+                  <button className="btn-icon btn-remove" title="Xóa" onClick={() => onRemoveSong(song.id)}>
                     <FaTimes size={14} />
                   </button>
                 )}
