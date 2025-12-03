@@ -37,15 +37,15 @@ export default function PopupEditUser({ user, onClose, onSubmit }) {
       email,
       birthYear,
       gender,
-      password: password ? password : user.password, // nếu không đổi thì giữ mật khẩu cũ
+      password: password || undefined,   // Nếu không nhập, gửi undefined - nếu không đổi thì giữ mật khẩu cũ
     });
 
     onClose();
   };
 
   return (
-    <div className="edit-overlay" onClick={onClose}>
-      <div className="edit-card" onClick={(e) => e.stopPropagation()}>
+    <div className="edit-overlay">
+      <div className="edit-card">
         <h2 className="edit-title">Chỉnh Sửa Người Dùng</h2>
 
         <div className="edit-grid">
@@ -67,6 +67,8 @@ export default function PopupEditUser({ user, onClose, onSubmit }) {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              autoComplete="new-email"
+              name="edit-email"
             />
           </div>
 
@@ -89,7 +91,7 @@ export default function PopupEditUser({ user, onClose, onSubmit }) {
             >
               <option value="male">Nam</option>
               <option value="female">Nữ</option>
-              <option value="other">Khác</option>
+              <option value="prefer not to say">Prefer not to say</option>
             </select>
           </div>
 
@@ -102,6 +104,8 @@ export default function PopupEditUser({ user, onClose, onSubmit }) {
                 value={password}
                 placeholder="Để trống nếu không đổi..."
                 onChange={(e) => setPassword(e.target.value)}
+                autoComplete="new-password"   // <-- THÊM
+                name="new-password"           // <-- THÊM
               />
               <span className="eye-icon" onClick={() => setShowPass(!showPass)}>
                 {showPass ? <FiEyeOff /> : <FiEye />}
@@ -118,6 +122,8 @@ export default function PopupEditUser({ user, onClose, onSubmit }) {
                 value={confirmPass}
                 placeholder="Nhập lại mật khẩu..."
                 onChange={(e) => setConfirmPass(e.target.value)}
+                autoComplete="new-password"   // <-- THÊM
+                name="confirm-new-password"   // <-- THÊM
               />
               <span
                 className="eye-icon"

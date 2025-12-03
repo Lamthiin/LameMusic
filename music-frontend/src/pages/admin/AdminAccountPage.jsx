@@ -144,16 +144,28 @@ const AdminAccountPage = () => {
 
       {/* ADD */}
       {showAddAdmin && (
-        <PopupAddAdmin
-          onClose={() => setShowAddAdmin(false)}
-          onSubmit={(data) => {
-            setAdmins((prev) => [...prev, { id: prev.length + 1, ...data }]);
-            setShowAddAdmin(false);
-            setSuccessMessage("Thêm Admin thành công!");
-            setShowSuccess(true);
-          }}
-        />
-      )}
+      <PopupAddAdmin
+        onClose={() => setShowAddAdmin(false)}
+        onSubmit={(data) => {
+          const user = data.user; // backend trả về user
+
+          const mapped = {
+            id: user.id,
+            name: user.username,
+            email: user.email,
+            role: user.role,   // admin
+            createdAt: new Date().toISOString().split("T")[0],
+          };
+
+          setAdmins((prev) => [...prev, mapped]);
+
+          setShowAddAdmin(false);
+          setSuccessMessage("Thêm Admin thành công!");
+          setShowSuccess(true);
+        }}
+      />
+    )}
+
 
       {/* VIEW */}
       {showView && (
@@ -165,20 +177,52 @@ const AdminAccountPage = () => {
 
       {/* EDIT */}
       {showEdit && (
-        <PopupEditAdmin
-          admin={selectedAdmin}
-          onClose={() => setShowEdit(false)}
-          onSubmit={(updated) => {
+      <PopupEditAdmin
+        admin={selectedAdmin}
+        onClose={() => setShowEdit(false)}
+        onSubmit={async (updated) => {
+          try {
+            const payload = {
+              username: updated.name,
+              email: updated.email,
+              password: updated.password || undefined, // chỉ gửi nếu có
+            };
+
+            const res = await fetch(
+              `http://localhost:3000/admin/users/admins/${updated.id}`,
+              {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+              }
+            );
+
+            const result = await res.json();
+
+            if (!res.ok) {
+              alert(result.message || "Lỗi cập nhật admin!");
+              return;
+            }
+
+            // update FE
             setAdmins((prev) =>
               prev.map((item) =>
-                item.id === updated.id ? updated : item
+                item.id === updated.id ? { ...item, ...updated } : item
               )
             );
+
+            setShowEdit(false);
             setSuccessMessage("Cập nhật Admin thành công!");
             setShowSuccess(true);
-          }}
-        />
-      )}
+
+          } catch (err) {
+            console.error("Update admin failed:", err);
+            alert("Không thể cập nhật admin!");
+          }
+        }}
+      />
+    )}
+
 
       {/* DELETE */}
       {showDelete && (
@@ -186,14 +230,35 @@ const AdminAccountPage = () => {
           title="Xoá Admin"
           message={`Bạn có chắc muốn xoá admin "${selectedAdmin.name}"?`}
           onCancel={() => setShowDelete(false)}
-          onConfirm={() => {
-            setAdmins((prev) =>
-              prev.filter((item) => item.id !== selectedAdmin.id)
-            );
-            setShowDelete(false);
-            setSuccessMessage("Xoá Admin thành công!");
-            setShowSuccess(true);
+          onConfirm={async () => {
+            try {
+              const res = await fetch(
+                `http://localhost:3000/admin/users/admins/${selectedAdmin.id}/soft-delete`,
+                { method: "PATCH" }
+              );
+
+              const data = await res.json();
+
+              if (!res.ok) {
+                alert(data.message || "Xoá admin thất bại!");
+                return;
+              }
+
+              // Xóa trên FE
+              setAdmins((prev) =>
+                prev.filter((item) => item.id !== selectedAdmin.id)
+              );
+
+              setShowDelete(false);
+              setSuccessMessage("Xoá Admin thành công!");
+              setShowSuccess(true);
+
+            } catch (error) {
+              console.error("Delete admin failed:", error);
+              alert("Không thể xoá admin!");
+            }
           }}
+
         />
       )}
 

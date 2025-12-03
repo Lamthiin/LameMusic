@@ -616,17 +616,48 @@ textarea::placeholder {
   max-height: unset;      /* bỏ limit chiều cao */
   overflow: visible;      /* không scroll */
 }
-
 /* Container pagination */
 .song-pagination-clean {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 25px;
-
+  gap: 18px; /* thu nhỏ khoảng cách */
   margin: 40px 0 60px 0;
   background: transparent;
 }
 
-/* Nút mũi tên
+/* Nút mũi tên */
+.song-page-arrow {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  background: #3a3a3a;
+  border: none;
+  color: #dcdcdc;
+  font-size: 14px;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: 0.2s ease-in-out;
+}
+
+.song-page-arrow:hover:not(:disabled) {
+  background: #4a4a4a;
+}
+
+.song-page-arrow:disabled {
+  background: #555555;
+  color: #888;
+  cursor: not-allowed;
+}
+
+/* Text "Trang X / Y" */
+.song-page-text {
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 500;
+}
 

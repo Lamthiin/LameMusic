@@ -7,20 +7,39 @@ export default function PopupAddAdmin({ onClose, onSubmit }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!name.trim() || !email.trim() || !password.trim()) {
       alert("Vui lòng nhập đầy đủ thông tin!");
       return;
     }
 
-    onSubmit({
-      name,
-      email,
-      password,
-      role_id: 1, // automatic Admin
-    });
+    try {
+      const res = await fetch("http://localhost:3000/admin/users/admins/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: name,
+          email,
+          password,
+        }),
+      });
 
-    onClose();
+      // kiểm tra trước khi parse json
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({}));
+        alert(error.message || "Tạo admin thất bại!");
+        return;
+      }
+
+      const data = await res.json(); // { message, user }
+
+      // báo cho trang AdminAccountPage
+      onSubmit(data);
+      onClose();
+    } catch (err) {
+      console.error("Create admin failed:", err);
+      alert("Không thể kết nối server!");
+    }
   };
 
   return (

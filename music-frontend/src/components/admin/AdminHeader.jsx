@@ -7,6 +7,14 @@ const AdminHeader = () => {
   const dropdownRef = useRef(null);
   const avatarRef = useRef(null);
 
+
+  // HÀM LOGOUT
+  const handleLogout = () => {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("user_info"); // nếu bạn có lưu
+    window.location.href = "/login";
+  };
+
   // Đóng dropdown khi click ra ngoài
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -51,7 +59,9 @@ const AdminHeader = () => {
         {open && (
           <div className="admin-dropdown" ref={dropdownRef}>
             <p className="dropdown-item">Profile</p>
-            <p className="dropdown-item logout">Log out</p>
+            <p className="dropdown-item logout" onClick={handleLogout}>
+              Log out
+            </p>
           </div>
         )}
       </div>

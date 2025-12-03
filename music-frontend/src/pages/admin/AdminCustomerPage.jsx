@@ -9,6 +9,7 @@ import PopupRoleUser from "../../components/admin/PopupRoleUser";
 import PopupSuccess from "../../components/admin/PopupSuccess";
 import PopupDeleteConfirm from "../../components/admin/PopupDeleteConfirm";
 
+
 const AdminCustomerPage = () => {
   const [users, setUsers] = useState([]);
   const [searchValue, setSearchValue] = useState("");
@@ -42,10 +43,19 @@ const AdminCustomerPage = () => {
 
       setAllUsers(mapped);
       setUsers(mapped);
+
+      setTotalPages(Math.ceil(mapped.length / itemsPerPage)); // ← thêm dòng này
+      setCurrentPage(1);
+
     } catch (err) {
       console.error("Fetch users failed:", err);
     }
   };
+
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 15;
+  const [totalPages, setTotalPages] = useState(1);
 
   const [showAdd, setShowAdd] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
@@ -58,6 +68,8 @@ const AdminCustomerPage = () => {
 
   const [selectedUser, setSelectedUser] = useState(null);
   const [allUsers, setAllUsers] = useState([]);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
 
   const filteredUsers = users.filter((u) => {
@@ -81,7 +93,18 @@ const AdminCustomerPage = () => {
     });
 
     setUsers(filtered);
+
+    // cập nhật phân trang
+    setTotalPages(Math.ceil(filtered.length / itemsPerPage));
+    setCurrentPage(1);
+
   };
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedUsers = filteredUsers.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
 
 
   return (
@@ -93,7 +116,8 @@ const AdminCustomerPage = () => {
           <input
             type="text"
             placeholder="Tìm kiếm người dùng..."
-            autoComplete="off"     // <--- thêm dòng này
+            autoComplete="off"
+            name="search-user"     // <--- thêm dòng này
             value={searchValue}
             onChange={(e) => handleSearch(e.target.value)}
             className="google-search-input"
@@ -121,7 +145,7 @@ const AdminCustomerPage = () => {
         </thead>
 
         <tbody>
-          {filteredUsers.map((u) => (
+          {paginatedUsers.map((u) => (
             <tr key={u.id}>
               <td>{u.id}</td>
               <td>{u.name}</td>
@@ -174,13 +198,37 @@ const AdminCustomerPage = () => {
 
       </table>
 
+      <div className="mini-pagination">
+        <button
+          className="mini-page-btn"
+          onClick={() => setCurrentPage((p) => p - 1)}
+          disabled={currentPage === 1}
+        >
+          ←
+        </button>
+
+        <span className="mini-page-text">
+          Trang {currentPage} / {totalPages}
+        </span>
+
+        <button
+          className="mini-page-btn"
+          onClick={() => setCurrentPage((p) => p + 1)}
+          disabled={currentPage === totalPages}
+        >
+          →
+        </button>
+
+      </div>
+
+
       {/* POPUPS */}
       {showAdd && (
       <PopupAddUser
         onClose={() => {
           setShowAdd(false);
-          setSearchValue("");         // NEW
-          setUsers(allUsers);         // NEW
+          setSearchValue("");         
+          setUsers(allUsers);         
         }}
 
         onSubmit={(data) => {
@@ -222,45 +270,127 @@ const AdminCustomerPage = () => {
         <PopupEditUser
           user={selectedUser}
           onClose={() => setShowEdit(false)}
-          onSubmit={(updated) => {
-            setUsers(users.map((u) => (u.id === updated.id ? updated : u)));
+          onSubmit={async (updated) => {
+          try {
+            const payload = {
+              username: updated.name,
+              email: updated.email,
+              birth_year: Number(updated.birthYear),
+              gender: updated.gender,
+              password: updated.password || undefined
+            };
+
+            const res = await fetch(
+              `http://localhost:3000/admin/users/${selectedUser.id}`,
+              {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+              }
+            );
+
+            const result = await res.json();
+
+            if (!res.ok) {
+              alert(result.message || "Lỗi cập nhật!");
+              return;
+            }
+
+            // Cập nhật FE state
+            setUsers(prev =>
+              prev.map(u =>
+                u.id === updated.id ? { ...u, ...updated } : u
+              )
+            );
+
             setShowEdit(false);
             setSuccessMessage("Cập nhật thành công!");
             setShowSuccess(true);
-          }}
+
+          } catch (err) {
+            console.error(err);
+            alert("Không thể cập nhật!");
+          }
+        }}
         />
       )}
 
       {showRole && (
-        <PopupRoleUser
-          user={selectedUser}
-          onClose={() => setShowRole(false)}
-          onSubmit={(newRole) => {
+      <PopupRoleUser
+        user={selectedUser}
+        onClose={() => setShowRole(false)}
+        onSubmit={async () => {
+          try {
+            const res = await fetch(
+              `http://localhost:3000/admin/users/${selectedUser.id}/promote`,
+              { method: "PATCH" }
+            );
+
+            const result = await res.json();
+
+            // Nếu backend báo lỗi
+            if (!res.ok) {
+              alert(result.message || "Lỗi nâng quyền!");
+              return;
+            }
+
+            // Update FE
             setUsers(
               users.map((u) =>
-                u.id === selectedUser.id ? { ...u, role: newRole } : u
+                u.id === selectedUser.id ? { ...u, role: "admin" } : u
               )
             );
-            setShowSuccess(true);
-            setSuccessMessage("Nâng quyền thành công!");
+
             setShowRole(false);
-          }}
-        />
-      )}
+            setSuccessMessage("Nâng quyền thành công!");
+            setShowSuccess(true);
+
+          } catch (err) {
+            console.error("Promote failed:", err);
+            alert("Không thể nâng quyền người dùng!");
+          }
+        }}
+      />
+    )}
+
 
       {showDelete && (
-        <PopupDeleteConfirm
-          title="Xoá Người Dùng"
-          message={`Bạn có chắc muốn xoá người dùng "${selectedUser.name}"?`}
-          onCancel={() => setShowDelete(false)}
-          onConfirm={() => {
-            setUsers(users.filter((u) => u.id !== selectedUser.id));
+      <PopupDeleteConfirm
+        title="Xoá Người Dùng"
+        message={`Bạn có chắc muốn xoá người dùng "${selectedUser.name}"?`}
+        onCancel={() => setShowDelete(false)}
+        onConfirm={async () => {
+
+          try {
+            const res = await fetch(
+              `http://localhost:3000/admin/users/${selectedUser.id}/soft-delete`,
+              { method: "PATCH" }
+            );
+
+            const result = await res.json();
+
+            if (!res.ok) {
+              alert(result.message || "Không thể xoá người dùng!");
+              return;
+            }
+
+            // Xoá khỏi FE state
+            setUsers((prev) => prev.filter((u) => u.id !== selectedUser.id));
+            setAllUsers((prev) => prev.filter((u) => u.id !== selectedUser.id));
+
             setShowDelete(false);
             setSuccessMessage("Xoá người dùng thành công!");
             setShowSuccess(true);
-          }}
-        />
-      )}
+
+          } catch (err) {
+            console.error("Delete failed:", err);
+            alert("Lỗi khi xoá người dùng!");
+          }
+
+        }}
+      />
+    )}
+
 
       {showSuccess && (
         <PopupSuccess

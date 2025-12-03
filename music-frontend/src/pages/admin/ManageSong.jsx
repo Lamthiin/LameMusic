@@ -610,25 +610,26 @@ const ManageSong = () => {
         {/* PAGINATION */}
         <div className="song-pagination-clean">
           <button
-            className="circle-btn"
+            className="song-page-arrow"
             disabled={page === 1}
-            onClick={() => fetchSongs(page - 1)}
+            onClick={() => setPage(page - 1)}
           >
             ←
           </button>
 
-          <span className="page-center-text">
+          <span className="song-page-text">
             Trang {page} / {totalPages}
           </span>
 
           <button
-            className="circle-btn"
+            className="song-page-arrow"
             disabled={page === totalPages}
-            onClick={() => fetchSongs(page + 1)}
+            onClick={() => setPage(page + 1)}
           >
             →
           </button>
         </div>
+
 
 
 

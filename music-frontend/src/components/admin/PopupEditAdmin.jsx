@@ -26,7 +26,6 @@ export default function PopupEditAdmin({ admin, onClose, onSubmit }) {
       ...admin,
       name,
       email,
-      role,
       ...(password ? { password } : {})  // chỉ gửi password nếu nhập
     });
 
@@ -34,8 +33,8 @@ export default function PopupEditAdmin({ admin, onClose, onSubmit }) {
   };
 
   return (
-    <div className="popup-overlay" onClick={onClose}>
-      <div className="popup-card" onClick={(e) => e.stopPropagation()}>
+    <div className="popup-overlay">
+      <div className="popup-card">
         
         <h3 className="popup-title">Chỉnh Sửa Admin</h3>
 
@@ -55,18 +54,6 @@ export default function PopupEditAdmin({ admin, onClose, onSubmit }) {
             value={email} 
             onChange={(e) => setEmail(e.target.value)}
           />
-        </div>
-
-        {/* ROLE */}
-        <div className="popup-group">
-          <label>Vai trò</label>
-          <select 
-            value={role} 
-            onChange={(e) => setRole(e.target.value)}
-          >
-            <option value="super_admin">Super Admin</option>
-            <option value="admin">Admin</option>
-          </select>
         </div>
 
         {/* PASSWORD */}
