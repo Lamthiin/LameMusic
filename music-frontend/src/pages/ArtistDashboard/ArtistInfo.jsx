@@ -144,7 +144,6 @@ const ArtistInfo = () => {
                 <div className="form-actions">
                     <button type="submit" disabled={loading} className="btn btn-primary">
                         {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
-SESSION_MESSAGE
                     </button>
                 </div>
             </form>

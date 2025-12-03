@@ -181,7 +181,7 @@ export class SongService {
 
     // 1. UPLOAD FILE NHẠC LÊN R2
     const audioUpload = await this.r2Service.uploadFile(
-      'songs', 
+      'mucsic', 
       audioFile.originalname,
       audioFile.buffer, // <-- Dùng buffer
       audioFile.mimetype,

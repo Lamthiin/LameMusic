@@ -16,6 +16,7 @@ import { diskStorage } from 'multer'; // <-- (2) IMPORT diskStorage
 import { extname } from 'path';
 import { BadRequestException } from '@nestjs/common';
 import { Follow } from '../follow/follow.entity'
+import { SharedModule } from '../shared/shared.module';
 
 @Module({
   imports: [
@@ -23,27 +24,27 @@ import { Follow } from '../follow/follow.entity'
     TypeOrmModule.forFeature([Artist, User, Song, Album, Role, Follow]),
     // ===================================================
     forwardRef(() => AuthModule), // (AuthGuard dùng trong Controller)
-
-    // === (3) CẤU HÌNH UPLOAD AVATAR ===
-    MulterModule.register({
-      storage: diskStorage({
-        destination: './uploads/avatars', // Thư mục lưu avatar
-        filename: (req, file, cb) => {
-          const randomName = Array(32).fill(null).map(() => (Math.round(Math.random() * 16)).toString(16)).join('');
-          cb(null, `${randomName}${extname(file.originalname)}`);
-        },
-      }),
-      fileFilter: (req, file, cb) => {
-        // Chỉ chấp nhận file ảnh
-        if (!file.mimetype.match(/\/(jpg|jpeg|png|gif)$/)) {
-          return cb(new BadRequestException('Chỉ hỗ trợ file ảnh (jpg, png, gif)!'), false);
-        }
-        cb(null, true);
-      },
-      limits: {
-        fileSize: 1024 * 1024 * 5, // 5MB
-      },
-    }),
+    SharedModule
+    // // === (3) CẤU HÌNH UPLOAD AVATAR ===
+    // MulterModule.register({
+    //   storage: diskStorage({
+    //     destination: './uploads/avatars', // Thư mục lưu avatar
+    //     filename: (req, file, cb) => {
+    //       const randomName = Array(32).fill(null).map(() => (Math.round(Math.random() * 16)).toString(16)).join('');
+    //       cb(null, `${randomName}${extname(file.originalname)}`);
+    //     },
+    //   }),
+    //   fileFilter: (req, file, cb) => {
+    //     // Chỉ chấp nhận file ảnh
+    //     if (!file.mimetype.match(/\/(jpg|jpeg|png|gif)$/)) {
+    //       return cb(new BadRequestException('Chỉ hỗ trợ file ảnh (jpg, png, gif)!'), false);
+    //     }
+    //     cb(null, true);
+    //   },
+    //   limits: {
+    //     fileSize: 1024 * 1024 * 5, // 5MB
+    //   },
+    // }),
   ],
   controllers: [ArtistController],
   providers: [ArtistService],

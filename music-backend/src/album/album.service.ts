@@ -7,6 +7,7 @@ import { Artist } from '../artist/artist.entity'; // <-- (1) IMPORT
 import { CreateAlbumDto } from './dto/create-album.dto'; // <-- (2) IMPORT
 import { UpdateAlbumDto } from './dto/update-album.dto'; // <-- (3) IMPORT
 import { User } from '../user/user.entity'; // <-- (4) IMPORT
+import { R2Service } from '../shared/r2.service'; // <-- (1) IMPORT R2 SERVICE
 
 @Injectable()
 export class AlbumService {
@@ -15,6 +16,7 @@ export class AlbumService {
     private albumRepository: Repository<Album>,
     @InjectRepository(Artist) // <-- (5) INJECT ARTIST REPO
     private artistRepository: Repository<Artist>,
+    private r2Service: R2Service,
   ) {}
 
   // Hàm helper để lấy Artist từ UserId
@@ -49,58 +51,58 @@ export class AlbumService {
     });
   }
 
-  /**
-   * HÀM MỚI (ARTIST): TẠO Album mới
-   */
-  async createAlbum(userId: number, dto: CreateAlbumDto, coverFile?: Express.Multer.File): Promise<Album> {
-    const artist = await this.getArtistByUserId(userId);
+  // /**
+  //  * HÀM MỚI (ARTIST): TẠO Album mới
+  //  */
+  // async createAlbum(userId: number, dto: CreateAlbumDto, coverFile?: Express.Multer.File): Promise<Album> {
+  //   const artist = await this.getArtistByUserId(userId);
 
-    // === SỬA LỖI TS2322 (LỖI 1) ===
-    let cover_url: string | null = null; // Khai báo rõ ràng kiểu
-    if (coverFile) {
-        cover_url = `/uploads/covers/${coverFile.filename}`; 
-    }
-    // =============================
+  //   // === SỬA LỖI TS2322 (LỖI 1) ===
+  //   let cover_url: string | null = null; // Khai báo rõ ràng kiểu
+  //   if (coverFile) {
+  //       cover_url = `/uploads/covers/${coverFile.filename}`; 
+  //   }
+  //   // =============================
 
-    const newAlbum = this.albumRepository.create({
-      ...dto,
-      artist: artist,
-      cover_url: cover_url, // (Lỗi 2, 3 đã được fix)
-    });
+  //   const newAlbum = this.albumRepository.create({
+  //     ...dto,
+  //     artist: artist,
+  //     cover_url: cover_url, // (Lỗi 2, 3 đã được fix)
+  //   });
     
-    return this.albumRepository.save(newAlbum);
-  }
+  //   return this.albumRepository.save(newAlbum);
+  // }
 
-  /**
-   * HÀM MỚI (ARTIST): CẬP NHẬT Album
-   */
-  async updateMyAlbum(userId: number, albumId: number, dto: UpdateAlbumDto, coverFile?: Express.Multer.File): Promise<Album> {
-    const artist = await this.getArtistByUserId(userId);
-    const album = await this.albumRepository.findOne({ 
-      where: { id: albumId, active: true },
-      relations: ['artist'] 
-    });
+  // /**
+  //  * HÀM MỚI (ARTIST): CẬP NHẬT Album
+  //  */
+  // async updateMyAlbum(userId: number, albumId: number, dto: UpdateAlbumDto, coverFile?: Express.Multer.File): Promise<Album> {
+  //   const artist = await this.getArtistByUserId(userId);
+  //   const album = await this.albumRepository.findOne({ 
+  //     where: { id: albumId, active: true },
+  //     relations: ['artist'] 
+  //   });
 
-    if (!album) throw new NotFoundException('Album không tồn tại.');
-    if (album.artist.id !== artist.id) {
-      throw new UnauthorizedException('Bạn không có quyền sửa Album này.');
-    }
+  //   if (!album) throw new NotFoundException('Album không tồn tại.');
+  //   if (album.artist.id !== artist.id) {
+  //     throw new UnauthorizedException('Bạn không có quyền sửa Album này.');
+  //   }
 
-    // Cập nhật thông tin
-    album.title = dto.title || album.title;
+  //   // Cập nhật thông tin
+  //   album.title = dto.title || album.title;
     
-    // === SỬA LỖI TS2322 (LỖI 4): CHUYỂN STRING SANG DATE ===
-    if (dto.release_date) {
-        album.release_date = new Date(dto.release_date);
-    }
-    // ==================================================
+  //   // === SỬA LỖI TS2322 (LỖI 4): CHUYỂN STRING SANG DATE ===
+  //   if (dto.release_date) {
+  //       album.release_date = new Date(dto.release_date);
+  //   }
+  //   // ==================================================
     
-    if (coverFile) {
-        album.cover_url = `/uploads/covers/${coverFile.filename}`;
-    }
+  //   if (coverFile) {
+  //       album.cover_url = `/uploads/covers/${coverFile.filename}`;
+  //   }
 
-    return this.albumRepository.save(album);
-  }
+  //   return this.albumRepository.save(album);
+  // }
 
   /**
      * API: Lấy chi tiết 1 Album (Chỉ hiển thị bài hát APPROVED)
@@ -173,5 +175,96 @@ export class AlbumService {
     }
     
     return { message: 'Album đã được ẩn thành công (Soft Deleted).' };
+  }
+async createAlbum(
+  userId: number,
+  dto: CreateAlbumDto,
+  coverFile?: Express.Multer.File
+): Promise<Album> {
+  const artist = await this.getArtistByUserId(userId);
+
+  let coverUrl: string | null = null;
+
+  if (coverFile) {
+    const uploadResult = await this.r2Service.uploadFile(
+      'albums',
+      coverFile.originalname,
+      coverFile.buffer,
+      coverFile.mimetype
+    );
+    coverUrl = uploadResult.url;
+  }
+
+  const newAlbum = this.albumRepository.create({
+    ...dto,
+    release_date: new Date(dto.release_date),
+    artist,
+    cover_url: coverUrl,
+    active: true,
+  });
+
+  return await this.albumRepository.save(newAlbum);
+}
+
+// /**
+//    * (ARTIST) Tạo Album mới (Upload lên R2)
+//    */
+//   async createAlbum(userId: number, dto: any, coverFile?: Express.Multer.File): Promise<Album> {
+//     const artist = await this.getArtistByUserId(userId);
+
+//     let coverUrl: string | null = null;
+//     if (coverFile) {
+//         // 1. Upload file lên R2
+//         const uploadResult = await this.r2Service.uploadFile('albums', coverFile.originalname, coverFile.buffer, coverFile.mimetype);
+//         coverUrl = uploadResult.url; // <-- LƯU R2 PUBLIC URL
+//     }
+
+//     // 2. Tạo Entity Album
+//     const newAlbum = this.albumRepository.create({
+//       ...dto,
+//       artist: artist,
+//       cover_url: coverUrl, 
+//       active: true,
+//     });
+    
+//     // === FIX LỖI: Đảm bảo chỉ save 1 object ===
+//     const savedAlbum = await this.albumRepository.save(newAlbum);
+//     return savedAlbum; // Trả về Album (số ít)
+//     // ============================================
+//   }
+
+  /**
+   * (ARTIST) Cập nhật Album (Update/Replace Cover trên R2)
+   */
+  async updateMyAlbum(userId: number, albumId: number, dto: any, coverFile?: Express.Multer.File): Promise<Album> {
+    const artist = await this.getArtistByUserId(userId);
+    const album = await this.albumRepository.findOne({ 
+      where: { id: albumId, active: true },
+      relations: ['artist'] 
+    });
+
+    if (!album) throw new NotFoundException('Album không tồn tại.');
+    if (album.artist.id !== artist.id) {
+      throw new UnauthorizedException('Bạn không có quyền sửa Album này.');
+    }
+
+    album.title = dto.title || album.title;
+    if (dto.release_date) {
+      album.release_date = new Date(dto.release_date);
+    }
+    
+    // Xử lý upload ảnh mới
+    if (coverFile) {
+      if (album.cover_url) {
+        await this.r2Service.deleteFileByUrl(album.cover_url);
+      }
+      const uploadResult = await this.r2Service.uploadFile('albums', coverFile.originalname, coverFile.buffer, coverFile.mimetype);
+      album.cover_url = uploadResult.url; 
+    }
+
+    // === FIX LỖI: Đảm bảo chỉ save 1 object ===
+    const savedAlbum = await this.albumRepository.save(album);
+    return savedAlbum; // Trả về Album (số ít)
+    // ============================================
   }
 }
