@@ -1,0 +1,115 @@
+/* Tabs */
+.report-tabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.report-tab {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid #444;
+  background: transparent;
+  color: #ddd;
+  cursor: pointer;
+}
+
+.report-tab.active {
+  background: #1db954;
+  color: white;
+  border-color: #1db954;
+}
+
+/* Status badge */
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  color: #fff;
+}
+
+.status-badge.pending {
+  background: #ff9800;
+}
+.status-badge.in_review {
+  background: #1e88e5;
+}
+.status-badge.resolved {
+  background: #4caf50;
+}
+.status-badge.rejected {
+  background: #e53935;
+}
+
+/* Buttons */
+.view-btn {
+  background: #1e88e5;
+  padding: 6px 14px;
+  border: none;
+  color: white;
+  border-radius: 6px;
+}
+
+.resolve-btn {
+  background: #1db954;
+  padding: 8px 20px;
+  border-radius: 8px;
+  border: none;
+  color: white;
+}
+
+.reject-btn {
+  background: #e53935;
+  padding: 8px 20px;
+  border-radius: 8px;
+  border: none;
+  color: white;
+}
+
+.popup-cancel {
+  background: #555;
+  padding: 8px 20px;
+  border-radius: 8px;
+  color: white;
+  border: none;
+}
+
+/* Popup wrapper */
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.popup-card {
+  width: 450px;
+  background: #121212;
+  border-radius: 14px;
+  padding: 20px;
+  color: white;
+}
+
+.popup-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 12px;
+}
+
+.popup-group input,
+.popup-group textarea {
+  background: #1f1f1f;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 10px;
+  color: white;
+}
+
+.popup-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+  gap: 10px;
+}
