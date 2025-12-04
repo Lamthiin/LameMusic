@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, IsNull, Not } from 'typeorm';
 import { Artist } from '../../artist/artist.entity';
 import { User } from '../../user/user.entity';
 import { Role } from '../../role/role.entity';
@@ -28,7 +28,22 @@ export class AdminArtistService {
   // DANH SÁCH APPROVED
   findApproved() {
     return this.artistRepository.find({
-      where: { registrationStatus: 'APPROVED', active: 1 },
+      where: { registrationStatus: 'APPROVED', active: 1, user: Not(IsNull()) },
+      relations: ['user', 'albums', 'songs'],
+      order: { updated_at: 'DESC' },
+    })
+    .then(list =>
+    list.map(a => ({
+      ...a,
+      total_albums: a.albums?.length || 0,
+      total_songs: a.songs?.length || 0,
+    }))
+  );
+  }
+
+  findInactive() {
+    return this.artistRepository.find({
+      where: { registrationStatus: 'APPROVED', active: 1, user: IsNull() },
       relations: ['user'],
       order: { updated_at: 'DESC' },
     });
@@ -95,6 +110,7 @@ export class AdminArtistService {
     return this.artistRepository.save(newArtist);
   }
 
+
   // UPDATE ARTIST
   async updateArtist(id: number, data: any, file?: Express.Multer.File) {
     const artist = await this.artistRepository.findOne({ where: { id } });
@@ -122,6 +138,8 @@ export class AdminArtistService {
     return this.artistRepository.save(artist);
   }
 
+  
+
   async setPending(id: number) {
     // 1. Tìm Artist
     const artist = await this.artistRepository.findOne({ where: { id } });
@@ -137,4 +155,68 @@ export class AdminArtistService {
     // 3. Lưu thay đổi
     return this.artistRepository.save(artist);
   }
+
+  // DANH SÁCH NGHỆ SĨ TRỰC THUỘC LAME MUSIC (user_id = null)
+  async findInternal() {
+    return this.artistRepository.find({
+      where: {
+        user: IsNull(),  // 🔥 CHUẨN | không user_id -> true
+        active: 1,
+      },
+      relations: ['user'],
+      order: { created_at: 'ASC' },
+    });
+  }
+
+  async findFullDetail(id: number) {
+  const artist = await this.artistRepository.findOne({
+    where: { id },
+    relations: [
+      "user",
+      "albums",
+      "songs",
+      "followers", // nếu cần dùng followers.length
+      "songs.album", // để lấy album title
+    ],
+  });
+
+  if (!artist) {
+    throw new NotFoundException("Artist không tồn tại");
+  }
+
+  return {
+    id: artist.id,
+    stage_name: artist.stage_name,
+    bio: artist.bio,
+    avatar_url: artist.avatar_url,
+    created_at: artist.created_at,
+    updated_at: artist.updated_at,
+    registrationStatus: artist.registrationStatus,
+    user_id: artist.user_id,
+
+    total_albums: artist.albums?.length || 0,
+    total_songs: artist.songs?.length || 0,
+    total_followers: artist.followers?.length || 0,
+
+    albums: artist.albums.map(a => ({
+      id: a.id,
+      title: a.title,
+      cover_url: a.cover_url,
+      created_at: a.created_at,
+    })),
+
+    songs: artist.songs.map(s => ({
+      id: s.id,
+      title: s.title,
+      duration: s.duration,
+      album_id: s.album?.id || null,
+      album_title: s.album?.title || null,
+
+      status: s.status || "UNKNOWN"
+    }))
+  };
 }
+
+
+}
+

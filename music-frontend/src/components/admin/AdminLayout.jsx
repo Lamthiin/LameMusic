@@ -10,16 +10,16 @@ const AdminLayout = () => {
   return (
     <div className="admin-wrapper">
 
-      {/* SIDEBAR TRÁI */}
+  
       <AdminSidebar />
 
-      {/* PHẦN BÊN PHẢI */}
+
       <div className="admin-right">
 
-        {/* HEADER TRONG CARD */}
+    
         <AdminHeader />
 
-        {/* CONTENT */}
+      
         <div className="admin-content">
           <Outlet />
         </div>

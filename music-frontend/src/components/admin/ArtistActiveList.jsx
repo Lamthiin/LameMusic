@@ -2,10 +2,12 @@ import React, { useState } from "react";
 import axios from "axios";
 import "./ArtistActiveList.css";
 import ArtistFormModal from "../admin/ArtistFormModal.jsx";
+import { useNavigate } from "react-router-dom";
 
 const ArtistActiveList = ({ artists = [], refresh }) => {
   const [showModal, setShowModal] = useState(false);
   const [editArtist, setEditArtist] = useState(null);
+  const navigate = useNavigate();
 
   const sortedArtists = [...artists].sort((a, b) =>
     a.stage_name.localeCompare(b.stage_name, "vi", { sensitivity: "base" })
@@ -54,16 +56,6 @@ const ArtistActiveList = ({ artists = [], refresh }) => {
 
       <div className="top-bar">
         <h2 className="active-title">Nghệ sĩ đang hoạt động</h2>
-
-        <button
-          className="am-btn-add"
-          onClick={() => {
-            setEditArtist(null);
-            setShowModal(true);
-          }}
-        >
-          + Thêm nghệ sĩ
-        </button>
       </div>
 
       {sortedArtists.length === 0 ? (
@@ -75,6 +67,11 @@ const ArtistActiveList = ({ artists = [], refresh }) => {
               <th>STT</th>
               <th>Ảnh</th>
               <th>Tên nghệ sĩ</th>
+
+              {/* ⭐ CỘT MỚI */}
+              <th>Tổng Album</th>
+              <th>Tổng Bài hát</th>
+
               <th>Ngày tạo</th>
               <th>Trạng thái</th>
               <th>Hành động</th>
@@ -96,6 +93,10 @@ const ArtistActiveList = ({ artists = [], refresh }) => {
 
                 <td>{a.stage_name}</td>
 
+                {/* ⭐ DỮ LIỆU 2 CỘT MỚI */}
+                <td>{a.total_albums ?? 0}</td>
+                <td>{a.total_songs ?? 0}</td>
+
                 <td>
                   {a.created_at
                     ? new Date(a.created_at).toLocaleDateString("vi-VN")
@@ -108,6 +109,14 @@ const ArtistActiveList = ({ artists = [], refresh }) => {
 
                 <td>
                   <div className="admin-actions">
+
+                    <button
+                      className="btn-view"
+                      onClick={() => navigate(`/admin/artists/${a.id}`, { state: { fromTab: "active" } })}
+                    >
+                      Xem
+                    </button>
+
 
                     <button
                       className="btn-edit"

@@ -1,14 +1,24 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useLocation } from "react-router-dom";
 
 import "./ManageArtist.css";
-
 import ArtistPendingList from "../../components/admin/ArtistPendingList";
 import ArtistActiveList from "../../components/admin/ArtistActiveList";
 import ArtistRejectedList from "../../components/admin/ArtistRejectedList";
+import ArtistBot from "../../components/admin/ArtistBot";
+
 
 export default function ManageArtist() {
-  const [tab, setTab] = useState("pending");
+  const location = useLocation();  
+  const startTab = location.state?.tab || "pending";
+  const [tab, setTab] = useState(startTab);
+
+  useEffect(() => {                 // ⭐ THÊM BLOCK NÀY
+    if (location.state?.tab) {
+      setTab(location.state.tab);
+    }
+  }, [location.state])
 
   const [artistsPending, setArtistsPending] = useState([]);
   const [artistsActive, setArtistsActive] = useState([]);
@@ -87,13 +97,20 @@ export default function ManageArtist() {
         </div>
 
         <div
+          className={`am-card ${tab === "internal" ? "active" : ""}`}
+          onClick={() => setTab("internal")}
+        >
+          <h3>Nghệ sĩ trực thuộc Lame Music</h3>
+          <p>Không thông qua tài khoản User</p>
+        </div>
+
+        <div
           className={`am-card ${tab === "rejected" ? "active" : ""}`}
           onClick={() => setTab("rejected")}
         >
           <h3>Bị từ chối</h3>
           <p>Hồ sơ không hợp lệ</p>
         </div>
-
       </div>
 
       {/* TABLE */}
@@ -113,12 +130,20 @@ export default function ManageArtist() {
           />
         )}
 
+        {tab === "internal" && (
+          <ArtistBot />
+        )}
+
         {tab === "rejected" && (
           <ArtistRejectedList
             artists={artistsRejected}
             refresh={loadRejected}
           />
         )}
+
+
+
+
       </div>
     </div>
   );

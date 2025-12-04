@@ -5,62 +5,95 @@ export default function AlbumViewModal({ album, isOpen, onClose, onAddSong }) {
   if (!isOpen || !album) return null;
 
   return (
-    <div className="alb-view-overlay">
-      <div className="alb-view-box">
+    <div className="album-detail-overlay">
+      <div className="album-detail-container">
 
-        <h2 className="alb-view-title">Chi tiết Album</h2>
+        {/* CLOSE BUTTON */}
+        <button className="close-btn" onClick={onClose}>
+          ✕
+        </button>
 
-        {/* Cover */}
-        <img
-          src={album.cover_url}
-          alt={album.name}
-          className="alb-view-cover"
-        />
+        {/* HERO */}
+        <div className="album-hero">
+          <img
+            src={album.cover_url}
+            alt={album.name}
+            className="album-cover-large"
+          />
 
-        {/* Album Info */}
-        <div className="alb-view-info">
-          <p><strong>Tên Album:</strong> {album.name}</p>
+          <div className="album-info">
+            <h1>{album.name}</h1>
 
-          <p><strong>Nghệ sĩ:</strong> {album.artist?.name ?? "—"}</p>
+            <p className="album-artist">
+              Nghệ sĩ: <strong>{album.artist?.name ?? "—"}</strong>
+            </p>
 
-          <p>
-            <strong>Ngày phát hành:</strong>{" "}
-            {album.release_date
-              ? new Date(album.release_date).toLocaleDateString("vi-VN")
-              : "—"}
-          </p>
+            <p className="album-release">
+              Ngày phát hành:{" "}
+              {album.release_date
+                ? new Date(album.release_date).toLocaleDateString("vi-VN")
+                : "—"}
+            </p>
 
-          <p><strong>Số bài hát:</strong> {album.songs ?? 0}</p>
+            <div className="album-stats">
+              <div className="stat-card">
+                <strong>{album.songs ?? 0}</strong>
+                <span>Bài hát</span>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <h3 className="alb-view-subtitle">Danh sách bài hát</h3>
-
-        {/* Songs List */}
-        {album.songs_list?.length > 0 ? (
-          <ul className="alb-song-list">
-            {album.songs_list.map((song, idx) => (
-              <li key={song.id} className="alb-song-item">
-                <span>{idx + 1}. {song.title}</span>
-
-                {/* Nếu cần thêm nút xoá bài hát trong tương lai */}
-                {/* <button className="alb-btn-delete-small">Xoá</button> */}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <div className="alb-empty-song">Chưa có bài hát nào</div>
+        {/* INFO SECTION */}
+        {album.info && (
+          <div className="section">
+            <h2>Giới thiệu Album</h2>
+            <p className="album-bio">{album.info}</p>
+          </div>
         )}
 
-        {/* Action bar */}
-        <div className="alb-view-actions">
-          <button
-            className="btn-addsong"
-            onClick={() => onAddSong(album.id)}
-          >
+        {/* SONG SECTION */}
+        <div className="section">
+          <h2>Danh sách bài hát</h2>
+
+          {album.songs_list?.length > 0 ? (
+            <table className="song-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Tên bài hát</th>
+                  <th>Thời lượng</th>
+                  <th>Trạng thái</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {album.songs_list.map((song, index) => (
+                  <tr key={song.id}>
+                    <td>{index + 1}</td>
+                    <td>{song.title}</td>
+                    <td>{song.duration ?? "—"}</td>
+                    <td>
+                      <span className={`song-status ${song.status?.toLowerCase()}`}>
+                        {song.status || "UNKNOWN"}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <div className="alb-empty-song">Chưa có bài hát nào</div>
+          )}
+        </div>
+
+        {/* ACTION BAR */}
+        <div className="detail-actions">
+          <button className="btn-addsong" onClick={() => onAddSong(album.id, album.name)}>
             + Thêm bài hát
           </button>
 
-          <button className="btn-delete" onClick={onClose}>
+          <button className="btn-close" onClick={onClose}>
             Đóng
           </button>
         </div>

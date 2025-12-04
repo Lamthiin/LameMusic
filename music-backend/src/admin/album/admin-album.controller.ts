@@ -11,13 +11,13 @@ import {
   UploadedFile,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { AdminAlbumService } from './album.service';
+import { AdminAlbumService } from './admin-album.service';
 
 @Controller('admin/albums')
 export class AdminAlbumController {
   constructor(private readonly service: AdminAlbumService) {}
 
-  // LẤY DS ALBUM CHO ADMIN
+  // LẤY DS ALBUM
   @Get()
   findAll() {
     return this.service.findByActive(true);
@@ -26,15 +26,27 @@ export class AdminAlbumController {
   @Get('hidden')
   findHidden() {
     return this.service.findByActive(false);
-}
+  }
 
+  @Get(':id/available-songs')
+  getAvailableSongs(@Param('id') id: number) {
+    return this.service.findAvailableSongs(+id);
+  }
 
-  // LẤY CHI TIẾT ALBUM
+  // ⭐ ĐẶT TRƯỚC — ROUTE FULL CHI TIẾT
+  @Get(':id/full')
+  getFull(@Param('id') id: number) {
+    return this.service.findFull(+id);
+  }
+
+  
+  // ⭐ ROUTE MATCH ĐỘNG — ĐẶT SAU
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.service.findOne(+id);
   }
 
+  
   // TẠO ALBUM
   @Post()
   @UseInterceptors(FileInterceptor('cover'))
@@ -55,8 +67,17 @@ export class AdminAlbumController {
   ) {
     return this.service.update(+id, dto, cover);
   }
+// SỬA INFO ALBUM (CHỈ SỬA PHẦN INFO)
+@Patch(':id/info')
+updateInfo(
+  @Param('id') id: number,
+  @Body('info') info: string,
+) {
+  return this.service.updateAlbumInfo(+id, info);
+}
 
-  // XOÁ ALBUM
+
+  // XOÁ
   @Delete(':id')
   delete(@Param('id') id: number) {
     return this.service.delete(+id);

@@ -2,20 +2,23 @@ import React from "react";
 import AlbumSongSelector from "./AlbumSongSelector";
 import "./AlbumAddSongModal.css";
 
-export default function AlbumAddSongModal({ show, onClose, albumId }) {
+export default function AlbumAddSongModal({ show, onClose, albumId, albumName }) {
   if (!show) return null;
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-box">
-        <h2>Thêm bài hát vào album #{albumId}</h2>
+    <div className="addsong-overlay" onClick={onClose}>
+      <div className="addsong-box" onClick={(e) => e.stopPropagation()}>
+        
+        {/* Title */}
+        <h2 className="addsong-title">
+          Thêm bài hát vào album <span className="album-id">{albumName}</span>
+        </h2>
 
-        <AlbumSongSelector />
-
-        <div className="modal-footer">
-          <button className="am-btn danger" onClick={onClose}>Đóng</button>
-          <button className="am-btn primary">Thêm</button>
+        {/* Song list */}
+        <div className="addsong-content">
+          <AlbumSongSelector albumId={albumId} />
         </div>
+
       </div>
     </div>
   );

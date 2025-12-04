@@ -1,0 +1,244 @@
+/* ==============================
+   CONTAINER
+============================== */
+.artist-admin-detail {
+  position: relative;
+  padding: 30px;
+  color: #fff;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==============================
+   CLOSE BUTTON (NEW COLOR ONLY)
+============================== */
+.close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+
+  width: 38px;
+  height: 38px;
+
+  background: rgba(255, 70, 70, 0.18);      /* ✔ Màu đỏ nổi hơn */
+  border: 1px solid rgba(255, 70, 70, 0.35); /* ✔ Red border */
+  backdrop-filter: blur(8px);
+
+  border-radius: 12px;
+  color: #ffb3b3;       /* ✔ Light red text */
+  font-size: 18px;
+  font-weight: 600;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  transition: all 0.22s ease;
+  z-index: 10;
+
+  box-shadow: 0 4px 12px rgba(255, 70, 70, 0.25); /* ✔ nhẹ glow đỏ */
+}
+
+.close-btn:hover {
+  background: rgba(255, 70, 70, 0.32);
+  border-color: rgba(255, 70, 70, 0.50);
+  color: #ffd2d2;
+  transform: scale(1.12);
+}
+
+/* ==============================
+   HERO / HEADER CARD
+============================== */
+
+.artist-hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 26px;
+  gap: 28px;
+  background: #1c1c1c;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.artist-avatar {
+  width: 150px;
+  height: 150px;
+  border-radius: 16px;
+  object-fit: cover;
+
+  border: 2px solid rgba(255,255,255,0.12);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+}
+
+.artist-info h1 {
+  font-size: 36px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.created-date {
+  color: #aaa;
+  margin-bottom: 10px;
+}
+
+/* ==============================
+   STATS CARDS
+============================== */
+.artist-stats {
+  display: flex;
+  gap: 22px;
+  margin-top: 14px;
+}
+
+.stat-card {
+  background: #272727;
+  padding: 16px 20px;
+
+  border-radius: 14px;
+  text-align: center;
+
+  min-width: 110px;
+  border: 1px solid rgba(255,255,255,0.07);
+
+  transition: 0.2s ease;
+}
+
+.stat-card strong {
+  font-size: 26px;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.stat-card:hover {
+  background: #303030;
+  transform: translateY(-3px);
+}
+
+/* ==============================
+   SECTION
+============================== */
+.section {
+  margin-top: 40px;
+}
+
+.section h2 {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 18px;
+}
+
+/* ==============================
+   ALBUM GRID
+============================== */
+.album-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 22px;
+}
+
+.album-card {
+  background: #242424;
+  padding: 14px;
+  border-radius: 14px;
+  cursor: pointer;
+  text-align: center;
+
+  border: 1px solid rgba(255,255,255,0.08);
+
+  transition: 0.2s ease;
+}
+
+.album-card:hover {
+  background: #2e2e2e;
+  transform: translateY(-4px);
+}
+
+.album-cover {
+  width: 100%;
+  height: 170px;
+  border-radius: 12px;
+  object-fit: cover;
+
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+}
+
+.album-title {
+  margin-top: 10px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.album-date {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #aaa;
+}
+
+/* ==============================
+   SONG TABLE
+============================== */
+.song-table {
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: 16px;
+  overflow: hidden;
+
+  background: #1d1d1d;
+  border: 1px solid rgba(255,255,255,0.08);
+
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+
+.song-table th {
+  background: #242424;
+  padding: 14px 16px;
+  text-align: left;
+  color: #ddd;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.song-table td {
+  padding: 12px 16px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  color: #eee;
+  font-size: 15px;
+}
+
+.song-table tbody tr:hover {
+  background: #2a2a2a;
+}
+
+.empty {
+  color: #bbb;
+  font-style: italic;
+  padding-left: 4px;
+}
+
+/* ======================
+   UNIFIED TABLE COLUMNS
+========================= */
+
+/* Tổng 5 cột cho 2 bảng */
+.table-col-idx { width: 6%; }
+.table-col-img { width: 12%; }
+.table-col-title { width: 40%; }
+.table-col-meta { width: 20%; }
+.table-col-status { width: 15%; }
+
+/* Ảnh thu nhỏ */
+.album-thumb {
+  width: 55px;
+  height: 55px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+

@@ -1,51 +1,22 @@
-import React, { useState } from "react";
-import "./AlbumArtistSelector.css";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
-const SAMPLE_ARTISTS = [
-  { id: 10, name: "Sơn Tùng M-TP" },
-  { id: 11, name: "AMEE" },
-  { id: 12, name: "Đen Vâu" },
-];
+export default function AlbumArtistSelector({ onSelect }) {
+  const [artists, setArtists] = useState([]);
 
-export default function AlbumArtistSelector({ selected, onSelect }) {
-  const [open, setOpen] = useState(false);
-  const [key, setKey] = useState("");
-
-  const filtered = SAMPLE_ARTISTS.filter((a) =>
-    a.name.toLowerCase().includes(key.toLowerCase())
-  );
+  useEffect(() => {
+    axios.get("http://localhost:3000/admin/artists/active")
+      .then(res => setArtists(res.data))
+      .catch(err => console.error("LOAD ARTISTS ERROR:", err));
+  }, []);
 
   return (
-    <div className="artist-selector">
-      <div className="selector-box" onClick={() => setOpen(!open)}>
-        {selected ? selected.name : "Chọn nghệ sĩ..."}
-      </div>
-
-      {open && (
-        <div className="selector-dropdown">
-          <input
-            className="selector-search"
-            placeholder="Tìm nghệ sĩ..."
-            value={key}
-            onChange={(e) => setKey(e.target.value)}
-          />
-
-          <div className="selector-list">
-            {filtered.map((a) => (
-              <div
-                key={a.id}
-                className="selector-item"
-                onClick={() => {
-                  onSelect(a);
-                  setOpen(false);
-                }}
-              >
-                {a.name}
-              </div>
-            ))}
-          </div>
+    <div>
+      {artists.map(a => (
+        <div key={a.id} onClick={() => onSelect(a)}>
+          {a.stage_name}
         </div>
-      )}
+      ))}
     </div>
   );
 }

@@ -20,7 +20,7 @@ const ArtistPendingList = ({ artists = [], approve, reject, view }) => {
               <th>STT</th>
               <th>Ảnh</th>
               <th>Tên nghệ sĩ</th>
-              <th>Ngày tạo</th>     {/* ⭐ thêm cột mới */}
+              <th>Ngày tạo</th>    
               <th>Trạng thái</th>
               <th>Hành động</th>
             </tr>

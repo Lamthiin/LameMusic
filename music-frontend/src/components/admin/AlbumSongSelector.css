@@ -1,30 +1,60 @@
-.song-selector {
+.alb-selector {
+  margin-top: 16px;
+}
+
+.alb-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.alb-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #222;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  transition: 0.2s;
+}
+
+.alb-item:hover {
+  background: #333;
+}
+
+.alb-info {
   display: flex;
   flex-direction: column;
-  gap: 10px;
 }
 
-.song-selector .selector-search {
-  width: 100%;
-  padding: 10px 12px;
-  background: #2a2a2a;
-  border-radius: 8px;
-  border: 1px solid #444;
-  color: white;
+.song-title {
+  font-weight: 600;
+  color: #fff;
 }
 
-.selector-list {
-  max-height: 180px;
-  overflow-y: auto;
-  border-radius: 8px;
+.song-artist {
+  font-size: 13px;
+  color: #ccc;
+  margin-top: 3px;
 }
 
-.selector-item {
-  padding: 10px 12px;
+.alb-add-btn {
+  background: #4caf50;
+  color: #fff;
+  padding: 6px 12px;
   border-radius: 6px;
+  border: none;
   cursor: pointer;
+  transition: 0.2s;
 }
 
-.selector-item:hover {
-  background: #333;
+.alb-add-btn:hover {
+  background: #43a047;
+}
+
+.alb-empty {
+  text-align: center;
+  padding: 10px;
+  color: #aaa;
 }

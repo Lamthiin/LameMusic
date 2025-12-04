@@ -48,9 +48,17 @@ export class AdminArtistController {
   @Get('active')
   async getActive() {
     const list = await this.service.findApproved();
+    const filtered = list.filter(a => a.user_id !== null);
+    return filtered.map(a => this.fixAvatar(a));
+  }
+
+  @Get('inactive')
+  async getInactive() {
+    const list = await this.service.findInactive();
     return list.map(a => this.fixAvatar(a));
   }
 
+  
   @Get('rejected')
   async getRejected() {
     const list = await this.service.findRejected();
@@ -85,6 +93,14 @@ export class AdminArtistController {
     });
   }
 
+
+  @Get('internal')
+  async getInternalArtists() {
+    const list = await this.service.findInternal();
+    return list.map(a => this.fixAvatar(a));
+  }
+
+
   @Patch(':id')
   @UseInterceptors(FileInterceptor('avatarFile'))
   updateArtist(
@@ -100,4 +116,11 @@ export class AdminArtistController {
   deleteArtist(@Param('id') id: string) {
     return this.service.deleteArtist(Number(id));
   }
+  
+  @Get(':id/full')
+  async getFullArtist(@Param('id') id: string) {
+    const artist = await this.service.findFullDetail(Number(id));
+    return this.fixAvatar(artist);
+  }
+
 }

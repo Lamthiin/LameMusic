@@ -145,6 +145,15 @@
 }
 
 /* Xem */
+/* Từ chối */
+.btn-view {
+  background: #ffcc00;
+}
+.btn-view:hover {
+  background: #ffcc00;
+  transform: translateY(-2px);
+}
+
 .btn-edit {
   background: #4aa3df;
 }
@@ -170,6 +179,7 @@
   background: #d5574c;
   transform: translateY(-2px);
 }
+
 
 /* ==========================
    MODAL GIỮ NGUYÊN

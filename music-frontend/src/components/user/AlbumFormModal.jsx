@@ -15,6 +15,8 @@ const AlbumFormModal = ({ onClose, onComplete, albumToEdit }) => {
     const [preview, setPreview] = useState('/images/default-album.png');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [info, setInfo] = useState(albumToEdit?.info || "");
+
 
     useEffect(() => {
         if (isEditMode) {

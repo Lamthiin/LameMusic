@@ -15,8 +15,8 @@ import { ManageSongModule } from './manage-song/manage-song.module';
 import { MulterModule } from '@nestjs/platform-express/multer/multer.module';
 import { diskStorage } from 'multer';
 
-import { AdminAlbumController } from './album/album.controller';
-import { AdminAlbumService } from './album/album.service';
+import { AdminAlbumController } from './album/admin-album.controller';
+import { AdminAlbumService } from './album/admin-album.service';
 import { AdminGenreController } from "./genre/admin-genre.controller";
 import { AdminGenreService } from "./genre/admin-genre.service";
 import { Category } from "../category/category.entity";

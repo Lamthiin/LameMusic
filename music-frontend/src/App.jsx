@@ -31,6 +31,7 @@ import ManageAlbum from "./pages/admin/ManageAlbum";
 import ManageSong from "./pages/admin/ManageSong";
 import AdminCustomerPage from "./pages/admin/AdminCustomerPage";
 import AdminAccountPage from "./pages/admin/AdminAccountPage";
+import AdminArtistDetail from "./pages/admin/AdminArtistDetail";
 
 
 // (3) IMPORT CÁC TRANG CON CỦA PROFILE
@@ -130,6 +131,7 @@ function App() {
           <Route path="artists" element={<ManageArtist />} />
           <Route path="albums" element={<ManageAlbum />} />
           <Route path="songs" element={<ManageSong />} />
+          <Route path="artists/:id" element={<AdminArtistDetail />} />
 
         </Route>
       </Route>

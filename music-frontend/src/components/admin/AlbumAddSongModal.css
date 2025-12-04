@@ -1,4 +1,44 @@
-/* dùng chung modal style của AlbumFormModal */
-.modal-box h2 {
-  margin-bottom: 12px;
+/* Overlay */
+.addsong-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+/* Modal box */
+.addsong-box {
+  width: 520px;
+  background: #181818;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.5);
+  animation: fadeIn 0.25s ease;
+}
+
+/* Title */
+.addsong-title {
+  text-align: center;
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 16px;
+}
+
+.album-id {
+  color: #1db954;
+  font-weight: 700;
+}
+
+/* Scroll area */
+.addsong-content {
+  max-height: 350px;
+  overflow-y: auto;
+  padding-right: 6px;
 }
