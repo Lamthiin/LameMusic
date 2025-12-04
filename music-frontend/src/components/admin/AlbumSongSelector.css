@@ -1,60 +1,77 @@
+/* Wrapper */
 .alb-selector {
   margin-top: 16px;
 }
 
-.alb-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+/* Table container */
+.song-table-container {
+  background: #1b1b1b;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #333;
 }
 
-.alb-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #222;
-  padding: 10px 14px;
-  border-radius: 8px;
-  margin-bottom: 10px;
+/* Table base */
+.song-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #eee;
+  font-size: 14px;
+}
+
+/* Head row */
+.song-table thead tr {
+  background: #262626;
+}
+
+.song-table th {
+  padding: 10px 8px;
+  font-weight: 600;
+  color: #ccc;
+  border-bottom: 1px solid #333;
+}
+
+/* Body rows */
+.song-table tbody tr {
   transition: 0.2s;
 }
 
-.alb-item:hover {
-  background: #333;
+.song-table tbody tr:hover {
+  background-color: #2a2a2a;
 }
 
-.alb-info {
-  display: flex;
-  flex-direction: column;
+/* Table cells */
+.song-table td {
+  padding: 10px 8px;
+  border-bottom: 1px solid #2d2d2d;
 }
 
+/* Center utility */
+.center {
+  text-align: center;
+}
+
+/* Song styles */
 .song-title {
   font-weight: 600;
   color: #fff;
 }
 
 .song-artist {
+  color: #bbb;
   font-size: 13px;
-  color: #ccc;
-  margin-top: 3px;
 }
 
-.alb-add-btn {
-  background: #4caf50;
-  color: #fff;
-  padding: 6px 12px;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.alb-add-btn:hover {
-  background: #43a047;
-}
-
+/* Empty message */
 .alb-empty {
   text-align: center;
-  padding: 10px;
-  color: #aaa;
+  color: #888;
+  padding: 12px 0;
+}
+
+/* Checkbox bigger */
+.song-table input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
 }

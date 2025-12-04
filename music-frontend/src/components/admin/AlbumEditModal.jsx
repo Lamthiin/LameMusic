@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./AlbumEditModal.css";
 import { FaTimes } from "react-icons/fa";
 import AlbumArtistSelector from "./AlbumArtistSelector";
+import axios from "axios";
 
 export default function AlbumEditModal({ show, onClose, initialData, onSubmit }) {
   if (!show) return null;
@@ -15,8 +16,12 @@ export default function AlbumEditModal({ show, onClose, initialData, onSubmit })
 
   const [error, setError] = useState("");
 
+  // ⭐ THÊM STATE BỊ THIẾU
+  const [songs, setSongs] = useState([]);
+  const [availableSongs, setAvailableSongs] = useState([]);
+
   // ============================
-  // LOAD ALBUM DATA INTO FORM
+  // LOAD ALBUM DATA + SONGS
   // ============================
   useEffect(() => {
     if (initialData) {
@@ -25,6 +30,13 @@ export default function AlbumEditModal({ show, onClose, initialData, onSubmit })
       setPreview(initialData.cover_url || "/images/default-album.png");
       setArtist(initialData.artist || null);
       setInfo(initialData.info || "");
+      setSongs(initialData.songs_list || []);
+
+      // ⭐ Load danh sách bài hát có thể thêm
+      axios
+        .get(`http://localhost:3000/admin/albums/${initialData.id}/available-songs`)
+        .then((res) => setAvailableSongs(res.data || []))
+        .catch(() => setAvailableSongs([]));
     }
   }, [initialData]);
 
@@ -39,9 +51,7 @@ export default function AlbumEditModal({ show, onClose, initialData, onSubmit })
     }
   };
 
-  // ============================
-  // SUBMIT
-  // ============================
+ 
   const handleSubmit = (e) => {
     e.preventDefault();
     setError("");
@@ -50,19 +60,22 @@ export default function AlbumEditModal({ show, onClose, initialData, onSubmit })
     if (!artist) return setError("Vui lòng chọn nghệ sĩ.");
     if (!releaseDate) return setError("Ngày phát hành không hợp lệ.");
 
+    // TRUYỀN DATA ĐÚNG VỀ ManageAlbum
     onSubmit({
-      id: initialData.id,
       name,
       release_date: releaseDate,
       artist_id: artist.id,
       info,
-      coverFile,                // người dùng có thể không đổi ảnh
-      old_cover: initialData.cover_url
+      coverFile,   // file ảnh (nếu có)
     });
-
-    onClose();
   };
 
+
+
+
+  // ============================================================
+  // ====================== JSX RETURN ==========================
+  // ============================================================
   return (
     <div className="albumedit-overlay" onClick={onClose}>
       <div className="albumedit-modal" onClick={(e) => e.stopPropagation()}>
@@ -73,19 +86,18 @@ export default function AlbumEditModal({ show, onClose, initialData, onSubmit })
         </button>
 
         {/* TITLE */}
-        <h2 className="modal-title">Sửa Album</h2>
+        <h2 className="modal-title">
+          Sửa Album: <span className="highlight">{initialData.name}</span>
+        </h2>
 
         <form className="modal-form" onSubmit={handleSubmit}>
-
           {error && <p className="modal-error">{error}</p>}
 
           {/* COVER PREVIEW */}
           <div className="form-group">
             <label>Ảnh bìa hiện tại:</label>
-
             <div className="cover-preview-container">
               <img src={preview} alt="Preview" className="cover-preview" />
-
               <label className="change-cover-btn">
                 Đổi ảnh
                 <input type="file" accept="image/*" onChange={handleFileChange} />
@@ -107,10 +119,7 @@ export default function AlbumEditModal({ show, onClose, initialData, onSubmit })
           {/* ARTIST */}
           <div className="form-group">
             <label>Nghệ sĩ:</label>
-            <AlbumArtistSelector
-              selected={artist}
-              onSelect={(artist) => setArtist(artist)}
-            />
+            <AlbumArtistSelector selected={artist} onSelect={setArtist} />
           </div>
 
           {/* RELEASE DATE */}
@@ -134,13 +143,91 @@ export default function AlbumEditModal({ show, onClose, initialData, onSubmit })
             ></textarea>
           </div>
 
+          {/* ====================== SONGS IN ALBUM ====================== */}
+          <div className="section">
+            <h2>Bài hát trong album</h2>
+
+            {songs.length > 0 ? (
+              <table className="song-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Tên bài hát</th>
+                    <th>Thời lượng</th>
+                    <th>Trạng thái</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {songs.map((song, index) => (
+                    <tr key={song.id}>
+                      <td>{index + 1}</td>
+                      <td>{song.title}</td>
+                      <td>{song.duration ?? "—"}</td>
+                      <td>{song.status}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="alb-empty-song">Chưa có bài hát nào</div>
+            )}
+          </div>
+
+          {/* ====================== AVAILABLE SONGS ====================== */}
+          <div className="section">
+            <h2>Bài hát có thể thêm</h2>
+
+            {availableSongs.length > 0 ? (
+              <table className="song-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Tên bài hát</th>
+                    <th>Nghệ sĩ</th>
+                    <th>Thời lượng</th>
+                    <th>Thêm</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {availableSongs.map((song, index) => (
+                    <tr key={song.id}>
+                      <td>{index + 1}</td>
+                      <td>{song.title}</td>
+                      <td>{song.artist_name}</td>
+                      <td>{song.duration ?? "—"}</td>
+                      <td>
+                        <button
+                          className="song-add-btn"
+                          onClick={async () => {
+                            await axios.patch(
+                              `http://localhost:3000/admin/albums/${initialData.id}/add-song`,
+                              { songId: song.id }
+                            );
+
+                            setSongs((prev) => [...prev, song]);
+                            setAvailableSongs((prev) =>
+                              prev.filter((s) => s.id !== song.id)
+                            );
+                          }}
+                        >
+                          + Thêm
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="alb-empty-song">Không còn bài hát nào để thêm</div>
+            )}
+          </div>
+
           {/* SUBMIT BUTTON */}
           <div className="submit-container">
             <button type="submit" className="save-btn">
               Lưu thay đổi
             </button>
           </div>
-
         </form>
       </div>
     </div>

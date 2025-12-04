@@ -2,67 +2,80 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./AlbumSongSelector.css";
 
-export default function AlbumSongSelector({ albumId }) {
+export default function AlbumSongSelector({ albumId, selectedSongs, onSelect }) {
   const [songs, setSongs] = useState([]);
-
-  // Load danh sách bài hát đủ điều kiện
-  const loadSongs = () => {
-    axios
-      .get(`http://localhost:3000/admin/albums/${albumId}/available-songs`)
-      .then(res => setSongs(res.data))
-      .catch(err => console.error("LOAD SONGS ERROR:", err));
-  };
+  const [selectAll, setSelectAll] = useState(false);
 
   useEffect(() => {
-    if (albumId) loadSongs();
+    axios
+      .get(`http://localhost:3000/admin/albums/${albumId}/available-songs`)
+      .then((res) => setSongs(res.data || []))
+      .catch(() => setSongs([]));
   }, [albumId]);
 
-  // ⭐ HANDLE ADD SONG
-  const handleAddSong = async (song) => {
-    const confirmAdd = window.confirm(
-      `Bạn có muốn thêm bài hát "${song.title}" vào album này?`
-    );
-    if (!confirmAdd) return;
+  const toggleSong = (id) => {
+    const updated = selectedSongs.includes(id)
+      ? selectedSongs.filter((x) => x !== id)
+      : [...selectedSongs, id];
 
-    try {
-      await axios.patch(
-        `http://localhost:3000/admin/albums/${albumId}/add-song/${song.id}`
-      );
+    onSelect(updated);
+  };
 
-      alert("Đã thêm bài hát vào album!");
-
-      // Reload danh sách sau khi thêm
-      loadSongs();
-
-    } catch (err) {
-      console.error("ADD SONG ERROR:", err);
-      alert("Lỗi khi thêm bài hát!");
+  const toggleAll = () => {
+    if (selectAll) {
+      setSelectAll(false);
+      onSelect([]);
+    } else {
+      setSelectAll(true);
+      onSelect(songs.map((s) => s.id));
     }
   };
 
   return (
     <div className="alb-selector">
-      {songs.length === 0 ? (
-        <p className="alb-empty">Không có bài hát phù hợp</p>
-      ) : (
-        <ul className="alb-list">
-          {songs.map(song => (
-            <li key={song.id} className="alb-item">
-              <div className="alb-info">
-                <span className="song-title">{song.title}</span>
-                <span className="song-artist">{song.artist_name}</span>
-              </div>
+      <div className="song-table-container">
+        <table className="song-table">
+          <thead>
+            <tr>
+              <th className="center">
+                <input type="checkbox" checked={selectAll} onChange={toggleAll} />
+              </th>
+              <th>Tên bài hát</th>
+              <th>Nghệ sĩ</th>
+              <th>Thời lượng</th>
+              <th>Ngày tạo</th>
+            </tr>
+          </thead>
 
-              <button
-                className="alb-add-btn"
-                onClick={() => handleAddSong(song)}
-              >
-                Thêm
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
+          <tbody>
+            {songs.length === 0 ? (
+              <tr>
+                <td colSpan="5" className="alb-empty">
+                  Không còn bài hát nào để thêm
+                </td>
+              </tr>
+            ) : (
+              songs.map((song) => (
+                <tr key={song.id} className="song-row">
+                  <td className="center">
+                    <input
+                      type="checkbox"
+                      checked={selectedSongs.includes(song.id)}
+                      onChange={() => toggleSong(song.id)}
+                    />
+                  </td>
+                  <td className="song-title">{song.title}</td>
+                  <td className="song-artist">
+                    {song.artist_name || "—"}
+                  </td>
+                  <td>{song.duration || "—"}</td>
+                  <td>{song.created_at?.slice(0, 10)}</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

@@ -1,24 +1,156 @@
+/* ============================
+   OVERLAY
+============================ */
+.albumcreate-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(3px); /* hiệu ứng nền đẹp */
+  z-index: 9999;
+}
+
+/* ============================
+   MODAL BOX
+============================ */
+.albumcreate-modal {
+  background: #181818;
+  padding: 28px;
+  border-radius: 14px;
+  width: 650px;        /* ⭐ RỘNG HƠN */
+  max-width: 95%;   
+  color: white;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.45);
+  animation: modalFade 0.25s ease;
+  position: relative;
+  max-height: 90vh;        /* ⭐ GIỚI HẠN CHIỀU CAO */
+  overflow-y: auto;  
+}
+
+/* Animation mở modal */
+@keyframes modalFade {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================
+   TITLE
+============================ */
+.albumcreate-title {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 18px;
+}
+
+/* ============================
+   FORM ELEMENTS
+============================ */
 .album-form {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
 }
 
 .album-form label {
   font-weight: 600;
-  margin-bottom: -6px;
+  font-size: 14px;
+  margin-bottom: 4px;
+  color: #dddddd;
 }
 
-.album-form input {
-  padding: 10px 14px;
+.album-form input,
+.album-form textarea,
+.album-form select {
+  padding: 12px 14px;
   border-radius: 8px;
-  border: 1px solid #444;
-  background: #2b2b2b;
+  border: 1px solid #333;
+  background: #222;
   color: white;
+  width: 100%;
+  font-size: 15px;
   outline: none;
   transition: 0.2s;
 }
 
-.album-form input:focus {
-  border-color: #3498db;
+.album-form input:focus,
+.album-form textarea:focus,
+.album-form select:focus {
+  border-color: #1db954;
+  box-shadow: 0 0 0 2px rgba(29, 185, 84, 0.35);
+}
+
+.album-form textarea {
+  resize: vertical;
+}
+
+/* ============================
+   BUTTONS
+============================ */
+.albumcreate-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+
+.btn-submit {
+  background: #1db954;
+  padding: 12px 22px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  color: white;
+  font-size: 15px;
+  transition: 0.25s;
+}
+
+.btn-submit:hover {
+  background: #17a84c;
+}
+
+.btn-cancel {
+  background: #444;
+  padding: 12px 22px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  color: white;
+  font-weight: 500;
+  font-size: 15px;
+  transition: 0.25s;
+}
+
+.btn-cancel:hover {
+  background: #555;
+}
+
+/* ============================
+   CLOSE BUTTON (X)
+============================ */
+.close-modal-btn {
+  position: absolute;
+  right: 18px;
+  top: 18px;
+  background: transparent;
+  color: #aaa;
+  font-size: 22px;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.close-modal-btn:hover {
+  color: #fff;
+}
+
+.albumcreate-modal::-webkit-scrollbar {
+  display: none; /* Ẩn scrollbar (Chrome, Edge, Safari) */
+}
+
+.albumcreate-modal {
+  -ms-overflow-style: none;  /* Ẩn scrollbar (IE, Edge cũ) */
+  scrollbar-width: none;     /* Ẩn scrollbar (Firefox) */
 }

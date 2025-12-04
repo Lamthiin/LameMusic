@@ -30,7 +30,7 @@ export class AdminAlbumController {
 
   @Get(':id/available-songs')
   getAvailableSongs(@Param('id') id: number) {
-    return this.service.findAvailableSongs(+id);
+    return this.service.findAvailableSongs();
   }
 
   // ⭐ ĐẶT TRƯỚC — ROUTE FULL CHI TIẾT
@@ -76,10 +76,28 @@ updateInfo(
   return this.service.updateAlbumInfo(+id, info);
 }
 
+@Patch(':id/add-song')
+addSongToAlbum(
+  @Param('id') id: number,
+  @Body('songId') songId: number,
+) {
+  return this.service.addSongToAlbum(+id, +songId);
+}
 
-  // XOÁ
-  @Delete(':id')
-  delete(@Param('id') id: number) {
-    return this.service.delete(+id);
-  }
+Y
+
+
+// XOÁ ALBUM (SOFT DELETE: active = 0)
+@Delete(':id')
+delete(@Param('id') id: number) {
+  return this.service.softDelete(+id);
+}
+
+// KHÔI PHỤC ALBUM (active = 1)
+@Patch(':id/restore')
+restore(@Param('id') id: number) {
+  return this.service.restore(+id);
+}
+
+
 }

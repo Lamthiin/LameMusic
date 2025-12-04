@@ -9,6 +9,7 @@ import AlbumViewModal from "../../components/admin/AlbumViewModal";
 
 import AlbumCreateModal from "../../components/admin/AlbumCreateModal";
 import AlbumEditModal from "../../components/admin/AlbumEditModal";
+import AlbumHiddenList from "../../components/admin/AlbumHiddenList";
 
 export default function ManageAlbum() {
   const [tab, setTab] = useState("all");
@@ -140,11 +141,19 @@ export default function ManageAlbum() {
       )}
 
       {tab === "hidden" && (
-        <AlbumList
+        <AlbumHiddenList
           albums={albumsHidden}
           onView={openView}
-          onEdit={openEdit}
-          onDelete={handleDelete}
+          onRestore={async (id) => {
+            if (!window.confirm("Bạn chắc chắn muốn khôi phục album này?")) return;
+            try {
+              await axios.patch(`http://localhost:3000/admin/albums/${id}/restore`);
+              loadAlbums();
+              loadHiddenAlbums();
+            } catch (err) {
+              console.error("RESTORE ALBUM ERROR:", err);
+            }
+          }}
         />
       )}
     </div>
@@ -155,29 +164,62 @@ export default function ManageAlbum() {
         show={showCreate}
         onClose={() => setShowCreate(false)}
         onSubmit={async (data) => {
-          const formData = new FormData();
-          Object.entries(data).forEach(([k, v]) => formData.append(k, v));
-          await axios.post("http://localhost:3000/admin/albums", formData);
-          setShowCreate(false);
-          loadAlbums();
-        }}
+  const formData = new FormData();
+
+  formData.append("name", data.name);
+  formData.append("release_date", data.release_date);
+  formData.append("artist_id", data.artist_id);
+  formData.append("info", data.info);
+
+  if (data.cover) {               // ⭐ cần cái này
+    formData.append("cover", data.cover);
+  }
+
+  await axios.patch(
+    `http://localhost:3000/admin/albums/${editingAlbum.id}`,
+    formData,
+    {
+      headers: { "Content-Type": "multipart/form-data" }
+    }
+  );
+
+  setShowEdit(false);
+  loadAlbums();
+}}
+
       />
     )}
 
     {showEdit && (
       <AlbumEditModal
-        show={showEdit}
-        onClose={() => setShowEdit(false)}
-        initialData={editingAlbum}
-        onSubmit={async (data) => {
-          const formData = new FormData();
-          Object.entries(data).forEach(([k, v]) => formData.append(k, v));
-          await axios.patch(`http://localhost:3000/admin/albums/${editingAlbum.id}`, formData);
-          setShowEdit(false);
-          loadAlbums();
-        }}
-      />
+  show={showEdit}
+  onClose={() => setShowEdit(false)}
+  initialData={editingAlbum}
+  onSubmit={async (data) => {
+
+    const formData = new FormData();
+    formData.append("name", data.name);
+    formData.append("release_date", data.release_date);
+    formData.append("artist_id", data.artist_id);
+    formData.append("info", data.info);
+
+    // Nếu có file ảnh mới → thêm vào formData
+    if (data.coverFile) {
+      formData.append("cover", data.coverFile);
+    }
+
+    await axios.patch(
+      `http://localhost:3000/admin/albums/${editingAlbum.id}`,
+      formData
+    );
+
+    setShowEdit(false);
+    loadAlbums();
+  }}
+/>
+
     )}
+
 
     {showView && (
       <AlbumViewModal

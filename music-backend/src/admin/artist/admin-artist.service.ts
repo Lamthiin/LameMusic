@@ -4,6 +4,7 @@ import { Repository, IsNull, Not } from 'typeorm';
 import { Artist } from '../../artist/artist.entity';
 import { User } from '../../user/user.entity';
 import { Role } from '../../role/role.entity';
+import { R2Service } from 'src/shared/r2.service';
 
 @Injectable()
 export class AdminArtistService {
@@ -14,7 +15,15 @@ export class AdminArtistService {
     private userRepository: Repository<User>,
     @InjectRepository(Role)
     private roleRepository: Repository<Role>,
+    private readonly r2: R2Service, 
   ) {}
+
+  async findAll() {
+    return this.artistRepository.find({
+      order: { stage_name: "ASC" }
+    });
+  }
+
 
   // DANH SÁCH PENDING
   findPending() {
@@ -97,34 +106,69 @@ export class AdminArtistService {
   }
 
   // THÊM ARTIST (Admin thêm)
-  async createArtist(data: any) {
-    const newArtist = this.artistRepository.create({
-      stage_name: data.stage_name,
-      bio: data.bio || '',
-      avatar_url: data.avatar_url || null,
-      registrationStatus: 'APPROVED',
-      active: 1,
-      user: null,
-    });
+  async createArtist(data: any, file?: Express.Multer.File) {
+  let avatarUrl: string | null = null;
 
-    return this.artistRepository.save(newArtist);
+  if (file) {
+    const uploaded = await this.r2.uploadFile(
+      "artistscover",
+      file.originalname,
+      file.buffer,
+      file.mimetype,
+    );
+    avatarUrl = uploaded.url;
+  } else {
+    // fallback ảnh mặc định
+    avatarUrl = "/uploads/defaults/default-artist.png";
   }
+
+  const artist = this.artistRepository.create({
+    stage_name: data.stage_name,
+    bio: data.bio || "",
+    avatar_url: avatarUrl,
+    registrationStatus: "APPROVED",
+    active: 1,
+    user: null,
+  });
+
+  return this.artistRepository.save(artist);
+}
+
 
 
   // UPDATE ARTIST
   async updateArtist(id: number, data: any, file?: Express.Multer.File) {
-    const artist = await this.artistRepository.findOne({ where: { id } });
-    if (!artist) throw new NotFoundException('Artist không tồn tại');
+  const artist = await this.artistRepository.findOne({ where: { id } });
+  if (!artist) throw new NotFoundException("Artist không tồn tại");
 
-    if (data.stage_name !== undefined) artist.stage_name = data.stage_name;
-    if (data.bio !== undefined) artist.bio = data.bio;
+  if (data.stage_name !== undefined) artist.stage_name = data.stage_name;
+  if (data.bio !== undefined) artist.bio = data.bio;
 
-    if (file) {
-      artist.avatar_url = `/uploads/avatars/${file.filename}`;
+  // ⭐ Nếu có ảnh mới → upload lên Cloudflare R2
+  if (file) {
+
+    // XÓA ẢNH CŨ nếu có
+    if (artist.avatar_url && artist.avatar_url.includes("r2.dev")) {
+      try {
+        await this.r2.deleteFileByUrl(artist.avatar_url);
+      } catch (err) {
+        console.warn("Không thể xoá ảnh cũ R2:", err.message);
+      }
     }
 
-    return this.artistRepository.save(artist);
+    // UPLOAD ẢNH MỚI
+    const uploaded = await this.r2.uploadFile(
+      "artistscover",
+      file.originalname,
+      file.buffer,
+      file.mimetype,
+    );
+
+    artist.avatar_url = uploaded.url; // ⭐ URL thật từ Cloudflare
   }
+
+  return this.artistRepository.save(artist);
+}
 
 
   // XOÁ HỒ SƠ (soft delete)

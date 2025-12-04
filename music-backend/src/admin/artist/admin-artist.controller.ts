@@ -21,17 +21,27 @@ export class AdminArtistController {
   private fixAvatar(artist: any) {
   if (!artist) return artist;
 
-  if (artist.avatar_url) {
-    // đổi backslash thành slash
-    let url = artist.avatar_url.replace(/\\/g, '/');
+  // Nếu avatar đã là URL Cloudflare thì giữ nguyên
+  if (artist.avatar_url?.startsWith("http")) {
+    return artist;
+  }
 
+  // Nếu avatar là local thì thêm localhost
+  if (artist.avatar_url) {
+    const url = artist.avatar_url.replace(/\\/g, "/");
     artist.avatar_url = `http://localhost:3000${url}`;
   } else {
-    artist.avatar_url = `http://localhost:3000/uploads/defaults/default-artist.png`;
+    artist.avatar_url = "http://localhost:3000/uploads/defaults/default-artist.png";
   }
 
   return artist;
 }
+
+  @Get()
+  async getAll() {
+    const list = await this.service.findAll(); // service bạn sẽ gọi method findAll
+    return list.map(a => this.fixAvatar(a));
+  }
 
   @Get('pending')
   async getPending() {
@@ -82,16 +92,14 @@ export class AdminArtistController {
   }
 
   @Post()
-  @UseInterceptors(FileInterceptor('avatarFile'))
+  @UseInterceptors(FileInterceptor('avatar'))
   createArtist(
     @UploadedFile() file: Express.Multer.File,
     @Body() body: any,
   ) {
-    return this.service.createArtist({
-      ...body,
-      avatar_url: file ? `/uploads/avatars/${file.filename}` : null,
-    });
+    return this.service.createArtist(body, file);
   }
+
 
 
   @Get('internal')

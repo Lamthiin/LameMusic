@@ -206,35 +206,3 @@
   display: flex;
   justify-content: space-between;
 }
-
-.btn-addsong {
-  background: #27ae60;
-  padding: 10px 18px;
-  border-radius: 10px;
-  border: none;
-  cursor: pointer;
-  color: white;
-  font-weight: 600;
-  transition: 0.2s;
-}
-
-.btn-addsong:hover {
-  background: #1e8f50;
-  transform: translateY(-2px);
-}
-
-.btn-close {
-  background: #e74c3c;
-  padding: 10px 18px;
-  border-radius: 10px;
-  border: none;
-  cursor: pointer;
-  color: white;
-  font-weight: 600;
-  transition: 0.2s;
-}
-
-.btn-close:hover {
-  background: #c0392b;
-  transform: translateY(-2px);
-}

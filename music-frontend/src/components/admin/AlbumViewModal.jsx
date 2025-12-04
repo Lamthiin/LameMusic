@@ -87,17 +87,7 @@ export default function AlbumViewModal({ album, isOpen, onClose, onAddSong }) {
           )}
         </div>
 
-        {/* ACTION BAR */}
-        <div className="detail-actions">
-          <button className="btn-addsong" onClick={() => onAddSong(album.id, album.name)}>
-            + Thêm bài hát
-          </button>
-
-          <button className="btn-close" onClick={onClose}>
-            Đóng
-          </button>
-        </div>
-
+        
       </div>
     </div>
   );

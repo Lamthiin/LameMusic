@@ -36,7 +36,8 @@ export default function AlbumCreateModal({ show, onClose, onSubmit }) {
       release_date: releaseDate,
       artist_id: artist.id,
       info,
-      coverFile,
+      cover: coverFile,
+      active: 1,
     });
 
     onClose();
@@ -47,14 +48,15 @@ export default function AlbumCreateModal({ show, onClose, onSubmit }) {
       <div className="albumcreate-modal" onClick={(e) => e.stopPropagation()}>
 
         {/* CLOSE BUTTON */}
-        <button className="modal-close-btn" onClick={onClose}>
+        <button className="close-modal-btn" onClick={onClose}>
           <FaTimes />
         </button>
 
         {/* TITLE */}
-        <h2 className="modal-title">Tạo Album Mới</h2>
+        <h2 className="albumcreate-title">Tạo Album Mới</h2>
 
-        <form className="modal-form" onSubmit={handleSubmit}>
+        {/* FORM */}
+        <form className="album-form" onSubmit={handleSubmit}>
 
           {error && <p className="modal-error">{error}</p>}
 
@@ -63,15 +65,11 @@ export default function AlbumCreateModal({ show, onClose, onSubmit }) {
             <label>Ảnh bìa</label>
 
             <div className="cover-preview-container">
-              <img src={preview} className="cover-preview" />
+              <img src={preview} className="cover-preview" alt="preview" />
 
               <label className="change-cover-btn">
                 Chọn ảnh
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                />
+                <input type="file" accept="image/*" onChange={handleFileChange} />
               </label>
             </div>
           </div>
@@ -90,10 +88,7 @@ export default function AlbumCreateModal({ show, onClose, onSubmit }) {
           {/* ARTIST */}
           <div className="form-group">
             <label>Nghệ sĩ</label>
-            <AlbumArtistSelector
-              selected={artist}
-              onSelect={setArtist}
-            />
+            <AlbumArtistSelector selected={artist} onSelect={setArtist} />
           </div>
 
           {/* RELEASE DATE */}
@@ -106,8 +101,8 @@ export default function AlbumCreateModal({ show, onClose, onSubmit }) {
             />
           </div>
 
-          {/* INFO */}
-          <div className="form-group full-width">
+          {/* DESCRIPTION */}
+          <div className="form-group">
             <label>Mô tả</label>
             <textarea
               rows="3"
@@ -117,9 +112,13 @@ export default function AlbumCreateModal({ show, onClose, onSubmit }) {
             ></textarea>
           </div>
 
-          {/* SUBMIT */}
-          <div className="submit-container">
-            <button type="submit" className="create-btn">
+          {/* ACTION BUTTONS */}
+          <div className="albumcreate-actions">
+            <button type="button" className="btn-cancel" onClick={onClose}>
+              Hủy
+            </button>
+
+            <button type="submit" className="btn-submit">
               Tạo Album
             </button>
           </div>

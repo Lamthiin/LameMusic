@@ -21,8 +21,9 @@ import { AdminGenreController } from "./genre/admin-genre.controller";
 import { AdminGenreService } from "./genre/admin-genre.service";
 import { Category } from "../category/category.entity";
 import { CategoryModule } from '../category/category.module';
+import { SharedModule } from '../shared/shared.module';
 
-
+import * as multer from 'multer';
 
 @Module({
   imports: [
@@ -32,18 +33,14 @@ import { CategoryModule } from '../category/category.module';
       Role,
       Album,   // ⭐ BẮT BUỘC
       Song, 
-      Category,   // ⭐ BẮT BUỘC
+      Category,
+         // ⭐ BẮT BUỘC
     ]),
+    SharedModule,
     CategoryModule,   // ⭐ BẮT BUỘC
     MulterModule.register({
-      storage: diskStorage({
-        destination: './uploads/avatars',
-        filename: (req, file, cb) => {
-          const unique = Date.now() + '-' + file.originalname;
-          cb(null, unique);
-        },
-      }),
-    }),
+  storage: multer.memoryStorage(),
+}),
 
     ManageSongModule,
   ],
