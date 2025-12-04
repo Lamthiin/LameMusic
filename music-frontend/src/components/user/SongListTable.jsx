@@ -128,6 +128,7 @@ const SongListTable = ({ songs = [], onRemoveSong }) => {
 
   return (
     <div className="song-list-table">
+
       {/* HEADER */}
       <div className={`table-header ${hasSelection ? 'has-selection' : ''}`}>
         <span className="header-checkbox" onClick={selectAll}>
@@ -198,10 +199,14 @@ const SongListTable = ({ songs = [], onRemoveSong }) => {
               <span className="col-plays">{(song.play_count || 0).toLocaleString()}</span>
               <span className="col-duration">{formatDuration(song.duration)}</span>
 
-              {/* CÁC NÚT XÓA / BỎ THÍCH */}
+              {/* NÚT BỎ THÍCH */}
               <div className="col-options" onClick={(e) => e.stopPropagation()}>
                 {onRemoveSong && (
-                  <button className="btn-icon btn-remove" title="Xóa" onClick={() => onRemoveSong(song.id)}>
+                  <button
+                    className="btn-icon btn-remove"
+                    title="Bỏ thích"
+                    onClick={() => onRemoveSong(song.id)}
+                  >
                     <FaTimes size={14} />
                   </button>
                 )}

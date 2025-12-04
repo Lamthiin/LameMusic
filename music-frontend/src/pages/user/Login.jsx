@@ -41,9 +41,12 @@ const Login = () => {
       await login(email, password); 
       
     } catch (err) {
-      // Xử lý lỗi từ Backend (sai email/pass hoặc chưa active)
-      setError(err.response?.data?.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại.');
-    }
+            if (err.response?.status === 429) {
+                setError('Bạn đã nhập sai/gửi quá nhiều yêu cầu. Vui lòng thử lại sau 30 phút.');
+            } else {
+                setError(err.response?.data?.message || 'Đăng nhập thất bại.');
+            }
+          }
   };
 
   return (

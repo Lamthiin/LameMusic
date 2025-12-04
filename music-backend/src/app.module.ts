@@ -27,6 +27,7 @@ import { ManageUserModule } from './admin/manage-user/manage-user.module';
 import { DashboardModule } from './admin/dashboard/dashboard.module';
 import { ReportModule } from './report/report.module'; // <-- IMPORT MỚI
 import { NotificationModule } from './notification/notification.module';
+import { RateLimitModule } from './common/rate-limit.module'; // <-- IMPORT MỚI
 
 @Module({
   imports: [
@@ -40,12 +41,12 @@ import { NotificationModule } from './notification/notification.module';
       host: 'localhost',
       port: 3306,
       username: 'root', // Đảm bảo đúng username
-      password: '123456',     // Đảm bảo đúng password
+      password: 'root',     // Đảm bảo đúng password
       database: 'musicdb',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: false, 
     }),
-    
+
     // 2. Các module tính năng
     RoleModule,
     UserModule,
@@ -65,6 +66,7 @@ import { NotificationModule } from './notification/notification.module';
     DashboardModule,
     ReportModule,
     NotificationModule,
+    RateLimitModule,
   ],
   
   controllers: [AppController],

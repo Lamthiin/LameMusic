@@ -8,19 +8,20 @@ import { SharedModule } from '../shared/shared.module'; // <-- (2) IMPORT SHARED
 import { Otp } from '../totp/totp.entity'; // <-- (1) IMPORT OTP
 
 // Imports Entity và DTO
-import { AuthService } from './auth.service';
-import { AuthController } from './auth.controller';
 import { UserModule } from '../user/user.module'; 
 import { RoleModule } from '../role/role.module'; 
 import { User } from '../user/user.entity';
 import { Role } from '../role/role.entity';
 import { JwtStrategy } from './jwt.strategy'; 
+import { RateLimitModule } from '../common/rate-limit.module';
+import { AuthController } from './auth.controller'; 
+import { AuthService } from './auth.service';
 
 @Module({
   imports: [
     // Phá vỡ vòng lặp (Circular Dependency) với UserModule
     forwardRef(() => UserModule), 
-    
+    RateLimitModule,
     RoleModule, 
     TypeOrmModule.forFeature([User, Role, Otp]),
     

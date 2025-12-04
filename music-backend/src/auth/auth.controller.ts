@@ -1,86 +1,107 @@
-// music-backend/src/auth/auth.controller.ts (FULL CODE - OTP ENDPOINTS)
-import { 
-  Controller, Post, Body, ValidationPipe, 
-  Get, Query, Redirect, BadRequestException,
-  UseGuards, // <-- (1) IMPORT UseGuards
-  Req // <-- (2) IMPORT Req
+// music-backend/src/auth/auth.controller.ts (FULL + CLEAN)
+import {
+  Controller,
+  Post,
+  Body,
+  ValidationPipe,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
-import { JwtPayload } from './jwt.strategy';
-import { AuthGuard } from '@nestjs/passport'; // <-- IMPORT MỚI
+
+import { AuthGuard } from '@nestjs/passport';
 
 import { AuthService } from './auth.service';
+
 import { RegisterAuthDto } from './dto/register-auth.dto';
 import { LoginAuthDto } from './dto/login-auth.dto';
-import { VerifyOtpDto } from './dto/verify-otp.dto'; // <-- IMPORT DTO MỚI
+import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { ResendOtpDto } from './dto/resend-otp.dto';
-import { ForgotPasswordDto } from './dto/forgot-password.dto'; // <-- IMPORT MỚI
-import { ResetPasswordWithOtpDto } from './dto/reset-password-with-otp.dto'; // <-- IMPORT MỚI
-import { ChangePasswordDto } from './dto/change-password.dto'; // <-- IMPORT MỚI
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordWithOtpDto } from './dto/reset-password-with-otp.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
-@Controller('auth') 
+import { JwtPayload } from './jwt.strategy';
+import { Throttle } from '@nestjs/throttler';
+
+@Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-  
+
   /**
-   * ENDPOINT: POST /auth/register (Tạo user INACTIVE và gửi OTP)
+   * REGISTER — tạo user inactive và gửi OTP
+   * POST /auth/register
    */
-  @Post('/register') 
+  @Post('/register')
   register(@Body(ValidationPipe) registerAuthDto: RegisterAuthDto) {
     return this.authService.register(registerAuthDto);
   }
 
   /**
-   * ENDPOINT: POST /auth/login (Chỉ đăng nhập nếu user.active = true)
+   * LOGIN — kiểm tra rate limit trong service
+   * POST /auth/login
    */
-  @Post('/login') 
-  login(@Body(ValidationPipe) loginAuthDto: LoginAuthDto) {
-    return this.authService.login(loginAuthDto);
+  @Post('/login')
+  async login(@Body(ValidationPipe) loginDto: LoginAuthDto) {
+    return this.authService.login(loginDto);
   }
 
   /**
-   * ENDPOINT MỚI: POST /auth/verify-otp (Xác nhận mã OTP)
+   * RESEND OTP — giới hạn 5 lần / 30 phút
+   * POST /auth/resend-otp
+   */
+  @Throttle({ default: { limit: 5, ttl: 30 * 60 * 1000 } })
+  @Post('/resend-otp')
+  resendOtp(@Body(ValidationPipe) resendOtpDto: ResendOtpDto) {
+    return this.authService.resendOtp(resendOtpDto);
+  }
+
+  /**
+   * VERIFY OTP — kích hoạt tài khoản
+   * POST /auth/verify-otp
    */
   @Post('/verify-otp')
   async verifyOtp(@Body(ValidationPipe) verifyOtpDto: VerifyOtpDto) {
     await this.authService.verifyOtp(verifyOtpDto.email, verifyOtpDto.otpCode);
     return { message: 'Xác nhận tài khoản thành công! Vui lòng đăng nhập.' };
   }
-  
-  // API link cũ GET /auth/confirm ĐÃ BỊ XÓA
 
-  @Post('resend-otp')
-  resendOtp(@Body() resendOtpDto: ResendOtpDto) {
-    return this.authService.resendOtp(resendOtpDto);
-  }
-
+  /**
+   * FORGOT PASSWORD — gửi OTP khôi phục mật khẩu
+   * POST /auth/forgot-password
+   */
   @Post('/forgot-password')
-  forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+  forgotPassword(@Body(ValidationPipe) forgotPasswordDto: ForgotPasswordDto) {
     return this.authService.forgotPasswordOtp(forgotPasswordDto);
   }
 
-  // === ENDPOINT 6: ĐẶT LẠI MẬT KHẨU (DÙNG OTP) ===
+  /**
+   * RESET PASSWORD WITH OTP
+   * POST /auth/reset-password-otp
+   */
   @Post('/reset-password-otp')
-  resetPassword(@Body() resetPasswordDto: ResetPasswordWithOtpDto) {
-    // Trả về { message: 'Mật khẩu đã được đặt lại thành công. Bạn có thể đăng nhập.' }
+  resetPassword(@Body(ValidationPipe) resetPasswordDto: ResetPasswordWithOtpDto) {
     return this.authService.resetPasswordOtp(resetPasswordDto);
   }
-/**
-   * ENDPOINT MỚI: POST /auth/change-password (Đổi pass khi đã login)
+
+  /**
+   * CHANGE PASSWORD (đã đăng nhập)
+   * POST /auth/change-password
    */
-  @UseGuards(AuthGuard('jwt')) 
+  @UseGuards(AuthGuard('jwt'))
   @Post('/change-password')
   async changePassword(
     @Req() req: any,
-    @Body(ValidationPipe) changePasswordDto: ChangePasswordDto
+    @Body(ValidationPipe) changePasswordDto: ChangePasswordDto,
   ) {
     const userId = (req.user as JwtPayload).userId;
     return this.authService.changePassword(userId, changePasswordDto);
   }
-  
+
   /**
-   * ENDPOINT MỚI: POST /auth/request-reset-otp (Khi đã đăng nhập)
+   * REQUEST PASSWORD RESET OTP (đã đăng nhập)
+   * POST /auth/request-reset-otp
    */
-  @UseGuards(AuthGuard('jwt')) 
+  @UseGuards(AuthGuard('jwt'))
   @Post('/request-reset-otp')
   async requestResetOtp(@Req() req: any) {
     const userId = (req.user as JwtPayload).userId;
