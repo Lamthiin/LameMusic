@@ -1,115 +1,236 @@
-/* Tabs */
+/* WRAPPER */
+.report-wrapper {
+  padding: 10px 0;
+}
+
+/* TABS */
 .report-tabs {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   margin-bottom: 15px;
+  margin-top: -10px; /* kéo tab lại gần search */
 }
 
 .report-tab {
-  padding: 8px 16px;
-  border-radius: 999px;
-  border: 1px solid #444;
-  background: transparent;
-  color: #ddd;
+  padding: 8px 20px;
+  background: #222;
+  border: 1px solid #333;
+  border-radius: 20px;
+  color: #ccc;
   cursor: pointer;
+  transition: 0.2s;
 }
 
 .report-tab.active {
-  background: #1db954;
+  background: #00a86b;
+  border-color: #00a86b;
   color: white;
-  border-color: #1db954;
 }
 
-/* Status badge */
+/* BADGES */
 .status-badge {
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 11px;
-  color: #fff;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  color: white;
 }
 
 .status-badge.pending {
-  background: #ff9800;
+  background: #f5a623;
 }
-.status-badge.in_review {
-  background: #1e88e5;
-}
+
 .status-badge.resolved {
-  background: #4caf50;
+  background: #28a745;
 }
+
 .status-badge.rejected {
-  background: #e53935;
+  background: #dc3545;
 }
 
-/* Buttons */
-.view-btn {
-  background: #1e88e5;
-  padding: 6px 14px;
-  border: none;
-  color: white;
+.report-view-btn {
+  padding: 6px 12px;
+  background: #007bff;
   border-radius: 6px;
-}
-
-.resolve-btn {
-  background: #1db954;
-  padding: 8px 20px;
-  border-radius: 8px;
   border: none;
   color: white;
+  cursor: pointer;
 }
 
-.reject-btn {
-  background: #e53935;
-  padding: 8px 20px;
-  border-radius: 8px;
-  border: none;
-  color: white;
-}
-
-.popup-cancel {
-  background: #555;
-  padding: 8px 20px;
-  border-radius: 8px;
-  color: white;
-  border: none;
-}
-
-/* Popup wrapper */
-.popup-overlay {
+/* POPUP */
+.report-popup-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.55);
+  background: rgba(0,0,0,0.65);
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.popup-card {
-  width: 450px;
-  background: #121212;
-  border-radius: 14px;
-  padding: 20px;
+.report-popup-card {
+  width: 520px;
+  background: #111;
+  padding: 28px;
+  border-radius: 12px;
+}
+
+.report-popup-title {
   color: white;
+  margin-bottom: 15px;
+  font-size: 22px;
+  font-weight: bold;
 }
 
-.popup-group {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 12px;
+.report-popup-group {
+  margin-bottom: 15px;
 }
 
-.popup-group input,
-.popup-group textarea {
-  background: #1f1f1f;
+.report-popup-group label {
+  color: #bbb;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.report-popup-group input,
+.report-popup-group textarea {
+  width: 100%;
+  padding: 10px;
+  background: #1c1c1c;
   border: 1px solid #333;
   border-radius: 8px;
-  padding: 10px;
   color: white;
 }
 
-.popup-footer {
+/* BUTTONS */
+.report-popup-actions {
   display: flex;
-  justify-content: flex-end;
-  margin-top: 12px;
-  gap: 10px;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
 }
+
+.resolve-btn,
+.reject-btn,
+.close-btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  color: white;
+}
+
+.resolve-btn {
+  background: #28a745;
+}
+
+.reject-btn {
+  background: #dc3545;
+}
+
+.close-btn {
+  background: #666;
+}
+
+/* Popup overlay */
+.report-popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Popup card */
+.report-popup-card {
+  background: #111;
+  padding: 28px;
+  width: 550px;
+  border-radius: 14px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.6);
+}
+
+/* Title */
+.report-popup-title {
+  color: white;
+  font-size: 22px;
+  margin-bottom: 18px;
+  font-weight: bold;
+}
+
+/* Input group spacing */
+.report-popup-group {
+  margin-bottom: 14px;
+}
+
+.report-popup-group label {
+  display: block;
+  margin-bottom: 6px;
+  color: #bbb;
+  font-size: 14px;
+}
+
+.report-popup-group input,
+.report-popup-group textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  background: #1b1b1b;
+  border: 1px solid #333;
+  color: white;
+}
+
+/* ACTION BUTTON ROW */
+.report-popup-actions {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;   /* Left group + Close button tách nhau */
+  align-items: center;
+}
+
+/* Left buttons: resolve + reject */
+.left-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+/* Buttons */
+.report-resolve-btn {
+  background: #28a745;
+  padding: 10px 20px;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+}
+
+.report-reject-btn {
+  background: #dc3545;
+  padding: 10px 20px;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+}
+
+.report-close-btn {
+  background: #666;
+  padding: 10px 20px;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+}
+
+/* Remove default outline & border on buttons */
+.report-resolve-btn,
+.report-reject-btn,
+.report-close-btn {
+  border: none !important;
+  outline: none !important;
+}
+
+.report-resolve-btn:focus,
+.report-reject-btn:focus,
+.report-close-btn:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+

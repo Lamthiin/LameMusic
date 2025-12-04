@@ -1,70 +1,75 @@
 import React, { useEffect, useState } from "react";
 import "./ReportTab.css";
 
-const STATUS_LIST = ["PENDING", "IN_REVIEW", "RESOLVED", "REJECTED"];
+const STATUS_LIST = ["PENDING", "RESOLVED", "REJECTED"];
 
 export default function ReportTab() {
   const [reports, setReports] = useState([]);
   const [activeFilter, setActiveFilter] = useState("PENDING");
   const [selectedReport, setSelectedReport] = useState(null);
 
-  // Mock data test giao diện
-  useEffect(() => {
-    const mock = [
-      {
-        id: 1,
-        user_id: 12,
-        user_name: "User #12",
-        song_id: 5,
-        song_title: "Bài hát ABC",
-        title: "Nội dung không phù hợp",
-        description: "Chứa lời lẽ nhạy cảm",
-        status: "PENDING",
-      },
-    ];
-    setReports(mock);
-  }, []);
+  // ===============================
+  // 🚀 FETCH REPORTS
+  // ===============================
+  const fetchReports = async () => {
+    try {
+      const res = await fetch(
+        `http://localhost:3000/admin/report?status=${activeFilter}`
+      );
 
-  // Cập nhật trạng thái
-  const updateStatus = (id, newStatus) => {
-    setReports((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, status: newStatus } : r))
-    );
+      const data = await res.json();
 
-    // cập nhật popup
-    setSelectedReport((prev) =>
-      prev ? { ...prev, status: newStatus } : prev
-    );
-  };
+      if (!Array.isArray(data)) return;
 
-  // Khi admin nhấn XEM
-  const handleView = (report) => {
-    let updated = report;
-
-    // PENDING => auto chuyển sang IN_REVIEW
-    if (report.status === "PENDING") {
-      updated = { ...report, status: "IN_REVIEW" };
-      updateStatus(report.id, "IN_REVIEW");
+      setReports(
+        data.map((r) => ({
+          id: r.id,
+          user_name: r.user?.username ?? "Unknown",
+          song_title: r.song?.title ?? "—",
+          title: r.title,
+          description: r.description,
+          status: r.status,
+        }))
+      );
+    } catch (err) {
+      console.error("❌ Fetch reports error:", err);
     }
-
-    setSelectedReport(updated);
   };
 
-  // Lọc theo tab
-  const filteredReports = reports.filter(
-    (r) => r.status === activeFilter
-  );
+  useEffect(() => {
+    fetchReports();
+  }, [activeFilter]);
+
+  // ===============================
+  // 🚀 CALL API RESOLVE / REJECT
+  // ===============================
+  const handleResolve = async (id) => {
+    await fetch(`http://localhost:3000/admin/report/${id}/resolve`, {
+      method: "PATCH",
+    });
+
+    setSelectedReport(null);
+    fetchReports();
+  };
+
+  const handleReject = async (id) => {
+    await fetch(`http://localhost:3000/admin/report/${id}/reject`, {
+      method: "PATCH",
+    });
+
+    setSelectedReport(null);
+    fetchReports();
+  };
 
   return (
     <div className="report-wrapper">
-      {/* TAB LỚN */}
+
+      {/* FILTER TABS */}
       <div className="report-tabs">
         {STATUS_LIST.map((st) => (
           <button
             key={st}
-            className={
-              "report-tab" + (activeFilter === st ? " active" : "")
-            }
+            className={`report-tab ${activeFilter === st ? "active" : ""}`}
             onClick={() => setActiveFilter(st)}
           >
             {st}
@@ -72,7 +77,7 @@ export default function ReportTab() {
         ))}
       </div>
 
-      {/* BẢNG */}
+      {/* TABLE */}
       <table className="admin-table">
         <thead>
           <tr>
@@ -87,14 +92,14 @@ export default function ReportTab() {
         </thead>
 
         <tbody>
-          {filteredReports.length === 0 ? (
+          {reports.length === 0 ? (
             <tr>
               <td colSpan={7} style={{ textAlign: "center", padding: 15 }}>
                 Không có báo cáo nào.
               </td>
             </tr>
           ) : (
-            filteredReports.map((r) => (
+            reports.map((r) => (
               <tr key={r.id}>
                 <td>{r.id}</td>
                 <td>{r.user_name}</td>
@@ -109,9 +114,16 @@ export default function ReportTab() {
                 </td>
 
                 <td>
-                  <button className="view-btn" onClick={() => handleView(r)}>
-                    Xem
-                  </button>
+                  {activeFilter === "PENDING" ? (
+                    <button
+                      className="report-view-btn"
+                      onClick={() => setSelectedReport(r)}
+                    >
+                      Xem
+                    </button>
+                  ) : (
+                    "—"
+                  )}
                 </td>
               </tr>
             ))
@@ -122,76 +134,60 @@ export default function ReportTab() {
       {/* POPUP */}
       {selectedReport && (
         <div
-          className="popup-overlay"
+          className="report-popup-overlay"
           onClick={() => setSelectedReport(null)}
         >
           <div
-            className="popup-card"
+            className="report-popup-card"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="popup-title">Thông tin Report</h3>
+            <h3 className="report-popup-title">Thông tin Report</h3>
 
-            <div className="popup-group">
+            <div className="report-popup-group">
               <label>User báo cáo</label>
               <input type="text" value={selectedReport.user_name} readOnly />
             </div>
 
-            <div className="popup-group">
+            <div className="report-popup-group">
               <label>Bài hát</label>
               <input type="text" value={selectedReport.song_title} readOnly />
             </div>
 
-            <div className="popup-group">
+            <div className="report-popup-group">
               <label>Tiêu đề report</label>
               <input type="text" value={selectedReport.title} readOnly />
             </div>
 
-            <div className="popup-group">
+            <div className="report-popup-group">
               <label>Mô tả</label>
-              <textarea
-                rows={4}
-                value={selectedReport.description}
-                readOnly
-              ></textarea>
+              <textarea rows={4} value={selectedReport.description} readOnly />
             </div>
 
-            {/* HÀNH ĐỘNG CHỈ HIỆN Ở IN_REVIEW */}
-            {selectedReport.status === "IN_REVIEW" && (
-              <div
-                className="popup-footer"
-                style={{ justifyContent: "flex-start", gap: "10px" }}
-              >
+            {/* BUTTON ROW */}
+            <div className="report-popup-actions">
+              <div className="left-buttons">
                 <button
-                  className="resolve-btn"
-                  onClick={() => {
-                    updateStatus(selectedReport.id, "RESOLVED");
-                    setSelectedReport(null);
-                  }}
+                  className="report-resolve-btn"
+                  onClick={() => handleResolve(selectedReport.id)}
                 >
                   Resolve
                 </button>
 
                 <button
-                  className="reject-btn"
-                  onClick={() => {
-                    updateStatus(selectedReport.id, "REJECTED");
-                    setSelectedReport(null);
-                  }}
+                  className="report-reject-btn"
+                  onClick={() => handleReject(selectedReport.id)}
                 >
                   Reject
                 </button>
               </div>
-            )}
 
-            <div className="popup-footer">
               <button
-                className="popup-cancel"
+                className="report-close-btn"
                 onClick={() => setSelectedReport(null)}
               >
                 Đóng
               </button>
             </div>
-
           </div>
         </div>
       )}

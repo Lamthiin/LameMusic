@@ -12,6 +12,7 @@ import { AdminArtistController } from './artist/admin-artist.controller';
 import { AdminArtistService } from './artist/admin-artist.service';
 
 import { ManageSongModule } from './manage-song/manage-song.module';
+import { ReportModule } from './report/report.module';
 import { MulterModule } from '@nestjs/platform-express/multer/multer.module';
 import { diskStorage } from 'multer';
 
@@ -37,12 +38,13 @@ import * as multer from 'multer';
          // ⭐ BẮT BUỘC
     ]),
     SharedModule,
-    CategoryModule,   // ⭐ BẮT BUỘC
+    CategoryModule,   
     MulterModule.register({
   storage: multer.memoryStorage(),
 }),
 
     ManageSongModule,
+    ReportModule,
   ],
 
   controllers: [AdminArtistController, AdminAlbumController, AdminGenreController,], // ⭐ THÊM AdminGenreController
