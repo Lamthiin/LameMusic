@@ -43,6 +43,13 @@ export class AdminArtistController {
     return list.map(a => this.fixAvatar(a));
   }
 
+  @Get('list-all')
+  async listAllApproved() {
+    const list = await this.service.findAllApprovedArtists();
+    return list.map(a => this.fixAvatar(a));
+  }
+
+
   @Get('pending')
   async getPending() {
     const list = await this.service.findPending();

@@ -15,6 +15,12 @@ import { R2Service } from '../../shared/r2.service';
 import { UpdateSongDto } from './dto/update-song.dto';
 import { Category } from '../../category/category.entity';
 import { Lyrics } from '../../lyrics/lyrics.entity';
+import * as mm from 'music-metadata';
+import { NotificationService } from '../../notification/notification.service';
+import { NotificationType } from '../../notification/notification.entity';
+
+
+
 
 
 @Injectable()
@@ -37,16 +43,25 @@ export class ManageSongService {
     private readonly categoryRepo: Repository<Category>,
 
     private readonly r2: R2Service,
+
+    private readonly notificationService: NotificationService, 
   ) {}
 
   // =============================
-  // 🟢 TẠO BÀI HÁT (UPLOAD)
+  //  TẠO BÀI HÁT (UPLOAD)
   // =============================
   async uploadSong(files: any, body: any) {
     console.log('FILES RECEIVED FROM FE:', files);
     console.log('BODY RECEIVED:', body);
 
     const audio = files?.audioFile?.[0];
+    // Đọc metadata từ file nhạc để lấy thời lượng
+    const metadata = await mm.parseBuffer(audio.buffer);
+    const detectedDuration = Math.floor(metadata.format.duration ?? 0);
+
+
+    console.log("⏱ Duration detected:", detectedDuration);
+
     const image = files?.imageFile?.[0];
 
     if (!audio || !image) {
@@ -54,7 +69,7 @@ export class ManageSongService {
     }
 
     // =============================
-    // 🟢 Xử lý nghệ sĩ
+    //  Xử lý nghệ sĩ
     // =============================
     // Artist ID từ FE
     const artistId = Number(body.artist);
@@ -66,15 +81,21 @@ export class ManageSongService {
     // Tìm artist theo ID
     const artist = await this.artistRepo.findOne({
       where: { id: artistId },
-    });
+    }) as Artist;
+
 
     if (!artist) {
       throw new NotFoundException("Artist không tồn tại");
     }
 
+    //  Fix 
+    if (artist.user_id == null) {
+      throw new BadRequestException("Artist chưa được liên kết với tài khoản User");
+    }
+
 
     // =============================
-    // 🟢 Xử lý album (optional)
+    //  Xử lý album (optional)
     // =============================
     let album: Album | null = null;
 
@@ -96,7 +117,7 @@ export class ManageSongService {
 
 
     // =============================
-    // 🟢 Xử lý thể loại Category
+    //  Xử lý thể loại Category
     // =============================
     const categoryId = Number(body.category);
 
@@ -115,7 +136,7 @@ export class ManageSongService {
 
 
     // =============================
-    // 🟢 Upload audio lên R2
+    //  Upload audio lên R2
     // =============================
     const audioUploaded = await this.r2.uploadFile(
       'music',
@@ -125,7 +146,7 @@ export class ManageSongService {
     );
 
     // =============================
-    // 🟢 Upload ảnh lên R2
+    //  Upload ảnh lên R2
     // =============================
     const imageUploaded = await this.r2.uploadFile(
       'covers',
@@ -135,11 +156,11 @@ export class ManageSongService {
     );
 
     // =============================
-    // 🟢 Lưu vào DB
+    //  Lưu vào DB
     // =============================
     const song = this.songRepo.create({
       title: body.title,
-      duration: Number(body.duration),
+      duration: detectedDuration,
       file_url: audioUploaded.url,
       image_url: imageUploaded.url,
       status: 'APPROVED',
@@ -154,7 +175,20 @@ export class ManageSongService {
     const savedSong = await this.songRepo.save(song);
 
     // =============================
-    // 🟢 LƯU LYRICS nếu FE gửi
+    //  GỬI THÔNG BÁO CHO NGHỆ SĨ
+    // =============================
+    await this.notificationService.createNotificationForUser(
+      artist.user_id,                      // lúc này TS hiểu chắc chắn là number
+      artist.id,
+      NotificationType.SONG_APPROVED,
+      `Admin đã thêm bài hát "${savedSong.title}" vào hồ sơ nghệ sĩ của bạn.`,
+      savedSong.id
+    );
+
+
+
+    // =============================
+    // LƯU LYRICS nếu FE gửi
     // =============================
     if (body.lyrics && body.lyrics.trim() !== "") {
       const lyricsRecord = this.lyricsRepo.create({
@@ -171,7 +205,7 @@ export class ManageSongService {
   }
 
   // ==============================================
-  // 🟡 LIST
+  //  LIST
   // ==============================================
   async getAllSongsForAdmin() {
     return this.songRepo
@@ -204,7 +238,7 @@ export class ManageSongService {
   }
 
   // ==============================================
-  // 🟡 DETAIL
+  //  DETAIL
   // ==============================================
   async getSongDetail(id: number) {
     const song = await this.songRepo.findOne({
@@ -216,7 +250,7 @@ export class ManageSongService {
   }
 
   // ==============================================
-  // 🟡 UPDATE
+  //  UPDATE
   // ==============================================
   async updateSong(
     id: number,
@@ -231,7 +265,7 @@ export class ManageSongService {
 
     if (body.title) song.title = body.title.trim();
     // =============================
-    // 🟢 Update thể loại (category)
+    //  Update thể loại (category)
     // =============================
     if (body.category) {
       const categoryId = Number(body.category);
@@ -247,7 +281,6 @@ export class ManageSongService {
       song.genre = category.name;   // ✅ GÁN TÊN CATEGORY VÀO CỘT genre
     }
 
-    if (body.duration) song.duration = Number(body.duration);
 
     //  UPDATE NGHỆ SĨ (NHẬN ID)
     if (body.artist) {
@@ -316,24 +349,51 @@ export class ManageSongService {
     }
 
     // audio mới
-    const newAudio = files?.audioFile?.[0];
-    if (newAudio) {
-      if (song.file_url) await this.r2.deleteFileByUrl(song.file_url);
+  const newAudio = files?.audioFile?.[0];
+  if (newAudio) {
 
-      const uploaded = await this.r2.uploadFile(
-        'music',
-        newAudio.originalname,
-        newAudio.buffer,
-        newAudio.mimetype,
-      );
-      song.file_url = uploaded.url;
+    // Xóa file cũ nếu có
+    if (song.file_url) {
+      await this.r2.deleteFileByUrl(song.file_url);
     }
+
+    // Đọc lại thời lượng mới
+    const meta = await mm.parseBuffer(newAudio.buffer);
+    song.duration = Math.floor(meta.format.duration ?? 0);
+
+    // Upload file nhạc mới lên R2
+    const uploaded = await this.r2.uploadFile(
+      'music',
+      newAudio.originalname,
+      newAudio.buffer,
+      newAudio.mimetype,
+    );
+
+  song.file_url = uploaded.url;
+}
+
 
     return this.songRepo.save(song);
   }
 
+  // =============================
+  //  Lấy album theo nghệ sĩ
+  // =============================
+  async getAlbumsByArtist(artistId: number) {
+    const artist = await this.artistRepo.findOne({ where: { id: artistId } });
+    if (!artist) {
+      throw new NotFoundException("Artist không tồn tại");
+    }
+
+    return this.albumRepo.find({
+      where: { artist: { id: artistId } },
+      order: { title: 'ASC' },
+    });
+  }
+
+
   // ==============================================
-  // 🟡 ACTIVE / INACTIVE
+  //  ACTIVE / INACTIVE
   // ==============================================
   async toggleActive(id: number) {
     const song = await this.songRepo.findOne({ where: { id } });
@@ -344,29 +404,82 @@ export class ManageSongService {
   }
 
   // ==============================================
-  // 🟡 APPROVE
+  //  APPROVE
   // ==============================================
   async approveSong(id: number) {
-    const song = await this.songRepo.findOne({ where: { id } });
+    const song = await this.songRepo.findOne({
+      where: { id },
+      relations: ['artist'],
+    });
+
     if (!song) throw new NotFoundException('Không tìm thấy bài hát');
 
     song.status = 'APPROVED';
     song.active = true;
-    return this.songRepo.save(song);
+
+    const saved = await this.songRepo.save(song);
+
+    const artist = song.artist;
+
+    // =============================
+    // 1. Gửi THÔNG BÁO CHO NGHỆ SĨ
+    // =============================
+    if (artist.user_id) {
+      await this.notificationService.createNotificationForUser(
+        artist.user_id,
+        artist.id,
+        NotificationType.SONG_APPROVED,
+        `Bài hát "${song.title}" của bạn đã được phê duyệt.`,
+        song.id
+      );
+    }
+
+    // =============================
+    // 2. Gửi thông báo CHO NGƯỜI FOLLOW
+    // =============================
+    await this.notificationService.createNotificationForFollowers(
+      artist.id,
+      artist.stage_name,
+      NotificationType.NEW_SONG,
+      `vừa phát hành bài hát mới: "${song.title}"`,
+      song.id
+    );
+
+    return saved;
   }
 
+
   // ==============================================
-  // 🟡 REJECT SONG
+  // REJECT SONG
   // ==============================================
   async rejectSong(id: number) {
-    const song = await this.songRepo.findOne({ where: { id } });
+    const song = await this.songRepo.findOne({
+      where: { id },
+      relations: ['artist']
+    });
+
     if (!song) throw new NotFoundException('Không tìm thấy bài hát');
 
     song.status = 'REJECTED';
-    song.active = false; // từ chối thì ẩn luôn
+    song.active = false;
 
-    return this.songRepo.save(song);
+    const saved = await this.songRepo.save(song);
+
+    // 🔔 Gửi thông báo cho nghệ sĩ
+    const artist = song.artist;
+    if (artist?.user_id) {
+      await this.notificationService.createNotificationForUser(
+        artist.user_id,
+        artist.id,
+        NotificationType.SONG_APPROVED, // Hoặc bạn nên tạo type SONG_REJECTED
+        `Bài hát "${song.title}" đã bị từ chối bởi quản trị viên.`,
+        song.id
+      );
+    }
+
+    return saved;
   }
+
 
 
   // ==============================================
@@ -384,7 +497,7 @@ export class ManageSongService {
 
 
   // ==============================================
-  // 🟡 DELETE
+  // DELETE
   // ==============================================
   async deleteSong(id: number) {
     const song = await this.songRepo.findOne({ where: { id } });

@@ -423,4 +423,30 @@ async login(loginAuthDto: LoginAuthDto): Promise<{ accessToken: string }> {
     return { message: 'Đổi mật khẩu thành công.' };
   }
 
+  async getProfile(userId: number) {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['role'], 
+    });
+
+    if (!user) {
+      throw new NotFoundException('User không tồn tại');
+    }
+
+    return {
+      status: 200,
+      content: {
+        id: user.id,
+        name: user.username,
+        email: user.email,
+
+        // ⭐ Avatar anime (KHÔNG cần field avatar trong DB)
+        avatar: `https://api.dicebear.com/7.x/lorelei/svg?seed=${user.id}`,
+
+        role: user.role?.name || 'User',
+      },
+    };
+  }
+
+
 }

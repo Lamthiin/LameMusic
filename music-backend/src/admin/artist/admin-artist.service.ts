@@ -49,6 +49,7 @@ export class AdminArtistService {
     }))
   );
   }
+  
 
   findInactive() {
     return this.artistRepository.find({
@@ -77,6 +78,15 @@ export class AdminArtistService {
     if (!artist) throw new NotFoundException('Artist không tồn tại');
     return artist;
   }
+
+  // 🔥 LẤY TẤT CẢ NGHỆ SĨ APPROVED (không lọc user_id)
+  async findAllApprovedArtists() {
+    return this.artistRepository.find({
+      where: { registrationStatus: 'APPROVED', active: 1 },
+      order: { stage_name: 'ASC' },
+    });
+  }
+
 
   // DUYỆT / PHÊ DUYỆT LẠI
   async approve(id: number) {

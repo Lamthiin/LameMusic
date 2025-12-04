@@ -8,7 +8,7 @@ const ArtistDropdown = ({ artists = [], value, onChange }) => {
   const ref = useRef(null);
 
   // =============================
-  // 🔥 CLICK BÊN NGOÀI → ĐÓNG DROPDOWN
+  // CLICK BÊN NGOÀI → ĐÓNG DROPDOWN
   // =============================
   useEffect(() => {
     const handleClickOutside = (e) => {

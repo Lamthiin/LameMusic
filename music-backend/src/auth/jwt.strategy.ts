@@ -8,6 +8,7 @@ export interface JwtPayload {
   userId: number;
   username: string;
   role: string;
+  email?: string;  // ⭐ thêm dòng này KHÔNG phá code cũ
 }
 
 @Injectable()

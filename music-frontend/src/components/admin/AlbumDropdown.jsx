@@ -8,9 +8,7 @@ const AlbumDropdown = ({ albums = [], value, onChange }) => {
 
   const ref = useRef(null);
 
-  // =============================
-  // 🔥 CLICK BÊN NGOÀI → ĐÓNG MENU
-  // =============================
+  // CLICK OUTSIDE → CLOSE
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (ref.current && !ref.current.contains(e.target)) {
@@ -22,23 +20,19 @@ const AlbumDropdown = ({ albums = [], value, onChange }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // SAFE FILTER
+  // FILTER (dùng title, không phải name)
   const filtered = albums.filter((a) =>
-    (a?.name ?? "").toLowerCase().includes(search.toLowerCase())
+    (a?.title ?? "").toLowerCase().includes(search.toLowerCase())
   );
 
-  // Reset limit khi thay đổi search
+  // Reset limit khi search
   useEffect(() => {
     setLimit(5);
   }, [search]);
 
-  // =============================
-  // 🔥 SCROLL → LOAD THÊM
-  // =============================
+  // SCROLL LOAD MORE
   const handleScroll = (e) => {
     const el = e.target;
-
-    // Nếu người dùng scroll đến cuối
     if (el.scrollTop + el.clientHeight >= el.scrollHeight - 5) {
       setLimit((prev) => Math.min(prev + 5, filtered.length));
     }
@@ -47,7 +41,7 @@ const AlbumDropdown = ({ albums = [], value, onChange }) => {
   return (
     <div className="dropdown-container" ref={ref}>
       <div className="dropdown-selected" onClick={() => setOpen(!open)}>
-        {value ? value.name : "-- Chọn album --"}
+        {value ? value.title : "-- Chọn album --"}
       </div>
 
       {open && (
@@ -69,7 +63,7 @@ const AlbumDropdown = ({ albums = [], value, onChange }) => {
                   setOpen(false);
                 }}
               >
-                {album.name}
+                {album.title}
               </div>
             ))}
           </div>

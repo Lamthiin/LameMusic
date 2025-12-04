@@ -77,11 +77,9 @@ const ManageSong = () => {
   const [newArtist, setNewArtist] = useState("");
   const [newAlbum, setNewAlbum] = useState("");
   const [newCategory, setNewCategory] = useState("");
-  const [newDuration, setNewDuration] = useState("");
   const [editTitle, setEditTitle] = useState("");
   const [editArtist, setEditArtist] = useState("");
   const [editAlbum, setEditAlbum] = useState("");
-  const [editDuration, setEditDuration] = useState("");
   const [editLyrics, setEditLyrics] = useState("");
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
@@ -98,12 +96,19 @@ const ManageSong = () => {
   const [newLyrics, setNewLyrics] = useState("");
   const [newLyricsLanguage, setNewLyricsLanguage] = useState("vi");
   const [editLyricsLanguage, setEditLyricsLanguage] = useState("vi");
+  const [filteredAlbums, setFilteredAlbums] = useState([]);
+  const [filteredAlbumsAdd, setFilteredAlbumsAdd] = useState([]);
+  const [filteredAlbumsEdit, setFilteredAlbumsEdit] = useState([]);
+
+
+
 
   useEffect(() => {
     // Lấy nghệ sĩ đã được duyệt
-    fetch("http://localhost:3000/admin/artists/active")
-      .then(res => res.json())
-      .then(setArtists);
+    fetch("http://localhost:3000/admin/artists/list-all")
+    .then(res => res.json())
+    .then(setArtists);
+
 
     // Lấy album
     fetch("http://localhost:3000/admin/albums")
@@ -174,7 +179,8 @@ const ManageSong = () => {
 
       if (!res.ok) throw new Error("Approve failed");
 
-      fetchSongs(); // reload lại danh sách từ backend
+      await fetchSongs();   //  Load lại danh sách
+      setOpenMenu(null);    //  FIX: đóng dropdown ngay lập tức
     } catch (err) {
       console.error(err);
       alert("Không thể duyệt bài hát!");
@@ -190,7 +196,9 @@ const ManageSong = () => {
 
       if (!res.ok) throw new Error("Reject failed");
 
-      fetchSongs(); // cập nhật lại danh sách
+      await fetchSongs();   // Load lại danh sách
+      setOpenMenu(null);    // FIX: đóng dropdown ngay lập tức
+
     } catch (err) {
       console.error(err);
       alert("Không thể từ chối bài hát!");
@@ -209,7 +217,8 @@ const ManageSong = () => {
       if (!res.ok) throw new Error("Soft delete failed");
 
       // load lại danh sách
-      await fetchSongs();
+      await fetchSongs();   //  Load lại danh sách
+      setOpenMenu(null);    //  FIX: đóng dropdown ngay lập tức
 
       // THÔNG BÁO XÓA THÀNH CÔNG
       alert("Đã xóa bài hát thành công!");
@@ -230,7 +239,8 @@ const ManageSong = () => {
       if (!res.ok) throw new Error("Toggle failed");
 
       // load lại danh sách từ backend để chắc chắn đồng bộ
-      fetchSongs();
+      await fetchSongs();   //  Load lại danh sách
+      setOpenMenu(null);    //  FIX: đóng dropdown ngay lập tức
 
     } catch (err) {
       console.error(err);
@@ -246,7 +256,6 @@ const ManageSong = () => {
     formData.append("artist", editArtist);
     formData.append("album", editAlbum ?? "");
     formData.append("category", editCategory);
-    formData.append("duration", editDuration);
     formData.append("lyrics", editLyrics);
     formData.append("lyricsLanguage", editLyricsLanguage);
 
@@ -320,8 +329,8 @@ const ManageSong = () => {
       !newAlbum &&
       !newGenre &&
       !coverFile &&
-      !audioFile &&
-      (!newDuration || newDuration <= 0);
+      !audioFile;
+
 
     if (allEmpty) {
       error = "Bạn chưa nhập thông tin bài hát!";
@@ -333,8 +342,6 @@ const ManageSong = () => {
     else if (!newCategory) error = "Bạn chưa chọn thể loại.";
     else if (!coverFile) error = "Bạn chưa chọn ảnh bìa.";
     else if (!audioFile) error = "Bạn chưa chọn file nhạc.";
-    else if (!newDuration || newDuration <= 0)
-      error = "Thời lượng bài hát không hợp lệ.";
 
     // Nếu có lỗi → hiện popup lỗi
     if (error) {
@@ -348,7 +355,6 @@ const ManageSong = () => {
     formData.append("title", newTitle);
     formData.append("artist", newArtist);    // ID nghệ sĩ (number)
     formData.append("category", newCategory); // ID thể loại
-    formData.append("duration", newDuration);
     formData.append("lyrics", newLyrics);
     formData.append("lyricsLanguage", newLyricsLanguage);
 
@@ -399,7 +405,6 @@ const ManageSong = () => {
     setNewArtist("");
     setNewAlbum("");
     setNewCategory("");
-    setNewDuration("");
     setNewLyrics("");
   };
 
@@ -414,7 +419,6 @@ const ManageSong = () => {
     setEditArtist("");
     setEditAlbum("");
     setEditCategory("");   // ✔ đúng state
-    setEditDuration("");
     setEditLyrics("");
   };
 
@@ -430,7 +434,11 @@ const ManageSong = () => {
           {/* ACTIVE SONGS */}
           <div
             className={`um-card ${activeTab === "active" ? "active" : ""}`}
-            onClick={() => setActiveTab("active")}
+            onClick={() => {
+              setActiveTab("active");
+              setOpenMenu(null);      //  FIX
+            }}
+
           >
             <h3>Active</h3>
             <p>Bài hát đang hiển thị</p>
@@ -439,7 +447,10 @@ const ManageSong = () => {
           {/* PENDING SONGS */}
           <div
             className={`um-card ${activeTab === "pending" ? "active" : ""}`}
-            onClick={() => setActiveTab("pending")}
+            onClick={() => {
+              setActiveTab("pending");
+              setOpenMenu(null);      //  FIX
+            }}
           >
             <h3>Pending</h3>
             <p>Bài hát đang chờ duyệt</p>
@@ -448,7 +459,11 @@ const ManageSong = () => {
           {/* REPORT SONGS */}
           <div
             className={`um-card ${activeTab === "report" ? "active" : ""}`}
-            onClick={() => setActiveTab("report")}
+            onClick={() => {
+              setActiveTab("report");
+              setOpenMenu(null);      //  FIX
+            }}
+
           >
             <h3>Report</h3>
             <p>Báo cáo từ người dùng</p>
@@ -556,7 +571,6 @@ const ManageSong = () => {
                             setShowEditPopup(song);
 
                             setEditTitle(song.title);
-                            setEditDuration(song.duration);
                             setEditLyrics(song.lyrics?.lyrics || "");
                             setEditLyricsLanguage(song.lyrics?.language || "vi");
 
@@ -566,6 +580,19 @@ const ManageSong = () => {
                             const artistObj = artists.find(a => a.id === song.artistId);
                             setSelectedEditArtist(artistObj || null);
                             setEditArtist(artistObj?.id || "");
+
+                            if (artistObj) {
+                              fetch(`http://localhost:3000/admin/manage-song/albums/by-artist/${artistObj.id}`)
+                                .then(res => res.json())
+                                .then(albumData => {
+                                  setFilteredAlbumsEdit(albumData);
+
+                                  const match = albumData.find(a => a.title === song.albumName);
+                                  setSelectedEditAlbum(match || null);
+                                  setEditAlbum(match?.id || "");
+                                });
+                            }
+
 
 
                             // Album object
@@ -693,8 +720,20 @@ const ManageSong = () => {
                   <ArtistDropdown
                     artists={artists}
                     value={artists.find(a => a.id === Number(newArtist))}
-                    onChange={(artist) => setNewArtist(artist.id)}
+                    onChange={async (artist) => {
+                      setNewArtist(artist.id);
+
+                      // Gọi API backend để lấy album theo artist
+                      const res = await fetch(
+                        `http://localhost:3000/admin/manage-song/albums/by-artist/${artist.id}`
+                      );
+                      const data = await res.json();
+
+                      setFilteredAlbumsAdd(data);
+                      setNewAlbum("");          // reset album
+                    }}
                   />
+
                 </div>
 
 
@@ -765,44 +804,6 @@ const ManageSong = () => {
                   )}
                 </div>
 
-                {/* THỜI LƯỢNG */}
-                <div className="popup-group">
-                  <label>Thời lượng (giây)</label>
-                  <input
-                    type="number"
-                    placeholder="Ví dụ: 210"
-                    value={newDuration}
-                    onChange={(e) => setNewDuration(e.target.value)}
-                  />
-                </div>
-
-              </div>
-
-              {/* =====================
-                  CỘT PHẢI
-              ====================== */}
-              <div className="popup-col">
-                <div className="popup-group">
-                  <label>Album</label>
-                  <AlbumDropdown
-                    albums={albums}
-                    value={albums.find(a => a.id === Number(newAlbum))}
-                    onChange={(album) => setNewAlbum(album.id)}
-                  />
-                </div>
-
-                {/* THỂ LOẠI */}
-                <div className="popup-group">
-                  <label>Thể loại</label>
-                  <GenreDropdown
-                    genres={genres}
-                    value={genres.find(g => g.id === Number(newCategory))}
-                    onChange={(genre) => setNewCategory(genre.id)}
-                  />
-
-                </div>
-
-
                 {/* FILE NHẠC */}
                 <div className="popup-group">
                   <div className="audio-upload-group">
@@ -844,6 +845,33 @@ const ManageSong = () => {
                     </div>
                   </div>
                 </div>
+
+              </div>
+
+              {/* =====================
+                  CỘT PHẢI
+              ====================== */}
+              <div className="popup-col">
+                <div className="popup-group">
+                  <label>Album</label>
+                  <AlbumDropdown
+                    albums={filteredAlbumsAdd}
+                    value={filteredAlbumsAdd.find(a => a.id === Number(newAlbum))}
+                    onChange={(album) => setNewAlbum(album.id)}
+                  />
+                </div>
+
+                {/* THỂ LOẠI */}
+                <div className="popup-group">
+                  <label>Thể loại</label>
+                  <GenreDropdown
+                    genres={genres}
+                    value={genres.find(g => g.id === Number(newCategory))}
+                    onChange={(genre) => setNewCategory(genre.id)}
+                  />
+
+                </div>
+
 
                 {/* LYRICS */}
                 <div className="popup-group">
@@ -1084,13 +1112,23 @@ const ManageSong = () => {
             <div className="popup-group">
                 <label>Nghệ sĩ</label>
                 <ArtistDropdown
-                    artists={artists}
-                    value={selectedEditArtist}
-                    onChange={(artist) => {
-                        setSelectedEditArtist(artist);
-                        setEditArtist(artist.id);
-                    }}
+                  artists={artists}
+                  value={selectedEditArtist}
+                  onChange={async (artist) => {
+                    setSelectedEditArtist(artist);
+                    setEditArtist(artist.id);
+
+                    const res = await fetch(
+                      `http://localhost:3000/admin/manage-song/albums/by-artist/${artist.id}`
+                    );
+                    const data = await res.json();
+
+                    setFilteredAlbumsEdit(data);
+                    setEditAlbum("");
+                    setSelectedEditAlbum(null);
+                  }}
                 />
+
             </div>
 
 
@@ -1161,46 +1199,6 @@ const ManageSong = () => {
               )}
             </div>
 
-
-            <div className="popup-group">
-              <label>Thời lượng (giây)</label>
-              <input
-                type="number"
-                value={editDuration}
-                onChange={(e) => setEditDuration(e.target.value)}
-              />
-            </div>
-
-          </div>
-
-          {/* CỘT PHẢI */}
-          <div className="popup-col">
-
-            <div className="popup-group">
-              <label>Album</label>
-              <AlbumDropdown
-                  albums={albums}
-                  value={selectedEditAlbum}
-                  onChange={(album) => {
-                      setSelectedEditAlbum(album);
-                      setEditAlbum(album.id);
-                  }}
-              />
-            </div>
-
-            <div className="popup-group">
-              <label>Thể loại</label>
-              <GenreDropdown
-                genres={genres}
-                value={selectedEditCategory}
-                onChange={(genre) => {
-                    setSelectedEditCategory(genre);
-                    setEditCategory(genre.id);
-                }}
-              />
-
-            </div>
-
             <div className="popup-group">
               <label>File nhạc</label>
 
@@ -1265,6 +1263,37 @@ const ManageSong = () => {
                   />
                 </div>
               )}
+            </div>
+
+          </div>
+
+          {/* CỘT PHẢI */}
+          <div className="popup-col">
+
+            <div className="popup-group">
+              <label>Album</label>
+              <AlbumDropdown
+                albums={filteredAlbumsEdit}
+                value={filteredAlbumsEdit.find(a => a.id === Number(editAlbum))}
+                onChange={(album) => {
+                  setSelectedEditAlbum(album);
+                  setEditAlbum(album.id);
+                }}
+              />
+
+            </div>
+
+            <div className="popup-group">
+              <label>Thể loại</label>
+              <GenreDropdown
+                genres={genres}
+                value={selectedEditCategory}
+                onChange={(genre) => {
+                    setSelectedEditCategory(genre);
+                    setEditCategory(genre.id);
+                }}
+              />
+
             </div>
 
             <div className="popup-group">

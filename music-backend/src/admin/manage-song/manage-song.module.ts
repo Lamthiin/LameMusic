@@ -14,13 +14,16 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { Song } from '../../song/song.entity';
 import { CategoryModule } from '../../category/category.module';
-import { Lyrics } from '../../lyrics/lyrics.entity';   // ⭐ THÊM DÒNG NÀY
+import { Lyrics } from '../../lyrics/lyrics.entity';  
+import { NotificationModule } from '../../notification/notification.module';
+
 
 @Module({
   imports: [
     SharedModule,
     TypeOrmModule.forFeature([Song, Artist, Album, Lyrics]),
     CategoryModule,
+    NotificationModule,
 
     // Upload file vào RAM để gửi lên R2
     MulterModule.register({

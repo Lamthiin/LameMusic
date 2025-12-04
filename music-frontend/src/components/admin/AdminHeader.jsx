@@ -3,19 +3,40 @@ import "./admin.css";
 
 const AdminHeader = () => {
   const [open, setOpen] = useState(false);
+  const [user, setUser] = useState(null);
 
   const dropdownRef = useRef(null);
   const avatarRef = useRef(null);
 
+  // FETCH USER (chỉ chạy 1 lần)
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = localStorage.getItem("accessToken");
+      console.log("Token lấy được:", token);
 
-  // HÀM LOGOUT
-  const handleLogout = () => {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("user_info"); // nếu bạn có lưu
-    window.location.href = "/login";
-  };
+      if (!token) return; //RETURN TRONG ASYNC, KHÔNG RETURN TRONG COMPONENT
 
-  // Đóng dropdown khi click ra ngoài
+      try {
+        const res = await fetch("http://localhost:3000/auth/me", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        console.log("Status /auth/me:", res.status);
+        const data = await res.json();
+        console.log("Data trả về:", data);
+
+        setUser(data.content);
+      } catch (err) {
+        console.error("Lỗi fetch user:", err);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  // CLICK OUTSIDE
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
@@ -32,15 +53,22 @@ const AdminHeader = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const handleLogout = () => {
+    localStorage.removeItem("accessToken");
+    window.location.href = "/login";
+  };
+
   return (
     <header className="admin-header-card">
       <div className="admin-header-title-box">
-        <h2 className="admin-header-title">Brian</h2>
+        <h2 className="admin-header-title">
+          {user ? user.name : "Đang tải..."}
+        </h2>
+
         <p className="admin-header-subtitle">Quản trị viên hệ thống</p>
       </div>
 
       <div className="admin-header-right">
-        {/* AVATAR */}
         <div
           className="admin-avatar-box"
           ref={avatarRef}
@@ -48,14 +76,16 @@ const AdminHeader = () => {
         >
           <div className="admin-avatar-wrapper">
             <img
-              src="https://i.pravatar.cc/80"
-              alt="Admin Avatar"
+              src={
+                user?.avatar ??
+                `https://api.dicebear.com/7.x/lorelei/svg?seed=${user?.id || 1}`
+              }
+              alt="Avatar"
               className="admin-avatar"
             />
           </div>
         </div>
 
-        {/* DROPDOWN */}
         {open && (
           <div className="admin-dropdown" ref={dropdownRef}>
             <p className="dropdown-item">Profile</p>

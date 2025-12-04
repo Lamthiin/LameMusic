@@ -28,6 +28,12 @@ export class ManageSongController {
     return this.manageSongService.getAllSongsForAdmin();
   }
 
+  // Lấy danh sách album theo artist
+  @Get('albums/by-artist/:artistId')
+  getAlbumsByArtist(@Param('artistId', ParseIntPipe) artistId: number) {
+    return this.manageSongService.getAlbumsByArtist(artistId);
+  }
+
   // ================================
   // 📌 2. XEM CHI TIẾT 1 BÀI HÁT
   // ================================
@@ -35,6 +41,7 @@ export class ManageSongController {
   getDetail(@Param('id', ParseIntPipe) id: number) {
     return this.manageSongService.getSongDetail(id);
   }
+
 
   // ================================
   // 📌 3. UPLOAD BÀI HÁT MỚI (audio + image)

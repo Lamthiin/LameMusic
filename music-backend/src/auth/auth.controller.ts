@@ -22,6 +22,8 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 
 import { JwtPayload } from './jwt.strategy';
 import { Throttle } from '@nestjs/throttler';
+import { Get } from '@nestjs/common';
+
 
 @Controller('auth')
 export class AuthController {
@@ -106,5 +108,12 @@ export class AuthController {
   async requestResetOtp(@Req() req: any) {
     const userId = (req.user as JwtPayload).userId;
     return this.authService.requestPasswordResetOtp(userId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('/me')
+  async getProfile(@Req() req: any) {
+    const userId = (req.user as JwtPayload).userId;
+    return this.authService.getProfile(userId);
   }
 }
