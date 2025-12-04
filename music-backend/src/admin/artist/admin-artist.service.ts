@@ -105,6 +105,16 @@ export class AdminArtistService {
     return this.artistRepository.save(artist);
   }
 
+  private normalizeUrl(url: string | null): string | null {
+  if (!url) return null;
+
+  // Nếu là đường dẫn local → convert sang BE host
+  if (url.startsWith("\\") || url.startsWith("/")) {
+    return `http://localhost:3000${url.replace(/\\/g, "/")}`;
+  }
+
+  return url; // Cloudflare URL giữ nguyên
+}
   // THÊM ARTIST (Admin thêm)
   async createArtist(data: any, file?: Express.Multer.File) {
   let avatarUrl: string | null = null;
@@ -212,27 +222,26 @@ export class AdminArtistService {
     });
   }
 
-  async findFullDetail(id: number) {
+async findFullDetail(id: number) {
   const artist = await this.artistRepository.findOne({
     where: { id },
     relations: [
       "user",
       "albums",
       "songs",
-      "followers", // nếu cần dùng followers.length
-      "songs.album", // để lấy album title
+      "followers",
+      "songs.album",
     ],
   });
 
-  if (!artist) {
-    throw new NotFoundException("Artist không tồn tại");
-  }
+  if (!artist) throw new NotFoundException("Artist không tồn tại");
 
   return {
     id: artist.id,
     stage_name: artist.stage_name,
     bio: artist.bio,
-    avatar_url: artist.avatar_url,
+    avatar_url: this.normalizeUrl(artist.avatar_url),
+
     created_at: artist.created_at,
     updated_at: artist.updated_at,
     registrationStatus: artist.registrationStatus,
@@ -242,25 +251,29 @@ export class AdminArtistService {
     total_songs: artist.songs?.length || 0,
     total_followers: artist.followers?.length || 0,
 
+    // ⭐ FIX ALBUM COVER URL HERE
     albums: artist.albums.map(a => ({
       id: a.id,
       title: a.title,
-      cover_url: a.cover_url,
+      cover_url: this.normalizeUrl(a.cover_url),
       created_at: a.created_at,
     })),
 
+    // ⭐ FIX SONG IMAGE_URL + ALBUM COVER
     songs: artist.songs.map(s => ({
       id: s.id,
       title: s.title,
       duration: s.duration,
+
+      image_url: this.normalizeUrl(s.image_url),
+
       album_id: s.album?.id || null,
       album_title: s.album?.title || null,
+      album_cover_url: this.normalizeUrl(s.album?.cover_url || null),
 
-      status: s.status || "UNKNOWN"
+      status: s.status || "UNKNOWN",
     }))
   };
 }
-
-
 }
 

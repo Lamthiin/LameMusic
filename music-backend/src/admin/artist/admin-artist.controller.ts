@@ -92,10 +92,10 @@ export class AdminArtistController {
   }
 
   @Post()
-  @UseInterceptors(FileInterceptor('avatar'))
+  @UseInterceptors(FileInterceptor('avatarFile'))
   createArtist(
     @UploadedFile() file: Express.Multer.File,
-    @Body() body: any,
+    @Body() body: any
   ) {
     return this.service.createArtist(body, file);
   }

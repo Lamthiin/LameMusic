@@ -85,8 +85,9 @@ export default function ArtistDetailAdmin() {
           <table className="song-table">
             <thead>
               <tr>
-                <th>#</th>
-                <th>Ảnh</th>
+                <th>STT</th>
+                <th>ẢNh</th>
+             
                 <th>Tên album</th>
                 <th>Ngày tạo</th>
               </tr>
