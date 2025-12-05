@@ -327,7 +327,7 @@ const ManageSong = () => {
       !newTitle.trim() &&
       !newArtist &&
       !newAlbum &&
-      !newGenre &&
+      !newCategory &&
       !coverFile &&
       !audioFile;
 
@@ -383,6 +383,7 @@ const ManageSong = () => {
 
       // 🟩 HIỆN POPUP THÀNH CÔNG
       setShowSuccessPopup(true);
+      await fetchSongs();
 
     } catch (err) {
       console.error(err);

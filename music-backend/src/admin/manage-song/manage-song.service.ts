@@ -51,157 +51,194 @@ export class ManageSongService {
   //  TẠO BÀI HÁT (UPLOAD)
   // =============================
   async uploadSong(files: any, body: any) {
-    console.log('FILES RECEIVED FROM FE:', files);
-    console.log('BODY RECEIVED:', body);
+    try{
+      console.log('FILES RECEIVED FROM FE:', files);
+      console.log('BODY RECEIVED:', body);
+      console.log("AUDIO FILE:", files?.audioFile?.[0]);
+      console.log("IMAGE FILE:", files?.imageFile?.[0]);
+      console.log("BODY RECEIVED:", body);
 
-    const audio = files?.audioFile?.[0];
-    // Đọc metadata từ file nhạc để lấy thời lượng
-    const metadata = await mm.parseBuffer(audio.buffer);
-    const detectedDuration = Math.floor(metadata.format.duration ?? 0);
+      const audio = files?.audioFile?.[0];
+      // Đọc metadata từ file nhạc để lấy thời lượng
+      const metadata = await mm.parseBuffer(audio.buffer);
+      const detectedDuration = Math.floor(metadata.format.duration || 0);
 
-
-    console.log("⏱ Duration detected:", detectedDuration);
-
-    const image = files?.imageFile?.[0];
-
-    if (!audio || !image) {
-      throw new BadRequestException('Thiếu file nhạc hoặc ảnh bìa');
-    }
-
-    // =============================
-    //  Xử lý nghệ sĩ
-    // =============================
-    // Artist ID từ FE
-    const artistId = Number(body.artist);
-
-    if (!artistId) {
-      throw new BadRequestException("Artist ID không hợp lệ");
-    }
-
-    // Tìm artist theo ID
-    const artist = await this.artistRepo.findOne({
-      where: { id: artistId },
-    }) as Artist;
-
-
-    if (!artist) {
-      throw new NotFoundException("Artist không tồn tại");
-    }
-
-    //  Fix 
-    if (artist.user_id == null) {
-      throw new BadRequestException("Artist chưa được liên kết với tài khoản User");
-    }
-
-
-    // =============================
-    //  Xử lý album (optional)
-    // =============================
-    let album: Album | null = null;
-
-    if (body.album && body.album !== "") {
-      const albumId = Number(body.album);
-
-      if (isNaN(albumId)) {
-        throw new BadRequestException("Album ID không hợp lệ");
+      if (!detectedDuration || detectedDuration <= 0) {
+        // fallback: ước tính duration theo bitrate hoặc bỏ qua
+        console.warn("⚠️ Không đọc được duration từ file — fallback = 0");
       }
 
-      album = await this.albumRepo.findOne({
-        where: { id: albumId },
-      });
+      console.log("⏱ Duration detected:", detectedDuration);
 
-      if (!album) {
-        throw new NotFoundException("Album không tồn tại");
+      const image = files?.imageFile?.[0];
+
+      if (!audio || !image) {
+        throw new BadRequestException('Thiếu file nhạc hoặc ảnh bìa');
       }
-    }
+
+      // =============================
+      //  Xử lý nghệ sĩ
+      // =============================
+      // Artist ID từ FE
+      const artistId = Number(body.artist);
+
+      if (!artistId) {
+        throw new BadRequestException("Artist ID không hợp lệ");
+      }
+
+      // Tìm artist theo ID
+      const artist = await this.artistRepo.findOne({
+        where: { id: artistId },
+      }) as Artist;
 
 
-    // =============================
-    //  Xử lý thể loại Category
-    // =============================
-    const categoryId = Number(body.category);
+      if (!artist) {
+        throw new NotFoundException("Artist không tồn tại");
+      }
 
-    if (!categoryId || isNaN(categoryId)) {
-      throw new BadRequestException("Category ID không hợp lệ");
-    }
-
-    const category = await this.categoryRepo.findOne({
-      where: { id: categoryId },
-    });
-
-    if (!category) {
-      throw new NotFoundException("Thể loại không tồn tại");
-    }
-
-
-
-    // =============================
-    //  Upload audio lên R2
-    // =============================
-    const audioUploaded = await this.r2.uploadFile(
-      'music',
-      audio.originalname,
-      audio.buffer,
-      audio.mimetype,
-    );
-
-    // =============================
-    //  Upload ảnh lên R2
-    // =============================
-    const imageUploaded = await this.r2.uploadFile(
-      'covers',
-      image.originalname,
-      image.buffer,
-      image.mimetype,
-    );
-
-    // =============================
-    //  Lưu vào DB
-    // =============================
-    const song = this.songRepo.create({
-      title: body.title,
-      duration: detectedDuration,
-      file_url: audioUploaded.url,
-      image_url: imageUploaded.url,
-      status: 'APPROVED',
-      active: true,
-      artist,
-      album: album ?? null,
-      genre: category.name, // ⭐ LƯU TÊN THỂ LOẠI VÀO CỘT genre
-    });
-
-
-    // Lưu vào DB trước
-    const savedSong = await this.songRepo.save(song);
-
-    // =============================
-    //  GỬI THÔNG BÁO CHO NGHỆ SĨ
-    // =============================
-    await this.notificationService.createNotificationForUser(
-      artist.user_id,                      // lúc này TS hiểu chắc chắn là number
-      artist.id,
-      NotificationType.SONG_APPROVED,
-      `Admin đã thêm bài hát "${savedSong.title}" vào hồ sơ nghệ sĩ của bạn.`,
-      savedSong.id
-    );
+      //  Fix 
+      if (!artist.user_id) {
+        console.warn("⚠ Nghệ sĩ không có user_id — bỏ qua gửi thông báo cho nghệ sĩ.");
+      }
 
 
 
-    // =============================
-    // LƯU LYRICS nếu FE gửi
-    // =============================
-    if (body.lyrics && body.lyrics.trim() !== "") {
-      const lyricsRecord = this.lyricsRepo.create({
-        song: savedSong,               // relation 1-1
-        song_id: savedSong.id,         // foreign key
-        lyrics: body.lyrics.trim(),
-        language: body.lyricsLanguage || "vi",
+      // =============================
+      //  Xử lý album (optional)
+      // =============================
+      let album: Album | null = null;
+
+      if (body.album && body.album !== "") {
+        const albumId = Number(body.album);
+
+        if (isNaN(albumId)) {
+          throw new BadRequestException("Album ID không hợp lệ");
+        }
+
+        album = await this.albumRepo.findOne({
+          where: { id: albumId },
+        });
+
+        if (!album) {
+          throw new NotFoundException("Album không tồn tại");
+        }
+      }
+
+
+      // =============================
+      //  Xử lý thể loại Category
+      // =============================
+      const categoryId = Number(body.category);
+
+      if (!categoryId || isNaN(categoryId)) {
+        throw new BadRequestException("Category ID không hợp lệ");
+      }
+
+      const category = await this.categoryRepo.findOne({
+        where: { id: categoryId },
       });
 
-      await this.lyricsRepo.save(lyricsRecord);
-    }
+      if (!category) {
+        throw new NotFoundException("Thể loại không tồn tại");
+      }
 
-    return savedSong;
+
+
+
+      console.log("➡️ UPLOADING AUDIO TO R2...", {
+        filename: audio.originalname,
+        size: audio.size,
+        mime: audio.mimetype
+      });
+
+      // =============================
+      //  Upload audio lên R2
+      // =============================
+      const audioUploaded = await this.r2.uploadFile(
+        'music',
+        audio.originalname,
+        audio.buffer,
+        audio.mimetype,
+      );
+
+      console.log("✅ AUDIO UPLOADED:", audioUploaded);
+
+
+      // =============================
+      //  UPLOAD IMAGE TO R2
+      // =============================
+      console.log("➡️ UPLOADING IMAGE TO R2...", {
+        filename: image.originalname,
+        size: image.size,
+        mime: image.mimetype
+      });
+
+      // =============================
+      //  Upload ảnh lên R2
+      // =============================
+      const imageUploaded = await this.r2.uploadFile(
+        'covers',
+        image.originalname,
+        image.buffer,
+        image.mimetype,
+      );
+
+      console.log("✅ IMAGE UPLOADED:", imageUploaded);
+      // =============================
+      //  Lưu vào DB
+      // =============================
+      const song = this.songRepo.create({
+        title: body.title,
+        duration: detectedDuration,
+        file_url: audioUploaded.url,
+        image_url: imageUploaded.url,
+        status: 'APPROVED',
+        active: true,
+        artist,
+        album: album ?? null,
+        genre: category.name, // ⭐ LƯU TÊN THỂ LOẠI VÀO CỘT genre
+      });
+
+
+      // Lưu vào DB trước
+      const savedSong = await this.songRepo.save(song);
+
+      // =============================
+      //  GỬI THÔNG BÁO CHO NGHỆ SĨ (NẾU NGHỆ SĨ CÓ USER ID)
+      // =============================
+      if (artist.user_id) {
+        await this.notificationService.createNotificationForUser(
+          artist.user_id,
+          artist.id,
+          NotificationType.SONG_APPROVED,
+          `Admin đã thêm bài hát "${savedSong.title}" vào hồ sơ nghệ sĩ của bạn.`,
+          savedSong.id
+        );
+      } else {
+        console.log("⚠ Nghệ sĩ không có user_id → Bỏ qua gửi thông báo.");
+      }
+
+
+
+      // =============================
+      // LƯU LYRICS nếu FE gửi
+      // =============================
+      if (body.lyrics && body.lyrics.trim() !== "") {
+        const lyricsRecord = this.lyricsRepo.create({
+          song: savedSong,               // relation 1-1
+          song_id: savedSong.id,         // foreign key
+          lyrics: body.lyrics.trim(),
+          language: body.lyricsLanguage || "vi",
+        });
+
+        await this.lyricsRepo.save(lyricsRecord);
+      }
+
+      return savedSong;
+    } catch (err) {
+      console.error("❌ LỖI UPLOAD:", err);
+      throw err;
+  }
   }
 
   // ==============================================

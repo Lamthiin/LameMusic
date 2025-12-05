@@ -31,25 +31,50 @@ export class R2Service {
   ) {
     const key = `${folder}/${Date.now()}-${fileName}`;
 
-    console.log('🚀 UPLOADING TO R2:', { key, mime, size: buffer.length });
+    console.log("------------------------------------------------");
+    console.log("🚀 [R2] START UPLOAD");
+    console.log("➡️ Bucket:", this.bucket);
+    console.log("➡️ Folder:", folder);
+    console.log("➡️ Key:", key);
+    console.log("➡️ Mime:", mime);
+    console.log("➡️ Buffer size:", buffer.length);
+    console.log("------------------------------------------------");
 
-    const result = await this.client.send(
-      new PutObjectCommand({
-        Bucket: this.bucket,
-        Key: key,
-        Body: buffer,
-        ContentType: mime,
-        ContentLength: buffer.length,
-      }),
-    );
+    try {
+      const start = Date.now();
 
-    console.log('✅ R2 RESPONSE:', result);
+      const result = await this.client.send(
+        new PutObjectCommand({
+          Bucket: this.bucket,
+          Key: key,
+          Body: buffer,
+          ContentType: mime,
+          ContentLength: buffer.length,
+        }),
+      );
 
-    return {
-      key,
-      url: `${this.publicBase}/${key}`,
-    };
+      console.log(
+        `✅ [R2] UPLOAD SUCCESS (${fileName}) — ${Date.now() - start}ms`
+      );
+      console.log("📦 R2 Response:", result);
+
+      return {
+        key,
+        url: `${this.publicBase}/${key}`,
+      };
+
+    } catch (err: any) {
+      console.error("❌ [R2] UPLOAD FAILED!");
+      console.error("➡️ Error name:", err.name);
+      console.error("➡️ Error message:", err.message);
+      console.error("➡️ Error code:", err.code);
+      console.error("➡️ Full error:", err);
+      console.log("------------------------------------------------");
+
+      throw new Error("R2 upload failed: " + err.message);
+    }
   }
+
 
   /** Lấy key trong R2 từ public URL lưu trong DB */
   extractKeyFromUrl(url: string): string | null {
