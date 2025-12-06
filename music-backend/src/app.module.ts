@@ -28,6 +28,7 @@ import { DashboardModule } from './admin/dashboard/dashboard.module';
 import { ReportModule } from './report/report.module'; // <-- IMPORT MỚI
 import { NotificationModule } from './notification/notification.module';
 import { RateLimitModule } from './common/rate-limit.module'; // <-- IMPORT MỚI
+import { AdminProfileModule } from './admin/admin-profile/admin-profile.module';
 
 @Module({
   imports: [
@@ -67,6 +68,7 @@ import { RateLimitModule } from './common/rate-limit.module'; // <-- IMPORT MỚ
     ReportModule,
     NotificationModule,
     RateLimitModule,
+    AdminProfileModule,
   ],
   
   controllers: [AppController],
