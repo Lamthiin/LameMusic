@@ -54,7 +54,7 @@ export class Song {
 
   // === CỘT MỚI: TRẠNG THÁI DUYỆT ===
   @Column({ type: 'varchar', length: 20, default: 'PENDING' }) 
-  status: 'PENDING' | 'APPROVED' | 'REJECTED'; 
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'HIDDEN'; 
   // ===================================
 
   

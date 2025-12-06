@@ -133,7 +133,7 @@ const AdminCustomerPage = () => {
       <table className="admin-table">
         <thead>
           <tr>
-            <th>ID</th>
+            <th>STT</th>
             <th>Tên người dùng</th>
             <th>Email</th>
             <th>Năm sinh</th>
@@ -145,9 +145,9 @@ const AdminCustomerPage = () => {
         </thead>
 
         <tbody>
-          {paginatedUsers.map((u) => (
+          {paginatedUsers.map((u, index) => (
             <tr key={u.id}>
-              <td>{u.id}</td>
+              <td>{(currentPage - 1) * itemsPerPage + (index + 1)}</td>
               <td>{u.name}</td>
               <td>{u.email}</td>
               <td>{u.birthYear}</td>

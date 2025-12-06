@@ -661,3 +661,31 @@ textarea::placeholder {
   font-weight: 500;
 }
 
+/* =========================================
+   SCROLLBAR DARK MODE CHO Ô LYRIC
+========================================= */
+.lyrics-textarea::-webkit-scrollbar {
+  width: 6px;
+}
+
+.lyrics-textarea::-webkit-scrollbar-track {
+  background: #111;       /* nền tối */
+  border-radius: 6px;
+}
+
+.lyrics-textarea::-webkit-scrollbar-thumb {
+  background: #3a3a3a;    /* thanh kéo màu xám tối */
+  border-radius: 6px;
+}
+
+.lyrics-textarea::-webkit-scrollbar-thumb:hover {
+  background: #555;       /* sáng hơn nhẹ khi hover */
+}
+
+/* Firefox */
+.lyrics-textarea {
+  scrollbar-width: thin; 
+  scrollbar-color: #3a3a3a #111;
+}
+
+

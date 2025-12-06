@@ -81,7 +81,7 @@ const AdminAccountPage = () => {
       <table className="admin-table">
         <thead>
           <tr>
-            <th>ID</th>
+            <th>STT</th>
             <th>Tên Admin</th>
             <th>Email</th>
             <th>Role</th>
@@ -90,9 +90,9 @@ const AdminAccountPage = () => {
         </thead>
 
         <tbody>
-          {filteredAdmins.map((ad) => (
+          {filteredAdmins.map((ad, index) => (
             <tr key={ad.id}>
-              <td>{ad.id}</td>
+              <td>{index + 1}</td>
               <td>{ad.name}</td>
               <td>{ad.email}</td>
               <td>{ad.role}</td>

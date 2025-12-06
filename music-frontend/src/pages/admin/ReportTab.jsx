@@ -81,7 +81,7 @@ export default function ReportTab() {
       <table className="admin-table">
         <thead>
           <tr>
-            <th>ID</th>
+            <th>STT</th>
             <th>User</th>
             <th>Bài hát</th>
             <th>Tiêu đề</th>
@@ -101,7 +101,7 @@ export default function ReportTab() {
           ) : (
             reports.map((r) => (
               <tr key={r.id}>
-                <td>{r.id}</td>
+                <td>{index + 1}</td>   // STT
                 <td>{r.user_name}</td>
                 <td>{r.song_title}</td>
                 <td>{r.title}</td>

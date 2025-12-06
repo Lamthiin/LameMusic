@@ -79,7 +79,7 @@ const AdminBlockAccount = () => {
       <table className="admin-table">
         <thead>
           <tr>
-            <th>ID</th>
+            <th>STT</th>
             <th>Tên người dùng</th>
             <th>Email</th>
             <th>Năm sinh</th>
@@ -91,9 +91,9 @@ const AdminBlockAccount = () => {
         </thead>
 
         <tbody>
-          {filtered.map((u) => (
+          {filtered.map((u, index) => (
             <tr key={u.id}>
-              <td>{u.id}</td>
+              <td>{index + 1}</td>
               <td>{u.name}</td>
               <td>{u.email}</td>
               <td>{u.birthYear}</td>

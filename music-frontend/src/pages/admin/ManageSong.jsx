@@ -7,6 +7,7 @@ import ArtistDropdown from "../../components/admin/ArtistDropdown";
 import AlbumDropdown from "../../components/admin/AlbumDropdown";
 import GenreDropdown from "../../components/admin/GenreDropdown";
 import ReportTab from "./ReportTab";
+import PopupSuccess from "../../components/admin/PopupSuccess";
 
 
 // Format thời lượng 420 -> 07:00
@@ -22,6 +23,8 @@ const ManageSong = () => {
     try {
       const res = await fetch("http://localhost:3000/admin/manage-song");
       const data = await res.json();
+
+      console.log("🔥 BACKEND RAW SONG DATA:", data);
 
       setSongs(
         data.map(s => ({
@@ -39,7 +42,7 @@ const ManageSong = () => {
           status: s.status,
           active: s.active,
           lyrics: s.lyrics?.lyrics ?? "",
-          lyricsLanguage: s.lyrics?.language ?? "vi",
+          lyricsLanguage: s.lyrics?.language || "vi",  // ✔ BẮT BUỘC
         }))
       );
 
@@ -99,6 +102,8 @@ const ManageSong = () => {
   const [filteredAlbums, setFilteredAlbums] = useState([]);
   const [filteredAlbumsAdd, setFilteredAlbumsAdd] = useState([]);
   const [filteredAlbumsEdit, setFilteredAlbumsEdit] = useState([]);
+  const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
+
 
 
 
@@ -153,10 +158,17 @@ const ManageSong = () => {
 
     if (!matchSearch) return false;
 
+    // Tab Active → Hiển thị bài hát còn tồn tại (active = true)
     if (activeTab === "active") {
-      // ⭐ CHỈ LẤY BÀI ĐÃ DUYỆT
-      return song.status === "APPROVED";
+      return song.active === true;  
     }
+
+    // Tab Hidden → Hiển thị bài bị xoá mềm (active = false)
+    if (activeTab === "hidden") {
+      return song.active === false;
+    }
+
+
 
     if (activeTab === "pending") {
       return song.status === "PENDING";
@@ -221,7 +233,7 @@ const ManageSong = () => {
       setOpenMenu(null);    //  FIX: đóng dropdown ngay lập tức
 
       // THÔNG BÁO XÓA THÀNH CÔNG
-      alert("Đã xóa bài hát thành công!");
+      setShowDeleteSuccess(true);
 
     } catch (err) {
       console.error(err);
@@ -423,10 +435,25 @@ const ManageSong = () => {
     setEditLyrics("");
   };
 
+  // ============================
+  // PHÂN TRANG FRONTEND
+  // ============================
+  const ITEMS_PER_PAGE = 15;
 
+  const startIndex = (page - 1) * ITEMS_PER_PAGE;
+
+  const paginatedSongs = filteredSongs.slice(
+    startIndex,
+    startIndex + ITEMS_PER_PAGE
+  );
+
+  useEffect(() => {
+    setTotalPages(Math.ceil(filteredSongs.length / ITEMS_PER_PAGE));
+  }, [filteredSongs]);
 
 
   return (
+    
     <div className="admin-user-container">
       {/* HEADER */}
       <div className="admin-user-header"></div>
@@ -495,11 +522,12 @@ const ManageSong = () => {
           <ReportTab />
         ) : (
           <>
+          
           {/* TABLE */}
           <table className="admin-table">
             <thead>
               <tr>
-                <th>ID</th>
+                <th>STT</th>
                 <th>Cover</th>
                 <th>Bài hát</th>
                 <th>Nghệ sĩ</th>
@@ -513,10 +541,9 @@ const ManageSong = () => {
             </thead>
 
             <tbody>
-              {filteredSongs.map((song) => (
+              {paginatedSongs.map((song, index) => (
                 <tr key={song.id}>
-                  <td>{song.id}</td>
-
+                  <td>{startIndex + index + 1}</td>
                   {/* Cover */}
                   <td>
                     <img src={song.coverUrl} alt="" className="song-cover" />
@@ -543,17 +570,18 @@ const ManageSong = () => {
                         "status-merged " +
                         (song.status === "PENDING"
                           ? "pending"
-                          : song.active
-                          ? "public"
-                          : "hidden")
+                          : song.status === "HIDDEN"
+                          ? "hidden"
+                          : "public")
                       }
                     >
                       {song.status === "PENDING"
                         ? "Pending"
-                        : song.active
-                        ? "Public"
-                        : "Hidden"}
+                        : song.status === "HIDDEN"
+                        ? "Hidden"
+                        : "Public"}
                     </span>
+
                   </td>
 
                   {/* ACTION MENU */}
@@ -572,10 +600,8 @@ const ManageSong = () => {
                             setShowEditPopup(song);
 
                             setEditTitle(song.title);
-                            setEditLyrics(song.lyrics?.lyrics || "");
-                            setEditLyricsLanguage(song.lyrics?.language || "vi");
-
-
+                            setEditLyrics(song.lyrics || "");  
+                            setEditLyricsLanguage(song.lyricsLanguage ?? "vi");
 
                             // Nghệ sĩ object
                             const artistObj = artists.find(a => a.id === song.artistId);
@@ -618,12 +644,13 @@ const ManageSong = () => {
                             Sửa
                         </button>
 
-                        {/* Chỉ hiển thị nút Hiện/Ẩn khi bài đã APPROVED */}
-                        {song.status === "APPROVED" && (
+                        {/* Chỉ hiển thị nút Hiện/Ẩn khi bài đã APPROVED/HIDDEN */}
+                        {(song.status === "APPROVED" || song.status === "HIDDEN") && (
                           <button onClick={() => handleToggleActive(song.id)}>
-                            {song.active ? "Ẩn" : "Hiện"}
+                            {song.status === "APPROVED" ? "Ẩn" : "Hiện"}
                           </button>
                         )}
+
 
                         {song.status === "PENDING" && (
                           <button onClick={() => handleApprove(song.id)}>Duyệt</button>
@@ -942,6 +969,15 @@ const ManageSong = () => {
           </div>
         </div>
       )}
+
+
+      {showDeleteSuccess && (
+        <PopupSuccess
+          message="Xóa bài hát thành công!"
+          onClose={() => setShowDeleteSuccess(false)}
+        />
+      )}
+
 
     
       {/* POPUP THÀNH CÔNG */}

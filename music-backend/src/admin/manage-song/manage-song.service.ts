@@ -432,13 +432,28 @@ export class ManageSongService {
   // ==============================================
   //  ACTIVE / INACTIVE
   // ==============================================
+  // ==============================================
+//  HIDDEN / APPROVED (active luôn = 1)
+// ==============================================
   async toggleActive(id: number) {
     const song = await this.songRepo.findOne({ where: { id } });
     if (!song) throw new NotFoundException('Không tìm thấy bài hát');
 
-    song.active = !song.active;
+    // Nếu đang APPROVED → chuyển sang HIDDEN (ẩn)
+    if (song.status === 'APPROVED') {
+      song.status = 'HIDDEN';
+      song.active = true;   // theo yêu cầu mới
+    }
+    // Nếu đang HIDDEN → chuyển lại APPROVED (hiện)
+    else if (song.status === 'HIDDEN') {
+      song.status = 'APPROVED';
+      song.active = true;   // vẫn = 1
+    }
+
+    // Các trạng thái khác (PENDING, REJECTED, DELETED) tạm thời không động vào
     return this.songRepo.save(song);
   }
+
 
   // ==============================================
   //  APPROVE
@@ -517,20 +532,19 @@ export class ManageSongService {
     return saved;
   }
 
-
-
   // ==============================================
-  // SOFT DELETE
+  //  SOFT DELETE: active = 0, status = APPROVED
   // ==============================================
   async softDeleteSong(id: number) {
     const song = await this.songRepo.findOne({ where: { id } });
     if (!song) throw new NotFoundException("Không tìm thấy bài hát");
 
-    song.status = "REJECTED";  // đánh dấu bị từ chối / không hợp lệ
-    song.active = false;       // ẩn khỏi hệ thống
+    song.active = false;        // xoá mềm → không còn active
+    song.status = "APPROVED";   // theo yêu cầu: vẫn giữ status APPROVED
 
     return this.songRepo.save(song);
   }
+
 
 
   // ==============================================
