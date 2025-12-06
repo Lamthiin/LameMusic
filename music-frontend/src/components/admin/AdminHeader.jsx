@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./admin.css";
+import { useNavigate } from "react-router-dom";
 
 const AdminHeader = () => {
   const [open, setOpen] = useState(false);
@@ -58,6 +59,9 @@ const AdminHeader = () => {
     window.location.href = "/login";
   };
 
+  const navigate = useNavigate();
+
+
   return (
     <header className="admin-header-card">
       <div className="admin-header-title-box">
@@ -88,9 +92,18 @@ const AdminHeader = () => {
 
         {open && (
           <div className="admin-dropdown" ref={dropdownRef}>
-            <p className="dropdown-item">Profile</p>
+            <p
+              className="dropdown-item"
+              onClick={() => {
+                navigate("/admin/profile"); 
+                setOpen(false);             
+              }}
+            >
+              Tài khoản
+            </p>
+
             <p className="dropdown-item logout" onClick={handleLogout}>
-              Log out
+              Đăng xuất
             </p>
           </div>
         )}

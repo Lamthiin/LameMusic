@@ -32,6 +32,8 @@ import ManageSong from "./pages/admin/ManageSong";
 import AdminCustomerPage from "./pages/admin/AdminCustomerPage";
 import AdminAccountPage from "./pages/admin/AdminAccountPage";
 import AdminArtistDetail from "./pages/admin/AdminArtistDetail";
+import ProfileAdmin from "./pages/admin/ProfileAdmin";
+
 
 
 // (3) IMPORT CÁC TRANG CON CỦA PROFILE
@@ -118,6 +120,8 @@ function App() {
 
           {/* Dashboard mặc định */}
           <Route index element={<Dashboard />} />
+
+          <Route path="profile" element={<ProfileAdmin />} />
 
           {/* Trang chọn 3 mục */}
           <Route path="users" element={<ManageUser />} />

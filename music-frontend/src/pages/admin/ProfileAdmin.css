@@ -1,0 +1,90 @@
+.admin-profile-wrapper {
+  padding: 24px;
+  color: white;
+}
+
+.admin-profile-title {
+  font-size: 26px;
+  font-weight: bold;
+  margin-bottom: 30px;
+}
+
+.admin-profile-card {
+  display: flex;
+  background: #111;
+  padding: 32px;
+  border-radius: 18px;
+  gap: 40px;
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.45);
+}
+
+/* LEFT SIDE */
+.admin-profile-left {
+  width: 260px;
+  text-align: center;
+}
+
+.admin-profile-avatar {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #1ed760;
+  margin-bottom: 15px;
+}
+
+.admin-profile-name {
+  font-size: 22px;
+  margin-top: 10px;
+  font-weight: 600;
+}
+
+.admin-profile-role {
+  margin-top: 6px;
+  opacity: 0.75;
+}
+
+/* RIGHT SIDE */
+.admin-profile-right {
+  flex: 1;
+}
+
+.admin-form-group {
+  margin-bottom: 22px;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-form-group label {
+  font-size: 14px;
+  opacity: 0.8;
+  margin-bottom: 6px;
+}
+
+.admin-form-group input {
+  background: #222;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  color: white;
+  outline: none;
+  font-size: 15px;
+}
+
+.admin-save-btn {
+  margin-top: 10px;
+  background: #1ed760;
+  border: none;
+  padding: 12px 22px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  color: black;
+  transition: 0.2s ease-in-out;
+}
+
+.admin-save-btn:hover {
+  background: #1bcb5c;
+}
+

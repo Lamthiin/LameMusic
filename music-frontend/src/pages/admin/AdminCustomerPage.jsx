@@ -185,6 +185,34 @@ const AdminCustomerPage = () => {
                     Xem
                   </button>
 
+                  <button
+                    className="admin-btn edit"
+                    onClick={async () => {
+                      try {
+                        const res = await fetch(`http://localhost:3000/admin/users/${u.id}`);
+                        const detail = await res.json();
+
+                        // Map dữ liệu trả về để truyền vào PopupEditUser
+                        setSelectedUser({
+                          id: detail.id,
+                          name: detail.username,
+                          email: detail.email,
+                          birthYear: detail.birth_year,
+                          gender: detail.gender,
+                          createdAt: detail.created_at?.split("T")[0],
+                          role: detail.role?.name ?? "",
+                        });
+
+                        setShowEdit(true);
+                      } catch (err) {
+                        console.error("Error loading user detail:", err);
+                      }
+                    }}
+                  >
+                    Sửa
+                  </button>
+
+
                   {u.role === "listener" && (
                     <button className="admin-btn role" onClick={() => { setSelectedUser(u); setShowRole(true); }}>Role</button>
                   )}
@@ -230,30 +258,14 @@ const AdminCustomerPage = () => {
           setUsers(allUsers);         
         }}
 
-        onSubmit={(data) => {
-          const user = data.user;
-
-          const mapped = {
-            id: user.id,
-            name: user.username,
-            email: user.email,
-            birthYear: "",
-            gender: "prefer not to say",
-            createdAt: new Date().toISOString().split("T")[0],
-            role: user.role
-          };
-
-          // Cập nhật cả allUsers và users
-          setAllUsers((prev) => [...prev, mapped]);
-          setUsers((prev) => [...prev, mapped]);
-
-          // Reset search
-          setSearchValue("");
+        onSubmit={async () => {
+          await fetchCustomers(); // load lại toàn bộ danh sách từ backend
 
           setShowAdd(false);
           setSuccessMessage("Thêm người dùng thành công!");
           setShowSuccess(true);
         }}
+
 
       />
     )}
@@ -295,12 +307,7 @@ const AdminCustomerPage = () => {
               return;
             }
 
-            // Cập nhật FE state
-            setUsers(prev =>
-              prev.map(u =>
-                u.id === updated.id ? { ...u, ...updated } : u
-              )
-            );
+            await fetchCustomers();   
 
             setShowEdit(false);
             setSuccessMessage("Cập nhật thành công!");
