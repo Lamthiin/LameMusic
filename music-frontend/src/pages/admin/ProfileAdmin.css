@@ -143,3 +143,36 @@
     width: 100%;
   }
 }
+/* input chung */
+.admin-input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid #333;
+  background: #111;
+  color: #f1f1f1;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.admin-input:focus {
+  border-color: #1db954;
+  box-shadow: 0 0 0 1px rgba(29, 185, 84, 0.5);
+  background: #151515;
+}
+
+/* select */
+.admin-select {
+  appearance: none;
+}
+
+/* animation riêng cho password */
+.password-animated {
+  position: relative;
+}
+
+.password-animated:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.65);
+}
