@@ -24,7 +24,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 30% 70%, rgba(192, 192, 192, 0.2), transparent 60%);
+  background: radial-gradient(circle at 30% 70%, rgba(109, 109, 109, 0.2), transparent 60%);
   pointer-events: none;
 }
 

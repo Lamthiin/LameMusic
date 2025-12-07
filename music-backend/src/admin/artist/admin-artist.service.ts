@@ -33,22 +33,29 @@ export class AdminArtistService {
       order: { created_at: 'ASC' },
     });
   }
+    findApproved() {
+      return this.artistRepository.find({
+        where: { registrationStatus: 'APPROVED', active: 1, user: Not(IsNull()) },
+        relations: ['user', 'albums', 'songArtists', 'songArtists.song', 'songArtists.song.album'],
+        order: { updated_at: 'DESC' },
+      })
+      .then(list =>
+        list.map(a => ({
+          ...a,
+          total_albums: a.albums?.length || 0,
+          total_songs: a.songArtists?.length || 0,
+          songs: a.songArtists?.map(sa => ({
+            id: sa.song.id,
+            title: sa.song.title,
+            duration: sa.song.duration,
+            album_id: sa.song.album?.id || null,
+            album_title: sa.song.album?.title || null,
+            album_cover_url: this.normalizeUrl(sa.song.album?.cover_url || null),
+          })) || []
+        }))
+      );
+    }
 
-  // DANH SÁCH APPROVED
-  findApproved() {
-    return this.artistRepository.find({
-      where: { registrationStatus: 'APPROVED', active: 1, user: Not(IsNull()) },
-      relations: ['user', 'albums', 'songs'],
-      order: { updated_at: 'DESC' },
-    })
-    .then(list =>
-    list.map(a => ({
-      ...a,
-      total_albums: a.albums?.length || 0,
-      total_songs: a.songs?.length || 0,
-    }))
-  );
-  }
   
 
   findInactive() {
@@ -258,7 +265,17 @@ async findFullDetail(id: number) {
     user_id: artist.user_id,
 
     total_albums: artist.albums?.length || 0,
-    total_songs: artist.songs?.length || 0,
+    total_songs: artist.songArtists?.length || 0,
+    songs: artist.songArtists.map(sa => ({
+      id: sa.song.id,
+      title: sa.song.title,
+      duration: sa.song.duration,
+      image_url: this.normalizeUrl(sa.song.image_url),
+      album_id: sa.song.album?.id || null,
+      album_title: sa.song.album?.title || null,
+      album_cover_url: this.normalizeUrl(sa.song.album?.cover_url || null),
+      status: sa.song.status || 'UNKNOWN',
+    })),
     total_followers: artist.followers?.length || 0,
 
     // ⭐ FIX ALBUM COVER URL HERE
@@ -269,20 +286,20 @@ async findFullDetail(id: number) {
       created_at: a.created_at,
     })),
 
-    // ⭐ FIX SONG IMAGE_URL + ALBUM COVER
-    songs: artist.songs.map(s => ({
-      id: s.id,
-      title: s.title,
-      duration: s.duration,
+    // // ⭐ FIX SONG IMAGE_URL + ALBUM COVER
+    // songs: artist.songs.map(s => ({
+    //   id: s.id,
+    //   title: s.title,
+    //   duration: s.duration,
 
-      image_url: this.normalizeUrl(s.image_url),
+    //   image_url: this.normalizeUrl(s.image_url),
 
-      album_id: s.album?.id || null,
-      album_title: s.album?.title || null,
-      album_cover_url: this.normalizeUrl(s.album?.cover_url || null),
+    //   album_id: s.album?.id || null,
+    //   album_title: s.album?.title || null,
+    //   album_cover_url: this.normalizeUrl(s.album?.cover_url || null),
 
-      status: s.status || "UNKNOWN",
-    }))
+    //   status: s.status || "UNKNOWN",
+    // }))
   };
 }
 }

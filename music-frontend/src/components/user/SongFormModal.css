@@ -263,3 +263,113 @@
     }
 }
 
+
+/* ============================================= */
+/* DROPDOWN NGHỆ SĨ CỘNG TÁC — FINAL COMPACT     */
+/* ============================================= */
+
+.collab-dropdown {
+    position: relative;
+    width: 100%;
+}
+
+.collab-dropdown-btn {
+    width: 100%;
+    padding: 7px 10px;
+    background: #202020;
+    border: 1px solid #333;
+    border-radius: 8px;
+    color: #e0e0e0;
+    cursor: pointer;
+    font-size: 13px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: .2s ease;
+}
+
+.collab-dropdown-btn:hover {
+    background: #292929;
+}
+
+.collab-dropdown-btn .arrow {
+    font-size: 12px;
+    opacity: .7;
+}
+
+/* MENU */
+.collab-dropdown-menu {
+    position: absolute;
+    top: 102%;
+    left: 0;
+    width: 100%;
+    background: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 8px;
+    max-height: 150px;
+    overflow-y: auto;
+    padding: 4px 0;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-6px);
+    transition: .18s ease;
+    z-index: 30;
+}
+
+.collab-dropdown-menu.open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+/* ITEM — compact chuẩn */
+.collab-item {
+    padding: 5px 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #ddd;
+    font-size: 13px;
+    cursor: pointer;
+    min-height: 28px;         /* ↓ nhỏ hơn */
+    line-height: 1.15;
+}
+
+.collab-item:hover {
+    background: rgba(60, 120, 80, 0.25);
+}
+
+/* Checkbox nhỏ */
+.collab-item input[type="checkbox"] {
+    transform: scale(0.85);
+    cursor: pointer;
+}
+
+/* Avatar (nếu sau này dùng) */
+.collab-item .artist-avatar {
+    width: 22px;
+    height: 22px;
+    border-radius: 4px;
+    object-fit: cover;
+}
+
+/* FIX DROPDOWN ITEM */
+.collab-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 10px;
+    white-space: nowrap;         /* Không cho xuống dòng */
+    overflow: hidden;            /* Giữ layout gọn */
+}
+
+.collab-item input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #39e6d4;       /* Checkbox màu xanh neon đẹp */
+    cursor: pointer;
+}
+
+.collab-dropdown-menu {
+    width: 275px;                /* Rộng hơn để text không bị xuống dòng */
+}

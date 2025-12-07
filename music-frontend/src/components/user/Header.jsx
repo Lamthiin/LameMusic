@@ -188,24 +188,22 @@ const Header = () => {
           <div className="search-dropdown">
 
             {/* SONGS */}
-            {results.songs.length > 0 && (
-              <>
-                <h4>Bài hát</h4>
-                {results.songs.map(song => (
-                  <div
-                    key={song.id}
-                    className="result-item"
-                    onClick={e => go(`/song/${song.id}`, e)}
-                  >
-                    <img src={song.image_url} />
-                    <div>
-                      <p>{song.title}</p>
-                      <span>{song.artist?.stage_name}</span>
-                    </div>
+            {results.songs.map(song => {
+              const artistNames = song.songArtists?.map(sa => sa.artist?.stage_name).join(", ") || song.artist?.stage_name;
+              return (
+                <div
+                  key={song.id}
+                  className="result-item"
+                  onClick={e => go(`/song/${song.id}`, e)}
+                >
+                  <img src={song.image_url} />
+                  <div>
+                    <p>{song.title}</p>
+                    <span>{artistNames}</span>
                   </div>
-                ))}
-              </>
-            )}
+                </div>
+              );
+            })}
 
             {/* ARTISTS */}
             {results.artists.length > 0 && (

@@ -16,7 +16,7 @@ import { Lyrics } from '../lyrics/lyrics.entity';
 import { UserLikedSongs } from '../like/user-liked-songs.entity'; // <-- THÊM DÒNG NÀY
 import { History } from '../history/history.entity'; // <-- (1) IMPORT HISTORY
 import { PlaylistSong } from '../playlist/playlist-song.entity'; // <-- IMPORT MỚI
-
+import { SongArtist } from './song-artist.entity'; // <-- IMPORT MỚI
 
 @Entity('Song') // Ánh xạ với bảng 'Song'
 export class Song {
@@ -74,10 +74,15 @@ export class Song {
   @Column({ type: 'json', nullable: true })
   embedding: number[] | null; // Lưu trữ mảng số (vector)
 
-  // Quan hệ: Nhiều Song thuộc 1 Artist
-  @ManyToOne(() => Artist, (artist) => artist.songs, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'artist_id' })
-  artist: Artist;
+  // // Quan hệ: Nhiều Song thuộc 1 Artist
+  // @ManyToOne(() => Artist, (artist) => artist.songs, { onDelete: 'CASCADE' })
+  // @JoinColumn({ name: 'artist_id' })
+  // artist: Artist;
+
+  // === THAY THẾ BẰNG QUAN HỆ NHIỀU-NHIỀU QUA BẢNG TRUNG GIAN ===
+    @OneToMany(() => SongArtist, songArtist => songArtist.song)
+    songArtists: SongArtist[];
+    // =============================================================
 
   // === THỂ LOẠI CATEGORY ===
 

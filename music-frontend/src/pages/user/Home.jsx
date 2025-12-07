@@ -152,7 +152,23 @@ const Home = () => {
                 </div>
                 <p className="home-track-title">{song.title}</p>
                 <p className="home-track-artist">
-                  {song.artist?.stage_name || "Nghệ sĩ không xác định"}
+                  {song.songArtists && song.songArtists.length > 0
+                    ? song.songArtists.map((sa, index) => (
+                        <span
+                          key={sa.artist?.id || index}
+                          className="home-artist-link"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (sa.artist?.id) {
+                              navigate(`/artist/${sa.artist.id}`);
+                            }
+                          }}
+                        >
+                          {sa.artist?.stage_name}
+                          {index < song.songArtists.length - 1 ? ", " : ""}
+                        </span>
+                      ))
+                    : "Nghệ sĩ không xác định"}
                 </p>
               </div>
             ))}

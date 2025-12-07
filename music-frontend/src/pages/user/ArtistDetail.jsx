@@ -6,7 +6,6 @@ import './ArtistDetail.css';
 import { FaPlay, FaHeart } from 'react-icons/fa';
 import { usePlayer } from '../../context/PlayerContext';
 import { useAuth } from '../../context/AuthContext';
-
 import SongListTable from '../../components/user/SongListTable';
 
 const ArtistDetail = () => {
@@ -58,31 +57,34 @@ const ArtistDetail = () => {
           }));
         }
 
-        if (artistData.songs) {
-          artistData.songs = artistData.songs.map(song => {
-            const songImageUrl = song.image_url ? fixUrl(song.image_url, 'image') : null;
-            if (song.album) song.album.cover_url = fixUrl(song.album.cover_url, 'image');
-
-            return {
+        if (artistData.songArtists) {
+          const songs = artistData.songArtists
+            .map(sa => sa.song)
+            .filter(Boolean)
+            .map(song => ({
               ...song,
               file_url: fixUrl(song.file_url, 'audio'),
-              image_url: songImageUrl,
-              artist: {
-                id: artistData.id,
-                stage_name: artistData.stage_name,
-                avatar_url: artistData.avatar_url
-              }
-            };
-          });
+              image_url: fixUrl(song.image_url || song.album?.cover_url, 'image'),
+              album: song.album
+                ? { ...song.album, cover_url: fixUrl(song.album.cover_url, 'image') }
+                : null,
+              artists: song.songArtists?.map(sa => sa.artist) || [artistData], // <-- tất cả artist
+            }));
+
+          artistData.songs = songs;
+        } else {
+          artistData.songs = [];
         }
 
         setArtist(artistData);
       } catch (err) {
         setError('Không tìm thấy nghệ sĩ này.');
+        console.error(err);
       } finally {
         setLoading(false);
       }
     };
+
     loadArtist();
   }, [id]);
 
@@ -127,7 +129,6 @@ const ArtistDetail = () => {
 
   return (
     <div className="artist-detail-page">
-      {/* HEADER NGHỆ SĨ */}
       <div className="artist-detail-header">
         <img src={artist.avatar_url} alt={artist.stage_name} className="artist-detail-avatar" />
         <div className="artist-detail-info">
@@ -155,17 +156,20 @@ const ArtistDetail = () => {
         </div>
       </div>
 
-      {/* BÀI HÁT NỔI BẬT */}
       <div className="artist-detail-songs-section">
         <h3 className="artist-detail-songs-title">Bài hát nổi bật</h3>
         {songs.length > 0 ? (
-          <SongListTable songs={songs} />
+          <SongListTable 
+            songs={songs.map(song => ({
+              ...song,
+              artistNames: song.artists.map(a => a.stage_name).join(', ') // <-- thêm hiển thị nhiều nghệ sĩ
+            }))} 
+          />
         ) : (
           <p className="artist-detail-no-songs">Nghệ sĩ này chưa có bài hát nào.</p>
         )}
       </div>
 
-      {/* ALBUMS */}
       <h2 className="artist-detail-albums-title">Albums</h2>
       <div className="artist-detail-album-grid">
         {albums.map(album => (

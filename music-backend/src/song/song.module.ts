@@ -17,11 +17,12 @@ import { LikeModule } from '../like/like.module';
 import { AiModule } from '../ai/ai.module'; // <-- THÊM AI MODULE
 import { HistoryModule } from '../history/history.module'; // <-- (1) IMPORT THIẾU
 import { SharedModule } from '../shared/shared.module'; // <-- import module chứa R2Service
+import { SongArtist } from './song-artist.entity'; // <-- IMPORT MỚI
 
 @Module({
   imports: [
     // === ĐĂNG KÝ TẤT CẢ CÁC ENTITY CẦN THIẾT ===
-    TypeOrmModule.forFeature([Song, Artist, Album, Lyrics, UserLikedSongs]), 
+    TypeOrmModule.forFeature([Song, Artist, Album, Lyrics, UserLikedSongs, SongArtist]), 
     // ============================================
     AiModule, // <-- Đảm bảo AiModule được import
     HistoryModule,

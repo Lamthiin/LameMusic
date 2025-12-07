@@ -10,7 +10,8 @@ export enum NotificationType {
     NEW_SONG = 'NEW_SONG', 
     NEW_ALBUM = 'NEW_ALBUM', 
     ARTIST_PROFILE_APPROVED = 'ARTIST_PROFILE_APPROVED', 
-    SONG_APPROVED = 'SONG_APPROVED',                     
+    SONG_APPROVED = 'SONG_APPROVED',     
+    SONG_REJECTED = 'SONG_REJECTED',                 
     ADMIN_MESSAGE = 'ADMIN_MESSAGE',
 }
 

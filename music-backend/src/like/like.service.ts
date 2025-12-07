@@ -55,7 +55,8 @@ export class LikeService {
             // QUAN TRỌNG: Lấy (JOIN) dữ liệu từ các bảng liên quan
             relations: [
                 'song', 
-                'song.artist', // Lấy artist của bài hát
+                'song.songArtists',       // Bảng trung gian
+                'song.songArtists.artist',// Lấy artist của bài hát
                 'song.album' // Lấy album của bài hát
             ], 
             order: {

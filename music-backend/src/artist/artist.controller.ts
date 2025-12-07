@@ -93,6 +93,12 @@ export class ArtistController {
     return this.artistService.updateMyArtistProfile(userId, dto, file);
   }
 
+@Get('approved')
+  async findAllApprovedArtists() {
+    // Hàm này sẽ trả về danh sách Artist (ID, stage_name)
+    return this.artistService.findAllApprovedArtists();
+  }
+
     /**
    * API: GET /artists/:id
    */

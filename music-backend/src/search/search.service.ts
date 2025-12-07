@@ -1,4 +1,3 @@
-// music-backend/src/search/search.service.ts (BẢN SỬA LỖI TÌM KIẾM USER)
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like } from 'typeorm'; 
@@ -28,14 +27,13 @@ export class SearchService {
     const searchTerm = `%${query}%`; 
 
     const [songs, artists, albums, users] = await Promise.all([
-      
-      // 1. Tìm Bài hát
+      // 1. Tìm Bài hát (qua songArtists)
       this.songRepository.find({
         where: { title: Like(searchTerm), active: true, status: 'APPROVED' },
-        relations: ['artist', 'album'],
-        take: 5, 
+        relations: ['songArtists', 'songArtists.artist', 'album'],
+        take: 5,
       }),
-      
+
       // 2. Tìm Nghệ sĩ
       this.artistRepository.find({
         where: { stage_name: Like(searchTerm), active: 1 },
@@ -44,33 +42,28 @@ export class SearchService {
       
       // 3. Tìm Album
       this.albumRepository.find({
-        where: { 
-            title: Like(searchTerm),
-            // === FIX: BẮT BUỘC is_active = true ===
-            active: true
-            // =====================================
-        }, 
+        where: { title: Like(searchTerm), active: true },
         relations: ['artist'],
         take: 5,
       }),
 
-      // 4. SỬA LỖI: TÌM USER (CHỈ LỌC THEO USERNAME, TẢI LUÔN ROLE)
+      // 4. Tìm User
       this.userRepository.find({
-        where: { 
-            username: Like(searchTerm), 
-            active: 1, // Chỉ tìm user đã active
-        },
-        relations: ['role'], // <-- Tải Role để lọc ở bước dưới
+        where: { username: Like(searchTerm), active: 1 },
+        relations: ['role'],
         take: 5,
       })
     ]);
 
-    // === LỌC ROLE 'LISTENER' Ở ĐÂY (TRONG SERVICE) ===
-    const listenerUsers = users.filter(u => u.role?.name === 'listener');
+    // Chuyển songArtists thành mảng artist trực tiếp
+    const formattedSongs = songs.map(song => ({
+      ...song,
+      artists: song.songArtists.map(sa => sa.artist),
+    }));
 
-    // Xóa password
+    const listenerUsers = users.filter(u => u.role?.name === 'listener');
     listenerUsers.forEach(u => delete u.password);
 
-    return { songs, artists, albums, users: listenerUsers }; // <-- Trả về mảng đã lọc
+    return { songs: formattedSongs, artists, albums, users: listenerUsers };
   }
 }

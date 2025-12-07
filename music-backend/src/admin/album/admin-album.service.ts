@@ -61,7 +61,7 @@ export class AdminAlbumService {
       title: s.title,
       duration: s.duration,
       status: s.status,
-      artist_name: s.artist?.stage_name ?? '—',
+      artist_name: s.songArtists.find(sa => sa.is_primary)?.artist.stage_name ?? '—',
       album_id: s.album ? s.album.id : null      // ⭐ THÊM ĐỂ DEBUG
     }));
   }
@@ -165,7 +165,7 @@ export class AdminAlbumService {
           title: s.title,
           duration: s.duration ?? null,
           status: s.status ?? 'ACTIVE',
-          artist_name: s.artist?.stage_name ?? null,
+          artist_name: s.songArtists.find(sa => sa.is_primary)?.artist.stage_name ?? '—',
         })) ?? [],
     });
   }

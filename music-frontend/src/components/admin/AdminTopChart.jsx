@@ -44,7 +44,7 @@ const AdminTopChart = () => {
 
         <tbody>
           {topSongs.map((song, index) => (
-            <tr key={song.id}>
+            <tr key={song.id + '-' + index}>
               <td>
                 <span
                   className={
@@ -58,7 +58,7 @@ const AdminTopChart = () => {
               <td>
                 <div className="topchart-song">
                   <img
-                    src={song.image}
+                    src={song.image || "/images/default-album.png"}
                     alt={song.title}
                     className="topchart-cover"
                   />
@@ -66,7 +66,9 @@ const AdminTopChart = () => {
                 </div>
               </td>
 
-              <td className="topchart-artist">{song.artist}</td>
+              <td className="topchart-artist">
+                {Array.isArray(song.artists) ? song.artists.join(", ") : ""}
+              </td>
 
               <td>{formatNumber(song.plays)}</td>
 

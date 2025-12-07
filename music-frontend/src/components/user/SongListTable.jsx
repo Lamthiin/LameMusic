@@ -13,7 +13,6 @@ const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:3000";
 
 const showToast = (msg) => alert(msg);
 
-// Định dạng lượt nghe kiểu Spotify: 1.2K, 30.5K, 1.5M
 const formatPlayCount = (num) => {
   if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
   if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
@@ -84,7 +83,6 @@ const SongListTable = ({ songs = [], onRemoveSong }) => {
 
   return (
     <div className="songlist-wrapper">
-      {/* HEADER */}
       <div className={`songlist-header ${hasSelection ? 'has-selection' : ''}`}>
         <span className="header-checkbox" onClick={selectAll}>
           {hasSelection ? <FaTimes size={12} /> : '☰'}
@@ -111,7 +109,6 @@ const SongListTable = ({ songs = [], onRemoveSong }) => {
         )}
       </div>
 
-      {/* BODY */}
       <div className="songlist-body">
         {paginatedSongs.map((song, idx) => {
           const displayIndex = (currentPage - 1) * ITEMS_PER_PAGE + idx + 1;
@@ -154,7 +151,23 @@ const SongListTable = ({ songs = [], onRemoveSong }) => {
                   }}
                 >
                   <p className="song-title">{song.title}</p>
-                  <p className="song-artist">{song.artist?.stage_name || 'Không rõ'}</p>
+                  <p className="song-artist">
+                    {song.songArtists && song.songArtists.length > 0
+                      ? song.songArtists.map((sa, index) => (
+                          <span
+                            key={sa.artist?.id || index}
+                            className="song-artist-link"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (sa.artist?.id) navigate(`/artist/${sa.artist.id}`);
+                            }}
+                          >
+                            {sa.artist?.stage_name}
+                            {index < song.songArtists.length - 1 ? ', ' : ''}
+                          </span>
+                        ))
+                      : 'Không rõ'}
+                  </p>
                 </div>
               </div>
 
@@ -177,7 +190,6 @@ const SongListTable = ({ songs = [], onRemoveSong }) => {
         })}
       </div>
 
-      {/* PHÂN TRANG */}
       {totalPages > 1 && (
         <div className="songlist-pagination">
           <button
@@ -198,7 +210,6 @@ const SongListTable = ({ songs = [], onRemoveSong }) => {
         </div>
       )}
 
-      {/* MENU & MODAL */}
       {menuAnchor && menuSong && (
         <SongOptionsMenu
           song={menuSong}

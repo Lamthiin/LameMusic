@@ -13,6 +13,7 @@ import { User } from '../user/user.entity';
 import { Album } from '../album/album.entity';
 import { Song } from '../song/song.entity';
 import { Follow } from '../follow/follow.entity'; // <-- BẮT BUỘC CÓ
+import { SongArtist } from '../song/song-artist.entity'; // <-- IMPORT MỚI
 
 @Entity('Artist')
 export class Artist {
@@ -53,8 +54,12 @@ export class Artist {
   albums: Album[];
 
   // Quan hệ 1:N với Song
-  @OneToMany(() => Song, (song) => song.artist)
-  songs: Song[];
+  // @OneToMany(() => Song, (song) => song.artist)
+  // songs: Song[];
+
+  // === THAY THẾ BẰNG QUAN HỆ NHIỀU-NHIỀU QUA BẢNG TRUNG GIAN ===
+    @OneToMany(() => SongArtist, songArtist => songArtist.artist)
+    songArtists: SongArtist[];
 
     // Quan hệ 1:N với Follow (Mảng người đang theo dõi Artist này)
     @OneToMany(() => Follow, follow => follow.following) 

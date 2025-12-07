@@ -16,12 +16,12 @@ import { Song } from '../../song/song.entity';
 import { CategoryModule } from '../../category/category.module';
 import { Lyrics } from '../../lyrics/lyrics.entity';  
 import { NotificationModule } from '../../notification/notification.module';
-
+import { SongArtist } from '../../song/song-artist.entity';
 
 @Module({
   imports: [
     SharedModule,
-    TypeOrmModule.forFeature([Song, Artist, Album, Lyrics]),
+    TypeOrmModule.forFeature([Song, Artist, Album, Lyrics, SongArtist,]),
     CategoryModule,
     NotificationModule,
 

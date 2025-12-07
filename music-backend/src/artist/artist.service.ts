@@ -45,26 +45,6 @@ async findFeaturedArtists(): Promise<Artist[]> {
   }
 }
 
-  /**
-   * Lấy chi tiết một nghệ sĩ theo ID, bao gồm Bài hát và Album (Dùng cho Trang Detail)
-   */
-//   async findOne(id: number): Promise<Artist | null> {
-//     return this.artistRepository.findOne({
-//       where: { 
-//             id: id, 
-//             active: 1,
-//             // === SỬA LỖI: THÊM LỌC STATUS ===
-//             registrationStatus: 'APPROVED' 
-//             // ================================
-//         },
-//       relations: ['user', 'songs', 'albums'], 
-//       order: {
-//          songs: { id: 'DESC' }, 
-//          albums: { release_date: 'DESC' } 
-//        } as any 
-//     });
-//   }
-
 // async findOne(id: number): Promise<Artist | null> {
 //     // SỬ DỤNG QUERY BUILDER ĐỂ LỌC BÀI HÁT TRONG QUAN HỆ
 //     const artist = await this.artistRepository.createQueryBuilder('artist')
@@ -89,45 +69,80 @@ async findFeaturedArtists(): Promise<Artist[]> {
 //     return artist;
 //   }
 
-  async findOne(id: number): Promise<Artist | null> {
-  const artist = await this.artistRepository
-    .createQueryBuilder('artist')
+//   async findOne(id: number): Promise<Artist | null> {
+//   const artist = await this.artistRepository
+//     .createQueryBuilder('artist')
 
-    // Lọc nghệ sĩ active + approved
-    .where('artist.id = :id', { id })
-    .andWhere('artist.active = :active', { active: true })
-    .andWhere('artist.registrationStatus = :status', { status: 'APPROVED' })
+//     // Lọc nghệ sĩ active + approved
+//     .where('artist.id = :id', { id })
+//     .andWhere('artist.active = :active', { active: true })
+//     .andWhere('artist.registrationStatus = :status', { status: 'APPROVED' })
 
-    /* =====================
-       JOIN ALBUM ACTIVE = 1
-       ===================== */
-    .leftJoinAndSelect(
-      'artist.albums',
-      'album',
-      'album.active = :albumActive',
-      { albumActive: true }
-    )
+//     /* =====================
+//        JOIN ALBUM ACTIVE = 1
+//        ===================== */
+//     .leftJoinAndSelect(
+//       'artist.albums',
+//       'album',
+//       'album.active = :albumActive',
+//       { albumActive: true }
+//     )
 
-    /* ==============================================
-       JOIN SONG ACTIVE = 1 + APPROVED
-       ============================================== */
-    .leftJoinAndSelect(
-      'artist.songs',
-      'song',
-      'song.active = :songActive AND song.status = :songStatus',
-      { songActive: true, songStatus: 'APPROVED' }
-    )
+//     /* ==============================================
+//        JOIN SONG ACTIVE = 1 + APPROVED
+//        ============================================== */
+//     .leftJoinAndSelect(
+//       'artist.songs',
+//       'song',
+//       'song.active = :songActive AND song.status = :songStatus',
+//       { songActive: true, songStatus: 'APPROVED' }
+//     )
 
-    /* SẮP XẾP SONG & ALBUM */
-    .orderBy({
-      'song.play_count': 'DESC',
-      'album.release_date': 'DESC'
-    })
+//     /* SẮP XẾP SONG & ALBUM */
+//     .orderBy({
+//       'song.play_count': 'DESC',
+//       'album.release_date': 'DESC'
+//     })
 
-    .getOne();
+//     .getOne();
 
-  return artist;
-}
+//   return artist;
+// // }
+// async findOne(id: number): Promise<Artist | null> {
+//   const artist = await this.artistRepository
+//     .createQueryBuilder('artist')
+//     .where('artist.id = :id', { id })
+//     .andWhere('artist.active = :active', { active: true })
+//     .andWhere('artist.registrationStatus = :status', { status: 'APPROVED' })
+    
+//     // Join albums
+//     .leftJoinAndSelect(
+//       'artist.albums',
+//       'album',
+//       'album.active = :albumActive',
+//       { albumActive: true }
+//     )
+
+//     // Join songs qua bảng trung gian songArtists
+//     .leftJoinAndSelect(
+//       'artist.songArtists',
+//       'songArtist'
+//     )
+//     .leftJoinAndSelect(
+//       'songArtist.song',
+//       'song',
+//       'song.active = :songActive AND song.status = :songStatus',
+//       { songActive: true, songStatus: 'APPROVED' }
+//     )
+
+//     .orderBy({
+//       'song.play_count': 'DESC',
+//       'album.release_date': 'DESC'
+//     })
+//     .getOne();
+
+//   return artist;
+// }
 
 
   async findAllArtists(): Promise<Artist[]> {
@@ -141,6 +156,35 @@ async findFeaturedArtists(): Promise<Artist[]> {
       order: { stage_name: 'ASC' }, // Sắp xếp A-Z
     });
   }
+
+async findOne(id: number): Promise<Artist | null> {
+  const artist = await this.artistRepository
+    .createQueryBuilder('artist')
+    .where('artist.id = :id', { id })
+    .andWhere('artist.active = true')
+    .andWhere('artist.registrationStatus = :status', { status: 'APPROVED' })
+    
+    // Join albums
+    .leftJoinAndSelect('artist.albums', 'album', 'album.active = true')
+    
+    // Join bài hát qua songArtists, chỉ lấy bài APPROVED + active
+    .leftJoinAndSelect('artist.songArtists', 'songArtist')
+    .leftJoinAndSelect(
+      'songArtist.song',
+      'song',
+      'song.active = true AND song.status = :songStatus',
+      { songStatus: 'APPROVED' }
+    )
+    // Join tất cả nghệ sĩ liên quan từng bài hát
+    .leftJoinAndSelect('song.songArtists', 'songAllArtists')
+    .leftJoinAndSelect('songAllArtists.artist', 'songAllArtistsArtist')
+    
+    .orderBy('song.play_count', 'DESC')
+    .addOrderBy('album.release_date', 'DESC')
+    .getOne();
+
+  return artist;
+}
 
   /**
    * 2. HÀM LẤY DANH SÁCH CHỜ DUYỆT (ADMIN)
@@ -245,6 +289,17 @@ async findFeaturedArtists(): Promise<Artist[]> {
 
     return this.artistRepository.save(artist);
   }
+
+  async findAllApprovedArtists(): Promise<Artist[]> {
+    return this.artistRepository.find({
+        where: { 
+            active: 1, 
+            registrationStatus: 'APPROVED' 
+        },
+        // Chỉ chọn các trường cần thiết cho Collab
+        select: ['id', 'stage_name', 'avatar_url'] 
+    });
+}
 
 /**
  * 1. HÀM ĐĂNG KÝ (Tạo/Tái liên kết Artist với trạng thái PENDING)

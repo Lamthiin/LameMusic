@@ -572,3 +572,13 @@ export const markNotificationAsReadApi = async (notificationId) => {
     }
 };
 
+// === BỔ SUNG API CHO TÍNH NĂNG COLLAB ===
+
+/**
+ * GET /artists/approved: Lấy danh sách tất cả nghệ sĩ đã được duyệt
+ */
+export const fetchAllArtistsApi = async () => {
+    // Giả định instance axios của bạn có tên là 'api'
+    const response = await api.get('/artists/approved');
+    return response.data;
+};
