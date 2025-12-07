@@ -27,7 +27,7 @@ export class AdminProfileService {
     if (!user) throw new NotFoundException("Không tìm thấy tài khoản");
 
     // Check quyền admin
-    if (user.role.id !== 1) {
+    if (!user.role || user.role.id !== 1) {
       throw new BadRequestException("Bạn không có quyền cập nhật!");
     }
 
@@ -37,15 +37,46 @@ export class AdminProfileService {
         where: { email: dto.email, id: Not(id) },
       });
 
-      if (exists)
+      if (exists) {
         throw new BadRequestException("Email đã được sử dụng!");
+      }
     }
 
+    // ========================
     // Update name, email
-    if (dto.username) user.username = dto.username;
-    if (dto.email) user.email = dto.email;
+    // ========================
+    if (dto.username) user.username = dto.username.trim();
+    if (dto.email) user.email = dto.email.trim();
 
-    // Update password
+    // ========================
+    // Update gender
+    // ========================
+    if (dto.gender) {
+      const g = dto.gender.toLowerCase();
+
+      if (g === "male") user.gender = "male";
+      else if (g === "female") user.gender = "female";
+      else user.gender = "prefer not to say"; // giá trị mặc định
+    }
+
+
+    // ========================
+    // Update birth_year
+    // ========================
+    if (dto.birth_year !== undefined) {
+      if (dto.birth_year === null || dto.birth_year === "") {
+        user.birth_year = null;
+      } else {
+        const by = Number(dto.birth_year);
+        if (!Number.isNaN(by)) {
+          user.birth_year = by;
+        }
+      }
+    }
+
+    // ========================
+    // Update password (nếu có)
+    // ========================
     if (dto.password && dto.password.trim() !== "") {
       user.password = await bcrypt.hash(dto.password, 10);
     }
@@ -59,6 +90,8 @@ export class AdminProfileService {
         id: user.id,
         username: user.username,
         email: user.email,
+        gender: user.gender,
+        birth_year: user.birth_year,
       }
     };
   }
