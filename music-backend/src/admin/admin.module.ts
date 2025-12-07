@@ -25,7 +25,8 @@ import { CategoryModule } from '../category/category.module';
 import { SharedModule } from '../shared/shared.module';
 
 import * as multer from 'multer';
-
+import { Notification } from '../notification/notification.entity'; 
+import { NotificationModule } from '../notification/notification.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([
@@ -35,10 +36,12 @@ import * as multer from 'multer';
       Album,   // ⭐ BẮT BUỘC
       Song, 
       Category,
-         // ⭐ BẮT BUỘC
+    
+        
     ]),
     SharedModule,
-    CategoryModule,   
+    CategoryModule, 
+    NotificationModule,
     MulterModule.register({
   storage: multer.memoryStorage(),
 }),

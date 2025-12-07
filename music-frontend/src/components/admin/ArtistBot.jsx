@@ -116,11 +116,8 @@ export default function ArtistBot() {
 
               <td>{a.stage_name}</td>
 
-              {/* ⭐ Tổng album */}
-              <td>{a.total_albums ?? 0}</td>
-
-              {/* ⭐ Tổng bài hát */}
-              <td>{a.total_songs ?? 0}</td>
+                <td>{a.total_albums ?? 0}</td>
+                <td>{a.total_songs ?? 0}</td>
 
               {/* ⭐ Ngày tạo */}
               <td>
@@ -128,8 +125,6 @@ export default function ArtistBot() {
                   ? new Date(a.created_at).toLocaleDateString("vi-VN")
                   : "—"}
               </td>
-
-              {/* ⭐ Status */}
               {/* ⭐ Status */}
               <td className="status-cell">
                 {a.registrationStatus === "PENDING" && (
@@ -147,6 +142,7 @@ export default function ArtistBot() {
                 {!a.registrationStatus && (
                   <span className="artist-status-bot">Internal</span>
                 )}
+                
               </td>
 
 
@@ -157,7 +153,7 @@ export default function ArtistBot() {
                     className="btn-view"
                     onClick={() =>
                       navigate(`/admin/artists/${a.id}`, {
-                        state: { fromTab: "bot" }
+                        state: { fromTab: "internal" }
                       })
                     }
                   >

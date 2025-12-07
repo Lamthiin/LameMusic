@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom"; // ⭐ thêm useLocation
 import axios from "axios";
 import "./AdminArtistDetail.css";
 
 export default function ArtistDetailAdmin() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation(); // ⭐ lấy state từ navigate
 
   const [artist, setArtist] = useState(null);
   const [songs, setSongs] = useState([]);
@@ -18,19 +19,24 @@ export default function ArtistDetailAdmin() {
         setAlbums(res.data.albums);
         setSongs(res.data.songs);
       });
-  }, []);
+  }, [id]);
 
   if (!artist) return <div className="loading">Đang tải...</div>;
+
+  const handleClose = () => {
+    // ⭐ giữ tab trước đó, mặc định 'active'
+    const tab = location.state?.fromTab || "active";
+    navigate("/admin/artists", { state: { tab } });
+  };
 
   return (
     <div className="artist-admin-detail">
 
       {/* HERO */}
       <div className="artist-hero">
-
         <button
           className="close-btn"
-          onClick={() => navigate("/admin/artists", { state: { tab: "active" } })}
+          onClick={handleClose} // ⭐ dùng hàm handleClose
         >
           ✕
         </button>
@@ -87,7 +93,6 @@ export default function ArtistDetailAdmin() {
               <tr>
                 <th>STT</th>
                 <th>ẢNh</th>
-             
                 <th>Tên album</th>
                 <th>Ngày tạo</th>
               </tr>
@@ -134,7 +139,7 @@ export default function ArtistDetailAdmin() {
                 <th>Tên bài hát</th>
                 <th>Thời lượng</th>
                 <th>Album</th>
-                <th>Trạng thái</th> {/* ⭐ NEW COLUMN */}
+                <th>Trạng thái</th>
               </tr>
             </thead>
 
@@ -146,7 +151,6 @@ export default function ArtistDetailAdmin() {
                   <td>{s.duration || "—"}</td>
                   <td>{s.album_title || "—"}</td>
 
-                  {/* ⭐ STATUS BADGE */}
                   <td>
                     <span className={`song-status ${s.status?.toLowerCase()}`}>
                       {s.status || "UNKNOWN"}
@@ -158,7 +162,6 @@ export default function ArtistDetailAdmin() {
           </table>
         )}
       </div>
-
 
     </div>
   );

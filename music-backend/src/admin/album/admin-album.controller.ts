@@ -8,6 +8,7 @@ import {
   Param,
   Body,
   UseInterceptors,
+  ParseIntPipe,
   UploadedFile,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -29,9 +30,10 @@ export class AdminAlbumController {
   }
 
   @Get(':id/available-songs')
-  getAvailableSongs(@Param('id') id: number) {
-    return this.service.findAvailableSongs();
+  async getAvailable(@Param('id') albumId: number) {
+    return this.service.findAvailableSongs(albumId);
   }
+
 
   // ⭐ ĐẶT TRƯỚC — ROUTE FULL CHI TIẾT
   @Get(':id/full')
@@ -87,16 +89,15 @@ addSongToAlbum(
 Y
 
 
-// XOÁ ALBUM (SOFT DELETE: active = 0)
-@Delete(':id')
-delete(@Param('id') id: number) {
-  return this.service.softDelete(+id);
+@Patch(':id/soft-delete')
+softDelete(@Param('id', ParseIntPipe) id: number) {
+  return this.service.softDelete(id);
 }
 
 // KHÔI PHỤC ALBUM (active = 1)
 @Patch(':id/restore')
-restore(@Param('id') id: number) {
-  return this.service.restore(+id);
+restore(@Param('id', ParseIntPipe) id: number) {
+  return this.service.restore(id);
 }
 
 

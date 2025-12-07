@@ -1,11 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, IsNull, Not } from 'typeorm';
+import { DataSource, Repository, IsNull, Not } from 'typeorm';
 import { Artist } from '../../artist/artist.entity';
 import { User } from '../../user/user.entity';
 import { Role } from '../../role/role.entity';
 import { R2Service } from 'src/shared/r2.service';
-
+import { NotificationType } from 'src/notification/notification.entity';
+import { NotificationService } from '../../notification/notification.service';
+import { Album } from '../../album/album.entity'; // Thêm dòng này
+import { Song } from '../../song/song.entity'; // Thêm dòng này
 @Injectable()
 export class AdminArtistService {
   constructor(
@@ -15,7 +18,15 @@ export class AdminArtistService {
     private userRepository: Repository<User>,
     @InjectRepository(Role)
     private roleRepository: Repository<Role>,
-    private readonly r2: R2Service, 
+    // 💡 THÊM REPOSITORIES CẦN THIẾT CHO CASCADE
+    @InjectRepository(Album)
+    private albumRepository: Repository<Album>, // THÊM DÒNG NÀY
+    @InjectRepository(Song)
+    private songRepository: Repository<Song>, // THÊM DÒNG NÀY
+    // 💡 THÊM DATASOURCE ĐỂ SỬ DỤNG TRANSACTION
+    private dataSource: DataSource, // THÊM DÒNG NÀY
+    private readonly r2: R2Service,
+    private notificationService: NotificationService,
   ) {}
 
   async findAll() {
@@ -50,13 +61,19 @@ export class AdminArtistService {
   );
   }
   
-
   findInactive() {
     return this.artistRepository.find({
-      where: { registrationStatus: 'APPROVED', active: 1, user: IsNull() },
-      relations: ['user'],
+      where: { registrationStatus: 'APPROVED', active: 1, user: (IsNull()) },
+      relations: ['user', 'albums', 'songs'],
       order: { updated_at: 'DESC' },
-    });
+    })
+    .then(list =>
+    list.map(a => ({
+      ...a,
+      total_albums: a.albums?.length || 0,
+      total_songs: a.songs?.length || 0,
+    }))
+  );
   }
 
   // DANH SÁCH REJECTED
@@ -89,42 +106,66 @@ export class AdminArtistService {
 
 
   // DUYỆT / PHÊ DUYỆT LẠI
-  async approve(id: number) {
-    const artist = await this.artistRepository.findOne({ where: { id } });
+ // Trong AdminArtistService.ts
 
-    if (!artist) throw new NotFoundException('Artist không tồn tại');
+  // DUYỆT / PHÊ DUYỆT LẠI
+  async approve(id: number) {
+    // ⭐ SỬA LỖI 1: Tải mối quan hệ 'user' để lấy user_id
+    const artist = await this.artistRepository.findOne({ 
+        where: { id },
+        relations: ['user'] // THÊM DÒNG NÀY
+    });
 
-    artist.registrationStatus = 'APPROVED';
-    artist.active = 1;
+    if (!artist) throw new NotFoundException('Artist không tồn tại');
 
-    return this.artistRepository.save(artist);
-  }
+    artist.registrationStatus = 'APPROVED';
+    artist.active = 1;
+    
+    // Lưu trước để đảm bảo trạng thái đã được cập nhật
+    const savedArtist = await this.artistRepository.save(artist); 
+
+    // Lấy user ID từ trường trực tiếp hoặc mối quan hệ
+    const userId = artist.user_id || artist.user?.id; 
+
+    if (userId) {
+      await this.notificationService.createNotificationForUser(
+        userId, // Dùng userId đã xác định
+        artist.id,
+        // ⭐ SỬA LỖI 2: Dùng ARTIST_APPROVED
+        NotificationType.ARTIST_PROFILE_APPROVED, 
+        `Hồ sơ đăng ký nghệ sỹ của bạn đã được duyệt!.`,
+        artist.id
+      );
+    }
+    
+    return { artist: savedArtist, message: 'Đã phê duyệt nghệ sĩ thành công.' };
+  }
 
   // TỪ CHỐI ARTIST
   async reject(id: number) {
-    const artist = await this.artistRepository.findOne({
-      where: { id, registrationStatus: 'PENDING' },
-    });
+      const artist = await this.artistRepository.findOne({
+        where: { id, registrationStatus: 'PENDING' },
+      });
 
-    if (!artist)
-      throw new NotFoundException('Không tìm thấy hồ sơ hoặc đã xử lý');
+      if (!artist)
+        throw new NotFoundException('Không tìm thấy hồ sơ hoặc đã xử lý');
 
-    artist.registrationStatus = 'REJECTED';
-    artist.active = 1; // ⭐ GIỮ ACTIVE = 1 (để hiện bên tab Rejected)
+      artist.registrationStatus = 'REJECTED';
+      artist.active = 1; // ⭐ GIỮ ACTIVE = 1 (để hiện bên tab Rejected)
 
-    return this.artistRepository.save(artist);
+      const savedArtist = await this.artistRepository.save(artist);
+      return { artist: savedArtist, message: 'Đã từ chối hồ sơ nghệ sĩ thành công.' }; // ⭐ Log thành công  }
+    }
+    private normalizeUrl(url: string | null): string | null {
+    if (!url) return null;
+
+    // Nếu là đường dẫn local → convert sang BE host
+    if (url.startsWith("\\") || url.startsWith("/")) {
+      return `http://localhost:3000${url.replace(/\\/g, "/")}`;
+    }
+
+    return url; // Cloudflare URL giữ nguyên
   }
-
-  private normalizeUrl(url: string | null): string | null {
-  if (!url) return null;
-
-  // Nếu là đường dẫn local → convert sang BE host
-  if (url.startsWith("\\") || url.startsWith("/")) {
-    return `http://localhost:3000${url.replace(/\\/g, "/")}`;
-  }
-
-  return url; // Cloudflare URL giữ nguyên
-}
   // THÊM ARTIST (Admin thêm)
   async createArtist(data: any, file?: Express.Multer.File) {
   let avatarUrl: string | null = null;
@@ -143,16 +184,16 @@ export class AdminArtistService {
   }
 
   const artist = this.artistRepository.create({
-    stage_name: data.stage_name,
-    bio: data.bio || "",
-    avatar_url: avatarUrl,
-    registrationStatus: "APPROVED",
-    active: 1,
-    user: null,
-  });
-
-  return this.artistRepository.save(artist);
-}
+      stage_name: data.stage_name,
+      bio: data.bio || "",
+      avatar_url: avatarUrl,
+      registrationStatus: "APPROVED",
+      active: 1,
+      user: null,
+    });
+    const savedArtist = await this.artistRepository.save(artist);
+    return { artist: savedArtist, message: 'Đã thêm nghệ sĩ nội bộ thành công.' }; // ⭐ Log thành công
+  }
 
 
 
@@ -186,21 +227,48 @@ export class AdminArtistService {
 
     artist.avatar_url = uploaded.url; // ⭐ URL thật từ Cloudflare
   }
+  const savedArtist = await this.artistRepository.save(artist);
+  return { artist: savedArtist, message: 'Đã cập nhật thông tin nghệ sĩ thành công.' }; // ⭐ Log thành công
+ }
 
-  return this.artistRepository.save(artist);
-}
 
-
-  // XOÁ HỒ SƠ (soft delete)
   async deleteArtist(id: number) {
-    const artist = await this.artistRepository.findOne({ where: { id } });
+  // Dùng transaction để rollback nếu có lỗi
+  return await this.artistRepository.manager.transaction(async manager => {
+    // 1️⃣ Lấy artist kèm albums + songs
+    const artist = await manager.findOne(Artist, {
+      where: { id },
+      relations: ['albums', 'albums.songs'],
+    });
 
-    if (!artist) throw new NotFoundException('Artist không tồn tại');
+    if (!artist) {
+      throw new NotFoundException('Artist không tồn tại');
+    }
 
-    artist.active = 0; // ⭐ XÓA = active=0, giữ nguyên status
+    // 2️⃣ Xoá mềm artist
+    artist.active = 0;
+    artist.registrationStatus = 'REMOVED';
+    await manager.save(artist);
 
-    return this.artistRepository.save(artist);
-  }
+    // 3️⃣ Xoá mềm albums (nếu có)
+    if (artist.albums && artist.albums.length > 0) {
+      for (const album of artist.albums) {
+        album.active = false;
+
+        // 4️⃣ Xoá mềm songs trong album (nếu có)
+        if (album.songs && album.songs.length > 0) {
+          for (const song of album.songs) {
+            song.active = false;
+          }
+          await manager.save(album.songs);
+        }
+      }
+      await manager.save(artist.albums);
+    }
+
+    return { message: 'Đã xoá (soft delete) artist và tất cả album, bài hát liên quan thành công.' };
+  });
+}
 
   
 
@@ -217,7 +285,8 @@ export class AdminArtistService {
     artist.active = 1; // Đảm bảo active = 1 (trừ khi bạn muốn active=0 khi pending)
 
     // 3. Lưu thay đổi
-    return this.artistRepository.save(artist);
+    const savedArtist = await this.artistRepository.save(artist);
+    return { artist: savedArtist, message: 'Đã chuyển trạng thái nghệ sĩ sang chờ duyệt (Pending) thành công.' }; // ⭐ Log thành công
   }
 
   // DANH SÁCH NGHỆ SĨ TRỰC THUỘC LAME MUSIC (user_id = null)
@@ -232,58 +301,113 @@ export class AdminArtistService {
     });
   }
 
-async findFullDetail(id: number) {
-  const artist = await this.artistRepository.findOne({
-    where: { id },
-    relations: [
-      "user",
-      "albums",
-      "songs",
-      "followers",
-      "songs.album",
-    ],
+  async findRemoved() {
+  const artists = await this.artistRepository.find({
+    where: { active: 0 },
+    relations: ['user', 'albums', 'songs'],
+    order: { updated_at: 'DESC' },
   });
 
-  if (!artist) throw new NotFoundException("Artist không tồn tại");
+  // Tính tổng albums và tổng songs
+  return artists.map(a => ({
+    ...a,
+    total_albums: a.albums?.length || 0,
+    total_songs: a.songs?.length || 0,
+  }));
+}
+
+
+  async findFullDetail(id: number) {
+    const artist = await this.artistRepository.findOne({
+      where: { id },
+      relations: [
+        "user",
+        "albums",
+        "songs",
+        "followers",
+        "songs.album",
+      ],
+    });
+
+    if (!artist) throw new NotFoundException("Artist không tồn tại");
+
+    return {
+      id: artist.id,
+      stage_name: artist.stage_name,
+      bio: artist.bio,
+      avatar_url: this.normalizeUrl(artist.avatar_url),
+
+      created_at: artist.created_at,
+      updated_at: artist.updated_at,
+      registrationStatus: artist.registrationStatus,
+      user_id: artist.user_id,
+
+      total_albums: artist.albums?.length || 0,
+      total_songs: artist.songs?.length || 0,
+      total_followers: artist.followers?.length || 0,
+
+      // ⭐ FIX ALBUM COVER URL HERE
+      albums: artist.albums.map(a => ({
+        id: a.id,
+        title: a.title,
+        cover_url: this.normalizeUrl(a.cover_url),
+        created_at: a.created_at,
+      })),
+
+      // ⭐ FIX SONG IMAGE_URL + ALBUM COVER
+      songs: artist.songs.map(s => {
+  // Chuyển duration từ giây sang mm:ss
+  const minutes = Math.floor((s.duration || 0) / 60).toString().padStart(2, '0');
+  const seconds = ((s.duration || 0) % 60).toString().padStart(2, '0');
+  const durationStr = `${minutes}:${seconds}`;
 
   return {
-    id: artist.id,
-    stage_name: artist.stage_name,
-    bio: artist.bio,
-    avatar_url: this.normalizeUrl(artist.avatar_url),
+    id: s.id,
+    title: s.title,
+    duration: durationStr, // giờ là mm:ss
+    image_url: this.normalizeUrl(s.image_url),
 
-    created_at: artist.created_at,
-    updated_at: artist.updated_at,
-    registrationStatus: artist.registrationStatus,
-    user_id: artist.user_id,
+    album_id: s.album?.id || null,
+    album_title: s.album?.title || null,
+    album_cover_url: this.normalizeUrl(s.album?.cover_url || null),
 
-    total_albums: artist.albums?.length || 0,
-    total_songs: artist.songs?.length || 0,
-    total_followers: artist.followers?.length || 0,
-
-    // ⭐ FIX ALBUM COVER URL HERE
-    albums: artist.albums.map(a => ({
-      id: a.id,
-      title: a.title,
-      cover_url: this.normalizeUrl(a.cover_url),
-      created_at: a.created_at,
-    })),
-
-    // ⭐ FIX SONG IMAGE_URL + ALBUM COVER
-    songs: artist.songs.map(s => ({
-      id: s.id,
-      title: s.title,
-      duration: s.duration,
-
-      image_url: this.normalizeUrl(s.image_url),
-
-      album_id: s.album?.id || null,
-      album_title: s.album?.title || null,
-      album_cover_url: this.normalizeUrl(s.album?.cover_url || null),
-
-      status: s.status || "UNKNOWN",
-    }))
+    status: s.status || "UNKNOWN",
   };
-}
+})
+
+    };
+  }
+
+  async getPaginatedArtists(page: number, take: number = 15) {
+    
+    // Tính toán vị trí bắt đầu bỏ qua (skip)
+    const skip = (page - 1) * take;
+
+    // Lấy danh sách nghệ sĩ và tổng số lượng cùng lúc
+    const [artists, total] = await this.artistRepository.findAndCount({
+      take, // Số lượng mỗi trang (mặc định 15)
+      skip, // Vị trí bắt đầu
+      order: { id: 'DESC' }, // Sắp xếp theo ID mới nhất
+      // Tải các mối quan hệ cơ bản thường dùng
+      relations: ['user', 'albums', 'songs'] 
+    });
+
+    // Tính toán và định dạng dữ liệu trả về (tính thêm tổng album/song)
+    const formattedArtists = artists.map(a => ({
+        ...a,
+        total_albums: a.albums?.length || 0,
+        total_songs: a.songs?.length || 0,
+        // Dọn dẹp mối quan hệ albums và songs nếu chúng quá lớn
+        albums: undefined,
+        songs: undefined,
+    }));
+    
+    return {
+      data: formattedArtists,
+      currentPage: page,
+      totalPages: Math.ceil(total / take),
+      totalItems: total
+    };
+  }
 }
 

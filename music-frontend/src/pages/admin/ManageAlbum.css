@@ -41,10 +41,11 @@
   padding: 10px 18px;
   border-radius: 8px;
   color: #fff;
-  font-weight: 600;
+  font-weight: 100;
   border: none;
   cursor: pointer;
   transition: 0.2s;
+  width: fit-content;
   margin-bottom: 22px;
 }
 
@@ -55,4 +56,41 @@
 /* TABLE AREA */
 .am-table-area {
   margin-top: 10px;
+}
+
+
+.mini-pagination {
+  margin-top: 25px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  background: #2a2a2a;       /* nền nhẹ hơn, phân tách table */
+  padding: 8px 16px;
+  border-radius: 8px;
+}
+.album-management {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* chiếm toàn bộ chiều cao trang */
+  padding: 16px;
+  color: white;
+  background-color: #121212;
+}
+
+.am-table-area {
+  flex: 1; /* chiếm phần còn lại, đẩy pagination xuống cuối */
+  display: flex;
+  flex-direction: column;
+}
+
+.mini-pagination {
+  margin-top: auto; /* đẩy xuống cuối container */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  background: #2a2a2a;       /* nền nhẹ hơn, phân tách table */
+  padding: 8px 16px;
+  border-radius: 8px;
 }
