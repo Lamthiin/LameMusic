@@ -99,20 +99,18 @@ export default function ReportTab() {
               </td>
             </tr>
           ) : (
-            reports.map((r) => (
+            reports.map((r, index) => (
               <tr key={r.id}>
-                <td>{index + 1}</td>   // STT
+                <td>{index + 1}</td>
                 <td>{r.user_name}</td>
                 <td>{r.song_title}</td>
                 <td>{r.title}</td>
                 <td>{r.description}</td>
-
                 <td>
                   <span className={`status-badge ${r.status.toLowerCase()}`}>
                     {r.status}
                   </span>
                 </td>
-
                 <td>
                   {activeFilter === "PENDING" ? (
                     <button
@@ -127,6 +125,7 @@ export default function ReportTab() {
                 </td>
               </tr>
             ))
+
           )}
         </tbody>
       </table>

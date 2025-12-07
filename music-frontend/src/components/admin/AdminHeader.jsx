@@ -4,38 +4,59 @@ import { useNavigate } from "react-router-dom";
 
 const AdminHeader = () => {
   const [open, setOpen] = useState(false);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem("admin_profile");
+    return saved ? JSON.parse(saved) : null;
+  });
+
+  // Update user khi quay lại trang hoặc reload component
+  useEffect(() => {
+    const saved = localStorage.getItem("admin_profile");
+    if (saved) setUser(JSON.parse(saved));
+  }, []);
+
+  // Theo dõi sự thay đổi localStorage để update Header ngay lập tức
+  useEffect(() => {
+    const handleStorage = () => {
+      const saved = localStorage.getItem("admin_profile");
+      if (saved) setUser(JSON.parse(saved));
+    };
+
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
+
 
   const dropdownRef = useRef(null);
   const avatarRef = useRef(null);
 
-  // FETCH USER (chỉ chạy 1 lần)
-  useEffect(() => {
-    const fetchUser = async () => {
-      const token = localStorage.getItem("accessToken");
-      console.log("Token lấy được:", token);
+  // // FETCH USER (chỉ chạy 1 lần)
+  // useEffect(() => {
+  //   const fetchUser = async () => {
+  //     const token = localStorage.getItem("accessToken");
+  //     console.log("Token lấy được:", token);
 
-      if (!token) return; //RETURN TRONG ASYNC, KHÔNG RETURN TRONG COMPONENT
+  //     if (!token) return; //RETURN TRONG ASYNC, KHÔNG RETURN TRONG COMPONENT
 
-      try {
-        const res = await fetch("http://localhost:3000/auth/me", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+  //     try {
+  //       const res = await fetch("http://localhost:3000/auth/me", {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       });
 
-        console.log("Status /auth/me:", res.status);
-        const data = await res.json();
-        console.log("Data trả về:", data);
+  //       console.log("Status /auth/me:", res.status);
+  //       const data = await res.json();
+  //       console.log("Data trả về:", data);
 
-        setUser(data.content);
-      } catch (err) {
-        console.error("Lỗi fetch user:", err);
-      }
-    };
+  //       setUser(data.content);
+  //     } catch (err) {
+  //       console.error("Lỗi fetch user:", err);
+  //     }
+  //   };
 
-    fetchUser();
-  }, []);
+  //   fetchUser();
+  // }, []);
 
   // CLICK OUTSIDE
   useEffect(() => {
@@ -53,6 +74,7 @@ const AdminHeader = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+  
 
   const handleLogout = () => {
     localStorage.removeItem("accessToken");

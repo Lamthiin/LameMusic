@@ -211,6 +211,7 @@ async login(loginAuthDto: LoginAuthDto): Promise<{ accessToken: string }> {
     this.rateLimitService.reset('login_fail', identifier);
 
     const payload = {
+      // id: user.id,  //TH bổ sung
       userId: user.id,
       username: user.username,
       role: user.role.name,
@@ -426,27 +427,37 @@ async login(loginAuthDto: LoginAuthDto): Promise<{ accessToken: string }> {
   async getProfile(userId: number) {
     const user = await this.userRepository.findOne({
       where: { id: userId },
-      relations: ['role'], 
+      relations: ["role"],
     });
 
     if (!user) {
-      throw new NotFoundException('User không tồn tại');
+      throw new NotFoundException("User không tồn tại");
     }
 
     return {
       status: 200,
       content: {
         id: user.id,
+
+        // ⭐ BE => FE: name = username
         name: user.username,
+
         email: user.email,
 
-        // ⭐ Avatar anime (KHÔNG cần field avatar trong DB)
+        // ⭐ Thêm để FE hiển thị dropdown giới tính
+        gender: user.gender || "prefer not to say",
+
+        // ⭐ Thêm để FE hiển thị năm sinh
+        birth_year: user.birth_year || null,
+
+        // ⭐ Avatar random theo userId
         avatar: `https://api.dicebear.com/7.x/lorelei/svg?seed=${user.id}`,
 
-        role: user.role?.name || 'User',
+        role: user.role?.name || "User",
       },
     };
   }
+
 
 
 }

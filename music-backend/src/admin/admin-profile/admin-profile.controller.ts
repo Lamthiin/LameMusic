@@ -15,7 +15,8 @@ export class AdminProfileController {
   @Patch()
   @UseGuards(AuthGuard("jwt"))
   async updateProfile(@Req() req, @Body() dto: any) {
-    const userId = req.user.id;
+    const userId = req.user.userId;
+  
     return this.service.updateProfile(userId, dto);
   }
 }

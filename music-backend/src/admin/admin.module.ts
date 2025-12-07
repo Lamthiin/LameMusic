@@ -35,6 +35,7 @@ import * as multer from 'multer';
       Album,   // ⭐ BẮT BUỘC
       Song, 
       Category,
+      
          // ⭐ BẮT BUỘC
     ]),
     SharedModule,
@@ -45,6 +46,7 @@ import * as multer from 'multer';
 
     ManageSongModule,
     ReportModule,
+
   ],
 
   controllers: [AdminArtistController, AdminAlbumController, AdminGenreController,], // ⭐ THÊM AdminGenreController
