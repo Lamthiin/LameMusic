@@ -1,7 +1,14 @@
 /* Home.css – SIÊU ĐẸP, CHUẨN SPOTIFY 2025, KHÔNG TRÙNG CLASS */
 .home-wrapper {
-  padding: 24px;
-  background: #000;
+  padding:20px;
+  background: linear-gradient(
+  to bottom,
+  #0F0F0F 0%,
+  #121212 40%,
+  #181818 100%
+  );
+  border: 1px solid #2c2c2c;
+  border-radius: 8px;
   min-height: 100vh;
   font-family: "Times New Roman", Georgia, serif;
   color: #fff;
@@ -39,7 +46,7 @@
 }
 
 /* TRACK GRID */
-.home-track-grid {
+/* .home-track-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 24px;
@@ -51,7 +58,59 @@
   overflow: hidden;
   cursor: pointer;
   transition: all 0.3s ease;
+} */
+
+/* TRACK GRID – BẢN FIX HOÀN CHỈNH */
+.home-track-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important;
+  gap: 18px !important;
 }
+
+/* Card nhỏ gọn */
+.home-track-card {
+  background: #181818;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+/* Ảnh nhỏ lại */
+.home-track-image {
+  width: 100%;
+  height: 150px !important;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+/* Hover */
+.home-track-card:hover {
+  background: #282828;
+  transform: translateY(-6px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+}
+
+.home-track-card:hover .home-track-image {
+  transform: scale(1.05);
+}
+
+/* Text gọn lại */
+.home-track-title {
+  padding: 14px 14px 4px;
+  font-size: 14px !important;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.home-track-artist {
+  padding: 0 14px 14px;
+  font-size: 12px !important;
+  color: #b3b3b3;
+}
+
 
 .home-track-card:hover {
   background: #282828;
@@ -64,12 +123,12 @@
   overflow: hidden;
 }
 
-.home-track-image {
+/* .home-track-image {
   width: 100%;
   height: 200px;
   object-fit: cover;
   transition: transform 0.3s;
-}
+} */
 
 .home-track-card:hover .home-track-image {
   transform: scale(1.05);
@@ -229,3 +288,4 @@
   .home-artist-card { flex: 0 0 140px; }
   .home-artist-avatar { width: 140px; height: 140px; }
 }
+

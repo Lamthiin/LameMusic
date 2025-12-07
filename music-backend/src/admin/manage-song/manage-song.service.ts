@@ -358,33 +358,15 @@ export class ManageSongService {
   //  LIST
   // ==============================================
   async getAllSongsForAdmin() {
-    return this.songRepo
-      .createQueryBuilder('song')
-      .leftJoinAndSelect('song.artist', 'artist')
-      .leftJoinAndSelect('song.album', 'album')
-      .leftJoinAndSelect('song.lyrics', 'lyrics')
-      .select([
-        'song.id',
-        'song.title',
-        'song.genre',
-        'song.duration',
-        'song.play_count',
-        'song.image_url',
-        'song.file_url',
-        'song.status',
-        'song.active',
-        'artist.id',
-        'artist.stage_name',
-        'album.id',
-        'album.title',
-
-        'lyrics.id',         // ⭐ THÊM
-        'lyrics.lyrics',     // ⭐ THÊM
-        'lyrics.language',   // ⭐ THÊM
-
-      ])
-      .orderBy('song.id', 'DESC')
-      .getMany();
+    return this.songRepo.find({
+      relations: [
+        "songArtists",
+        "songArtists.artist",
+        "album",
+        "lyrics",
+      ],
+      order: { id: "DESC" }
+    });
   }
 
   // ==============================================
@@ -393,11 +375,18 @@ export class ManageSongService {
   async getSongDetail(id: number) {
     const song = await this.songRepo.findOne({
       where: { id },
-      relations: ['artist', 'album', 'lyrics'],
+      relations: [
+        "songArtists",
+        "songArtists.artist",
+        "album",
+        "lyrics",
+      ]
     });
-    if (!song) throw new NotFoundException('Không tìm thấy bài hát');
+
+    if (!song) throw new NotFoundException("Không tìm thấy bài hát");
     return song;
   }
+
 
   // ==============================================
   //  UPDATE
@@ -560,15 +549,19 @@ async updateSong(
     const artist = await this.artistRepo.findOne({ where: { id: artistId } });
     if (!artist) throw new NotFoundException("Artist không tồn tại");
 
-    // Xóa artist cũ trong songArtists (nếu có)
-    song.songArtists = [];
+    // XÓA TẤT CẢ quan hệ cũ trong song_artist
+    await this.songArtistRepo.delete({ song: { id } });
 
-    // Thêm artist mới
-    const songArtist = new SongArtist();
-    songArtist.song = song;
-    songArtist.artist = artist;
-    song.songArtists.push(songArtist);
+    // TẠO QUAN HỆ MỚI
+    const songArtist = this.songArtistRepo.create({
+      song: song,
+      artist: artist,
+      is_primary: true
+    });
+
+    await this.songArtistRepo.save(songArtist);
   }
+
 
   // =============================
   //  UPDATE ALBUM

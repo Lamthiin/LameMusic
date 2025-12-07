@@ -1,6 +1,6 @@
 /* Footer.css – SIÊU ĐẸP, SÁT CHÂN TRANG, KHÔNG BỊ PLAYERBAR ĐÈ */
 .app-footer {
-  background: #000;
+  background: linear-gradient(to top, #0d0d0d, #181818);
   color: #b3b3b3;
   font-family: "Times New Roman", Georgia, serif;
   font-size: 14px;
@@ -9,14 +9,24 @@
   flex-shrink: 0;
 }
 
-.footer-inner {
+/* .footer-inner {
   max-width: 1200px;
   margin: 0 auto;
   padding: 60px 32px 40px;
   display: grid;
   grid-template-columns: 2fr 1fr 1fr;
   gap: 40px;
+} */
+
+.footer-inner {
+  width: 100%;               /* <-- FULL WIDTH */
+  max-width: 100% !important;
+  padding: 60px 32px 40px;   /* giống main-content padding */
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 40px;
 }
+
 
 .footer-col h4 {
   color: #fff;

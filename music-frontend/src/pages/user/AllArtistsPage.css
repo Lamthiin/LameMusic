@@ -1,10 +1,20 @@
 /* WRAPPER */
+/* WRAPPER – Đồng bộ style với HomeWrapper */
 .artists-wrapper {
-    background: #0e0e0e;
-    min-height: 100vh;
-    padding: 30px;
-    color: white;
+  padding: 20px;
+  background: linear-gradient(
+    to bottom,
+    #0F0F0F 0%,
+    #121212 40%,
+    #181818 100%
+  );
+  border: 1px solid #2c2c2c;
+  border-radius: 8px;
+  min-height: 100vh;
+  font-family: "Times New Roman", Georgia, serif;
+  color: #fff;
 }
+
 
 /* HEADER */
 .artists-header {

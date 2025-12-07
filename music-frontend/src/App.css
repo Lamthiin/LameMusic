@@ -64,9 +64,13 @@ body {
 .main-content {
   flex: 1;
   overflow-y: auto;
-  padding: calc(var(--header-height) + 24px) 32px 24px;
+
+  /* top | right | bottom | left */
+  padding: calc(var(--header-height) + 8px) 10px 24px 12px;
+
   background: black;
 }
+
 
 /* Thanh cuộn đẹp */
 .main-content::-webkit-scrollbar {

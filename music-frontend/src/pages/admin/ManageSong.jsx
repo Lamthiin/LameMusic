@@ -9,7 +9,6 @@ import GenreDropdown from "../../components/admin/GenreDropdown";
 import ReportTab from "./ReportTab";
 import PopupSuccess from "../../components/admin/PopupSuccess";
 
-
 // Format thời lượng 420 -> 07:00
 const formatDuration = (seconds) => {
   const m = Math.floor(seconds / 60).toString().padStart(2, "0");
@@ -27,23 +26,33 @@ const ManageSong = () => {
       console.log("🔥 BACKEND RAW SONG DATA:", data);
 
       setSongs(
-        data.map(s => ({
-          id: s.id,
-          title: s.title,
-          artistName: s.artist?.stage_name ?? "",
-          artistId: s.artist?.id ?? null,
-          albumName: s.album?.title ?? "",
-          duration: s.duration,
-          playCount: s.play_count,
-          genre: s.genre ?? "",
-          genreId: genres.find(g => g.name === s.genre)?.id ?? null,
-          coverUrl: s.image_url,
-          audioUrl: s.file_url,
-          status: s.status,
-          active: s.active,
-          lyrics: s.lyrics?.lyrics ?? "",
-          lyricsLanguage: s.lyrics?.language || "vi",  // ✔ BẮT BUỘC
-        }))
+        data.map(s => {
+          const primary = s.songArtists?.find(a => a.is_primary === 1);
+          const allNames = s.songArtists
+            ?.map(a => a.artist?.stage_name)
+            .join(", ") ?? "";
+
+          return {
+            id: s.id,
+            title: s.title,
+
+            // LẤY NGHỆ SĨ ĐÚNG
+            artistName: allNames,
+            artistId: primary?.artist?.id ?? null,
+
+            albumName: s.album?.title ?? "",
+            duration: s.duration,
+            playCount: s.play_count,
+            genre: s.genre ?? "",
+            genreId: genres.find(g => g.name === s.genre)?.id ?? null,
+            coverUrl: s.image_url,
+            audioUrl: s.file_url,
+            status: s.status,
+            active: s.active,
+            lyrics: s.lyrics?.lyrics ?? "",
+            lyricsLanguage: s.lyrics?.language || "vi",
+          };
+        })
       );
 
     } catch (err) {
@@ -103,8 +112,31 @@ const ManageSong = () => {
   const [filteredAlbumsAdd, setFilteredAlbumsAdd] = useState([]);
   const [filteredAlbumsEdit, setFilteredAlbumsEdit] = useState([]);
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
+  const searchRef = useRef(null);
+  const [featuredArtists, setFeaturedArtists] = useState([]);   // array các artist phụ
+  const [editCollabArtists, setEditCollabArtists] = useState([]); // nghệ sĩ collab khi SỬA
 
+  useEffect(() => {
+    if (showEditPopup) {
+      setEditCollabArtists(
+        showEditPopup.songArtists
+          ?.filter(sa => !sa.is_primary)
+          ?.map(sa => sa.artist_id) || []
+      );
+    }
+  }, [showEditPopup]);
 
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setSearchValue("");   // reset search
+        setPage(1);           // reset page
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
 
 
@@ -502,11 +534,15 @@ const ManageSong = () => {
           <div className="google-search-bar">
             <FiSearch className="google-search-icon" />
             <input
+              ref={searchRef}
               type="text"
               placeholder="Tìm kiếm bài hát, nghệ sĩ, album..."
               className="google-search-input"
               value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
+              onChange={(e) => {
+                setSearchValue(e.target.value);
+                setPage(1);   // ⭐ RESET VỀ TRANG 1 KHI SEARCH
+              }}
             />
           </div>
 
@@ -546,7 +582,7 @@ const ManageSong = () => {
                   <td>{startIndex + index + 1}</td>
                   {/* Cover */}
                   <td>
-                    <img src={song.coverUrl} alt="" className="song-cover" />
+                    <img src={song.coverUrl} alt="" className="ms-cover-thumb" />
                   </td>
 
                   <td
@@ -763,10 +799,43 @@ const ManageSong = () => {
                   />
 
                 </div>
+                
+                {/* NGHỆ SĨ PHỤ */}
+                <div id="add-song-popup" className="popup-group">
+                  <label>Nghệ sĩ collab</label>
+
+                  <div className="multi-select">
+                    {artists.map((a) => {
+                      const isChecked = featuredArtists.includes(a.id);
+
+                      return (
+                        <label
+                          key={a.id}
+                          className={`multi-select-item ${isChecked ? "checked" : ""}`}
+                        >
+                          <input
+                            type="checkbox"
+                            value={a.id}
+                            checked={isChecked}
+                            onChange={(e) => {
+                              const id = Number(e.target.value);
+                              if (e.target.checked) {
+                                setFeaturedArtists([...featuredArtists, id]);
+                              } else {
+                                setFeaturedArtists(featuredArtists.filter((v) => v !== id));
+                              }
+                            }}
+                          />
+                          {a.stage_name}
+                        </label>
+                      );
+                    })}
+                  </div>
+
+                </div>
 
 
-
-               <div className="popup-group">
+                <div className="popup-group">
                   <label>Ảnh bìa</label>
 
                   {previewCover ? (
@@ -832,6 +901,32 @@ const ManageSong = () => {
                   )}
                 </div>
 
+              </div>
+
+              {/* =====================
+                  CỘT PHẢI
+              ====================== */}
+              <div className="popup-col">
+                <div className="popup-group">
+                  <label>Album</label>
+                  <AlbumDropdown
+                    albums={filteredAlbumsAdd}
+                    value={filteredAlbumsAdd.find(a => a.id === Number(newAlbum))}
+                    onChange={(album) => setNewAlbum(album.id)}
+                  />
+                </div>
+
+                {/* THỂ LOẠI */}
+                <div className="popup-group">
+                  <label>Thể loại</label>
+                  <GenreDropdown
+                    genres={genres}
+                    value={genres.find(g => g.id === Number(newCategory))}
+                    onChange={(genre) => setNewCategory(genre.id)}
+                  />
+
+                </div>
+
                 {/* FILE NHẠC */}
                 <div className="popup-group">
                   <div className="audio-upload-group">
@@ -872,32 +967,6 @@ const ManageSong = () => {
                       />
                     </div>
                   </div>
-                </div>
-
-              </div>
-
-              {/* =====================
-                  CỘT PHẢI
-              ====================== */}
-              <div className="popup-col">
-                <div className="popup-group">
-                  <label>Album</label>
-                  <AlbumDropdown
-                    albums={filteredAlbumsAdd}
-                    value={filteredAlbumsAdd.find(a => a.id === Number(newAlbum))}
-                    onChange={(album) => setNewAlbum(album.id)}
-                  />
-                </div>
-
-                {/* THỂ LOẠI */}
-                <div className="popup-group">
-                  <label>Thể loại</label>
-                  <GenreDropdown
-                    genres={genres}
-                    value={genres.find(g => g.id === Number(newCategory))}
-                    onChange={(genre) => setNewCategory(genre.id)}
-                  />
-
                 </div>
 
 
@@ -1033,7 +1102,7 @@ const ManageSong = () => {
 
     {/* POPUP XEM BÀI HÁT */}
     {showViewPopup && (
-    <div className="popup-overlay" onClick={() => setShowViewPopup(null)}>
+    <div className="popup-overlay" id="view-song-popup" onClick={() => setShowViewPopup(null)}>
       <div className="popup-card" onClick={(e) => e.stopPropagation()}>
         <h3 className="popup-title">Thông tin bài hát</h3>
 
@@ -1050,6 +1119,26 @@ const ManageSong = () => {
               <label>Nghệ sĩ</label>
               <input type="text" value={showViewPopup.artistName} readOnly />
             </div>
+
+            {/* NGHỆ SĨ COLLAB */}
+            <div className="popup-group">
+              <label>Nghệ sĩ collab</label>
+
+              {showViewPopup.songArtists?.filter(sa => !sa.is_primary).length > 0 ? (
+                <div className="view-collab-box">
+                  {showViewPopup.songArtists
+                    .filter(sa => !sa.is_primary)
+                    .map(sa => (
+                      <span key={sa.artist_id} className="view-collab-tag">
+                        {sa.artist?.stage_name}
+                      </span>
+                    ))}
+                </div>
+              ) : (
+                <input type="text" value="Không có" readOnly />
+              )}
+            </div>
+
 
             <div className="popup-group">
               <label>Ảnh bìa</label>
@@ -1168,6 +1257,40 @@ const ManageSong = () => {
 
             </div>
 
+            {/* NGHỆ SĨ COLLAB (EDIT) */}
+            <div id="edit-song-popup" className="popup-group">
+              <label>Nghệ sĩ collab</label>
+
+              <div className="multi-select">
+                {artists.map((a) => {
+                  const isChecked = editCollabArtists.includes(a.id);
+
+                  return (
+                    <label
+                      key={a.id}
+                      className={`multi-select-item ${isChecked ? "checked" : ""}`}
+                    >
+                      <input
+                        type="checkbox"
+                        value={a.id}
+                        checked={isChecked}
+                        onChange={(e) => {
+                          const id = Number(e.target.value);
+                          if (e.target.checked) {
+                            setEditCollabArtists((prev) => [...prev, id]);
+                          } else {
+                            setEditCollabArtists((prev) => prev.filter(v => v !== id));
+                          }
+                        }}
+                      />
+                      {a.stage_name}
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
+
 
             {/* ẢNH BÌA */}
             <div className="popup-group">
@@ -1236,6 +1359,38 @@ const ManageSong = () => {
               )}
             </div>
 
+
+          </div>
+
+          {/* CỘT PHẢI */}
+          <div className="popup-col">
+
+            <div className="popup-group">
+              <label>Album</label>
+              <AlbumDropdown
+                albums={filteredAlbumsEdit}
+                value={filteredAlbumsEdit.find(a => a.id === Number(editAlbum))}
+                onChange={(album) => {
+                  setSelectedEditAlbum(album);
+                  setEditAlbum(album.id);
+                }}
+              />
+
+            </div>
+
+            <div className="popup-group">
+              <label>Thể loại</label>
+              <GenreDropdown
+                genres={genres}
+                value={selectedEditCategory}
+                onChange={(genre) => {
+                    setSelectedEditCategory(genre);
+                    setEditCategory(genre.id);
+                }}
+              />
+
+            </div>
+
             <div className="popup-group">
               <label>File nhạc</label>
 
@@ -1300,37 +1455,6 @@ const ManageSong = () => {
                   />
                 </div>
               )}
-            </div>
-
-          </div>
-
-          {/* CỘT PHẢI */}
-          <div className="popup-col">
-
-            <div className="popup-group">
-              <label>Album</label>
-              <AlbumDropdown
-                albums={filteredAlbumsEdit}
-                value={filteredAlbumsEdit.find(a => a.id === Number(editAlbum))}
-                onChange={(album) => {
-                  setSelectedEditAlbum(album);
-                  setEditAlbum(album.id);
-                }}
-              />
-
-            </div>
-
-            <div className="popup-group">
-              <label>Thể loại</label>
-              <GenreDropdown
-                genres={genres}
-                value={selectedEditCategory}
-                onChange={(genre) => {
-                    setSelectedEditCategory(genre);
-                    setEditCategory(genre.id);
-                }}
-              />
-
             </div>
 
             <div className="popup-group">
