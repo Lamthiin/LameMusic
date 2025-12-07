@@ -1,203 +1,149 @@
-/* src/components/AlbumFormModal.css */
-/* PHIÊN BẢN NANO – NHỎ NHẤT CÓ THỂ – ĐEN TUYỆT ĐỐI – CHỈ XANH NGỌC */
+/* ===========================================
+   ALBUM FORM MODAL – GREEN CYBER STYLE
+   =========================================== */
 
 .album-modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.94);
-  backdrop-filter: blur(10px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 3000;
-  padding: 16px;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.55);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:1000;
 }
 
 .album-modal-box {
-  background: #0a0a0a;
-  color: #e5e5e5;
-  width: 100%;
-  max-width: 400px;
-  max-height: 88vh;
-  border-radius: 18px;
-  padding: 20px;
-  box-shadow: 0 16px 50px rgba(0,0,0,0.8);
-  border: 1px solid #1a1a1a;
-  position: relative;
-  font-family: 'Inter', sans-serif;
-  overflow-y: auto;
+    background:#0e140e;
+    border-radius:16px;
+    width:90%;
+    max-width:520px;       /* FORM NHỎ HƠN */
+    padding:18px 20px;
+    color:#e7ffe7;
+    font-family:Arial, sans-serif;
+    position:relative;
 }
 
-/* CLOSE BUTTON NANO */
-.album-modal-close {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: #222;
-  color: #999;
-  border: none;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  font-size: 15px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.album-modal-close:hover {
-  background: #00e6c8;
-  color: #000;
-  transform: rotate(90deg);
-}
-
-/* TITLE SIÊU NHỎ */
 .album-modal-box h2 {
-  font-size: 18px;
-  font-weight: 800;
-  text-align: center;
-  margin: 0 0 14px;
-  color: #fff;
-  letter-spacing: -0.3px;
+    margin:0 0 10px;
+    font-size:20px;
+    color:#ffffff;
 }
 
-/* ERROR NANO */
-.album-error {
-  background: rgba(255,91,91,0.15);
-  color: #ff5b5b;
-  padding: 8px 12px;
-  border-radius: 10px;
-  font-size: 12px;
-  text-align: center;
-  margin-bottom: 12px;
-  border: 1px solid rgba(255,91,91,0.3);
+/* CLOSE */
+
+.album-modal-close {
+    position:absolute;
+    top:10px;
+    right:10px;
+    width:30px;
+    height:30px;
+    border-radius:50%;
+    border:none;
+    background:#1fe35d;
+    color:#022b08;
+    cursor:pointer;
 }
 
-/* UPLOAD SECTION */
-.album-upload-section {
-  margin-bottom: 16px;
-  text-align: center;
+/* FORM */
+
+.album-form {
+    display:flex;
+    flex-direction:column;
+    gap:14px;
 }
 
-.album-upload-section label {
-  display: block;
-  font-size: 12px;
-  color: #aaa;
-  margin-bottom: 8px;
-  font-weight: 600;
-}
-
-.album-preview-box {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
-.album-preview-img {
-  width: 100px;
-  height: 100px;
-  border-radius: 14px;
-  object-fit: cover;
-  border: 2px solid #333;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.6);
-}
-
-.album-preview-box input[type="file"] {
-  font-size: 9px;
-  color: #00e6c8;
-  background: #1a1a1a;
-  padding: 6px;
-  border-radius: 8px;
-  width: 100%;
-  max-width: 200px;
-}
-
-/* FIELD */
 .album-field {
-  margin-bottom: 14px;
+    display:flex;
+    flex-direction:column;
 }
 
 .album-field label {
-  display: block;
-  font-size: 12px;
-  color: #ccc;
-  margin-bottom: 6px;
-  font-weight: 600;
+    font-size:13px;
+    margin-bottom:3px;
+    color:#f3f3f3;
 }
 
 .album-field input {
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid #333;
-  background: #1a1a1a;
-  color: #e5e5e5;
-  font-size: 13px;
-  transition: 0.2s;
+    padding:6px 10px;
+    border-radius:10px;
+    border:1px solid #1c3f1c;
+    background:#131913;
+    color:white;
+    font-size:13px;
 }
 
 .album-field input:focus {
-  outline: none;
-  border-color: #00e6c8;
-  background: #222;
-  box-shadow: 0 0 0 2px rgba(0,230,200,0.2);
+    outline:none;
+    border-color:#1fe35d;
+    box-shadow:0 0 6px #1fe35d55;
 }
 
-/* BUTTONS */
+/* UPLOAD IMAGE */
+
+.album-upload-section label {
+    font-size:13px;
+    color:#ffffff;
+}
+
+.album-preview-box {
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.album-preview-img {
+    width:75px;
+    height:75px;
+    border-radius:12px;
+    object-fit:cover;
+    border:1px solid #1fe35d44;
+}
+
+.album-preview-box input {
+    font-size:12px;
+}
+
+/* ERRORS */
+
+.album-error {
+    font-size:13px;
+    color:#ff7a7a;
+}
+
+/* BUTTON */
+
 .album-buttons {
-  margin-top: 10px;
-  text-align: center;
+    display:flex;
+    justify-content:flex-end;
 }
 
 .album-btn {
-  width: 100%;
-  padding: 12px;
-  border: none;
-  border-radius: 12px;
-  background: #00e6c8;
-  color: #000;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: 0.25s;
+    background:#1fe35d;
+    border:none;
+    padding:7px 14px;
+    border-radius:12px;
+    font-size:13px;
+    cursor:pointer;
+    font-weight:bold;
+    color:#022b08;
+    transition:.2s;
 }
 
-.album-btn:hover:not(:disabled) {
-  background: #00f0d0;
-  transform: translateY(-2px);
+.album-btn:hover {
+    transform:translateY(-2px);
+    box-shadow:0 0 12px #1fe35d55;
 }
 
 .album-btn:disabled {
-  background: #333;
-  color: #666;
-  cursor: not-allowed;
+    opacity:.5;
+    cursor:not-allowed;
 }
 
-/* SCROLLBAR MỎNG */
-.album-modal-box::-webkit-scrollbar {
-  width: 4px;
-}
-.album-modal-box::-webkit-scrollbar-thumb {
-  background: rgba(0,230,200,0.3);
-  border-radius: 2px;
-}
-.album-modal-box::-webkit-scrollbar-thumb:hover {
-  background: #00e6c8;
-}
 
-/* MOBILE */
-@media (max-width: 480px) {
-  .album-modal-box {
-    padding: 16px;
-    max-height: 92vh;
-  }
-  .album-preview-img {
-    width: 80px;
-    height: 80px;
-  }
-  .album-field input {
-    padding: 9px;
-    font-size: 12px;
-  }
+/* RESPONSIVE */
+
+@media(max-width:600px){
+    .album-modal-box {
+        max-width:90%;
+    }
 }

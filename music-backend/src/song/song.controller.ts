@@ -67,18 +67,28 @@ export class SongController {
     res.send(Buffer.from(buffer));
   }
   
-  // (findAllWithFilters - giữ nguyên)
-  @Get('all')
-  @UseGuards(OptionalJwtAuthGuard)
-  findAllWithFilters(
-    @Query('genre') genre?: string, 
-    @Query('artistId', new ParseIntPipe({ optional: true })) 
-    artistId?: number, 
-  ) {
-    return this.songService.findAllWithFilters(genre, artistId);
-  }
+//   // (findAllWithFilters - giữ nguyên)
+//   @Get('all')
+//   @UseGuards(OptionalJwtAuthGuard)
+//   findAllWithFilters(
+//     @Query('genre') genre?: string, 
+//     @Query('artistId', new ParseIntPipe({ optional: true })) 
+//     artistId?: number, 
+//   ) {
+//     return this.songService.findAllWithFilters(genre, artistId);
+//   }
 
-  
+  @Get('all')
+  @UseGuards(OptionalJwtAuthGuard)
+  findAllWithFilters(
+    @Query('genre') genre?: string, 
+    // === FIX LỖI: LẤY artistId TỪ QUERY STRING ===
+    @Query('artistId', new ParseIntPipe({ optional: true })) 
+    artistId?: number, 
+    // ===========================================
+  ) {
+    return this.songService.findAllWithFilters(genre, artistId);
+  }
   
   // (findLyrics - giữ nguyên)
   @Get(':id/lyrics')

@@ -1,260 +1,185 @@
-/* ==================================================== */
-/* SONG DETAIL – FINAL ĐẸP NHẤT (FULL CSS)             */
-/* FORM NHỎ GỌN – 2 NÚT BẰNG NHAU – ARIAL SẠCH        */
-/* DÁN VÀO: src/pages/SongDetail.css                   */
-/* ==================================================== */
-
+/* ===== ROOT ===== */
 .song-detail-container {
-  min-height: 100vh;
-  background: #001a1a;
-  color: #e0fffa;
-  padding: 90px 24px 140px;
-  font-family: 'Arial', 'Helvetica', sans-serif;
-  line-height: 1.6;
-  position: relative;
-  overflow-x: hidden;
+    width: 100%;
+    padding: 40px;
+    background: #121212;
+    color: white;
+    min-height: 100vh;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Nền glow nhẹ */
-.song-detail-gradient-bg {
-  position: absolute;
-  inset: 0;
-  background: 
-    radial-gradient(circle at 15% 25%, rgba(0,230,200,0.15) 0%, transparent 45%),
-    radial-gradient(circle at 85% 75%, rgba(0,200,180,0.1) 0%, transparent 40%);
-  pointer-events: none;
-  z-index: 0;
-}
 
-/* HEADER – NHỎ GỌN, ĐẸP */
+/* ===== HEADER CHA ===== */
 .song-detail-header {
-  display: flex;
-  gap: 40px;
-  align-items: flex-end;
-  max-width: 1200px;
-  margin: 0 auto 70px;
-  position: relative;
-  z-index: 1;
-  padding: 0 20px;
-}
-
-/* ẢNH BÌA NHỎ GỌN */
-.detail-album-cover {
-  width: 260px;
-  height: 260px;
-  border-radius: 20px;
-  object-fit: cover;
-  box-shadow: 
-    0 20px 50px rgba(0,0,0,0.7),
-    0 0 40px rgba(0,230,200,0.5);
-  border: 4px solid #00e6c8;
-  transition: all 0.5s ease;
-}
-
-.detail-album-cover:hover {
-  transform: scale(1.08);
-  box-shadow: 0 30px 70px rgba(0,0,0,0.85), 0 0 60px rgba(0,230,200,0.9);
-}
-
-/* THÔNG TIN BÀI HÁT */
-.song-info {
-  flex: 1;
-  padding-bottom: 16px;
-}
-
-.song-type {
-  font-size: 14px;
-  font-weight: 700;
-  color: #80d8d0;
-  text-transform: uppercase;
-  letter-spacing: 3px;
-  margin: 0 0 12px;
-  text-shadow: 0 0 10px rgba(0,230,200,0.5);
-}
-
-.song-info h1 {
-  font-size: 48px;
-  font-weight: 900;
-  margin: 0 0 14px;
-  background: linear-gradient(90deg, #00e6c8, #00f0d0);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 25px rgba(0,230,200,0.7);
-  line-height: 1.1;
-  letter-spacing: -1px;
-}
-
-.song-artist-info {
-  font-size: 19px;
-  color: #c0f8f0;
-  margin: 0 0 32px;
-  font-weight: 600;
-}
-
-.artist-name {
-  color: #00e6c8;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.artist-name:hover {
-  text-shadow: 0 0 16px #00e6c8;
-}
-
-/* NÚT ĐIỀU KHIỂN – 2 NÚT BÊN PHẢI BẰNG NHAU */
-.detail-controls {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-top: 20px;
-}
-
-/* NÚT PHÁT – DÀI VỪA VẸN */
-.detail-play-button {
-  background: linear-gradient(90deg, #00e6c8, #00c8a8);
-  color: #001a1a;
-  border: none;
-  padding: 16px 36px;
-  border-radius: 50px;
-  font-size: 18px;
-  font-weight: 900;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  box-shadow: 0 12px 35px rgba(0,230,200,0.7);
-  transition: all 0.4s ease;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  min-width: 220px;
-  backdrop-filter: blur(6px);
-}
-
-.detail-play-button:hover {
-  transform: translateY(-6px) scale(1.06);
-  box-shadow: 0 25px 50px rgba(0,230,200,0.9), 0 0 40px rgba(0,230,200,1);
-}
-
-/* NÚT ICON – TRÒN, ĐỀU, BẰNG NHAU */
-.icon-button {
-  background: rgba(0, 40, 40, 0.9);
-  color: #a0e8e0;
-  border: 2.5px solid rgba(0,230,200,0.4);
-  width: 100px;
-  height: 52px;
-  min-width: 52px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.4s ease;
-  backdrop-filter: blur(8px);
-}
-
-.icon-button:hover {
-  background: rgba(0,230,200,0.3);
-  color: #00e6c8;
-  border-color: #00e6c8;
-  transform: translateY(-5px);
-  box-shadow: 0 12px 30px rgba(0,230,200,0.6);
-}
-
-.icon-button.liked {
-  color: #ff4757;
-  background: rgba(255,71,87,0.25);
-  border-color: #ff4757;
-}
-
-/* KHUNG LỜI BÀI HÁT – XUỐNG DƯỚI */
-.song-detail-body {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 1px 20px;
-  position: relative;
-  z-index: 1;
-}
-
-.lyrics-section {
-  background: rgba(0, 30, 30, 0.92);
-  backdrop-filter: blur(16px);
-  padding: 44px 52px;
-  border-radius: 32px;
-  border: 3px solid rgba(0,230,200,0.35);
-  box-shadow: 
-    0 25px 70px rgba(0,0,0,0.8),
-    inset 0 2px 0 rgba(0,230,200,0.2);
-  margin-top: 50px;
-}
-
-.lyrics-section h3 {
-  font-size: 26px;
-  font-weight: 700;
-  color: #00e6c8;
-  margin: 0 0 26px;
-  text-align: center;
-  text-shadow: 0 0 16px rgba(0,230,200,0.7);
-}
-
-.lyrics-content {
-  font-size: 18px;
-  line-height: 2;
-  color: #e8fffc;
-  white-space: pre-line;
-  margin: 0;
-  text-align: center;
-  font-weight: 500;
-  letter-spacing: 0.4px;
-}
-
-/* LOADING & ERROR */
-.song-detail-error {
-  text-align: center;
-  padding: 120px 20px;
-  font-size: 24px;
-  color: #ff6b6b;
-  font-weight: 700;
-}
-
-/* RESPONSIVE */
-@media (max-width: 768px) {
-  .song-detail-header {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
+    display: grid;
+    grid-template-columns: 300px 1fr;     /* Cover | Info */
     gap: 32px;
-    margin-bottom: 50px;
-  }
-  
-  .detail-album-cover {
-    width: 220px;
-    height: 220px;
-  }
-  
-  .song-info h1 {
-    font-size: 38px;
-  }
-  
-  .detail-play-button {
-    padding: 14px 32px;
-    font-size: 17px;
-    min-width: 200px;
-  }
-  
-  .icon-button {
-    width: 48px;
-    height: 48px;
-  }
-  
-  .lyrics-section {
-    padding: 32px 28px;
-    margin-top: 40px;
-  }
-  
-  .lyrics-content {
+    align-items: center;
+    width: 100%;
+}
+
+
+/* ===== COVER ===== */
+.song-detail-header .song-cover {
+    width: 300px;
+    height: 300px;
+    min-width: 300px;        /* ép kích thước để layout không vỡ */
+    min-height: 300px;
+    object-fit: cover;
+    border-radius: 14px;
+    background: #222;        /* fallback khi ảnh lỗi */
+    box-shadow: 0 8px 25px rgba(0,0,0,.6);
+}
+
+
+/* ===== SONG INFO ===== */
+.song-detail-header .song-info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;            /* CHO PHÉP XUỐNG DÒNG */
+}
+
+
+/* Type */
+.song-detail-header .song-info .song-type {
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: #aaa;
+    font-weight: 600;
+}
+
+/* Title */
+.song-detail-header .song-info h1 {
+    font-size: 42px;
+    font-weight: 800;
+    line-height: 1.2;
+    margin: 5px 0;
+    word-break: break-word;      /* tránh tràn */
+}
+
+/* Sub info */
+.song-detail-header .song-info p {
     font-size: 16px;
-  }
+    margin: 0;
+    color: #b3b3b3;
+}
+
+
+/* ===== CONTROLS ===== */
+.detail-controls {
+    display: flex;
+    justify-content: space-between;  /* Left | Right */
+    align-items: center;
+    margin-top: 25px;
+    width: 100%;
+}
+
+
+/* LEFT = replay button */
+.controls-left .btn-play {
+    background: #1db954;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 15px;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: 0.2s;
+}
+
+.btn-play:hover {
+    background: #1ed760;
+    transform: scale(1.03);
+}
+
+
+/* ===== RIGHT ICON BUTTONS ===== */
+.controls-right {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.icon-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.1);
+    color: white;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.icon-btn:hover {
+    background: rgba(255,255,255,0.22);
+}
+
+.icon-btn.liked {
+    color: #ff5e77;
+}
+
+.menu-box {
+    position: relative;
+}
+
+
+/* ===== LYRICS ===== */
+.lyrics-box {
+    margin-top: 40px;
+    background: #181818;
+    padding: 24px;
+    border-radius: 12px;
+}
+
+.lyrics-box h3 {
+    margin-bottom: 14px;
+    font-size: 20px;
+}
+
+.lyrics-box p {
+    color: #ddd;
+    white-space: pre-wrap;
+    line-height: 1.6;
+}
+
+
+/* ===== ERROR ===== */
+.song-detail-error {
+    padding: 40px;
+    text-align: center;
+    color: #ff7676;
+}
+
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 950px) {
+    .song-detail-header {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+
+    .song-detail-header .song-cover {
+        margin: 0 auto;
+    }
+
+    .detail-controls {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .controls-right {
+        justify-content: center;
+    }
 }

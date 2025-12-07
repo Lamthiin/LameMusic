@@ -1,4 +1,4 @@
-// src/pages/user/Home.jsx
+// src/pages/user/Home.jsx – FULL, ĐẸP, KHÔNG TRÙNG CLASS
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
@@ -12,32 +12,26 @@ import "./Home.css";
 import { FaPlay } from "react-icons/fa";
 import Footer from "../../components/user/Footer";
 
-// ==================== FIX URL THÔNG MINH (Local + R2) ====================
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:3000";
 const R2_BASE = import.meta.env.VITE_R2_BASE || "https://pub-1f9b74cb44204e84b3dd30bb4df6a1e2.r2.dev";
 
 const fixUrl = (url, type = 'image') => {
-    if (!url) { // Xử lý NULL
+    if (!url) { 
         if (type === 'artist') return '/images/default-artist.png';
-        if (type === 'audio') return ''; // Trả về rỗng nếu không có file nhạc
-        return '/images/default-album.png'; // Mặc định cho album/song
+        if (type === 'audio') return '';
+        return '/images/default-album.png';
     }
-    if (url.startsWith('http')) { // Nếu đã là URL tuyệt đối
-        return url;
-    }
-    // Mặc định (ví dụ: /images/artist-1.jpg)
+    if (url.startsWith('http')) return url;
+
     const prefix = type === 'image' ? '/media/images' : '/media/audio';
     const originalPath = type === 'image' ? '/images' : '/audio';
     
-    // Đảm bảo không thay thế 2 lần
     if (url.startsWith(prefix)) {
         return `http://localhost:3000${url}`;
     }
     
     return `http://localhost:3000${url.replace(originalPath, prefix)}`;
 };
-
-// ====================================================================
 
 const Home = () => {
   const { user } = useAuth();
@@ -51,25 +45,19 @@ const Home = () => {
   const [loadingArtists, setLoadingArtists] = useState(true);
   const [loadingGenres, setLoadingGenres] = useState(true);
 
-  // ==================== LOAD BÀI HÁT ====================
   useEffect(() => {
     const loadSongs = async () => {
       setLoading(true);
       try {
         const data = await fetchSongs();
-
         const songsWithUrls = data.map((song) => ({
           ...song,
           image_url: fixUrl(song.image_url || song.album?.cover_url, "image"),
-          file_url: fixUrl(song.file_url, "audio"), // 100% URL tuyệt đối
+          file_url: fixUrl(song.file_url, "audio"),
           album: song.album
-            ? {
-                ...song.album,
-                cover_url: fixUrl(song.album.cover_url, "image"),
-              }
+            ? { ...song.album, cover_url: fixUrl(song.album.cover_url, "image") }
             : null,
         }));
-
         setSongs(songsWithUrls);
       } catch (err) {
         console.error("Lỗi tải bài hát:", err);
@@ -77,22 +65,18 @@ const Home = () => {
         setLoading(false);
       }
     };
-
     loadSongs();
   }, []);
 
-  // ==================== LOAD NGHỆ SĨ ====================
   useEffect(() => {
     const loadArtists = async () => {
       setLoadingArtists(true);
       try {
         const data = await fetchFeaturedArtists();
-
         const artistsWithUrls = data.map((artist) => ({
           ...artist,
           avatar_url: fixUrl(artist.avatar_url, "artist"),
         }));
-
         setArtists(artistsWithUrls);
       } catch (err) {
         console.error("Lỗi tải nghệ sĩ:", err);
@@ -100,22 +84,18 @@ const Home = () => {
         setLoadingArtists(false);
       }
     };
-
     loadArtists();
   }, []);
 
-  // ==================== LOAD THỂ LOẠI ====================
   useEffect(() => {
     const loadGenres = async () => {
       setLoadingGenres(true);
       try {
         const data = await fetchCategories();
-
         const genresWithUrls = data.map((genre) => ({
           ...genre,
           image_url: fixUrl(genre.image_url, "image"),
         }));
-
         setGenres(genresWithUrls);
       } catch (err) {
         console.error("Lỗi tải thể loại:", err);
@@ -123,123 +103,123 @@ const Home = () => {
         setLoadingGenres(false);
       }
     };
-
     loadGenres();
   }, []);
 
   return (
-    <div className="home-page">
+    <div className="home-wrapper">
       {/* BÀI HÁT HÀNG ĐẦU */}
-      <div className="home-section">
+      <section className="home-section">
         <div className="home-section-header">
-          <h3>Bài hát hàng đầu</h3>
-          <a onClick={() => navigate("/songs")} className="see-more-link">
+          <h3 className="home-section-title">Bài hát hàng đầu</h3>
+          <button onClick={() => navigate("/songs")} className="home-see-more">
             Xem thêm
-          </a>
+          </button>
         </div>
 
         {loading ? (
-          <p className="loading-message">Đang tải bài hát...</p>
+          <p className="home-loading">Đang tải bài hát...</p>
         ) : songs.length === 0 ? (
-          <p className="loading-message">Không có bài hát nào</p>
+          <p className="home-empty">Không có bài hát nào</p>
         ) : (
-          <div className="track-list">
+          <div className="home-track-grid">
             {songs.map((song) => (
               <div
                 key={song.id}
-                className="track-item"
+                className="home-track-card"
                 onClick={() => navigate(`/song/${song.id}`)}
               >
-                <div className="track-image-container">
+                <div className="home-track-image-wrapper">
                   <img
                     src={song.image_url || "/images/default-album.png"}
                     alt={song.title}
-                    className="track-image"
+                    className="home-track-image"
                   />
                   <button
-                    className="play-button"
+                    className="home-play-overlay"
                     onClick={(e) => {
                       e.stopPropagation();
                       if (song.file_url) {
                         playTrack({
                           ...song,
-                          file_url: fixUrl(song.file_url, "audio"), // chắc chắn 100%
+                          file_url: fixUrl(song.file_url, "audio"),
                         });
                       }
                     }}
                   >
-                    <FaPlay />
+                    <FaPlay size={24} />
                   </button>
                 </div>
-                <p className="track-title">{song.title}</p>
-                <p className="track-artist">
+                <p className="home-track-title">{song.title}</p>
+                <p className="home-track-artist">
                   {song.artist?.stage_name || "Nghệ sĩ không xác định"}
                 </p>
               </div>
             ))}
           </div>
         )}
-      </div>
+      </section>
 
       {/* NGHỆ SĨ NỔI BẬT */}
-      <div className="home-section">
+      <section className="home-section">
         <div className="home-section-header">
-          <h3>Nghệ sĩ nổi bật</h3>
-          <a onClick={() => navigate("/artists")} className="see-more-link">
+          <h3 className="home-section-title">Nghệ sĩ nổi bật</h3>
+          <button onClick={() => navigate("/artists")} className="home-see-more">
             Xem thêm
-          </a>
+          </button>
         </div>
 
         {loadingArtists ? (
-          <p className="loading-message">Đang tải nghệ sĩ...</p>
+          <p className="home-loading">Đang tải nghệ sĩ...</p>
         ) : (
-          <div className="horizontal-scroll">
+          <div className="home-artist-scroll">
             {artists.map((artist) => (
               <div
                 key={artist.id}
-                className="artist-card"
+                className="home-artist-card"
                 onClick={() => navigate(`/artist/${artist.id}`)}
               >
                 <img
                   src={artist.avatar_url || "/images/default-artist.png"}
                   alt={artist.stage_name}
+                  className="home-artist-avatar"
                 />
-                <p>{artist.stage_name}</p>
+                <p className="home-artist-name">{artist.stage_name}</p>
               </div>
             ))}
           </div>
         )}
-      </div>
+      </section>
 
       {/* THỂ LOẠI */}
-      <div className="home-section">
+      <section className="home-section">
         <div className="home-section-header">
-          <h3>Thể loại</h3>
+          <h3 className="home-section-title">Khám phá thể loại</h3>
         </div>
 
         {loadingGenres ? (
-          <p className="loading-message">Đang tải thể loại...</p>
+          <p className="home-loading">Đang tải thể loại...</p>
         ) : (
-          <div className="genres-grid">
+          <div className="home-genre-grid">
             {genres.map((genre) => (
               <div
                 key={genre.id}
-                className="genre-card"
+                className="home-genre-card"
                 onClick={() => navigate(`/genre/${genre.slug}`)}
               >
                 <img
                   src={genre.image_url || "/images/default-genre.png"}
                   alt={genre.name}
-                  className="genre-image"
+                  className="home-genre-image"
                 />
-                <div className="genre-overlay">
-                  <p>{genre.name}</p>
+                <div className="home-genre-overlay">
+                  <h4 className="home-genre-name">{genre.name}</h4>
                 </div>
               </div>
             ))}
           </div>
         )}
-      </div>
+      </section>
 
       <Footer />
     </div>

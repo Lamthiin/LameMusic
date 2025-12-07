@@ -22,7 +22,7 @@
     overflow-y: auto;
     padding: 25px 30px;
     position: relative;
-    box-shadow: 0 10px 40px rgba(0, 230, 200, 0.4);
+    /* box-shadow: 0 10px 40px rgba(13, 118, 60, 0.4); */
     font-family: 'Segoe UI', system-ui, sans-serif;
     color: #c8f5f0;
 }
@@ -31,7 +31,7 @@
     position: absolute;
     top: 15px;
     right: 15px;
-    background: #00e6c8;
+    background: #1fe35d;
     color: #001a1a;
     border-radius: 50%;
     width: 36px;
@@ -47,7 +47,7 @@
 
 .sm-modal-close-btn:hover {
     transform: scale(1.1);
-    box-shadow: 0 0 20px #00e6c8;
+    box-shadow: 0 0 20px #1fe35d;
 }
 
 .sm-modal-form {
@@ -73,8 +73,8 @@
     font-weight: 600;
     margin-bottom: 5px;
     font-size: 14px;
-    color: #00e6c8;
-    text-shadow: 0 0 6px rgba(0, 230, 200, 0.5);
+    color: #ffffff;
+    /* text-shadow: 0 0 6px rgba(0, 198, 79, 0.604); */
 }
 
 .sm-form-group input,
@@ -82,7 +82,7 @@
 .sm-form-group textarea {
     padding: 8px 12px;
     border-radius: 12px;
-    border: 1px solid rgba(0, 230, 200, 0.3);
+    border: 1px solid rgba(11, 149, 73, 0.3);
     background: rgba(0, 30, 30, 0.6);
     color: #c8f5f0;
     font-size: 14px;
@@ -95,8 +95,8 @@
 .sm-form-group select:focus,
 .sm-form-group textarea:focus {
     outline: none;
-    border-color: #00e6c8;
-    box-shadow: 0 0 12px #00e6c8;
+    border-color: #1fe35d;
+    box-shadow: 0 0 12px #1fe35d;
     background: rgba(0, 40, 40, 0.8);
 }
 
@@ -111,16 +111,16 @@
     height: 80px;
     object-fit: cover;
     border-radius: 16px;
-    border: 2px solid rgba(0, 230, 200, 0.3);
+    border: 2px solid rgba(0, 230, 88, 0.3);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
     transition: all 0.3s ease;
 }
 
-.sm-avatar-preview img:hover {
-    border-color: #00e6c8;
-    box-shadow: 0 0 20px #00e6c8, 0 6px 20px rgba(0, 0, 0, 0.6);
+/* .sm-avatar-preview img:hover {
+    border-color: #00aa36;
+    box-shadow: 0 0 20px #00aa36, 0 6px 20px rgba(0, 0, 0, 0.6);
     transform: scale(1.05);
-}
+} */
 
 .sm-form-buttons {
     width: 100%;
@@ -130,7 +130,7 @@
 }
 
 .sm-form-buttons button {
-    background-color: #00e6c8;
+    background-color: #1fe35d;
     color: #001a1a;
     border: none;
     padding: 10px 18px;
@@ -139,12 +139,12 @@
     font-weight: 700;
     font-size: 14px;
     transition: all 0.3s ease;
-    box-shadow: 0 6px 20px rgba(0, 230, 200, 0.4);
+    box-shadow: 0 6px 20px rgba(0, 230, 84, 0.4);
 }
 
 .sm-form-buttons button:hover {
     transform: translateY(-2px) scale(1.03);
-    box-shadow: 0 8px 30px rgba(0, 230, 200, 0.6);
+    box-shadow: 0 8px 30px rgba(0, 230, 84, 0.6);
 }
 
 .sm-form-buttons button:disabled {
@@ -168,3 +168,98 @@
         flex: 1 1 100%;
     }
 }
+/* ========================== */
+/* SONG FORM MODAL – SMALLER  */
+/* ========================== */
+
+.sm-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.55);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:1000;
+}
+
+.sm-modal-content {
+    background: #101010;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 600px;     /* ↓ form nhỏ hơn */
+    padding: 18px 20px;   /* ↓ padding bé hơn */
+    color: #fff;
+}
+
+/* CLOSE BTN */
+
+.sm-modal-close-btn {
+    position:absolute;
+    top:10px;
+    right:10px;
+    width:30px;
+    height:30px;
+    border-radius:50%;
+    border:none;
+    background:#1fe35d;
+    cursor:pointer;
+}
+
+/* FORM GRID */
+
+.sm-modal-form {
+    display:flex;
+    gap:14px;
+    margin-top:10px;
+    flex-wrap:wrap;
+}
+
+.sm-modal-left,
+.sm-modal-right {
+    flex: 1 1 48%;
+    gap:10px;
+}
+
+/* INPUTS */
+
+
+.sm-form-group input,
+.sm-form-group select,
+.sm-form-group textarea {
+    font-size:13px;     /* ↓ chữ nhỏ hơn */
+    padding:6px 10px;  /* ↓ input nhỏ hơn */
+    border-radius:10px;
+    background:#181818;
+    border:1px solid #222;
+    color:white;
+}
+
+/* IMAGE */
+
+.sm-avatar-preview img {
+    width:70px;       /* ↓ nhỏ hơn */
+    height:70px;
+    border-radius:12px;
+}
+
+/* BUTTON */
+
+.sm-form-buttons {
+    justify-content:flex-end;
+}
+
+.sm-form-buttons button {
+    padding:7px 14px;
+    border-radius:12px;
+    font-size:13px;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:700px){
+    .sm-modal-left,
+    .sm-modal-right{
+        flex:1 1 100%;
+    }
+}
+

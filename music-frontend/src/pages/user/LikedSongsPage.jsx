@@ -8,28 +8,20 @@ import './LikedSongsPage.css';
 import { FaPlay, FaHeart } from 'react-icons/fa';
 import SongListTable from '../../components/user/SongListTable';
 
-// === DÙNG CHÍNH XÁC HÀM fixUrl CỦA BẠN (NHƯ CÁC TRANG KHÁC) ===
 const fixUrl = (url, type = 'image') => {
   if (!url) {
     if (type === 'artist') return '/images/default-artist.png';
-    if (type === 'audio') return ''; // Trả về rỗng nếu không có file nhạc
+    if (type === 'audio') return '';
     return '/images/default-album.png';
   }
-  if (url.startsWith('http')) {
-    return url;
-  }
+  if (url.startsWith('http')) return url;
   const prefix = type === 'image' ? '/media/images' : '/media/audio';
   const originalPath = type === 'image' ? '/images' : '/audio';
-
-  if (url.startsWith(prefix)) {
-    return `http://localhost:3000${url}`;
-  }
-
+  if (url.startsWith(prefix)) return `http://localhost:3000${url}`;
   return `http://localhost:3000${url.replace(originalPath, prefix)}`;
 };
-// ====================================================================
 
-const showToast = (message) => { alert(message); };
+const showToast = (message) => alert(message);
 
 const LikedSongsPage = () => {
   const [likedSongs, setLikedSongs] = useState([]);
@@ -50,11 +42,8 @@ const LikedSongsPage = () => {
 
           return {
             ...song,
-            // Ảnh: ưu tiên image_url → album.cover_url → default
             image_url: fixUrl(song.image_url || song.album?.cover_url, 'image'),
-            // File nhạc: BẮT BUỘC phải fix để tải được
             file_url: fixUrl(song.file_url, 'audio'),
-            // Giữ lại album cover nếu cần (cho SongListTable)
             album: song.album
               ? { ...song.album, cover_url: fixUrl(song.album.cover_url, 'image') }
               : null,
@@ -81,7 +70,7 @@ const LikedSongsPage = () => {
     try {
       await toggleLikeSongApi(songId);
       showToast('Đã xóa khỏi danh sách yêu thích');
-      loadLikedSongs(); // Refresh lại danh sách
+      loadLikedSongs();
     } catch (error) {
       showToast('Lỗi khi bỏ thích');
     }
@@ -94,40 +83,37 @@ const LikedSongsPage = () => {
   };
 
   if (loading) {
-    return <div className="loading-message">Đang tải danh sách yêu thích...</div>;
+    return <div className="liked-page-loading">Đang tải danh sách yêu thích...</div>;
   }
 
   return (
-    <div className="liked-songs-container">
-      {/* Header */}
-      <div className="playlist-header">
-        <div className="playlist-cover-art">
-          <FaHeart size={80} color="#ff4d8d" />
+    <div className="liked-page">
+      <div className="liked-header">
+        <div className="liked-header-icon">
+          <FaHeart size={70} color="#ff4d8d" />
         </div>
-        <div className="playlist-info">
-          <p className="playlist-type">PLAYLIST</p>
-          <h1 className="playlist-title">Bài hát đã thích</h1>
-          <p className="playlist-owner">
+
+        <div className="liked-header-info">
+          <p className="liked-header-type">PLAYLIST</p>
+          <h1 className="liked-header-title">Bài hát đã thích</h1>
+          <p className="liked-header-owner">
             {user?.username || 'Bạn'} • {likedSongs.length} bài hát
           </p>
-          <button className="playlist-play-button" onClick={playAllLiked}>
-            <FaPlay size={20} /> PHÁT TẤT CẢ
+
+          <button className="liked-play-btn" onClick={playAllLiked}>
+            <FaPlay size={18} /> Phát tất cả
           </button>
         </div>
       </div>
 
-      {/* Danh sách bài hát */}
-      <div className="song-list-wrapper">
+      <div className="liked-song-table">
         {likedSongs.length > 0 ? (
-          <SongListTable
-            songs={likedSongs}
-            onUnlike={handleUnlikeSong} // Hiển thị nút bỏ thích
-          />
+          <SongListTable songs={likedSongs} onUnlike={handleUnlikeSong} />
         ) : (
-          <div className="empty-state">
-            <FaHeart size={60} color="#666" />
-            <p>Chưa có bài hát nào được thích</p>
-            <p className="subtle-text">Nhấn trái tim để thêm bài hát vào đây nhé!</p>
+          <div className="liked-empty">
+            <FaHeart size={55} color="#999" />
+            <p>Chưa có bài hát yêu thích</p>
+            <p className="liked-empty-sub">Hãy thích một bài hát để thêm vào danh sách!</p>
           </div>
         )}
       </div>

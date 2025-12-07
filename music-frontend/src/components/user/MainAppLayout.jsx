@@ -1,26 +1,28 @@
-// music-frontend/src/components/MainAppLayout.jsx (BẢN SỬA LỖI)
-//listener
+// music-frontend/src/components/MainAppLayout.jsx
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-// import { Navigate } from 'react-router-dom'; // <-- KHÔNG CẦN
-// import { useAuth } from '../context/AuthContext'; // <-- KHÔNG CẦN
 
 import Sidebar from './Sidebar';
+import Header from './Header';
 import PlayerBar from './PlayerBar';
-import Header from './Header'; 
-import '../../App.css'; 
+import '../../App.css';
 
 const MainAppLayout = () => {
-
-  // Chỉ cần return (trả về) layout
   return (
     <div className="app-container">
-      <Header /> 
+      {/* Sidebar fixed full height */}
       <Sidebar />
-      <div className="main-content">
-        <Outlet /> {/* Render Home, Search... */}
+
+      {/* Header fixed, cùng level với Sidebar → không bị đè */}
+      <Header />
+
+      {/* Phần nội dung chính + player */}
+      <div className="right-section">
+        <main className="main-content">
+          <Outlet /> {/* Home, Search, Album, v.v. */}
+        </main>
+        <PlayerBar />
       </div>
-      <PlayerBar />
     </div>
   );
 };

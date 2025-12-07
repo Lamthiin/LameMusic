@@ -77,33 +77,35 @@ const GenreDetailPage = () => {
   }
 
   return (
-    <div className="liked-songs-container">
-      {/* Header */}
-      <div
-        className="playlist-header"
-        style={{
-          background: 'linear-gradient(210deg, #444444ff 0%, var(--color-background) 100%)',
-        }}
-      >
-        <div className="playlist-info">
-          <p className="playlist-type">THỂ LOẠI</p>
-          <h1 className="playlist-title">{genreName}</h1>
-          <p className="playlist-owner">{songs.length} bài hát</p>
-          <button className="playlist-play-button" onClick={playAll}>
-            <FaPlay size={20} /> PHÁT TẤT CẢ
-          </button>
-        </div>
-      </div>
+<div className="genre-page">
 
-      {/* Song List */}
-      <div className="song-list-detail">
-        {songs.length > 0 ? (
-          <SongListTable songs={songs} />
-        ) : (
-          <p className="subtle-text">Không tìm thấy bài hát nào thuộc thể loại này.</p>
-        )}
-      </div>
+  {/* HEADER */}
+  <div
+    className="genre-header"
+    style={{
+      background: 'linear-gradient(210deg, #444444ff 0%, var(--color-background) 100%)',
+    }}
+  >
+    <div className="genre-header-info">
+      <p className="genre-label">THỂ LOẠI</p>
+      <h1 className="genre-title">{genreName}</h1>
+      <p className="genre-count">{songs.length} bài hát</p>
+      <button className="genre-play-btn" onClick={playAll}>
+        <FaPlay size={20} /> PHÁT TẤT CẢ
+      </button>
     </div>
+  </div>
+
+  {/* SONG LIST */}
+  <div className="genre-songlist">
+    {songs.length > 0 ? (
+      <SongListTable songs={songs} />
+    ) : (
+      <p className="genre-empty">Không tìm thấy bài hát nào thuộc thể loại này.</p>
+    )}
+  </div>
+</div>
+
   );
 };
 

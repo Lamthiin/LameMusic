@@ -48,22 +48,87 @@ async findFeaturedArtists(): Promise<Artist[]> {
   /**
    * Lấy chi tiết một nghệ sĩ theo ID, bao gồm Bài hát và Album (Dùng cho Trang Detail)
    */
+//   async findOne(id: number): Promise<Artist | null> {
+//     return this.artistRepository.findOne({
+//       where: { 
+//             id: id, 
+//             active: 1,
+//             // === SỬA LỖI: THÊM LỌC STATUS ===
+//             registrationStatus: 'APPROVED' 
+//             // ================================
+//         },
+//       relations: ['user', 'songs', 'albums'], 
+//       order: {
+//          songs: { id: 'DESC' }, 
+//          albums: { release_date: 'DESC' } 
+//        } as any 
+//     });
+//   }
+
+// async findOne(id: number): Promise<Artist | null> {
+//     // SỬ DỤNG QUERY BUILDER ĐỂ LỌC BÀI HÁT TRONG QUAN HỆ
+//     const artist = await this.artistRepository.createQueryBuilder('artist')
+//       .where('artist.id = :id', { id })
+      
+//       // === BẮT BUỘC JOIN VÀ LỌC BÀI HÁT ===
+//       // Tải Album của Artist
+//       .leftJoinAndSelect('artist.albums', 'album', )
+      
+//       // Tải Bài hát của Artist
+//       .leftJoinAndSelect('artist.songs', 'song', 
+//           // ĐIỀU KIỆN LỌC: CHỈ LẤY BÀI HÁT ĐÃ DUYỆT VÀ ACTIVE
+//           'song.status = :status AND song.active = :active', 
+//           { status: 'APPROVED', active: true } // Tham số
+//       )
+//       // Sắp xếp bài hát theo play_count (ví dụ)
+//       .orderBy('song.play_count', 'DESC') 
+//       // ======================================
+      
+//       .getOne();
+
+//     return artist;
+//   }
+
   async findOne(id: number): Promise<Artist | null> {
-    return this.artistRepository.findOne({
-      where: { 
-            id: id, 
-            active: 1,
-            // === SỬA LỖI: THÊM LỌC STATUS ===
-            registrationStatus: 'APPROVED' 
-            // ================================
-        },
-      relations: ['user', 'songs', 'albums'], 
-      order: {
-         songs: { id: 'DESC' }, 
-         albums: { release_date: 'DESC' } 
-       } as any 
-    });
-  }
+  const artist = await this.artistRepository
+    .createQueryBuilder('artist')
+
+    // Lọc nghệ sĩ active + approved
+    .where('artist.id = :id', { id })
+    .andWhere('artist.active = :active', { active: true })
+    .andWhere('artist.registrationStatus = :status', { status: 'APPROVED' })
+
+    /* =====================
+       JOIN ALBUM ACTIVE = 1
+       ===================== */
+    .leftJoinAndSelect(
+      'artist.albums',
+      'album',
+      'album.active = :albumActive',
+      { albumActive: true }
+    )
+
+    /* ==============================================
+       JOIN SONG ACTIVE = 1 + APPROVED
+       ============================================== */
+    .leftJoinAndSelect(
+      'artist.songs',
+      'song',
+      'song.active = :songActive AND song.status = :songStatus',
+      { songActive: true, songStatus: 'APPROVED' }
+    )
+
+    /* SẮP XẾP SONG & ALBUM */
+    .orderBy({
+      'song.play_count': 'DESC',
+      'album.release_date': 'DESC'
+    })
+
+    .getOne();
+
+  return artist;
+}
+
 
   async findAllArtists(): Promise<Artist[]> {
     return this.artistRepository.find({
@@ -144,40 +209,6 @@ async findFeaturedArtists(): Promise<Artist[]> {
     }
     return artist;
   }
-
-  /**
-   * 5. HÀM MỚI: Cập nhật hồ sơ Artist CÁ NHÂN
-   */
-  // async updateMyArtistProfile(
-  //   userId: number, 
-  //   dto: UpdateArtistDto, 
-  //   avatarFile?: Express.Multer.File // <-- File avatar (optional)
-  // ): Promise<Artist> {
-    
-  //   const artist = await this.getMyArtistProfile(userId); // Lấy hồ sơ hiện tại
-
-  //   // Cập nhật thông tin text (Bio, StageName)
-  //   if (dto.stage_name) {
-  //       // Kiểm tra xem stage_name mới có bị trùng không (nếu nó khác tên cũ)
-  //       if (dto.stage_name !== artist.stage_name) {
-  //           const existing = await this.artistRepository.findOne({ where: { stage_name: dto.stage_name } });
-  //           if (existing) throw new ConflictException('Nghệ danh này đã có người sử dụng.');
-  //       }
-  //       artist.stage_name = dto.stage_name;
-  //   }
-  //   if (dto.bio) artist.bio = dto.bio;
-
-  //   // Cập nhật avatar (nếu có file mới)
-  //   if (avatarFile) {
-  //       // Cần xóa file avatar cũ (nếu có)
-  //       // ... (logic xóa file cũ) ...
-        
-  //       // Cập nhật đường dẫn avatar mới
-  //       artist.avatar_url = `/uploads/avatars/${avatarFile.filename}`;
-  //   }
-
-  //   return this.artistRepository.save(artist);
-  // }
 
   /**
    * HÀM: Cập nhật hồ sơ Artist CÁ NHÂN (Upload Avatar lên R2)

@@ -96,7 +96,7 @@ const ProfilePlaylists = () => {
                 />
               ) : (
                 <div className="pp-card-placeholder">
-                  <span>Playlist</span>
+                  <span><p className="pp-title">{pl.name}</p></span>
                 </div>
               )}
 

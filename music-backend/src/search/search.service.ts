@@ -31,7 +31,7 @@ export class SearchService {
       
       // 1. Tìm Bài hát
       this.songRepository.find({
-        where: { title: Like(searchTerm), active: true },
+        where: { title: Like(searchTerm), active: true, status: 'APPROVED' },
         relations: ['artist', 'album'],
         take: 5, 
       }),
@@ -44,7 +44,12 @@ export class SearchService {
       
       // 3. Tìm Album
       this.albumRepository.find({
-        where: { title: Like(searchTerm) }, 
+        where: { 
+            title: Like(searchTerm),
+            // === FIX: BẮT BUỘC is_active = true ===
+            active: true
+            // =====================================
+        }, 
         relations: ['artist'],
         take: 5,
       }),

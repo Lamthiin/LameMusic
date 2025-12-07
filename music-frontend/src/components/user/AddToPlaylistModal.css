@@ -66,7 +66,7 @@
 }
 .playlist-search:focus {
   outline: none;
-  border-color: #00e6c8;
+  border-color: #00e668;
   background: #222;
 }
 
@@ -84,12 +84,12 @@
 }
 .create-playlist-row:hover {
   background: #222;
-  border-color: #00e6c8;
+  border-color: #00e668;
 }
 .create-playlist-icon-box {
   width: 40px;
   height: 40px;
-  background: #00e6c8;
+  background: #00e668;
   color: #000;
   border-radius: 10px;
   display: flex;
@@ -158,7 +158,7 @@
   z-index: 3000;
 }
 .toast.show { opacity: 1; bottom: 40px; }
-.toast-success { background: #00e6c8; color: #000; }
+.toast-success { background: #00e668; color: #000; }
 .toast-error { background: #e91429; color: #fff; }
 
 /* MOBILE */

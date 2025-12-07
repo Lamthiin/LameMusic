@@ -51,59 +51,6 @@ export class AlbumService {
     });
   }
 
-  // /**
-  //  * HÀM MỚI (ARTIST): TẠO Album mới
-  //  */
-  // async createAlbum(userId: number, dto: CreateAlbumDto, coverFile?: Express.Multer.File): Promise<Album> {
-  //   const artist = await this.getArtistByUserId(userId);
-
-  //   // === SỬA LỖI TS2322 (LỖI 1) ===
-  //   let cover_url: string | null = null; // Khai báo rõ ràng kiểu
-  //   if (coverFile) {
-  //       cover_url = `/uploads/covers/${coverFile.filename}`; 
-  //   }
-  //   // =============================
-
-  //   const newAlbum = this.albumRepository.create({
-  //     ...dto,
-  //     artist: artist,
-  //     cover_url: cover_url, // (Lỗi 2, 3 đã được fix)
-  //   });
-    
-  //   return this.albumRepository.save(newAlbum);
-  // }
-
-  // /**
-  //  * HÀM MỚI (ARTIST): CẬP NHẬT Album
-  //  */
-  // async updateMyAlbum(userId: number, albumId: number, dto: UpdateAlbumDto, coverFile?: Express.Multer.File): Promise<Album> {
-  //   const artist = await this.getArtistByUserId(userId);
-  //   const album = await this.albumRepository.findOne({ 
-  //     where: { id: albumId, active: true },
-  //     relations: ['artist'] 
-  //   });
-
-  //   if (!album) throw new NotFoundException('Album không tồn tại.');
-  //   if (album.artist.id !== artist.id) {
-  //     throw new UnauthorizedException('Bạn không có quyền sửa Album này.');
-  //   }
-
-  //   // Cập nhật thông tin
-  //   album.title = dto.title || album.title;
-    
-  //   // === SỬA LỖI TS2322 (LỖI 4): CHUYỂN STRING SANG DATE ===
-  //   if (dto.release_date) {
-  //       album.release_date = new Date(dto.release_date);
-  //   }
-  //   // ==================================================
-    
-  //   if (coverFile) {
-  //       album.cover_url = `/uploads/covers/${coverFile.filename}`;
-  //   }
-
-  //   return this.albumRepository.save(album);
-  // }
-
   /**
      * API: Lấy chi tiết 1 Album (Chỉ hiển thị bài hát APPROVED)
      */

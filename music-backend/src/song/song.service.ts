@@ -25,6 +25,7 @@ import { HistoryService } from '../history/history.service'; // <-- IMPORT MỚI
 import { R2Service } from '../shared/r2.service'; // <-- (1) IMPORT R2 SERVICE
 import { SharedModule } from '../shared/shared.module'; // <-- import module chứa R2Service 
 import * as musicMetadata from 'music-metadata';
+import { FindOptionsWhere } from 'typeorm';
 
 @Injectable()
 export class SongService {
@@ -50,18 +51,14 @@ export class SongService {
     }
     return artist;
   }
-  
-  // ================================
-  // === CÁC HÀM CŨ (PUBLIC) ===
-  // ================================
-  
+
   // (Hàm findAll - Trang Home)
   async findAll(user: JwtPayload | null): Promise<Song[]> {
       return this.songRepository.find({
           where: { active: true, status: 'APPROVED' }, 
           relations: ['artist', 'album'],
           order: { play_count: 'DESC' }, // sắp xếp theo lượt nghe giảm dần
-          take: 6
+          take: 10
       });
   }
 
@@ -90,6 +87,38 @@ export class SongService {
     }
 
     return query.getMany();
+ }
+
+ /**
+   * (PUBLIC) Lấy tất cả bài hát có filter (Dùng cho Trang Artist Detail/All Songs)
+   * CHỈ HIỂN THỊ CÁC BÀI ĐÃ DUYỆT (APPROVED) VÀ CÒN ACTIVE.
+   * @param artistId ID Artist Profile
+   */
+  async findAllWithFilters(genre?: string, artistId?: number): Promise<Song[]> {
+      
+      const whereConditions: FindOptionsWhere<Song> = {
+          // === BẮT BUỘC ĐIỀU KIỆN CÔNG KHAI ===
+          active: true,
+          status: 'APPROVED', 
+          // ===================================
+      };
+      
+      if (genre) {
+          whereConditions.genre = genre;
+      } 
+      
+      if (artistId) {
+          // Lọc theo ID hồ sơ Artist (PK của bảng Artist)
+          whereConditions.artist = { id: artistId } as FindOptionsWhere<Artist>; 
+      }
+      
+      const options: FindManyOptions<Song> = {
+          where: whereConditions,
+          relations: ['artist', 'album'],
+          order: { created_at: 'DESC' }
+      };
+
+      return this.songRepository.find(options);
   }
 
   // (Hàm findOne - Chi tiết bài hát)
@@ -104,17 +133,17 @@ export class SongService {
       return song;
   }
   
-  // (Hàm findAllWithFilters - Trang All Songs)
-  async findAllWithFilters(genre?: string, artistId?: number): Promise<any> {
-      const options: FindManyOptions<Song> = {
-          where: { active: true, status: 'APPROVED' },
-          relations: ['artist', 'album'],
-          order: { created_at: 'DESC' }
-      };
-      if (genre) options.where = { ...options.where, genre: genre }; 
-      if (artistId) options.where = { ...options.where, artist: { id: artistId } };
-      return this.songRepository.find(options);
-  }
+  // // (Hàm findAllWithFilters - Trang All Songs)
+  // async findAllWithFilters(genre?: string, artistId?: number): Promise<any> {
+  //     const options: FindManyOptions<Song> = {
+  //         where: { active: true, status: 'APPROVED' },
+  //         relations: ['artist', 'album'],
+  //         order: { created_at: 'DESC' }
+  //     };
+  //     if (genre) options.where = { ...options.where, genre: genre }; 
+  //     if (artistId) options.where = { ...options.where, artist: { id: artistId } };
+  //     return this.songRepository.find(options);
+  // }
   
   // (Hàm findByGenre - Trang Genre Detail)
   async findByGenre(genreName: string): Promise<Song[]> {
@@ -181,7 +210,7 @@ export class SongService {
 
     // 1. UPLOAD FILE NHẠC LÊN R2
     const audioUpload = await this.r2Service.uploadFile(
-      'mucsic', 
+      'music', 
       audioFile.originalname,
       audioFile.buffer, // <-- Dùng buffer
       audioFile.mimetype,

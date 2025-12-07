@@ -18,15 +18,6 @@
   padding: 12px 22px;
 }
 
-
-/* SONG COVER */
-.song-cover {
-  width: 44px;
-  height: 44px;
-  object-fit: cover;
-  border-radius: 6px;
-}
-
 /* MERGED BADGE */
 .status-merged {
   padding: 6px 12px;

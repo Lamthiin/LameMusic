@@ -1,218 +1,324 @@
-// music-frontend/src/components/Header.jsx (Sửa FINAL)
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { FaSearch, FaUserCircle, FaBell, FaCheckCircle } from 'react-icons/fa'; // <-- IMPORT ICON CHUÔNG
-import { fetchNotificationsApi, markNotificationAsReadApi } from '../../utils/api'; // <-- IMPORT API THÔNG BÁO
-import './Header.css';
+// music-frontend/src/components/Header.jsx
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import {
+  fetchNotificationsApi,
+  markNotificationAsReadApi,
+  searchApi
+} from "../../utils/api";
 
+import {
+  FaSearch,
+  FaUserCircle,
+  FaBell,
+  FaCheckCircle
+} from "react-icons/fa";
+
+import "./Header.css";
+
+// ------------------------------------------------------
+// FIX ẢNH (BẮT BUỘC PHẢI CÓ)
+// ------------------------------------------------------
+const fixImageUrl = (url) => {
+  if (!url) return "/images/default.png";
+  if (url.startsWith("http")) return url;
+
+  return `http://localhost:3000${url}`;
+};
+
+// ------------------------------------------------------
+// HEADER COMPONENT
+// ------------------------------------------------------
 const Header = () => {
-  const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
+  const { isAuthenticated, user, logout } = useAuth();
 
-  // States hiện tại (ví dụ)
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  
-  // === STATE MỚI CHO THÔNG BÁO ===
-  const [notifications, setNotifications] = useState([]);
-  const [isNotifDropdownOpen, setIsNotifDropdownOpen] = useState(false);
-  
-  // Ref để đóng dropdown khi click bên ngoài
-  const userMenuRef = useRef(null);
+  // ---------------- SEARCH STATE ----------------
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState(null);
+
+  // ---------------- DROPDOWN ----------------
+  const searchRef = useRef(null);
+  const userRef = useRef(null);
   const notifRef = useRef(null);
-  const searchContainerRef = useRef(null); // Giả định có search container
-  
-  // ================================
 
-  // Logic tải thông báo
-  const loadNotifications = useCallback(async () => {
-    if (isAuthenticated) {
-        try {
-            // Lấy 10 thông báo mới nhất
-            const data = await fetchNotificationsApi(10);
-            setNotifications(data);
-        } catch (error) {
-            console.error("Không thể tải thông báo:", error);
-            setNotifications([]);
-        }
-    } else {
-        setNotifications([]);
+  // ---------------- NOTIFICATION ----------------
+  const [notifications, setNotifications] = useState([]);
+  const [notifOpen, setNotifOpen] = useState(false);
+
+  // ------------------------------------------------------
+  // LOAD NOTIFICATION
+  // ------------------------------------------------------
+  const loadNotifications = async () => {
+    if (!isAuthenticated) return;
+
+    try {
+      const data = await fetchNotificationsApi(10);
+      setNotifications(data);
+    } catch (err) {
+      console.log(err);
     }
-  }, [isAuthenticated]);
+  };
 
   useEffect(() => {
     loadNotifications();
-    const interval = setInterval(loadNotifications, 60000); // Tải lại sau mỗi 60 giây
-    return () => clearInterval(interval);
-  }, [isAuthenticated, loadNotifications]);
-
-
-  // Logic đóng dropdown khi click ra ngoài
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-        // Đóng User Menu
-        if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
-            setIsMenuOpen(false);
-        }
-        // Đóng Notification Dropdown
-        if (notifRef.current && !notifRef.current.contains(event.target)) {
-            setIsNotifDropdownOpen(false);
-        }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-        document.removeEventListener("mousedown", handleClickOutside);
-    };
+    const timer = setInterval(loadNotifications, 60000);
+    return () => clearInterval(timer);
   }, []);
-  
-  // Xử lý khi nhấn vào thông báo
-  const handleNotificationClick = async (notif) => {
-      // 1. Đánh dấu đã đọc
-      if (!notif.is_read) {
-          try {
-              await markNotificationAsReadApi(notif.id);
-              loadNotifications(); // Tải lại để cập nhật trạng thái
-          } catch (error) {
-              console.error("Lỗi khi đánh dấu đã đọc:", error);
-          }
-      }
-      
-      // 2. Chuyển hướng theo reference_id (Tùy chọn)
-      if (notif.type === 'SONG_APPROVED' && notif.reference_id) {
-          navigate(`/song/${notif.reference_id}`);
-      } else if (notif.type === 'ARTIST_PROFILE_APPROVED' && notif.reference_id) {
-          navigate(`/artist/dashboard`);
-      }
-      
-      setIsNotifDropdownOpen(false); // Đóng dropdown
-  };
-  
-  // Đếm thông báo chưa đọc
-  const unreadCount = notifications.filter(n => !n.is_read).length;
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchTerm.trim()) {
-        navigate(`/search?q=${encodeURIComponent(searchTerm.trim())}`);
+  // ------------------------------------------------------
+  // HANDLE CLICK NOTIFICATION
+  // ------------------------------------------------------
+  const handleNotifClick = async (n) => {
+    try {
+      if (!n.is_read) {
+        await markNotificationAsReadApi(n.id);
+        loadNotifications();
+      }
+
+      if (n.type === "SONG_APPROVED") {
+        navigate(`/song/${n.reference_id}`);
+      } else if (n.type === "ARTIST_PROFILE_APPROVED") {
+        navigate("/artist-dashboard");
+      }
+    } catch (err) {}
+
+    setNotifOpen(false);
+  };
+
+  const unread = notifications.filter(n => !n.is_read).length;
+
+  // ------------------------------------------------------
+  // SEARCH
+  // ------------------------------------------------------
+  useEffect(() => {
+    if (!query.trim()) {
+      setResults(null);
+      return;
     }
+
+    const timer = setTimeout(async () => {
+      try {
+        const data = await searchApi(query);
+
+        data.songs = data.songs.map(s => ({
+          ...s,
+          image_url: fixImageUrl(s.image_url || s.album?.cover_url)
+        }));
+        data.artists = data.artists.map(a => ({
+          ...a,
+          avatar_url: fixImageUrl(a.avatar_url)
+        }));
+        data.albums = data.albums.map(a => ({
+          ...a,
+          cover_url: fixImageUrl(a.cover_url)
+        }));
+
+        setResults(data);
+
+      } catch (err) {
+        console.log(err);
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
+
+  }, [query]);
+
+  // ------------------------------------------------------
+  // CLICK OUTSIDE
+  // ------------------------------------------------------
+  useEffect(() => {
+    const handler = e => {
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setResults(null);
+      }
+      if (userRef.current && !userRef.current.contains(e.target)) {
+        setUserOpen(false);
+      }
+      if (notifRef.current && !notifRef.current.contains(e.target)) {
+        setNotifOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  // ------------------------------------------------------
+  // RESULT CLICK
+  // ------------------------------------------------------
+  const go = (path, e) => {
+    e.stopPropagation();
+    setResults(null);
+    setQuery("");
+    navigate(path);
   };
 
+  // ------------------------------------------------------
+  // USER MENU
+  // ------------------------------------------------------
+  const [userOpen, setUserOpen] = useState(false);
+
+  // ------------------------------------------------------
+  // RENDER
+  // ------------------------------------------------------
   return (
-    <header className="hdr-container">
-      {/* CỘT 1: LOGO */}
-      <div className="hdr-left">
-        <h1 className="hdr-logo" onClick={() => navigate('/')}>
-          🎧 MusicApp
-        </h1>
+    <header className="header">
+
+      {/* LEFT: LOGO */}
+      <div className="header-left" onClick={() => navigate("/")}>
+        🎧 Lame
       </div>
 
-      {/* CỘT 2: SEARCH */}
-      <div className="hdr-center" ref={searchContainerRef}>
-        <form className="hdr-search-bar" onSubmit={handleSearch}>
+      {/* CENTER: SEARCH */}
+      <div className="header-center" ref={searchRef}>
+
+        <div className="search-box">
+          <FaSearch />
           <input
-            type="text"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
             placeholder="Tìm kiếm bài hát, nghệ sĩ, album..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <button type="submit" className="hdr-search-btn">
-            <FaSearch />
-          </button>
-        </form>
-      </div>
-      
-      {/* CỘT 3: BÊN PHẢI (AUTH & NOTIF) */}
-      <div className="hdr-right">
-        {isAuthenticated ? (
-          <>
-            {/* === CHUÔNG THÔNG BÁO === */}
-            <div className="notif-bell-container" ref={notifRef}>
-                <button 
-                    className="notif-btn-icon" 
-                    onClick={() => setIsNotifDropdownOpen(!isNotifDropdownOpen)}
-                    title="Thông báo"
-                >
-                    <FaBell size={20} />
-                    {/* Badge hiển thị số lượng chưa đọc */}
-                    {unreadCount > 0 && <span className="notif-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>}
-                </button>
-                
-                {/* DROPDOWN HIỂN THỊ */}
-                {isNotifDropdownOpen && (
-                    <div className="notif-dropdown">
-                        <h3>Thông báo mới</h3>
-                        {notifications.length === 0 ? (
-                            <div className="notif-item subtle-text">Không có thông báo mới.</div>
-                        ) : (
-                            notifications.map(notif => (
-                                <div 
-                                    key={notif.id} 
-                                    className={`notif-item ${notif.is_read ? 'read' : 'unread'}`}
-                                    onClick={() => handleNotificationClick(notif)}
-                                >
-                                    <p className="notif-message">{notif.message}</p>
-                                    <span className="notif-date">{new Date(notif.created_at).toLocaleTimeString()}</span>
-                                </div>
-                            ))
-                        )}
-                        <div className="notif-footer" onClick={() => {
-                            navigate('/notifications'); // Chuyển đến trang tất cả thông báo
-                            setIsNotifDropdownOpen(false);
-                        }}>
-                            Xem tất cả thông báo
-                        </div>
+        </div>
+
+        {results && (
+          <div className="search-dropdown">
+
+            {/* SONGS */}
+            {results.songs.length > 0 && (
+              <>
+                <h4>Bài hát</h4>
+                {results.songs.map(song => (
+                  <div
+                    key={song.id}
+                    className="result-item"
+                    onClick={e => go(`/song/${song.id}`, e)}
+                  >
+                    <img src={song.image_url} />
+                    <div>
+                      <p>{song.title}</p>
+                      <span>{song.artist?.stage_name}</span>
                     </div>
-                )}
-            </div>
-            {/* ======================= */}
+                  </div>
+                ))}
+              </>
+            )}
 
-            {/* === ARTIST BADGE HOẶC NÚT ĐĂNG KÝ === */}
-            {user?.role === 'artist' ? (
-              <div 
-                className="hdr-artist-badge" 
-                onClick={() => navigate('/artist-dashboard/info')}
-                title="Quản lý kênh nghệ sĩ"
-              >
-                <FaCheckCircle size={15} />
-                Nghệ sĩ
-              </div>
-            ) : (user?.role === 'listener' && (
-              <button className="hdr-btn-become-artist" onClick={() => navigate('/artist-registration')}>
-                Trở thành Nghệ sĩ
-              </button>
-            ))}
-            {/* ===================================== */}
+            {/* ARTISTS */}
+            {results.artists.length > 0 && (
+              <>
+                <h4>Nghệ sĩ</h4>
+                {results.artists.map(a => (
+                  <div
+                    key={a.id}
+                    className="result-item"
+                    onClick={e => go(`/artist/${a.id}`, e)}
+                  >
+                    <img src={a.avatar_url} />
+                    <div>
+                      <p>{a.stage_name}</p>
+                      <span>Nghệ sĩ</span>
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
 
-            {/* User Menu */}
-            <div className="hdr-user-menu" ref={userMenuRef}>
-              <button className="hdr-user-btn" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                <FaUserCircle size={24} />
-                <span className="hdr-username">{user.username}</span>
-              </button>
-              {isMenuOpen && (
-                <div className="hdr-user-dropdown">
-                  <div className="hdr-menu-item" onClick={() => { navigate('/profile/info'); setIsMenuOpen(false); }}>Tài khoản cá nhân</div>
-                  {user?.role === 'artist' && (
-                    <div className="hdr-menu-item" onClick={() => { navigate('/artist-dashboard/info'); setIsMenuOpen(false); }}>Quản lý Kênh</div>
-                  )}
-                  <div className="hdr-menu-item hdr-logout" onClick={logout}>Đăng xuất</div>
-                </div>
-              )}
-            </div>
-          </>
-        ) : (
-          <div className="hdr-auth-buttons">
-            <button className="hdr-btn-secondary" onClick={() => navigate('/login')}>
-              Đăng nhập
-            </button>
-            <button className="hdr-btn-primary" onClick={() => navigate('/register')}>
-              Đăng ký
-            </button>
+            {/* ALBUMS */}
+            {results.albums.length > 0 && (
+              <>
+                <h4>Album</h4>
+                {results.albums.map(alb => (
+                  <div
+                    key={alb.id}
+                    className="result-item"
+                    onClick={e => go(`/album/${alb.id}`, e)}
+                  >
+                    <img src={alb.cover_url} />
+                    <div>
+                      <p>{alb.title}</p>
+                      <span>{alb.artist?.stage_name}</span>
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
+
+            {results.songs.length + results.artists.length + results.albums.length === 0 && (
+              <div className="no-result">Không tìm thấy gì 😢</div>
+            )}
+
           </div>
         )}
+
       </div>
+
+      {/* RIGHT: USER + NOTIF */}
+      <div className="header-right">
+
+        {/* NOTIF */}
+        {isAuthenticated && (
+          <div className="notif" ref={notifRef}>
+            <button onClick={() => setNotifOpen(!notifOpen)}>
+              <FaBell />
+              {unread > 0 && <span className="badge">{unread}</span>}
+            </button>
+
+            {notifOpen && (
+              <div className="notif-dropdown">
+                {notifications.length === 0 && <div>Không có thông báo</div>}
+
+                {notifications.map(n => (
+                  <div
+                    key={n.id}
+                    className={`notif-item ${n.is_read ? "" : "unread"}`}
+                    onClick={() => handleNotifClick(n)}
+                  >
+                    {n.message}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ARTIST BADGE */}
+        {isAuthenticated && user?.role === "artist" && (
+          <div className="artist-badge">
+            <FaCheckCircle/> Nghệ sĩ
+          </div>
+        )}
+
+        {/* USER MENU */}
+        {isAuthenticated ? (
+          <div className="user" ref={userRef}>
+            <button onClick={() => setUserOpen(!userOpen)}>
+              <FaUserCircle />
+              {user.username}
+            </button>
+
+            {userOpen && (
+              <div className="user-dropdown">
+                <div onClick={() => navigate("/profile/info")}>Tài khoản</div>
+                {user.role==="artist" && (
+                  <div onClick={() => navigate("/artist-dashboard")}>Quản lý kênh nghệ sĩ</div>
+                )}
+                <div onClick={logout}>Đăng xuất</div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div>
+            <button onClick={() => navigate("/login")}>Đăng nhập</button>
+            <button onClick={() => navigate("/register")}>Đăng ký</button>
+          </div>
+        )}
+
+      </div>
+
     </header>
   );
 };

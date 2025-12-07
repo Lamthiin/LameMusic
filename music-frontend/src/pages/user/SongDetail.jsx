@@ -1,256 +1,229 @@
-// music-frontend/src/pages/SongDetail.jsx (BẢN SỬA LỖI FINAL)
+// music-frontend/src/pages/SongDetail.jsx
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { api } from '../../utils/api'; 
-import { usePlayer } from '../../context/PlayerContext'; 
-import './SongDetail.css'; 
-import { FaPlay, FaHeart, FaPause, FaEllipsisV, FaRedo } from 'react-icons/fa'; 
-import { useAuth } from '../../context/AuthContext'; 
-import SongOptionsMenu from '../../components/user//SongOptionsMenu'; // <-- (1) IMPORT MENU
-import AddToPlaylistModal from '../../components/user/AddToPlaylistModal'; // <-- (2) IMPORT MODAL
-import ReportModal from '../../components/user/ReportModal'; // <-- (1) IMPORT MODAL MỚI
-import { FaPlus, FaFlag } from 'react-icons/fa'; // <-- IMPORT FaFlag
+import { api } from '../../utils/api';
+import { usePlayer } from '../../context/PlayerContext';
+import './SongDetail.css';
+import { FaPlay, FaHeart, FaRedo, FaEllipsisV, FaPlus, FaFlag } from 'react-icons/fa';
+import { useAuth } from '../../context/AuthContext';
 
-// === HÀM HELPER: Sửa lỗi URL (Fix NULL và Thêm Domain) ===
+import SongOptionsMenu from '../../components/user/SongOptionsMenu';
+import AddToPlaylistModal from '../../components/user/AddToPlaylistModal';
+import ReportModal from '../../components/user/ReportModal';
+
+// ─────────────────────────
+// FIX URL
+// ─────────────────────────
 const fixUrl = (url, type = 'image') => {
-    if (!url) { // Xử lý NULL
+    if (!url) {
         if (type === 'artist') return '/images/default-artist.png';
-        if (type === 'audio') return ''; // Trả về rỗng nếu không có file nhạc
-        return '/images/default-album.png'; // Mặc định cho album/song
+        if (type === 'audio') return '';
+        return '/images/default-album.png';
     }
-    if (url.startsWith('http')) { // Nếu đã là URL tuyệt đối
-        return url;
-    }
-    // Mặc định (ví dụ: /images/artist-1.jpg)
+    if (url.startsWith('http')) return url;
+
     const prefix = type === 'image' ? '/media/images' : '/media/audio';
-    const originalPath = type === 'image' ? '/images' : '/audio';
-    
-    // Đảm bảo không thay thế 2 lần
-    if (url.startsWith(prefix)) {
-        return `http://localhost:3000${url}`;
-    }
-    
-    return `http://localhost:3000${url.replace(originalPath, prefix)}`;
+    const original = type === 'image' ? '/images' : '/audio';
+
+    if (url.startsWith(prefix)) return `http://localhost:3000${url}`;
+    return `http://localhost:3000${url.replace(original, prefix)}`;
 };
 
+// ─────────────────────────
+// COMPONENT
+// ─────────────────────────
 const SongDetail = () => {
-  const { id } = useParams(); 
-  const navigate = useNavigate();
-  const { playTrack, currentTrack, isPlaying, setIsPlaying, audioRef } = usePlayer();
-  const { isAuthenticated } = useAuth(); 
-  
-  const [song, setSong] = useState(null);
-  const [lyrics, setLyrics] = useState(''); 
-  const [loading, setLoading] = useState(true);
-  const [loadingLyrics, setLoadingLyrics] = useState(true); 
-  const [isLiked, setIsLiked] = useState(false);
-  const [error, setError] = useState(''); 
-  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
-  
-  // (3) STATE MỚI ĐỂ MỞ/ĐÓNG MENU 3 CHẤM
-  const [menuOpen, setMenuOpen] = useState(false);
-  // (4) STATE MỚI ĐỂ MỞ MODAL "THÊM VÀO PLAYLIST"
-  const [isAddPlaylistModalOpen, setIsAddPlaylistModalOpen] = useState(false);
+    const { id } = useParams();
+    const navigate = useNavigate();
 
-  // === useEffect 1: Tải Data (Tách ra để tránh lặp) ===
-  useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      setLoadingLyrics(true);
-      setError(''); 
-      try {
-        // Tải Song và Lyrics cùng lúc
-        const [songRes, lyricsRes] = await Promise.all([
-          api.get(`/song/${id}`), 
-          api.get(`/song/${id}/lyrics`).catch(err => null) 
-        ]);
-        
-        if (!songRes.data) throw new Error('Không tìm thấy bài hát');
+    const { playTrack, currentTrack, isPlaying, setIsPlaying, audioRef } = usePlayer();
+    const { isAuthenticated } = useAuth();
 
-        const songData = songRes.data;
+    const [song, setSong] = useState(null);
+    const [lyrics, setLyrics] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [loadingLyrics, setLoadingLyrics] = useState(true);
 
-        // ======= 🔧 FIX LINK NHẠC & ẢNH =======
-        songData.file_url = fixUrl(songData.file_url, 'audio');
-        songData.image_url = songData.image_url ? fixUrl(songData.image_url, 'image') : null;
-        if (songData.album) {
-            songData.album.cover_url = fixUrl(songData.album.cover_url, 'image');
+    const [isLiked, setIsLiked] = useState(false);
+
+    const [menuOpen, setMenuOpen] = useState(false);
+    const [playlistModal, setPlaylistModal] = useState(false);
+    const [reportOpen, setReportOpen] = useState(false);
+
+    // ─────────────────────────
+    // LOAD SONG
+    // ─────────────────────────
+    useEffect(() => {
+        const load = async () => {
+            setLoading(true);
+            setLoadingLyrics(true);
+
+            try {
+                const [songRes, lyricRes] = await Promise.all([
+                    api.get(`/song/${id}`),
+                    api.get(`/song/${id}/lyrics`).catch(() => null)
+                ]);
+
+                const data = songRes.data;
+
+                data.file_url = fixUrl(data.file_url, 'audio');
+                data.image_url = fixUrl(data.image_url, 'image');
+                if (data.album) {
+                    data.album.cover_url = fixUrl(data.album.cover_url, 'image');
+                }
+
+                setSong(data);
+
+                if (isAuthenticated) {
+                    const like = await api.get(`/like/${id}/status`);
+                    setIsLiked(like.data.isLiked);
+                }
+
+                setLyrics(lyricRes?.data?.lyrics || 'Không có lời bài hát.');
+                setLoadingLyrics(false);
+
+            } catch {
+                setSong(null);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        load();
+    }, [id, isAuthenticated]);
+
+    // Tự động phát khi vào bài
+    useEffect(() => {
+        if (song && (!currentTrack || currentTrack.id !== song.id)) {
+            playTrack(song);
         }
+    }, [song]);
 
-        setSong(songData);
+    // ─────────────────────────
+    // EVENT
+    // ─────────────────────────
+    const replay = () => {
+        if (!audioRef.current?.audio?.current) return;
 
-        // ======= LOAD LIKE STATUS =======
-        if (isAuthenticated) {
-          const likeStatus = await api.get(`/like/${id}/status`);
-          setIsLiked(likeStatus.data.isLiked);
-        } else {
-          setIsLiked(false);
-        }
+        audioRef.current.audio.current.currentTime = 0;
+        audioRef.current.audio.current.play();
+        setIsPlaying(true);
+    };
 
-        // ======= LOAD LYRICS =======
-        setLyrics(lyricsRes?.data?.lyrics || 'Không tìm thấy lời bài hát.');
-        setLoadingLyrics(false);
-        
-      } catch (err) {
-        console.error("Lỗi tải chi tiết bài hát:", err);
-        setError('Không thể tìm thấy bài hát bạn yêu cầu.'); 
-      } finally {
-        setLoading(false);
-      }
-    };
+    const toggleLike = async () => {
+        if (!isAuthenticated) {
+            alert("Vui lòng đăng nhập!");
+            navigate("/login");
+            return;
+        }
+        const res = await api.post(`/like/${song.id}`);
+        setIsLiked(res.data.isLiked);
+    };
 
-    loadData();
-  }, [id, isAuthenticated]); // XÓA navigate và playTrack khỏi dependency
+    // ─────────────────────────
+    // RENDER
+    // ─────────────────────────
+    if (loading) return <div>Đang tải...</div>;
+    if (!song) return <div>Không tìm thấy bài hát</div>;
 
-  // Khi vào bài hát mới, tự động phát
-  useEffect(() => {
-    if (song && (!currentTrack || currentTrack.id !== song.id)) {
-      playTrack(song);
-    }
-  }, [song, playTrack, currentTrack]); 
+    return (
+        <div className="song-detail-container">
 
-  const isThisSongPlaying = currentTrack?.id === song?.id && isPlaying;
-  const handlePlayPause = () => {
-    if (isThisSongPlaying) setIsPlaying(false);
-    else playTrack(song);
-  };
-  const handleReplay = () => {
-  if (audioRef.current?.audio?.current) {
-    audioRef.current.audio.current.currentTime = 0;
-    audioRef.current.audio.current.play();
-    setIsPlaying(true);
-  }
-  };
+            {/* HEADER */}
+            <div className="song-detail-header">
 
-
-  const handleReportSent = () => {
-          setIsReportModalOpen(false); // Đóng modal
-          // Tùy chọn: Bạn có thể cập nhật trạng thái UI (ví dụ: đổi nút Report thành "Đã báo cáo")
-      };
-
-  // LIKE TOGGLE
-  const handleLike = async () => {
-    if (!isAuthenticated) {
-      alert('Vui lòng đăng nhập để thích bài hát này.');
-      navigate('/login');
-      return;
-    }
-    try {
-      const response = await api.post(`/like/${song.id}`);
-      setIsLiked(response.data.isLiked); 
-    } catch (error) {
-      console.error("Lỗi khi toggle like:", error);
-      if (error.response?.status === 401) {
-        alert('Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại.');
-      }
-    }
-  };
-
-  if (loading || error) {
-    return <div className="song-detail-error">{error || 'Đang tải...'}</div>;
-  }
-  if (!song) return null;
-  
-  return (
-    <div className="song-detail-container">
-      {/* BACKGROUND */}
-      <div className="song-detail-gradient-bg" style={{ background: 'var(--color-surface)' }} />
-
-      {/* HEADER */}
-      <div className="song-detail-header">
-        <img
-          src={song.image_url || song.album?.cover_url}
-          alt={song.title}
-          className="detail-album-cover"
-        />
-
-        <div className="song-info">
-          <p className="song-type">BÀI HÁT</p>
-          <h1>{song.title}</h1>
-          <p className="song-artist-info">
-            <span className="artist-name">{song.artist?.stage_name}</span> •{' '}
-            <span>{song.album?.title}</span>
-          </p>
-
-          <div className="detail-controls">
-            {/* Replay */}
-            <button className="detail-play-button" onClick={handleReplay}>
-              <FaRedo size={20} /> PHÁT LẠI
-            </button>
-
-            <button className={`icon-button ${isLiked ? 'liked' : ''}`} onClick={handleLike}>
-              <FaHeart size={20} />
-            </button>
-
-            <button
-              className="icon-button"
-              onClick={() => setIsAddPlaylistModalOpen(true)}
-              title="Thêm vào playlist"
-            >
-              <FaPlus size={20} />
-            </button>
-
-            {isAuthenticated && (
-              <button
-                className="icon-button"
-                onClick={() => setIsReportModalOpen(true)}
-                title="Báo cáo vi phạm"
-              >
-                <FaFlag size={20} />
-              </button>
-            )}
-
-            {/* MENU 3 CHẤM */}
-            <div style={{ position: 'relative' }}>
-              <button className="icon-button" onClick={() => setMenuOpen(!menuOpen)}>
-                <FaEllipsisV size={20} />
-              </button>
-              {menuOpen && (
-                <SongOptionsMenu
-                  song={song}
-                  closeMenu={() => setMenuOpen(false)}
-                  onAddToPlaylistClick={() => {
-                    setMenuOpen(false);
-                    setIsAddPlaylistModalOpen(true);
-                  }}
+                <img
+                    src={song.image_url || song.album?.cover_url}
+                    className="song-cover"
                 />
-              )}
+
+                <div className="song-info">
+
+                    <p className="song-type">BÀI HÁT</p>
+                    <h1>{song.title}</h1>
+
+                    <p>
+                        {song.artist?.stage_name} • {song.album?.title}
+                    </p>
+
+                    {/* ===================== CONTROLS ===================== */}
+                    <div className="detail-controls">
+
+                        {/* LEFT ONLY PLAY */}
+                        <div className="controls-left">
+                            <button className="btn-play" onClick={replay}>
+                                <FaRedo /> PHÁT LẠI
+                            </button>
+                        </div>
+
+                        {/* RIGHT ALL BUTTONS */}
+                        <div className="controls-right">
+
+                            <button className={`icon-btn ${isLiked ? 'liked' : ''}`}
+                                    onClick={toggleLike}>
+                                <FaHeart />
+                            </button>
+
+                            <button className="icon-btn"
+                                    onClick={() => setPlaylistModal(true)}>
+                                <FaPlus />
+                            </button>
+
+                            {isAuthenticated && (
+                                <button className="icon-btn"
+                                        onClick={() => setReportOpen(true)}>
+                                    <FaFlag />
+                                </button>
+                            )}
+
+                            {/* MENU */}
+                            <div className="menu-box">
+                                <button className="icon-btn"
+                                        onClick={() => setMenuOpen(!menuOpen)}>
+                                    <FaEllipsisV />
+                                </button>
+
+                                {menuOpen && (
+                                    <SongOptionsMenu
+                                        song={song}
+                                        closeMenu={() => setMenuOpen(false)}
+                                    />
+                                )}
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
             </div>
 
-            
-          </div>
+            {/* LYRICS */}
+            <div className="lyrics-box">
+                <h3>Lời bài hát</h3>
+                {loadingLyrics
+                    ? <p>Đang tải...</p>
+                    : <p>{lyrics}</p>
+                }
+            </div>
+
+            {/* MODALS */}
+            {playlistModal && (
+                <AddToPlaylistModal
+                    songId={song.id}
+                    onClose={() => setPlaylistModal(false)}
+                />
+            )}
+
+            {reportOpen && (
+                <ReportModal
+                    songId={song.id}
+                    songTitle={song.title}
+                    onClose={() => setReportOpen(false)}
+                />
+            )}
+
         </div>
-      </div>
-
-      {/* BODY */}
-      <div className="song-detail-body">
-        <div className="lyrics-section">
-          <h3>Lời bài hát</h3>
-          {loadingLyrics ? (
-            <p className="lyrics-content">Đang tải lời...</p>
-          ) : (
-            <p className="lyrics-content">{lyrics}</p>
-          )}
-        </div>
-      </div>
-
-      {/* MODALS */}
-      {isAddPlaylistModalOpen && (
-        <AddToPlaylistModal
-          songId={song.id}
-          onClose={() => setIsAddPlaylistModalOpen(false)}
-        />
-      )}
-
-      {isReportModalOpen && (
-        <ReportModal
-          songId={song.id}
-          songTitle={song.title}
-          onClose={() => setIsReportModalOpen(false)}
-          onReportSent={handleReportSent}
-        />
-      )}
-    </div>
-  );
+    );
 };
 
 export default SongDetail;

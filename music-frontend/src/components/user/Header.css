@@ -1,496 +1,364 @@
-/* ================= HEADER - CYBER NEON 2025 ================= */
-.hdr-container {
-  position: fixed;
+/* ================================
+   HEADER.CSS – ĐẸP NHƯ SPOTIFY CHÍNH HIỆU 2025
+   Dùng cho Header.jsx của bạn
+================================ */
+
+.header {
+  position: sticky;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 70px;
-  background: rgba(0, 25, 25, 0.88);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border-bottom: 1px solid rgba(0, 255, 204, 0.35);
+  right: 0;
+  height: 72px;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 24px;
-  z-index: 9998;
-  box-shadow: 
-    0 8px 32px rgba(0, 255, 204, 0.15),
-    0 2px 10px rgba(0, 0, 0, 0.6);
-  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-  font-family: 'Segoe UI', system-ui, sans-serif;
+  padding: 0 32px;
+  z-index: 999;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-.hdr-container::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, 
-    rgba(0, 255, 204, 0.08) 0%, 
-    rgba(0, 255, 204, 0.15) 50%, 
-    rgba(0, 255, 204, 0.08) 100%);
-  pointer-events: none;
-  z-index: -1;
-}
-
-.hdr-container:hover {
-  background: rgba(0, 30, 30, 0.95);
-  box-shadow: 0 12px 40px rgba(0, 255, 204, 0.25);
-}
-
-/* ================= LEFT - LOGO ================= */
-.hdr-logo {
-  font-size: 28px;
+/* ================================
+   LEFT – LOGO
+================================ */
+.header-left {
+  font-size: 26px;
   font-weight: 900;
-  background: linear-gradient(90deg, #00ffcc, #00cc99);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: white;
   cursor: pointer;
+  letter-spacing: -1px;
+  transition: all 0.3s;
   user-select: none;
-  text-shadow: 0 0 20px rgba(0, 255, 204, 0.6);
-  transition: all 0.3s ease;
-  letter-spacing: 1.2px;
+}
+.header-left:hover {
+  color: #1db954;
+  transform: scale(1.05);
 }
 
-.hdr-logo:hover {
-  transform: scale(1.06);
-  filter: drop-shadow(0 0 16px #00ffcc);
-}
-
-/* ================= CENTER - SEARCH BAR ================= */
-.hdr-center {
+/* ================================
+   CENTER – SEARCH BAR
+================================ */
+.header-center {
   flex: 1;
-  max-width: 580px;
-  margin: 0 40px;
-}
-
-.hdr-search-bar {
+  max-width: 680px;
+  margin: 0 60px;
   position: relative;
-  width: 100%;
 }
 
-.hdr-search-bar input {
-  width: 100%;
-  padding: 13px 50px 13px 50px;
-  border-radius: 50px;
-  border: 2px solid rgba(0, 255, 204, 0.45);
-  background: rgba(0, 40, 40, 0.75);
-  color: #e0fffa;
-  font-size: 15px;
-  outline: none;
-  transition: all 0.4s ease;
-  backdrop-filter: blur(10px);
+.search-box {
+  position: relative;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 500px;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
 }
 
-.hdr-search-bar input::placeholder {
-  color: #88cccc;
-  font-style: italic;
+.search-box:hover,
+.search-box:focus-within {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: #1db954;
 }
 
-.hdr-search-bar input:focus {
-  border-color: #00ffcc;
-  background: rgba(0, 50, 50, 0.92);
-  box-shadow: 
-    0 0 25px rgba(0, 255, 204, 0.55),
-    inset 0 1px 4px rgba(0, 0, 0, 0.4);
-  transform: scale(1.02);
+.search-box svg {
+  color: #fff;
+  font-size: 20px;
 }
 
-.hdr-search-btn {
-  position: absolute;
-  left: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
+.search-box input {
+  background: transparent;
   border: none;
-  color: #00ffcc;
-  font-size: 19px;
-  cursor: pointer;
-  padding: 0;
-  pointer-events: none;
-  filter: drop-shadow(0 0 8px #00ffcc);
+  outline: none;
+  color: white;
+  font-size: 16px;
+  width: 100%;
+  caret-color: #1db954;
 }
 
-/* ================= RIGHT SECTION ================= */
-.hdr-right {
+.search-box input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* ================================
+   SEARCH DROPDOWN
+================================ */
+.search-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: #181818;
+  border-radius: 16px;
+  max-height: 70vh;
+  overflow-y: auto;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+  border: 1px solid #333;
+  padding: 16px 0;
+  z-index: 1000;
+}
+
+.search-dropdown h4 {
+  margin: 0 20px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #b3b3b3;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.result-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background 0.25s;
+}
+
+.result-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.result-item img {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.result-item > div p {
+  margin: 0;
+  font-size: 15px;
+  color: white;
+  font-weight: 500;
+}
+
+.result-item > div span {
+  font-size: 13px;
+  color: #b3b3b3;
+}
+
+.no-result {
+  padding: 40px 20px;
+  text-align: center;
+  color: #888;
+  font-size: 15px;
+}
+
+/* ================================
+   RIGHT – NOTIF + USER
+================================ */
+.header-right {
   display: flex;
   align-items: center;
   gap: 20px;
 }
 
-/* Notification Bell */
-.notif-bell-container {
+/* Notification */
+.notif {
   position: relative;
 }
 
-.notif-btn-icon {
-  background: rgba(0, 255, 204, 0.12);
-  border: 1.5px solid rgba(0, 255, 204, 0.3);
-  color: #e0fffa;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.notif button {
+  background: transparent;
+  border: none;
+  /* color: white; */
+  font-size: 22px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.3s;
   position: relative;
 }
 
-.notif-btn-icon:hover {
-  background: rgba(0, 255, 204, 0.25);
-  border-color: #00ffcc;
-  transform: translateY(-3px) scale(1.08);
-  box-shadow: 0 8px 20px rgba(0, 255, 204, 0.4);
+.notif button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.1);
 }
 
-.notif-badge {
+.badge {
   position: absolute;
-  top: -2px;
-  right: -2px;
-  background: #ff2d55;
-  color: white;
+  top: 4px;
+  right: 4px;
+  /* background: #1db954; */
+  color: black;
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 700;
   min-width: 18px;
   height: 18px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid rgba(0, 25, 25, 0.9);
-  box-shadow: 0 0 12px rgba(255, 45, 90, 0.6);
-  animation: pulse 2s infinite;
+  padding: 0 4px;
 }
 
-@keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.15); }
-}
-
-/* Notification Dropdown */
+/* Notif dropdown */
 .notif-dropdown {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 12px);
   right: 0;
-  margin-top: 12px;
   width: 360px;
-  max-height: 80vh;
-  overflow-y: auto;
-  background: rgba(0, 25, 25, 0.97);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(0, 255, 204, 0.35);
+  background: #181818;
   border-radius: 16px;
-  box-shadow: 
-    0 20px 50px rgba(0, 0, 0, 0.7),
-    0 0 30px rgba(0, 255, 204, 0.25);
-  z-index: 9999;
-  animation: slideDown 0.35s ease;
-}
-
-.notif-dropdown h3 {
-  margin: 0;
-  padding: 16px 20px;
-  background: rgba(0, 255, 204, 0.15);
-  color: #00ffcc;
-  font-size: 15px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+  border: 1px solid #333;
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: 12px 0;
 }
 
 .notif-item {
   padding: 14px 20px;
-  border-bottom: 1px dashed rgba(0, 255, 204, 0.2);
+  font-size: 14px;
+  color: white;
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition: background 0.25s;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 
 .notif-item.unread {
-  background: rgba(0, 255, 204, 0.12);
+  background: rgba(29, 185, 84, 0.15);
+  font-weight: 600;
 }
 
 .notif-item:hover {
-  background: rgba(0, 255, 204, 0.2);
-  transform: translateX(4px);
+  background: rgba(255, 255, 255, 0.1);
 }
 
-.notif-message {
-  margin: 0 0 6px;
-  color: #e0fffa;
-  font-size: 14px;
-  line-height: 1.4;
+.notif-item:last-child {
+  border-bottom: none;
 }
 
-.notif-date {
-  font-size: 11px;
-  color: #88cccc;
-}
-
-.notif-footer {
-  padding: 14px 20px;
-  text-align: center;
-  color: #00ffcc;
-  font-weight: 600;
-  cursor: pointer;
-  background: rgba(0, 255, 204, 0.1);
-  transition: all 0.2s;
-}
-
-.notif-footer:hover {
-  background: rgba(0, 255, 204, 0.25);
-  letter-spacing: 1px;
-}
-
-/* Artist Badge */
-.hdr-artist-badge {
-  background: linear-gradient(135deg, #00cc99, #009977);
-  color: white;
-  padding: 8px 16px;
-  border-radius: 50px;
+/* Artist badge */
+.artist-badge {
+  background: rgba(29, 185, 84, 0.2);
+  color: #1db954;
   font-size: 13px;
   font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 20px;
   display: flex;
   align-items: center;
   gap: 6px;
-  cursor: pointer;
-  box-shadow: 0 0 20px rgba(0, 204, 153, 0.7);
-  animation: pulse-badge 4s infinite;
-  transition: all 0.3s ease;
+  border: 1px solid rgba(29, 185, 84, 0.4);
 }
 
-.hdr-artist-badge:hover {
-  transform: scale(1.08);
-  box-shadow: 0 0 30px rgba(0, 204, 153, 1);
-}
-
-.hdr-btn-become-artist {
-  background: transparent;
-  color: #00ffcc;
-  border: 2px solid #00ffcc;
-  padding: 9px 18px;
-  border-radius: 50px;
-  font-weight: 600;
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.35s ease;
-}
-
-.hdr-btn-become-artist:hover {
-  background: #00ffcc;
-  color: #001f1f;
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 0 25px rgba(0, 255, 204, 0.6);
-}
-
-/* User Menu */
-.hdr-user-menu {
+/* User menu */
+.user {
   position: relative;
 }
 
-.hdr-user-btn {
+.user button {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
   display: flex;
   align-items: center;
   gap: 10px;
-  background: rgba(0, 255, 204, 0.15);
-  color: #e0fffa;
-  padding: 8px 16px;
-  border-radius: 50px;
-  border: 1.5px solid rgba(0, 255, 204, 0.4);
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.3s ease;
+  padding: 8px 12px;
+  border-radius: 30px;
+  transition: all 0.3s;
 }
 
-.hdr-user-btn:hover {
-  background: rgba(0, 255, 204, 0.28);
-  border-color: #00ffcc;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 255, 204, 0.35);
+.user button:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 
-.hdr-username {
-  max-width: 120px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.user button svg {
+  font-size: 28px;
 }
 
-.hdr-user-dropdown {
+/* User dropdown */
+.user-dropdown {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 12px);
   right: 0;
-  margin-top: 12px;
-  min-width: 210px;
-  background: rgba(0, 25, 25, 0.97);
-  backdrop-filter: blur(14px);
-  border: 1px solid rgba(0, 255, 204, 0.35);
-  border-radius: 14px;
+  background: #181818;
+  border-radius: 16px;
+  min-width: 200px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+  border: 1px solid #333;
   overflow: hidden;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
-  animation: slideDown 0.3s ease;
 }
 
-.hdr-menu-item {
+.user-dropdown div {
   padding: 14px 20px;
-  color: #e0fffa;
-  font-size: 14px;
+  color: white;
+  font-size: 15px;
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition: background 0.25s;
 }
 
-.hdr-menu-item:hover {
-  background: rgba(0, 255, 204, 0.2);
-  color: #00ffcc;
-  padding-left: 26px;
+.user-dropdown div:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 
-.hdr-logout {
-  color: #ff6b6b !important;
-  border-top: 1px solid rgba(0, 255, 204, 0.2);
+.user-dropdown div:last-child {
+  color: #ff4d4d;
 }
 
-/* Auth Buttons (khi chưa đăng nhập) */
-.hdr-auth-buttons {
-  display: flex;
-  gap: 12px;
-}
-
-.hdr-btn-secondary {
-  padding: 10px 22px;
-  border-radius: 50px;
-  background: transparent;
-  color: #e0fffa;
-  border: 2px solid rgba(0, 255, 204, 0.5);
+/* Guest buttons */
+.header-right > div > button {
+  margin-left: 12px;
+  /* padding: 5px 20px; */
+  border-radius: 30px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s;
 }
 
-.hdr-btn-secondary:hover {
-  background: rgba(0, 255, 204, 0.15);
-  border-color: #00ffcc;
+.header-right > div > button:first-child {
+  background: transparent;
+  padding: 5px 20px;
+  border: 1px solid #fff;
+  color: white;
 }
 
-.hdr-btn-primary {
-  padding: 10px 24px;
-  border-radius: 50px;
-  background: rgba(0, 255, 204, 0.2);
-  color: #00ffcc;
-  border: 2px solid #00ffcc;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.3s ease;
+.header-right > div > button:first-child:hover {
+  background: rgb(188, 188, 188);
+  color: black;
 }
 
-.hdr-btn-primary:hover {
-  background: #00ffcc;
-  color: #001f1f;
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(0, 255, 204, 0.5);
+.header-right > div > button:last-child {
+  padding: 5px 20px;
+  border: none;
+  color: rgb(147, 147, 147);
 }
 
-/* Animations */
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-12px); }
-  to { opacity: 1; transform: translateY(0); }
+.header-right > div > button:last-child:hover {
+  background: #c2c2c2;
 }
 
-@keyframes pulse-badge {
-  0%, 100% { box-shadow: 0 0 20px rgba(0, 204, 153, 0.7); }
-  50% { box-shadow: 0 0 35px rgba(0, 204, 153, 1); }
-}
-
-/* ================= RESPONSIVE ================= */
-@media (max-width: 992px) {
-  .hdr-center { margin: 0 20px; max-width: 420px; }
+/* Responsive */
+@media (max-width: 1024px) {
+  .header {
+    padding: 0 20px;
+  }
+  .header-center {
+    margin: 0 20px;
+  }
 }
 
 @media (max-width: 768px) {
-  .hdr-container {
-    flex-direction: column;
-    height: auto;
-    padding: 12px 16px;
-    gap: 12px;
+  .header-left {
+    font-size: 22px;
   }
-  .hdr-center {
-    order: 3;
-    width: 100%;
-    margin: 0;
-    max-width: none;
+  .header-center {
+    margin: 0 16px;
   }
-  .hdr-left, .hdr-right {
-    width: 100%;
-    justify-content: space-between;
+  .search-box {
+    padding: 10px 16px;
   }
-  .hdr-logo { font-size: 24px; }
-}
-
-/* 1. Đảm bảo header-right là flex */
-.hdr-right {
-    display: flex;
-    align-items: center; 
-    gap: 15px; 
-}
-
-/* 2. Container Chuông */
-.notif-bell-container {
-    position: relative;
-    /* margin-right: 15px; (Đã dùng gap ở hdr-right) */
-}
-
-/* 3. Nút Icon (Thay cho .btn-icon cũ) */
-.notif-btn-icon {
-    background: none;
-    border: none;
-    color: var(--color-text-primary, #fff);
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: color 0.2s, background-color 0.2s;
-}
-
-.notif-btn-icon:hover {
-    color: var(--color-accent, #1db954);
-    background-color: var(--color-surface-hover, #3a3a3a);
-}
-
-/* 4. Badge số lượng chưa đọc */
-.notif-badge {
-    position: absolute;
-    top: 0;
-    right: 0;
-    transform: translate(50%, -50%); 
-    background-color: var(--color-error, #f44336);
-    color: white;
-    border-radius: 50%;
-    width: 18px;
-    height: 18px;
-    font-size: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    padding: 2px;
-}
-
-/* 5. Dropdown Content */
-.notif-dropdown {
-    position: absolute;
-    top: 45px;
-    right: 0;
-    width: 350px;
-    max-height: 400px;
-    overflow-y: auto;
-    background-color: var(--color-surface, #2a2a2a);
-    border: 1px solid var(--color-border, #444);
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-    z-index: 50;
-    padding: 10px 0;
+  .search-box input {
+    font-size: 15px;
+  }
 }

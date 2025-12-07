@@ -1,157 +1,148 @@
-// music-frontend/src/pages/ArtistDashboard/ArtistInfo.jsx (TẠO MỚI)
+// music-frontend/src/pages/ArtistDashboard/ArtistInfo.jsx
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { getMyArtistProfileApi, updateMyArtistProfileApi } from '../../utils/api';
-import '../user/ProfileUser/Profile.css'; // Dùng chung CSS Form
-import './ArtistDashboard.css'; // CSS riêng
+import './ArtistDashboard.css';
 
-// (Hàm Toast Helper)
-const showToast = (message, type = 'success') => { alert(message); };
+// Toast đơn giản
+const showToast = (msg) => alert(msg);
 
-const fixUrl = (url, type = 'image') => {
-    if (!url) { // Xử lý NULL
-        if (type === 'artist') return '/images/default-artist.png';
-        if (type === 'audio') return ''; // Trả về rỗng nếu không có file nhạc
-        return '/images/default-album.png'; // Mặc định cho album/song
-    }
-    if (url.startsWith('http')) { // Nếu đã là URL tuyệt đối
-        return url;
-    }
-    // Mặc định (ví dụ: /images/artist-1.jpg)
-    const prefix = type === 'image' ? '/media/images' : '/media/audio';
-    const originalPath = type === 'image' ? '/images' : '/audio';
-    
-    // Đảm bảo không thay thế 2 lần
-    if (url.startsWith(prefix)) {
-        return `http://localhost:3000${url}`;
-    }
-    
-    return `http://localhost:3000${url.replace(originalPath, prefix)}`;
+// Fix image
+const fixUrl = (url) => {
+    if (!url) return "/images/default-artist.png";
+    if (url.startsWith("http")) return url;
+    return `http://localhost:3000${url}`;
 };
 
 const ArtistInfo = () => {
-    const { user } = useAuth();
-    const [loading, setLoading] = useState(true);
-    const [artist, setArtist] = useState(null);
+    const { user } = useAuth();
 
-    const [formData, setFormData] = useState({ stage_name: '', bio: '' });
-    const [avatarFile, setAvatarFile] = useState(null); // State cho file
-    const [avatarPreview, setAvatarPreview] = useState(null); // State cho ảnh preview
+    const [loading, setLoading] = useState(true);
+    const [artist, setArtist] = useState(null);
 
-    // Tải dữ liệu Artist
-    useEffect(() => {
-        const fetchProfile = async () => {
-            setLoading(true);
-            try {
-                // Sẽ hoạt động sau khi bạn Login lại
-                const data = await getMyArtistProfileApi(); 
-                setArtist(data);
-                setFormData({
-                    stage_name: data.stage_name,
-                    bio: data.bio || '',
-                });
-                if (data.avatar_url) {
-                    setAvatarPreview(fixUrl(data.avatar_url, 'artist'));
-                }
-            } catch (error) {
-                console.error("Lỗi useEffect:", error);
-                showToast('Lỗi tải hồ sơ Nghệ sĩ. (Bạn đã đăng nhập lại chưa?)', 'error');
-            }
-            setLoading(false);
-        };
-        fetchProfile();
-    }, []);
+    const [formData, setFormData] = useState({
+        stage_name: '',
+        bio: ''
+    });
 
-    const handleInputChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
+    const [avatarFile, setAvatarFile] = useState(null);
+    const [preview, setPreview] = useState(null);
 
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setAvatarFile(file); // Lưu file
-            setAvatarPreview(URL.createObjectURL(file)); // Tạo link preview
-        }
-    };
+    // Load data
+    useEffect(() => {
+        const load = async () => {
+            try {
+                const data = await getMyArtistProfileApi();
+                setArtist(data);
 
-    // Cập nhật Profile (Sử dụng FormData)
-    const handleUpdate = async (e) => {
-        e.preventDefault();
-        setLoading(true);
+                setFormData({
+                    stage_name: data.stage_name,
+                    bio: data.bio || ''
+                });
 
-        const data = new FormData();
-        data.append('stage_name', formData.stage_name);
-        data.append('bio', formData.bio);
-        if (avatarFile) {
-            data.append('avatarFile', avatarFile); 
-        }
+                setPreview(fixUrl(data.avatar_url));
 
-        try {
-            const response = await updateMyArtistProfileApi(data); 
-            setArtist(response);
-            showToast('Cập nhật thông tin thành công!');
-        } catch (error) {
-            showToast(error.response?.data?.message || 'Cập nhật thất bại', 'error');
-        }
-        setLoading(false);
-    };
+            } catch (err) {
+                showToast("Không tải được Artist profile", "error");
+            }
+            setLoading(false);
+        };
 
-    if (loading) return <p>Đang tải thông tin...</p>;
-    if (!artist) return <p>Không tìm thấy hồ sơ nghệ sĩ.</p>;
+        load();
+    }, []);
 
-    return (
-        <div className="artist-info-container">
-            <form className="profile-edit-form" onSubmit={handleUpdate}>
-                
-                {/* --- PHẦN UPLOAD AVATAR --- */}
-                <div className="form-group avatar-upload-section">
-                    <label>Ảnh đại diện (Avatar)</label>
-                    <div className="avatar-preview-box">
-                        <img 
-                            src={avatarPreview || '/images/default-artist.png'} 
-                            alt="Avatar Preview" 
-                            className="avatar-preview"
-                        />
-                        <input 
-                            type="file" 
-                            accept="image/*"
-                            onChange={handleFileChange} 
-                        />
-                    </div>
-                </div>
+    // handle change
+    const handleChange = e => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value
+        });
+    };
 
-                {/* --- PHẦN THÔNG TIN TEXT --- */}
-                <div className="form-group">
-                    <label>Nghệ danh (Stage Name):</label>
-                    <input 
-                        type="text" 
-                        name="stage_name" 
-                        value={formData.stage_name} 
-                        onChange={handleInputChange} 
-                    />
-                </div>
-                
-                <div className="form-group">
-                    <label>Tiểu sử (Bio):</label>
-                    <textarea 
-                        name="bio" 
-                        value={formData.bio} 
-                        onChange={handleInputChange}
-                        rows={5}
-                    />
-                </div>
-                
-                <div className="form-actions">
-                    <button type="submit" disabled={loading} className="btn btn-primary">
-                        {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
-                    </button>
-                </div>
-            </form>
+    // upload avatar
+    const handleFile = e => {
+        const file = e.target.files[0];
+        if (!file) return;
 
-            {/* (Phần Đổi Mật khẩu - Tái sử dụng từ ProfileInfo) */}
-            {/* ... (Bạn có thể thêm nút mở ChangePasswordModal ở đây) ... */}
-        </div>
-    );
+        setAvatarFile(file);
+        setPreview(URL.createObjectURL(file));
+    };
+
+    // submit
+    const handleSubmit = async e => {
+        e.preventDefault();
+        setLoading(true);
+
+        const data = new FormData();
+        data.append("stage_name", formData.stage_name);
+        data.append("bio", formData.bio);
+        if (avatarFile) data.append("avatarFile", avatarFile);
+
+        try {
+            const res = await updateMyArtistProfileApi(data);
+            setArtist(res);
+            showToast("Cập nhật thành công!");
+        } catch (err) {
+            showToast(err.response?.data?.message || "Cập nhật thất bại", "error");
+        }
+
+        setLoading(false);
+    };
+
+    if (loading) return <p>Đang tải...</p>;
+    if (!artist) return <p>Không tìm thấy Artist</p>;
+
+    return (
+        <div className="artist-info-container">
+
+            <form className="artist-info-form" onSubmit={handleSubmit}>
+
+                {/* Avatar */}
+                <div className="artist-info-group">
+                    <label>Ảnh đại diện</label>
+
+                    <div className="artist-info-avatar-box">
+                        <img
+                            src={preview}
+                            className="artist-info-avatar"
+                            alt="preview"
+                        />
+                        <input type="file" accept="image/*" onChange={handleFile} />
+                    </div>
+                </div>
+
+                {/* Stage name */}
+                <div className="artist-info-group">
+                    <label>Nghệ danh</label>
+                    <input
+                        type="text"
+                        name="stage_name"
+                        value={formData.stage_name}
+                        onChange={handleChange}
+                    />
+                </div>
+
+                {/* Bio */}
+                <div className="artist-info-group">
+                    <label>Tiểu sử</label>
+                    <textarea
+                        name="bio"
+                        rows="5"
+                        value={formData.bio}
+                        onChange={handleChange}
+                    />
+                </div>
+
+                {/* button */}
+                <div className="artist-info-actions">
+                    <button disabled={loading} className="btn-save">
+                        {loading ? "Đang lưu..." : "Lưu thay đổi"}
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    );
 };
 
 export default ArtistInfo;

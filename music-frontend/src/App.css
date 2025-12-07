@@ -1,61 +1,155 @@
-/* music-frontend/src/App.css (LAYOUT MỚI VỚI HEADER NGANG) */
+/* =========================== src/App.css – FINAL 2025 =========================== */
+:root {
+  --color-black: #000000;
+  --color-background: #121212;
+  --color-surface: #181818;
+  --color-primary: #1db954;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #b3b3b3;
+  --header-height: 64px;
+  --player-height: 90px;
+  --sidebar-width: 240px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
 body {
-  /* (Giữ nguyên phần body cũ) */
+  margin: 0;
   background-color: var(--color-black);
   color: var(--color-text-primary);
-  font-family: 'Circular Std', sans-serif;
-  margin: 0;
-  /* overflow: hidden; */
-}
-.main-content {
-  background: linear-gradient(180deg, #1A1A1A 0%, var(--color-background) 350px);
-}
-
-.app-container {
-  display: grid;
-  height: 100vh;
+  font-family: "Times New Roman", Georgia, serif;
+  font-size: 16px;
   overflow: hidden;
-  
-  /* ĐỊNH NGHĨA LAYOUT MỚI
-    Hàng 1: Header (cao 60px)
-    Hàng 2: Nội dung chính (co giãn 1fr)
-    Hàng 3: PlayerBar (cao 90px)
-    
-    Cột 1: Sidebar (rộng 240px)
-    Cột 2: Content (co giãn 1fr)
-  */
-  grid-template-rows: 60px 1fr 90px;
-  grid-template-columns: 240px 1fr;
-  
-  /* Đặt tên cho các khu vực */
-  grid-template-areas:
-    "header header"  /* Header chiếm 2 cột hàng 1 */
-    "sidebar main"    /* Sidebar cột 1, Main cột 2 (hàng 2) */
-    "player player";  /* PlayerBar chiếm 2 cột hàng 3 */
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Gán component vào đúng khu vực */
-
-.header-container {
-  grid-area: header;
-  /* (CSS chi tiết sẽ ở Header.css) */
+/* =========================== LAYOUT CHÍNH =========================== */
+.app-container {
+  position: relative;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  display: flex;
 }
 
-.sidebar-container {
-  grid-area: sidebar;
-  /* (CSS chi tiết sẽ ở Sidebar.css) */
+
+/* Header fixed, nằm trên cùng, tránh sidebar */
+.header {
+  position: fixed;
+  top: 0;
+  left: var(--sidebar-width);
+  right: 0;
+  height: var(--header-height);
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 9999;
+  font-family: "Times New Roman", Georgia, serif;
+}
+
+/* Nội dung chính – đẩy xuống dưới header */
+.right-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  margin-left: var(--sidebar-width);
 }
 
 .main-content {
-  grid-area: main;
-  overflow-y: auto; /* Chỉ cuộn nội dung chính */
-  padding: 20px;
-  background-color: var(--color-background);
+  flex: 1;
+  overflow-y: auto;
+  padding: calc(var(--header-height) + 24px) 32px 24px;
+  background: black;
 }
 
+/* Thanh cuộn đẹp */
+.main-content::-webkit-scrollbar {
+  width: 8px;
+}
+.main-content::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 4px;
+}
+.main-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+/* Player bar */
 .player-bar-container {
-  grid-area: player;
-  /* (CSS chi tiết sẽ ở PlayerBar.css) */
+  height: var(--player-height);
+  background: #000000;
+  border-top: 1px solid #282828;
+  backdrop-filter: blur(20px);
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  z-index: 900;
 }
 
-.main-content::-webkit-scrollbar { display: none; }
+/* =========================== RESPONSIVE =========================== */
+@media (max-width: 1024px) {
+  :root {
+    --sidebar-width: 78px;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    left: 0;
+    padding: 0 16px;
+  }
+  .right-section {
+    margin-left: 0;
+  }
+  .main-content {
+    padding: calc(var(--header-height) + 16px) 16px 16px;
+  }
+
+  /* Ẩn sidebar trên mobile (sẽ thêm hamburger sau) */
+  .sidebar-container {
+    transform: translateX(-100%);
+    transition: transform 0.35s ease;
+  }
+  .sidebar-container.open {
+    transform: translateX(0);
+  }
+}
+*,
+*::before,
+*::after {
+  scrollbar-width: none;          /* Firefox */
+  -ms-overflow-style: none;       /* IE & Edge */
+}
+
+*::-webkit-scrollbar {
+  display: none;                  /* Chrome, Safari, Opera */
+}
+
+/* ĐỔI TOÀN BỘ CHỮ TRONG APP THÀNH TIMES NEW ROMAN – SIÊU ĐƠN GIẢN, SIÊU ĐẸP */
+*,
+*::before,
+*::after {
+  font-family: "Times New Roman", Georgia, serif !important;
+}
+
+/* Đảm bảo các input, textarea, button cũng bị ép font */
+input,
+textarea,
+button,
+select,
+option {
+  font-family: "Times New Roman", Georgia, serif !important;
+}
+
+/* Nếu vẫn có chỗ chưa đổi (ví dụ toast, modal từ thư viện), ép thêm */
+body,
+html {
+  font-family: "Times New Roman", Georgia, serif !important;
+}
+

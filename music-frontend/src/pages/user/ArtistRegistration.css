@@ -1,301 +1,289 @@
-/* === Artist Registration Page (Green Theme) === */
+/* =============================
+   GLOBAL
+   ============================= */
+
+body {
+    background: #0b0b0b;
+    color: white;
+}
+
+/* =============================
+   CONTAINER
+   ============================= */
+
 .registration-container {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding: 0px 30px;
-  background: linear-gradient(135deg, #0f172a, #0a1f0a);
-  min-height: 100vh;
+    width:100%;
+    display:flex;
+    justify-content:center;
+    padding:30px 10px;
 }
 
 .registration-card {
-  background: #ffffff10;
-  backdrop-filter: blur(10px);
-  border-radius: 18px;
-  box-shadow: 0 4px 25px rgba(0,0,0,0.25);
-  width: 100%;
-  max-width: 950px;
-  padding: 60px;
-  color: #fff;
-  animation: fadeIn 0.5s ease-in-out;
+    width:100%;
+    max-width:600px;
+
+    background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.08);
+
+    padding:25px;
+
+    border-radius:18px;
+
+    backdrop-filter: blur(6px);
+
+    box-shadow:0 10px 20px rgba(0,0,0,.35);
 }
 
-/* === Step Indicator === */
+/* =============================
+   STEP INDICATOR
+   ============================= */
+
 .step-indicator {
-  display: flex;
-  justify-content: space-between;
-  font-weight: 500;
-  font-size: 14px;
-  margin-bottom: 35px;
-  border-bottom: 2px solid #1c3b1c;
-  padding-bottom: 10px;
+    display:flex;
+    gap:10px;
+    margin-bottom:20px;
 }
 
 .step-indicator span {
-  color: #9caea1;
-  transition: all 0.3s ease;
+    flex:1;
+    text-align:center;
+
+    padding:6px;
+
+    font-size:13px;
+
+    background:rgba(255,255,255,0.05);
+    opacity:.55;
+
+    border-radius:8px;
 }
 
-.step-indicator span.active {
-  color: #4ade80;
-  font-weight: 600;
+.step-indicator .active {
+    background:#27ae60;
+    opacity:1;
+    font-weight:bold;
 }
 
-/* === Titles === */
+/* =============================
+   TITLES
+   ============================= */
+
 .main-title {
-  text-align: center;
-  font-size: 32px;
-  font-weight: 700;
-  margin-bottom: 20px;
-  color: #22c55e;
+    font-size:26px;
+    margin-bottom:10px;
 }
 
 .step-title {
-  font-size: 24px;
-  font-weight: 600;
-  margin-bottom: 10px;
-  color: #a7f3d0;
+    font-size:20px;
+    margin:10px 0;
 }
 
 .step-description {
-  color: #d1fae5;
-  font-size: 15px;
-  margin-bottom: 30px;
-  text-align: center;
+    opacity:.75;
+    margin-bottom:15px;
 }
 
-/* === Feature Grid === */
+/* =============================
+   ERRORS / LOADING
+   ============================= */
+
+.error-message-general {
+    color:#ff6b6b;
+}
+
+.loading-message {
+    opacity:.6;
+}
+
+/* =============================
+   FEATURE BOX
+   ============================= */
+
 .feature-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 25px;
-  margin-bottom: 40px;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:12px;
+
+    margin:15px 0;
 }
 
 .feature-card {
-  background: rgba(255,255,255,0.07);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 14px;
-  text-align: center;
-  padding: 30px 18px;
-  transition: all 0.3s ease;
-}
+    background:rgba(255,255,255,.05);
+    padding:12px;
+    border-radius:10px;
 
-.feature-card:hover {
-  background: rgba(74,222,128,0.1);
-  border-color: #4ade80;
-  transform: translateY(-5px);
-}
-
-.feature-icon {
-  font-size: 34px;
-  color: #4ade80;
-  margin-bottom: 12px;
+    text-align:center;
 }
 
 .feature-card h4 {
-  font-size: 17px;
-  margin-bottom: 5px;
-  color: #fff;
+    margin-top:5px;
+    font-size:14px;
 }
 
 .feature-card p {
-  color: #d1fae5;
-  font-size: 14px;
+    font-size:12px;
+    opacity:.7;
 }
 
-/* === Policy Box === */
+/* =============================
+   POLICY
+   ============================= */
+
 .policy-box {
-  background: rgba(255,255,255,0.05);
-  border-left: 4px solid #4ade80;
-  padding: 25px;
-  border-radius: 12px;
-  margin-bottom: 25px;
-  line-height: 1.6;
+    background:rgba(255,255,255,.05);
+    padding:12px;
+    border-radius:10px;
+
+    margin-bottom:10px;
 }
 
-.policy-box p {
-  margin-bottom: 8px;
-}
-
-.policy-box.commitment p {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* === Checkbox === */
 .checkbox-container {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 15px;
-  color: #d1fae5;
-  margin-bottom: 25px;
+    display:flex;
+    gap:10px;
+
+    cursor:pointer;
+
+    margin-bottom:15px;
 }
 
-.checkbox-container input[type="checkbox"] {
-  accent-color: #22c55e;
-  width: 18px;
-  height: 18px;
-}
+/* =============================
+   INPUT
+   ============================= */
 
-/* === Input Field === */
 .form-group {
-  margin-bottom: 25px;
+    display:flex;
+    flex-direction:column;
+
+    margin:10px 0;
 }
 
-.stage-name-input label {
-  display: block;
-  font-weight: 500;
-  margin-bottom: 8px;
-  color: #a7f3d0;
+.form-group input {
+    padding:10px;
+
+    border-radius:8px;
+
+    background:rgba(0,0,0,.3);
+    border:1px solid rgba(255,255,255,.1);
+
+    color:white;
 }
 
-.stage-name-input input {
-  width: 100%;
-  padding: 14px 16px;
-  border-radius: 8px;
-  border: 1px solid #1f3b2a;
-  background: rgba(255,255,255,0.08);
-  color: #fff;
-  font-size: 15px;
-  outline: none;
-  transition: border 0.3s ease;
-}
-
-.stage-name-input input:focus {
-  border-color: #22c55e;
-}
-
-/* === Buttons === */
-.btn-next, .btn-back {
-  width: 100%;
-  padding: 14px;
-  font-size: 16px;
-  font-weight: 600;
-  border-radius: 10px;
-  border: none;
-  cursor: pointer;
-  margin-top: 15px;
-  transition: background 0.3s ease, transform 0.2s;
-}
+/* =============================
+   BUTTONS
+   ============================= */
 
 .btn-next {
-  background: #22c55e;
-  color: #0f172a;
+    width:100%;
+    padding:12px;
+
+    background:#27ae60;
+    border:none;
+
+    border-radius:10px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:.2s;
 }
 
 .btn-next:hover {
-  background: #16a34a;
-  transform: scale(1.02);
-}
-
-.btn-next:disabled {
-  background: #47594a;
-  cursor: not-allowed;
+    opacity:.85;
 }
 
 .btn-back {
-  background: #1f3b2a;
-  color: #d1fae5;
+    margin-top:10px;
+
+    background:transparent;
+    border:none;
+
+    cursor:pointer;
+
+    opacity:.7;
 }
 
 .btn-back:hover {
-  background: #2c5540;
+    opacity:1;
 }
 
-/* === QR Code Section === */
-.qr-code-section {
-  text-align: center;
-  margin-bottom: 25px;
-}
+/* =============================
+   QR CODE
+   ============================= */
 
 .qr-code-box {
-  background: rgba(255,255,255,0.05);
-  border-radius: 12px;
-  padding: 25px;
-  margin-bottom: 20px;
+    background:rgba(255,255,255,.05);
+
+    padding:20px;
+
+    border-radius:10px;
+
+    text-align:center;
+
+    margin-bottom:15px;
 }
 
 .qr-code-box img {
-  width: 170px;
-  height: 170px;
-  margin-bottom: 12px;
-  border-radius: 10px;
+    width:190px;
 }
 
-.status-note {
-  color: #9caea1;
-  font-size: 14px;
-  text-align: center;
-}
-
-/* === Error Messages === */
-.error-message-general {
-  color: #f87171;
-  background: rgba(248,113,113,0.1);
-  border: 1px solid rgba(248,113,113,0.3);
-  border-radius: 8px;
-  padding: 10px;
-  margin-bottom: 15px;
-  text-align: center;
-}
-
-/* === Animations === */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* === Responsive === */
-@media (max-width: 600px) {
-  .registration-card {
-    padding: 30px;
-  }
-
-  .main-title {
-    font-size: 26px;
-  }
-
-  .step-title {
-    font-size: 20px;
-  }
-
-  .feature-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
+/* =============================
+   TOAST
+   ============================= */
 
 .toast {
-  position: fixed;
-  bottom: 30px;
-  left: 50%;
-  transform: translateX(-50%) translateY(50px);
-  background: #4caf50;
-  color: white;
-  padding: 14px 28px;
-  border-radius: 30px;
-  font-weight: 500;
-  font-size: 16px;
-  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
-  opacity: 0;
-  z-index: 9999;
-  animation: toastSlideUp 0.4s forwards;
+    position:fixed;
+    bottom:20px;
+
+    left:50%;
+    transform:translateX(-50%);
+
+    padding:12px 20px;
+
+    border-radius:12px;
+
+    font-weight:bold;
+
+    animation:fade .3s ease;
+}
+
+.toast.success {
+    background:#27ae60;
 }
 
 .toast.error {
-  background: #e74c3c;
+    background:#e74c3c;
 }
 
-@keyframes toastSlideUp {
-  0% {
-    opacity: 0;
-    transform: translateX(-50%) translateY(50px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
+@keyframes fade {
+    from{opacity:0; transform:translateX(-50%) translateY(10px);}
+    to{opacity:1; transform:translateX(-50%) translateY(0);}
+}
+
+.error {
+    color: #ff4d4f;
+    background: #ffecec;
+    padding: 6px 10px;
+    border-radius: 6px;
+}
+
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px 16px;
+    border-radius: 6px;
+    color: white;
+}
+
+.toast.success {
+    background: #52c41a;
+}
+
+.toast.error {
+    background: #ff4d4f;
+}
+
+.btn-back {
+    margin-top: 15px;
 }

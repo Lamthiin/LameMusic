@@ -1,167 +1,84 @@
-/* music-frontend/src/pages/LikedSongsPage.css (TẠO MỚI) */
+/* ===========================
+   HEADER BEAUTY UPGRADE
+   =========================== */
 
-.liked-songs-container {
-  padding-bottom: 50px;
-}
+.genre-header {
+    border-radius: 18px;
+    padding: 24px;
 
-/* Header (Nơi có trái tim lớn) */
-.playlist-header {
-    display: flex;
-    align-items: flex-end;
-    padding: 40px 20px 20px 20px;
-    background: linear-gradient(155deg, #5b5a5c 0%, #000000 100%);
-    margin-bottom: 30px;
-    min-height: 300px;
-}
-.playlist-cover-art {
-  width: 250px;
-  height: 250px;
-  background-color: var(--color-surface);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: var(--color-accent);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
-  margin-right: 30px;
-  border-radius: 10px;
-}
-
-.playlist-info h1 {
-  font-size: 60px;
-  text-transform: capitalize;
-  font-weight: 900;
-  margin: 0 0 15px 0;
-}
-
-.playlist-type {
-  font-size: 14px;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: var(--color-text-primary);
-  margin-bottom: 8px;
-}
-
-.playlist-owner {
-  color: var(--color-text-secondary);
-  font-size: 16px;
-  margin-bottom: 25px;
-}
-
-.playlist-play-button {
-  background-color: var(--color-accent);
-  color: var(--color-black);
-  border: none;
-  padding: 14px 28px;
-  border-radius: 500px;
-  font-weight: bold;
-  font-size: 16px;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-.playlist-play-button:hover {
-    transform: scale(1.05);
-}
-
-/* Danh sách bài hát (Copy từ ArtistDetail.css) */
-.song-list-detail {
-    margin-top: 20px;
-}
-.song-row {
-    display: grid; /* Dùng Grid để chia cột */
-    grid-template-columns: 4fr 2fr 1fr; /* Tên | Album | Icon */
-    align-items: center;
-    padding: 10px 15px;
-    border-radius: 6px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05); /* Viền mờ */
-    cursor: pointer;
-}
-.song-row:hover {
-    background-color: var(--color-surface-hover);
-}
-.song-title-col {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 20px;
+
+    background: linear-gradient(135deg,
+                rgba(46,204,113,0.25),
+                rgba(46,204,113,0.08));
+
+    backdrop-filter: blur(6px);
+
+    box-shadow: 0 6px 18px rgba(0,0,0,.2);
 }
-.song-title-col img {
-    width: 40px;
-    height: 40px;
-    border-radius: 4px;
+
+/* INFO BLOCK */
+.genre-header-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
-.song-row-title {
+
+/* LABEL */
+.genre-label {
+    font-size: 12px;
+    letter-spacing: 2px;
     font-weight: 500;
-    margin: 0;
-    color: var(--color-text-primary);
+    color: #6df2a2;
 }
-.song-row-artist {
-    color: var(--color-text-secondary);
+
+/* TITLE */
+.genre-title {
+    font-size: 34px;
+    font-weight: 700;
+    margin: 0;
+
+    background: linear-gradient(90deg, #8cffb8, #ffffff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* COUNT */
+.genre-count {
     font-size: 13px;
-    margin: 0;
-}
-.song-album-col {
-    color: var(--color-text-secondary);
-    font-size: 14px;
-}
-.song-row-liked {
-    color: var(--color-accent); /* Luôn luôn "thích" */
-    justify-self: center;
-}
-.subtle-text {
-    color: var(--color-text-secondary);
-    font-style: italic;
-    padding-left: 15px;
-}
-.song-list-header {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
-  padding: 10px 20px;
-  font-weight: bold;
-  color: var(--color-text-secondary);
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-  text-transform: uppercase;
-  font-size: 12px;
+    opacity: .75;
 }
 
-.song-row {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
-  align-items: center;
-  padding: 10px 20px;
-  cursor: pointer;
-  transition: background 0.2s ease;
+/* BUTTON */
+.genre-play-btn {
+    margin-top: 14px;
+
+    background: #3ddc84;
+    color: white;
+
+    border: none;
+    padding: 10px 18px;
+    border-radius: 12px;
+
+    cursor: pointer;
+
+    font-weight: 600;
+    transition: .2s;
 }
 
-.song-row:hover {
-  background: rgba(255, 255, 255, 0.1);
+.genre-play-btn:hover {
+    background: #34c977;
+    transform: translateY(-2px);
 }
 
-.song-index {
-  width: 25px;
-  display: inline-block;
-  text-align: right;
-  margin-right: 10px;
-  color: var(--color-text-secondary);
-}
-
-.col-song img {
-  width: 45px;
-  height: 45px;
-  object-fit: cover;
-  border-radius: 4px;
-  margin-right: 10px;
-}
-
-.col-song {
-  display: flex;
-  align-items: center;
-}
-
-.song-row-title {
-  font-weight: 500;
-}
-
-.song-row-artist,
-.song-row-album {
-  color: var(--color-text-secondary);
-  font-size: 14px;
+/* RESPONSIVE */
+@media (max-width:720px){
+    .genre-title{
+        font-size: 26px;
+    }
+    .genre-header{
+        padding:18px;
+    }
 }

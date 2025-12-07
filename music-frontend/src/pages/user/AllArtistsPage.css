@@ -1,303 +1,130 @@
-/* ==================================================== */
-/* ALL ARTISTS PAGE – ĐẸP Y CHANG ALBUM (HOÀN CHỈNH)   */
-/* DÁN VÀO: src/pages/AllArtistsPage.css              */
-/* ĐÃ DÙNG LẠI 95% CSS ALBUM – CHỈ SỬA 5%             */
-/* ==================================================== */
-
-.all-pages-container {
-  min-height: 100vh;
-  background: #001a1a;
-  color: #61eed6;
-  font-family: 'Arial', sans-serif;
+/* WRAPPER */
+.artists-wrapper {
+    background: #0e0e0e;
+    min-height: 100vh;
+    padding: 30px;
+    color: white;
 }
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 1600px;
-  margin: 0 auto 70px;
-  padding: 0 32px;
-  position: relative;
-  z-index: 1;
-}
-
-.page-header h1 {
-color: #61eed6;
-  font-family: 'Arial', sans-serif;
-}
-
-.count-badge {
-  font-size: 20px;
-  font-weight: 700;
-  color: #80d8d0;
-  background: rgba(0,35,35,0.8);
-  padding: 12px 28px;
-  border-radius: 50px;
-  border: 2px solid rgba(0,230,200,0.5);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 8px 25px rgba(0,230,200,0.3);
-  min-width: 180px;
-  text-align: center;
-}
-
-/* MOBILE: DỌC THEO NHAU */
-@media (max-width: 768px) {
-  .page-header {
-    flex-direction: column;
-    text-align: center;
-    gap: 20px;
-    padding: 0 16px;
-  }
-  
-  .page-header h1 {
-    font-size: 48px;
-  }
-  
-  .count-badge {
-    font-size: 18px;
-    padding: 10px 24px;
-  }
-}
-
-/* NỀN GLOW NHẸ */
-/* .all-pages-container::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: 
-    radial-gradient(circle at 20% 30%, rgba(0,230,200,0.15) 0%, transparent 50%),
-    radial-gradient(circle at 80% 70%, rgba(0,200,180,0.1) 0%, transparent 40%);
-  pointer-events: none;
-  z-index: 0;
-} */
 
 /* HEADER */
-.page-header {
-  text-align: center;
-  margin-bottom: 70px;
-  position: relative;
-  z-index: 1;
+.artists-header {
+    display:flex;
+    gap:12px;
+    align-items:center;
+    margin-bottom: 30px;
 }
 
-.page-header h1 {
-  
+.artists-count {
+    background:#222;
+    padding:5px 12px;
+    border-radius:20px;
+    font-size:13px;
 }
 
-.count-badge {
-  font-size: 20px;
-  color: #80d8d0;
-  background: rgba(0,35,35,0.7);
-  padding: 8px 24px;
-  border-radius: 50px;
-  border: 2px solid rgba(0,230,200,0.4);
-  backdrop-filter: blur(8px);
+/* GRID */
+.artists-grid {
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px,1fr));
+    gap: 24px;
 }
 
-/* GRID NGHỆ SĨ – DÙNG LẠI CỦA ALBUM */
-.artist-grid-new {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 150px));
-  gap: 15px;
-  padding: 0 32px;
-  max-width: 1600px;
-  margin: 0 auto;
-  position: relative;
-  z-index: 1;
+/* CARD */
+.artists-card {
+    cursor:pointer;
+    text-align:center;
+    transition:.25s;
 }
 
-/* CARD NGHỆ SĨ – 99% GIỐNG ALBUM */
-.artist-card-new {
-  background: rgba(0, 35, 35, 0.85);
-  backdrop-filter: blur(12px);
-  border-radius: 24px;
-  padding: 20px;
-  cursor: pointer;
-  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-  border: 2px solid rgba(0,230,200,0.25);
-  position: relative;
-  overflow: hidden;
-  box-shadow: 
-    0 10px 30px rgba(0,0,0,0.5),
-    0 0 20px rgba(0,230,200,0.1);
+.artists-card:hover {
+    transform: translateY(-6px);
 }
 
-.artist-card-new:hover {
-  border-color: #00e6c8;
-  box-shadow: 
-    0 30px 80px rgba(0,0,0,0.8),
-    0 0 60px rgba(0,230,200,0.6),
-    inset 0 0 40px rgba(0,230,200,0.15);
-  z-index: 10;
+/* AVATAR */
+.artists-avatar-box {
+    width:150px;
+    height:150px;
+    margin:auto;
+    border-radius:50%;
+    overflow:hidden;
+    border:4px solid #222;
+    position:relative;
 }
 
-/* ẢNH TRÒN */
-.artist-img-box {
-  width: 100%;
-  aspect-ratio: 1/1;
-  overflow: hidden;
-  border-radius: 50%;
-  margin-bottom: 16px;
-  position: relative;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.6);
-  border: 4px solid rgba(0,230,200,0.3);
+.artists-card:hover .artists-avatar-box {
+    border-color:#1db954;
 }
 
-.artist-img-box img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: all 0.5s ease;
+.artists-avatar-box img {
+    width:100%;
+    height:100%;
+    object-fit:cover;
 }
 
-.artist-card-new:hover img {
-  transform: scale(1.1);
-  border-color: #00e6c8;
+/* HOVER OVERLAY */
+.artists-hover {
+    position:absolute;
+    inset:0;
+    background:rgba(0,0,0,.5);
+    opacity:0;
+    transition:.25s;
 }
 
-/* TÊN NGHỆ SĨ */
-.artist-text {
-  text-align: center;
-  padding: 4px 8px;
+.artists-card:hover .artists-hover {
+    opacity:1;
 }
 
-.artist-text h3 {
-  font-size: 18px;
-  font-weight: 800;
-  color: #e0fffa;
-  margin: 0;
-  background: linear-gradient(90deg, #00e6c8, #00f0d0);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 15px rgba(0,230,200,0.5);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* NÚT "XEM" KHI HOVER */
-.artist-card-new::after {
-  content: 'Xem';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: linear-gradient(90deg, #00e6c8, #00c8a8);
-  color: #001a1a;
-  font-size: 16px;
-  font-weight: 900;
-  padding: 14px 32px;
-  border-radius: 50px;
-  box-shadow: 0 10px 30px rgba(0,230,200,0.7);
-  opacity: 0;
-  transition: all 0.5s ease;
-  pointer-events: none;
-  z-index: 2;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-}
-
-.artist-card-new:hover::after {
-  opacity: 1;
-  transform: translate(-50%, -50%) scale(1.1);
-}
-
-/* PHÂN TRANG – SIÊU ĐẸP */
-.pagination-new {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
-  margin: 80px auto 40px;
-  padding: 20px;
-  max-width: 600px;
-  background: rgba(0,35,35,0.7);
-  border-radius: 50px;
-  border: 2px solid rgba(0,230,200,0.4);
-  backdrop-filter: blur(12px);
-}
-
-.pagination-new button {
-  background: rgba(0,230,200,0.2);
-  color: #80d8d0;
-  border: 2px solid rgba(0,230,200,0.4);
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.4s ease;
-  font-size: 18px;
-}
-
-.pagination-new button:hover:not(:disabled) {
-  background: #00e6c8;
-  color: #001a1a;
-  transform: translateY(-4px);
-  box-shadow: 0 10px 25px rgba(0,230,200,0.5);
-}
-
-.pagination-new button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.pagination-new button.active {
-  background: linear-gradient(90deg, #00e6c8, #00c8a8);
-  color: #001a1a;
-  font-weight: 900;
-  box-shadow: 0 8px 20px rgba(0,230,200,0.6);
-}
-
-.pagination-new span {
-  color: #80d8d0;
-  font-size: 20px;
+/* TEXT */
+.artists-name {
+    font-weight:700;
+    margin-top:10px;
 }
 
 /* LOADING */
-.loading-artist {
-  text-align: center;
-  padding: 120px 40px;
+.artists-loading {
+    text-align:center;
 }
 
-.spinner {
-  width: 60px;
-  height: 60px;
-  border: 6px solid rgba(0,230,200,0.3);
-  border-top: 6px solid #00e6c8;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 24px;
+.artists-spinner {
+    width:40px;
+    height:40px;
+    border-radius:50%;
+    border:4px solid #444;
+    border-top-color:#1db954;
+    animation: spin 1s linear infinite;
+    margin:auto;
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+    to { transform:rotate(360deg); }
 }
 
-.loading-artist p {
-  font-size: 22px;
-  color: #80d8d0;
-  font-weight: 600;
+/* PAGINATION */
+.artists-pagination {
+    margin-top:30px;
+    display:flex;
+    justify-content:center;
+    gap:8px;
 }
 
-/* RESPONSIVE */
-@media (max-width: 768px) {
-  .page-header h1 { font-size: 48px; }
-  .artist-grid-new {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 20px;
-    padding: 0 16px;
-  }
-  .pagination-new {
-    gap: 8px;
-    padding: 16px;
-  }
-  .pagination-new button {
-    width: 38px;
-    height: 38px;
-    font-size: 16px;
-  }
+.artists-pagination button {
+    background:#181818;
+    border:none;
+    color:white;
+    padding:7px 12px;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+.artists-pagination button:hover {
+    background:#222;
+}
+
+.artists-pagination .active {
+    background:#1db954;
+    color:black;
+}
+
+.artists-pagination button:disabled {
+    opacity:.5;
+    cursor:not-allowed;
 }

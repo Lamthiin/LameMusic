@@ -1,0 +1,185 @@
+/* ReportModal.css – ĐẸP, NHỎ GỌN, CHUẨN SPOTIFY 2025 */
+.report-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.report-modal {
+  background: #181818;
+  width: 420px;
+  max-width: 92vw;
+  border-radius: 18px;
+  padding: 32px 28px;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+  border: 1px solid #333;
+  animation: modalPop 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalPop {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.report-close-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: #aaa;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.report-close-btn:hover {
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+}
+
+.report-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.report-icon {
+  font-size: 36px;
+  color: #e74c3c;
+  margin-bottom: 12px;
+}
+
+.report-header h2 {
+  font-size: 24px;
+  font-weight: 800;
+  color: #fff;
+  margin: 0;
+}
+
+.report-song-title {
+  text-align: center;
+  color: #ddd;
+  font-size: 15px;
+  margin: 16px 0 24px;
+  padding: 0 20px;
+}
+
+.report-error {
+  background: #b91c1c;
+  color: #fff;
+  padding: 12px;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.report-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.report-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.report-input-group label {
+  font-size: 14px;
+  color: #ddd;
+  font-weight: 600;
+}
+
+.report-input-group input,
+.report-input-group textarea {
+  padding: 12px 14px;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 15px;
+  outline: none;
+  transition: all 0.3s;
+  resize: vertical;
+}
+
+.report-input-group input:focus,
+.report-input-group textarea:focus {
+  border-color: #e74c3c;
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2);
+}
+
+.report-input-group input::placeholder,
+.report-input-group textarea::placeholder {
+  color: #666;
+}
+
+.report-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.report-submit-btn {
+  background: #e74c3c;
+  color: #fff;
+  font-weight: 800;
+  font-size: 15px;
+  padding: 14px 40px;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.3s;
+  min-width: 180px;
+}
+
+.report-submit-btn:hover:not(:disabled) {
+  background: #c0392b;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(255, 255, 255, 0.4);
+}
+
+.report-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* RESPONSIVE */
+@media (max-width: 480px) {
+  .report-modal {
+    padding: 28px 20px;
+    width: 94vw;
+  }
+  .report-header h2 {
+    font-size: 22px;
+  }
+  .report-submit-btn {
+    padding: 12px 32px;
+    font-size: 14px;
+  }
+}

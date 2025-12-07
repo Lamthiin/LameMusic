@@ -1,30 +1,25 @@
-// music-frontend/src/pages/AllAlbumsPage.jsx (TẠO MỚI)
+// src/pages/AllAlbumsPage.jsx – FULL, ĐẸP, KHÔNG TRÙNG CLASS
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchAllAlbumsApi } from '../../utils/api';
-import './AllAlbumPage.css'; // Dùng chung CSS cho trang All
+import './AllAlbumPage.css';
 
 const fixUrl = (url, type = 'image') => {
-    if (!url) { // Xử lý NULL
+    if (!url) {
         if (type === 'artist') return '/images/default-artist.png';
-        if (type === 'audio') return ''; // Trả về rỗng nếu không có file nhạc
-        return '/images/default-album.png'; // Mặc định cho album/song
+        if (type === 'audio') return '';
+        return '/images/default-album.png';
     }
-    if (url.startsWith('http')) { // Nếu đã là URL tuyệt đối
-        return url;
-    }
-    // Mặc định (ví dụ: /images/artist-1.jpg)
+    if (url.startsWith('http')) return url;
     const prefix = type === 'image' ? '/media/images' : '/media/audio';
     const originalPath = type === 'image' ? '/images' : '/audio';
     
-    // Đảm bảo không thay thế 2 lần
     if (url.startsWith(prefix)) {
         return `http://localhost:3000${url}`;
     }
     
     return `http://localhost:3000${url.replace(originalPath, prefix)}`;
 };
-
 
 const AllAlbumsPage = () => {
     const [albums, setAlbums] = useState([]);
@@ -35,12 +30,11 @@ const AllAlbumsPage = () => {
         const loadAlbums = async () => {
             setLoading(true);
             try {
-                const data = await fetchAllAlbumsApi(); 
+                const data = await fetchAllAlbumsApi();
                 
-                // Fix URL cho tất cả Album
                 const albumsWithUrls = data.map(album => ({
                     ...album,
-                    cover_url: fixUrl(album.cover_url, 'album')
+                    cover_url: fixUrl(album.cover_url, 'image')
                 }));
                 
                 setAlbums(albumsWithUrls);
@@ -58,33 +52,46 @@ const AllAlbumsPage = () => {
     };
 
     if (loading) {
-        return <p className="loading-message">Đang tải tất cả Album...</p>;
+        return <div className="allalbums-loading">Đang tải tất cả Album...</div>;
     }
 
     return (
-        <div className="all-pages-container">
-            <h1>Tất cả Album</h1>
+        <div className="allalbums-wrapper">
+            <h1 className="allalbums-title">Tất cả Album</h1>
             
-            <div className="album-grid-full"> {/* Class mới (sẽ style trong AllPages.css) */}
-                {albums.length > 0 ? (
-                    albums.map(album => (
+            {albums.length > 0 ? (
+                <div className="allalbums-grid">
+                    {albums.map(album => (
                         <div 
                             key={album.id} 
-                            className="album-card"
+                            className="allalbums-card"
                             onClick={() => goToAlbumDetail(album.id)}
                         >
-                            <img src={album.cover_url} alt={album.title} />
-                            <div className="album-card-info">
-                                <p className="album-title">{album.title}</p>
-                                <p className="album-artist">{album.artist?.stage_name || 'Nghệ sĩ'}</p>
-                                <p className="album-year">{new Date(album.release_date).getFullYear()}</p>
+                            <div className="allalbums-cover-wrapper">
+                                <img 
+                                    src={album.cover_url} 
+                                    alt={album.title}
+                                    className="allalbums-cover"
+                                />
+                                <div className="allalbums-play-overlay">
+                                    {/* <div className="allalbums-play-icon"></div> */}
+                                </div>
+                            </div>
+                            <div className="allalbums-info">
+                                <h3 className="allalbums-album-title">{album.title}</h3>
+                                <p className="allalbums-artist-name">
+                                    {album.artist?.stage_name || 'Nghệ sĩ'}
+                                </p>
+                                <p className="allalbums-release-year">
+                                    {new Date(album.release_date).getFullYear()}
+                                </p>
                             </div>
                         </div>
-                    ))
-                ) : (
-                    <p className="home-subtitle">Không tìm thấy Album nào.</p>
-                )}
-            </div>
+                    ))}
+                </div>
+            ) : (
+                <p className="allalbums-empty">Không tìm thấy Album nào.</p>
+            )}
         </div>
     );
 };

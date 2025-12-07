@@ -1,38 +1,41 @@
-// music-frontend/src/components/Footer.jsx
+// src/components/Footer.jsx
 import React from 'react';
-import './Footer.css'; // File CSS riêng
+import './Footer.css';
 import { FaGithub, FaFacebook, FaTwitter } from 'react-icons/fa';
 
 const Footer = () => {
   return (
-    <footer className="footer-container">
-      <div className="footer-content">
-        <div className="footer-section about">
-          <h2 className="footer-logo">lame 🎵</h2>
+    <footer className="app-footer">
+      <div className="footer-inner">
+        <div className="footer-col">
+          <h2 className="footer-logo">lame</h2>
           <p>
-            Dự án web nghe nhạc cá nhân. 
+            Dự án web nghe nhạc cá nhân.<br />
             Nơi chia sẻ và khám phá âm nhạc không giới hạn.
           </p>
         </div>
-        <div className="footer-section links">
+
+        <div className="footer-col">
           <h4>Liên kết nhanh</h4>
           <ul>
             <li><a href="/about">Giới thiệu</a></li>
             <li><a href="/blog">Blog</a></li>
-            <li><a href="/careers">Cơ hội</a></li>
+            <li><a href="/contact">Liên hệ</a></li>
           </ul>
         </div>
-        <div className="footer-section social">
-          <h4>Kết nối</h4>
-          <div className="social-icons">
-            <a href="#"><FaFacebook /></a>
-            <a href="#"><FaTwitter /></a>
-            <a href="#"><FaGithub /></a>
+
+        <div className="footer-col">
+          <h4>Kết nối với chúng tôi</h4>
+          <div className="social-links">
+            <a href="#" aria-label="Facebook"><FaFacebook size={20} /></a>
+            <a href="#" aria-label="Twitter"><FaTwitter size={20} /></a>
+            <a href="#" aria-label="GitHub"><FaGithub size={20} /></a>
           </div>
         </div>
       </div>
+
       <div className="footer-bottom">
-        <p>© {new Date().getFullYear()} lame Music. Đã đăng ký bản quyền.</p>
+        <p>© {new Date().getFullYear()} lame Music. All rights reserved.</p>
       </div>
     </footer>
   );

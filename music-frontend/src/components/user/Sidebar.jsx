@@ -62,23 +62,20 @@ const Sidebar = () => {
   // ----------------- Handle Dành cho tôi -----------------
   const handleForYouClick = async () => {
     if (!isAuthenticated) return navigate('/login');
-        try {
-        const recommendedSong = await getRecommendedSongApi();
-        if (recommendedSong?.file_url) {
-
-            // ---- FIX ARTIST NULL ----
-            if (!recommendedSong.artist) {
-                recommendedSong.artist = { stage_name: 'Nghệ sĩ' };
-            }
-
-            playTrack(recommendedSong, [recommendedSong], 0);
-            alert(`Đang phát: ${recommendedSong.title} của ${recommendedSong.artist.stage_name}`);
-        } else {
-            alert('Hiện tại chưa có đề xuất phù hợp.');
+    try {
+      const recommendedSong = await getRecommendedSongApi();
+      if (recommendedSong?.file_url) {
+        if (!recommendedSong.artist) {
+          recommendedSong.artist = { stage_name: 'Nghệ sĩ' };
         }
+        playTrack(recommendedSong, [recommendedSong], 0);
+        alert(`Đang phát: ${recommendedSong.title} của ${recommendedSong.artist.stage_name}`);
+      } else {
+        alert('Hiện tại chưa có đề xuất phù hợp.');
+      }
     } catch (err) {
-        console.error(err);
-        alert('Lỗi khi lấy bài đề xuất.');
+      console.error(err);
+      alert('Lỗi khi lấy bài đề xuất.');
     }
   };
 
@@ -88,15 +85,15 @@ const Sidebar = () => {
     <div className="sidebar-container">
       <div className="sidebar-section sidebar-nav">
         <ul>
-          <li className={activePage === 'home' ? 'active' : ''} onClick={() => navigate('/')}>
+          <li className={activePage === 'home' ? 'nav-item active' : 'nav-item'} onClick={() => navigate('/')}>
             {activePage === 'home' ? <MdExplore /> : <MdOutlineExplore />}
             <span>Khám phá</span>
           </li>
-          <li className={activePage === 'for-you' ? 'active' : ''} onClick={handleForYouClick}>
+          <li className={activePage === 'for-you' ? 'nav-item active' : 'nav-item'} onClick={handleForYouClick}>
             <FaUser />
             <span>Dành cho tôi</span>
           </li>
-          <li className={activePage === 'albums' ? 'active' : ''} onClick={() => navigate('/albums')}>
+          <li className={activePage === 'albums' ? 'nav-item active' : 'nav-item'} onClick={() => navigate('/albums')}>
             <FaCompactDisc />
             <span>Albums</span>
           </li>
@@ -106,89 +103,83 @@ const Sidebar = () => {
       <hr className="sidebar-divider" />
 
       <div className="sidebar-section sidebar-library">
-        
         <ul className="sidebar-library-items">
-          
-
-          <li onClick={() => navigate('/profile/info')}>
-          <VscLibrary />
-          <span>Thư viện</span>
+          <li className="library-item" onClick={() => navigate('/profile/info')}>
+            <VscLibrary />
+            <span>Thư viện</span>
           </li>
-                  {isAuthenticated && (
-          <div className="sidebar-dropdown-parent">
-            <li
-              ref={triggerRef}
-              className={`follow-header ${isFollowMenuOpen ? 'active' : ''}`}
-              onClick={() => setIsFollowMenuOpen(!isFollowMenuOpen)}
-              aria-expanded={isFollowMenuOpen}
-            >
-              <FaUsers />
-              <span>Quan tâm</span>
-              <FaAngleRight className="dropdown-arrow" />
-            </li>
 
-            <div 
-              className={`dropdown-content ${isFollowMenuOpen ? 'open' : ''}`}
-              ref={dropdownRef}
-              style={{
-                '--dropdown-top': triggerRef.current 
-                  ? `${triggerRef.current.getBoundingClientRect().top + window.pageYOffset -200}px`
-                  : '200px'
-              }}
-            >
-              <div className="dropdown-items-container">
-                {followedArtists.length > 0 ? (
-                  <>
-                    {followedArtists.map(artist => (
-                      <div
-                        key={artist.id}
-                        className="dropdown-item"
-                        onClick={() => {
-                          navigate(`/artist/${artist.id}`);
-                          setIsFollowMenuOpen(false);
-                        }}
-                      >
-                        <img
-                          src={artist.avatar_url?.startsWith('http') 
-                            ? artist.avatar_url 
-                            : `http://localhost:3000${artist.avatar_url || '/images/default-avatar.png'}`}
-                          alt={artist.stage_name}
-                          className="artist-mini-avatar"
-                          // onError={e => e.target.src = '/images/default-avatar.png'}
-                        />
-                        <span>{artist.stage_name}</span>
-                        <div className="mini-wave">
-                          <span></span>
-                          <span></span>
-                          <span></span>
+          {isAuthenticated && (
+            <div className="dropdown-wrapper">
+              <li
+                ref={triggerRef}
+                className={`dropdown-trigger ${isFollowMenuOpen ? 'active' : ''}`}
+                onClick={() => setIsFollowMenuOpen(!isFollowMenuOpen)}
+                aria-expanded={isFollowMenuOpen}
+              >
+                <FaUsers />
+                <span>Quan tâm</span>
+                <FaAngleRight className={`dropdown-arrow ${isFollowMenuOpen ? 'open' : ''}`} />
+              </li>
+
+              {/* DROPDOWN NHỎ GỌN – HIỆN BÊN PHẢI */}
+              <div
+                ref={dropdownRef}
+                className={`following-dropdown ${isFollowMenuOpen ? 'open' : ''}`}
+              >
+                <div className="dropdown-header">Nghệ sĩ bạn quan tâm</div>
+                <div className="dropdown-body">
+
+                  {followedArtists.length > 0 ? (
+                    <>
+                      {/* chỉ hiển thị 3 nghệ sĩ đầu */}
+                      {followedArtists.slice(0,3).map(artist => (
+                        <div
+                          key={artist.id}
+                          className="dropdown-item"
+                          onClick={() => {
+                            navigate(`/artist/${artist.id}`);
+                            setIsFollowMenuOpen(false);
+                          }}
+                        >
+                          <img
+                            src={
+                              artist.avatar_url?.startsWith("http")
+                                ? artist.avatar_url
+                                : `http://localhost:3000${artist.avatar_url || "/images/default-avatar.png"}`
+                            }
+                            alt={artist.stage_name}
+                            className="artist-mini-avatar"
+                          />
+                          <span>{artist.stage_name}</span>
                         </div>
-                      </div>
-                    ))}
-                    <div 
-                      className="see-all-artists"
-                      onClick={() => {
-                        navigate('/following');
-                        setIsFollowMenuOpen(false);
-                      }}
-                    >
-                      Xem tất cả
-                    </div>
-                  </>
-                ) : (
-                  <div style={{padding: '20px 20px', textAlign: 'center', color: '#80d8d0', fontSize: '11px'}}>
-                    Chưa theo dõi Artist nào
-                  </div>
-                )}
+                      ))}
+
+                      {/* nếu có hơn 3 → show xem thêm */}
+                      {followedArtists.length > 3 && (
+                        <div
+                          className="see-all-artists"
+                          onClick={() => {
+                            navigate("/profile/following");
+                            setIsFollowMenuOpen(false);
+                          }}
+                        >
+                          Xem thêm ({followedArtists.length - 3})
+                        </div>
+                      )}
+
+                    </>
+                  ) : (
+                    <div className="dropdown-empty">Chưa theo dõi Artist nào</div>
+                  )}
+
+                </div>
+
               </div>
             </div>
-          </div>
           )}
 
-          {/* <li onClick={() => setIsModalOpen(true)}>
-            <GoPlus />
-            <span>Tạo playlist</span>
-           */}
-          <li onClick={() => navigate('/liked-songs')}>
+          <li className="library-item" onClick={() => navigate('/liked-songs')}>
             <GoHeartFill />
             <span>Bài hát yêu thích</span>
           </li>
@@ -200,8 +191,8 @@ const Sidebar = () => {
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           onPlaylistCreated={() => setIsModalOpen(false)}
-        /> */}
-      {/* )} */}
+        />
+      )} */}
     </div>
   );
 };
