@@ -1,37 +1,40 @@
 // src/admin/manage-song/dto/update-song.dto.ts
-
-import { IsOptional, IsString, IsNumberString } from 'class-validator';
+import { IsOptional, IsString, IsNumberString, IsArray } from 'class-validator';
 
 export class UpdateSongDto {
-  
   @IsOptional()
   @IsString()
   title?: string;
 
+  // artistId (number string)
   @IsOptional()
-  @IsString()
-  artist?: string;   // stage_name
+  @IsNumberString()
+  artist?: string;
 
+  // albumId (nullable)
   @IsOptional()
   @IsString()
-  album?: string;    // title album (có thể rỗng hoặc null)
+  album?: string;
+
+  // categoryId
+  @IsOptional()
+  @IsNumberString()
+  category?: string;
 
   @IsOptional()
   @IsNumberString()
-  category?: string;   // FE gửi categoryId
+  duration?: string;
 
-
-  @IsOptional()
-  @IsNumberString()
-  duration?: string;  // FE đang gửi string, backend convert sang number
-
-  // ⭐ Thêm field lyrics
   @IsOptional()
   @IsString()
   lyrics?: string;
 
-  // ⭐ Thêm field language của lyrics
   @IsOptional()
   @IsString()
   lyricsLanguage?: string;
+
+  // ⭐ NEW: nghệ sĩ collab – FE gửi JSON string
+  @IsOptional()
+  @IsString()
+  featuredArtists?: string;
 }

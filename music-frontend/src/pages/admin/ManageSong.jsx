@@ -39,6 +39,9 @@ const ManageSong = () => {
             // LẤY NGHỆ SĨ ĐÚNG
             artistName: allNames,
             artistId: primary?.artist?.id ?? null,
+            collabs: s.songArtists
+            ?.filter(a => !a.is_primary)
+            ?.map(a => a.artist?.id) ?? [],     // ✔ thêm collab để dùng cho edit
 
             albumName: s.album?.title ?? "",
             duration: s.duration,
@@ -65,9 +68,6 @@ const ManageSong = () => {
     fetchSongs();
   }, []);
 
-
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [searchValue, setSearchValue] = useState("");
   const [openMenu, setOpenMenu] = useState(null);
   const [showEditSuccessPopup, setShowEditSuccessPopup] = useState(false);
@@ -115,6 +115,64 @@ const ManageSong = () => {
   const searchRef = useRef(null);
   const [featuredArtists, setFeaturedArtists] = useState([]);   // array các artist phụ
   const [editCollabArtists, setEditCollabArtists] = useState([]); // nghệ sĩ collab khi SỬA
+  const ITEMS_PER_PAGE = 15;
+  const [page, setPage] = useState(1);
+
+
+  // Lọc bài hát
+  const filteredSongs = songs.filter(song => {
+    const matchSearch =
+      (song.title + song.artistName + song.albumName + song.genre)
+        .toLowerCase()
+        .includes(searchValue.toLowerCase());
+
+    if (!matchSearch) return false;
+
+    // Tab Active → Hiển thị bài hát còn tồn tại (active = true)
+    if (activeTab === "active") {
+      return song.active === true;  
+    }
+
+    // Tab Hidden → Hiển thị bài bị xoá mềm (active = false)
+    if (activeTab === "hidden") {
+      return song.active === false;
+    }
+
+
+
+    if (activeTab === "pending") {
+      return song.status === "PENDING";
+    }
+
+    return true;
+  });
+
+  // TÍNH SỐ TRANG
+  const totalPages = Math.max(1, Math.ceil(filteredSongs.length / ITEMS_PER_PAGE));
+
+
+  // TÍNH INDEX BẮT ĐẦU
+  const startIndex = (page - 1) * ITEMS_PER_PAGE;
+
+  // LẤY DANH SÁCH BÀI HÁT HIỂN THỊ TRONG TRANG
+  const paginatedSongs = filteredSongs.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+
+
+  // Lấy tên nghệ sĩ chính và collab cho VIEW POPUP
+  const primaryArtistName =
+    showViewPopup && artists.length
+      ? (artists.find(a => a.id === showViewPopup.artistId)?.stage_name || "")
+      : "";
+
+  const collabNames =
+    showViewPopup && artists.length
+      ? (showViewPopup.collabs || [])
+          .map(id => artists.find(a => a.id === id)?.stage_name)
+          .filter(Boolean)
+          .join(", ")
+      : "";
+
 
   useEffect(() => {
     if (showEditPopup) {
@@ -130,7 +188,7 @@ const ManageSong = () => {
     function handleClickOutside(e) {
       if (searchRef.current && !searchRef.current.contains(e.target)) {
         setSearchValue("");   // reset search
-        setPage(1);           // reset page
+        // setPage(1);           // reset page
       }
     }
 
@@ -180,36 +238,7 @@ const ManageSong = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Lọc bài hát
-  // Lọc bài hát
-  const filteredSongs = songs.filter(song => {
-    const matchSearch =
-      (song.title + song.artistName + song.albumName + song.genre)
-        .toLowerCase()
-        .includes(searchValue.toLowerCase());
-
-    if (!matchSearch) return false;
-
-    // Tab Active → Hiển thị bài hát còn tồn tại (active = true)
-    if (activeTab === "active") {
-      return song.active === true;  
-    }
-
-    // Tab Hidden → Hiển thị bài bị xoá mềm (active = false)
-    if (activeTab === "hidden") {
-      return song.active === false;
-    }
-
-
-
-    if (activeTab === "pending") {
-      return song.status === "PENDING";
-    }
-
-    return true;
-  });
-
-
+  
   const toggleMenu = (id) => {
     setOpenMenu(openMenu === id ? null : id);
   };
@@ -302,7 +331,21 @@ const ManageSong = () => {
     formData.append("category", editCategory);
     formData.append("lyrics", editLyrics);
     formData.append("lyricsLanguage", editLyricsLanguage);
+    
+    // Lấy collab gốc
+    const originalCollabs =
+      showEditPopup?.songArtists
+        ?.filter(sa => !sa.is_primary)
+        ?.map(sa => sa.artist_id) || [];
 
+    // Nếu user đã thay đổi collab → gửi lên
+    const hasChangedCollab =
+      JSON.stringify(originalCollabs.sort()) !==
+      JSON.stringify([...editCollabArtists].sort());
+
+    if (hasChangedCollab) {
+      formData.append("featuredArtists", JSON.stringify(editCollabArtists));
+    }
 
 
 
@@ -366,7 +409,7 @@ const ManageSong = () => {
   const handleSaveSong = async () => {
     let error = "";
 
-    // ⚠️ KIỂM TRA NẾU CHƯA NHẬP GÌ
+    // KIỂM TRA NẾU CHƯA NHẬP GÌ
     const allEmpty =
       !newTitle.trim() &&
       !newArtist &&
@@ -394,13 +437,15 @@ const ManageSong = () => {
       return;
     }
 
-    // 🔥 TẠO FORM DATA GỬI BACKEND
+    // TẠO FORM DATA GỬI BACKEND
     const formData = new FormData();
     formData.append("title", newTitle);
     formData.append("artist", newArtist);    // ID nghệ sĩ (number)
     formData.append("category", newCategory); // ID thể loại
     formData.append("lyrics", newLyrics);
     formData.append("lyricsLanguage", newLyricsLanguage);
+    formData.append("featuredArtists", JSON.stringify(featuredArtists));
+
 
 
 
@@ -425,7 +470,7 @@ const ManageSong = () => {
       const data = await res.json();
       console.log("Upload thành công:", data);
 
-      // 🟩 HIỆN POPUP THÀNH CÔNG
+      // HIỆN POPUP THÀNH CÔNG
       setShowSuccessPopup(true);
       await fetchSongs();
 
@@ -451,6 +496,8 @@ const ManageSong = () => {
     setNewAlbum("");
     setNewCategory("");
     setNewLyrics("");
+    //QUAN TRỌNG: reset nghệ sĩ collab
+  setFeaturedArtists([]);
   };
 
   const resetEditPopup = () => {
@@ -467,23 +514,7 @@ const ManageSong = () => {
     setEditLyrics("");
   };
 
-  // ============================
-  // PHÂN TRANG FRONTEND
-  // ============================
-  const ITEMS_PER_PAGE = 15;
-
-  const startIndex = (page - 1) * ITEMS_PER_PAGE;
-
-  const paginatedSongs = filteredSongs.slice(
-    startIndex,
-    startIndex + ITEMS_PER_PAGE
-  );
-
-  useEffect(() => {
-    setTotalPages(Math.ceil(filteredSongs.length / ITEMS_PER_PAGE));
-  }, [filteredSongs]);
-
-
+  
   return (
     
     <div className="admin-user-container">
@@ -496,8 +527,10 @@ const ManageSong = () => {
             className={`um-card ${activeTab === "active" ? "active" : ""}`}
             onClick={() => {
               setActiveTab("active");
-              setOpenMenu(null);      //  FIX
+            + setPage(1);               // ⭐ THÊM DÒNG NÀY
+              setOpenMenu(null);
             }}
+
 
           >
             <h3>Active</h3>
@@ -509,8 +542,10 @@ const ManageSong = () => {
             className={`um-card ${activeTab === "pending" ? "active" : ""}`}
             onClick={() => {
               setActiveTab("pending");
-              setOpenMenu(null);      //  FIX
+            + setPage(1);               // THÊM DÒNG NÀY
+              setOpenMenu(null);
             }}
+
           >
             <h3>Pending</h3>
             <p>Bài hát đang chờ duyệt</p>
@@ -521,8 +556,10 @@ const ManageSong = () => {
             className={`um-card ${activeTab === "report" ? "active" : ""}`}
             onClick={() => {
               setActiveTab("report");
-              setOpenMenu(null);      //  FIX
+            + setPage(1);               // THÊM DÒNG NÀY
+              setOpenMenu(null);
             }}
+
 
           >
             <h3>Report</h3>
@@ -541,7 +578,7 @@ const ManageSong = () => {
               value={searchValue}
               onChange={(e) => {
                 setSearchValue(e.target.value);
-                setPage(1);   // ⭐ RESET VỀ TRANG 1 KHI SEARCH
+                setPage(1);   // RESET VỀ TRANG 1 KHI SEARCH
               }}
             />
           </div>
@@ -587,11 +624,26 @@ const ManageSong = () => {
 
                   <td
                     className="song-title-clickable"
-                    onClick={() => setShowViewPopup(song)}
                     style={{ cursor: "pointer", color: "#ffffff" }}
+                    onClick={async () => {
+                      try {
+                        const res = await fetch(
+                          `http://localhost:3000/admin/manage-song/${song.id}`
+                        );
+
+                        const full = await res.json();
+
+                        // mở popup xem bài hát bằng data đầy đủ từ backend
+                        setShowViewPopup(full);
+                      } catch (err) {
+                        console.error("❌ Không load được chi tiết bài hát:", err);
+                        alert("Không thể load chi tiết bài hát!");
+                      }
+                    }}
                   >
                     {song.title}
                   </td>
+
 
                   <td>{song.artistName}</td>
                   <td>{song.albumName}</td>
@@ -631,54 +683,75 @@ const ManageSong = () => {
 
                     {openMenu === song.id && (
                       <div className="action-dropdown" ref={dropdownRef}>
-                        <button onClick={() => setShowViewPopup(song)}>Xem</button>
-                        <button onClick={() => {
-                            setShowEditPopup(song);
+                        <button
+                          onClick={async () => {
+                            const res = await fetch(`http://localhost:3000/admin/manage-song/${song.id}`);
+                            const full = await res.json();
+                            setShowViewPopup(full);   // full có songArtists
+                          }}
+                        >
+                          Xem
+                        </button>
 
-                            setEditTitle(song.title);
-                            setEditLyrics(song.lyrics || "");  
-                            setEditLyricsLanguage(song.lyricsLanguage ?? "vi");
+                        <button
+                          onClick={async () => {
 
-                            // Nghệ sĩ object
-                            const artistObj = artists.find(a => a.id === song.artistId);
-                            setSelectedEditArtist(artistObj || null);
-                            setEditArtist(artistObj?.id || "");
+                            // Lấy FULL bài hát từ backend (có songArtists, lyrics, album…)
+                            const res = await fetch(`http://localhost:3000/admin/manage-song/${song.id}`);
+                            const full = await res.json();
 
-                            if (artistObj) {
-                              fetch(`http://localhost:3000/admin/manage-song/albums/by-artist/${artistObj.id}`)
-                                .then(res => res.json())
-                                .then(albumData => {
-                                  setFilteredAlbumsEdit(albumData);
+                            // Mở popup bằng full data
+                            setShowEditPopup(full);
 
-                                  const match = albumData.find(a => a.title === song.albumName);
-                                  setSelectedEditAlbum(match || null);
-                                  setEditAlbum(match?.id || "");
-                                });
+                            // Set tiêu đề + lyrics
+                            setEditTitle(full.title);
+                            setEditLyrics(full.lyrics?.lyrics || "");
+                            setEditLyricsLanguage(full.lyrics?.language || "vi");
+
+                            // LẤY NGHỆ SĨ CHÍNH
+                            const primary = full.songArtists.find(sa => sa.is_primary);
+                            setSelectedEditArtist(primary?.artist || null);
+                            setEditArtist(primary?.artist?.id || "");
+
+                            // LẤY COLLAB (tick checkbox)
+                            setEditCollabArtists(
+                              full.songArtists
+                                .filter(sa => !sa.is_primary)
+                                .map(sa => sa.artist_id)
+                            );
+
+                            // LOAD ALBUM THEO NGHỆ SĨ
+                            if (primary?.artist?.id) {
+                              const albRes = await fetch(
+                                `http://localhost:3000/admin/manage-song/albums/by-artist/${primary.artist.id}`
+                              );
+                              const albumData = await albRes.json();
+
+                              setFilteredAlbumsEdit(albumData);
+
+                              // Chọn album đúng
+                              const matchAlbum = albumData.find(a => a.id === full.album?.id);
+                              setSelectedEditAlbum(matchAlbum || null);
+                              setEditAlbum(matchAlbum?.id || "");
                             }
 
-
-
-                            // Album object
-                            const albumObj = albums.find(a => a.title === song.albumName);
-                            setSelectedEditAlbum(albumObj || null);
-                            setEditAlbum(albumObj?.id || "");
-
-                            // Thể loại object
-                            // Thể loại object - MATCH BẰNG TÊN
-                            const categoryObj = genres.find(g => g.name === song.genre);
+                            // 7️Thể loại
+                            const categoryObj = genres.find(g => g.name === full.genre);
                             setSelectedEditCategory(categoryObj || null);
                             setEditCategory(categoryObj?.id || "");
 
-
-                            // Ảnh + nhạc
-                            setEditCoverPreview(song.coverUrl);
+                            // 8Ảnh preview
+                            setEditCoverPreview(full.image_url);
                             setEditCoverFile(null);
 
+                            // File audio
                             setEditAudioFile(null);
                             setEditAudioName("");
-                        }}>
-                            Sửa
+                          }}
+                        >
+                          Sửa
                         </button>
+
 
                         {/* Chỉ hiển thị nút Hiện/Ẩn khi bài đã APPROVED/HIDDEN */}
                         {(song.status === "APPROVED" || song.status === "HIDDEN") && (
@@ -716,9 +789,10 @@ const ManageSong = () => {
               ))}
             </tbody>
           </table>
-        
+
           {/* PAGINATION */}
           <div className="song-pagination-clean">
+
             <button
               className="song-page-arrow"
               disabled={page === 1}
@@ -738,7 +812,10 @@ const ManageSong = () => {
             >
               →
             </button>
+
           </div>
+
+        
 
         </>
       )}
@@ -793,6 +870,9 @@ const ManageSong = () => {
                       );
                       const data = await res.json();
 
+                      // 🔥 chỉ giữ album active
+                      const activeAlbums = data.filter(a => a.active === true);
+
                       setFilteredAlbumsAdd(data);
                       setNewAlbum("");          // reset album
                     }}
@@ -805,7 +885,9 @@ const ManageSong = () => {
                   <label>Nghệ sĩ collab</label>
 
                   <div className="multi-select">
-                    {artists.map((a) => {
+                    {artists
+                      .filter(a => a.id !== Number(newArtist))   // LOẠI NGHỆ SĨ CHÍNH
+                      .map((a) => {
                       const isChecked = featuredArtists.includes(a.id);
 
                       return (
@@ -816,8 +898,10 @@ const ManageSong = () => {
                           <input
                             type="checkbox"
                             value={a.id}
+                            disabled={!newArtist}         // KHÓA NẾU CHƯA CHỌN NGHỆ SĨ CHÍNH
                             checked={isChecked}
                             onChange={(e) => {
+                              if (!newArtist) return;     // KHÔNG CHO CHỌN NẾU CHƯA CHỌN NGHỆ SĨ CHÍNH
                               const id = Number(e.target.value);
                               if (e.target.checked) {
                                 setFeaturedArtists([...featuredArtists, id]);
@@ -932,24 +1016,32 @@ const ManageSong = () => {
                   <div className="audio-upload-group">
                     <label>File nhạc</label>
 
-                    <div
-                      className="audio-upload-area"
+                    <div className="audio-upload-area"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const input = document.getElementById("audioUpload");
+                        if (input) {
+                          input.value = "";   // cho phép chọn lại cùng file
+                          input.click();      // mở hộp thoại chọn file
+                        }
+                      }}
                       onDragOver={(e) => e.preventDefault()}
                       onDrop={(e) => {
                         e.preventDefault();
+                        e.stopPropagation();
                         const file = e.dataTransfer.files[0];
                         if (file) {
                           setAudioFile(file);
                           setAudioName(file.name);
                         }
                       }}
-
                     >
-
                       {audioName ? (
                         <p className="audio-file-name">{audioName}</p>
                       ) : (
-                        <p className="audio-upload-text">Kéo thả hoặc nhấn để chọn file nhạc</p>
+                        <p className="audio-upload-text">
+                          Kéo thả hoặc nhấn để chọn file nhạc
+                        </p>
                       )}
 
                       <input
@@ -957,15 +1049,19 @@ const ManageSong = () => {
                         type="file"
                         accept="audio/*"
                         className="audio-upload-input"
+                        style={{ display: "none" }}        // ẨN input đi
+                        onClick={(e) => e.stopPropagation()}
                         onChange={(e) => {
                           const file = e.target.files[0];
                           if (file) {
                             setAudioFile(file);
                             setAudioName(file.name);
                           }
+                          e.target.value = "";            // reset để lần sau chọn lại được
                         }}
                       />
                     </div>
+
                   </div>
                 </div>
 
@@ -1115,16 +1211,25 @@ const ManageSong = () => {
               <input type="text" value={showViewPopup.title} readOnly />
             </div>
 
+            {/* NGHỆ SĨ CHÍNH */}
             <div className="popup-group">
               <label>Nghệ sĩ</label>
-              <input type="text" value={showViewPopup.artistName} readOnly />
+
+              <input
+                type="text"
+                value={
+                  showViewPopup.songArtists
+                    ?.find(sa => sa.is_primary)?.artist?.stage_name || ""
+                }
+                readOnly
+              />
             </div>
 
             {/* NGHỆ SĨ COLLAB */}
             <div className="popup-group">
               <label>Nghệ sĩ collab</label>
 
-              {showViewPopup.songArtists?.filter(sa => !sa.is_primary).length > 0 ? (
+              {showViewPopup.songArtists?.some(sa => !sa.is_primary) ? (
                 <div className="view-collab-box">
                   {showViewPopup.songArtists
                     .filter(sa => !sa.is_primary)
@@ -1140,13 +1245,10 @@ const ManageSong = () => {
             </div>
 
 
+
             <div className="popup-group">
               <label>Ảnh bìa</label>
-              <img
-                src={showViewPopup.coverUrl}
-                alt="Cover"
-                className="popup-cover-view"
-              />
+              <img src={showViewPopup.image_url} alt="Cover" className="popup-cover-view" />
             </div>
 
             <div className="popup-group">
@@ -1177,21 +1279,24 @@ const ManageSong = () => {
             <div className="popup-group">
               <label>Nghe thử bài hát</label>
               <audio controls style={{ width: "100%" }}>
-                <source src={showViewPopup.audioUrl} type="audio/mpeg" />
+                <source src={showViewPopup.file_url} type="audio/mpeg" />
               </audio>
             </div>
 
             {/* LYRICS */}
-            {showViewPopup.lyrics && (
+            {showViewPopup.lyrics?.lyrics && (
               <div className="popup-group">
                 <label>Lyrics</label>
                 <div className="lyrics-view-box">
-                  {showViewPopup.lyrics.split("\n").map((line, idx) => (
-                    <p key={idx}>{line}</p>
-                  ))}
+                  {showViewPopup.lyrics.lyrics
+                    .split("\n")
+                    .map((line, idx) => (
+                      <p key={idx}>{line}</p>
+                    ))}
                 </div>
               </div>
             )}
+
 
 
           </div>
@@ -1248,7 +1353,8 @@ const ManageSong = () => {
                       `http://localhost:3000/admin/manage-song/albums/by-artist/${artist.id}`
                     );
                     const data = await res.json();
-
+                    
+                    const activeAlbums = data.filter(a => a.active === true);
                     setFilteredAlbumsEdit(data);
                     setEditAlbum("");
                     setSelectedEditAlbum(null);
@@ -1262,35 +1368,42 @@ const ManageSong = () => {
               <label>Nghệ sĩ collab</label>
 
               <div className="multi-select">
-                {artists.map((a) => {
-                  const isChecked = editCollabArtists.includes(a.id);
+                {artists
+                  // Không cho chọn chính nghệ sĩ đang là primary
+                  .filter(a => a.id !== Number(editArtist))
+                  .map((a) => {
+                    const isChecked = editCollabArtists.includes(a.id);
 
-                  return (
-                    <label
-                      key={a.id}
-                      className={`multi-select-item ${isChecked ? "checked" : ""}`}
-                    >
-                      <input
-                        type="checkbox"
-                        value={a.id}
-                        checked={isChecked}
-                        onChange={(e) => {
-                          const id = Number(e.target.value);
-                          if (e.target.checked) {
-                            setEditCollabArtists((prev) => [...prev, id]);
-                          } else {
-                            setEditCollabArtists((prev) => prev.filter(v => v !== id));
-                          }
-                        }}
-                      />
-                      {a.stage_name}
-                    </label>
-                  );
-                })}
+                    return (
+                      <label
+                        key={a.id}
+                        className={`multi-select-item ${isChecked ? "checked" : ""}`}
+                      >
+                        <input
+                          type="checkbox"
+                          value={a.id}
+                          disabled={!editArtist}   // 🔒 KHÓA nếu chưa chọn nghệ sĩ chính
+                          checked={isChecked}
+                          onChange={(e) => {
+                            if (!editArtist) {
+                              alert("Vui lòng chọn nghệ sĩ chính trước!");
+                              return;
+                            }
+
+                            const id = Number(e.target.value);
+                            if (e.target.checked) {
+                              setEditCollabArtists((prev) => [...prev, id]);
+                            } else {
+                              setEditCollabArtists((prev) => prev.filter(v => v !== id));
+                            }
+                          }}
+                        />
+                        {a.stage_name}
+                      </label>
+                    );
+                  })}
               </div>
             </div>
-
-
 
             {/* ẢNH BÌA */}
             <div className="popup-group">
