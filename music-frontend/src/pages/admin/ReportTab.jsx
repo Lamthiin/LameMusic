@@ -112,16 +112,25 @@ export default function ReportTab() {
                   </span>
                 </td>
                 <td>
-                  {activeFilter === "PENDING" ? (
+                  {activeFilter === "PENDING" && (
                     <button
                       className="report-view-btn"
                       onClick={() => setSelectedReport(r)}
                     >
                       Xem
                     </button>
-                  ) : (
-                    "—"
                   )}
+
+                  {activeFilter === "RESOLVED" && (
+                    <button
+                      className="report-restore-btn"
+                      onClick={() => handleRestore(r.id)}
+                    >
+                      Khôi phục
+                    </button>
+                  )}
+
+                  {activeFilter !== "PENDING" && activeFilter !== "RESOLVED" && "—"}
                 </td>
               </tr>
             ))

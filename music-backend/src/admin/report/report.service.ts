@@ -47,6 +47,17 @@ export class ReportService {
     report.status = status;
     await this.reportRepo.save(report);
 
+
+    // Nếu RESOLVED → Ẩn bài hát thay vì xoá
+    if (status === ReportStatus.RESOLVED) {
+      const song = report.song;
+      if (song) {
+        song.active = false;        // bật active nếu bạn dùng cờ này
+        song.status = 'HIDDEN';    // đổi trạng thái bài hát
+        await this.songRepo.save(song);
+      }
+    }
+
     // =========================
     // 📌 Tạo nội dung thông báo
     // =========================

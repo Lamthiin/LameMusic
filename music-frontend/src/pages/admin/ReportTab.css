@@ -234,3 +234,26 @@
   outline: none !important;
   box-shadow: none !important;
 }
+
+.report-restore-btn {
+  background: #f1c40f;         /* vàng sáng */
+  color: #000;
+  padding: 8px 18px;
+  border: none;
+  border-radius: 10px;         /* bo tròn mềm */
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+  transition: all 0.2s ease;
+}
+
+.report-restore-btn:hover {
+  background: #f39c12;         /* màu cam vàng hover */
+  box-shadow: 0 5px 14px rgba(243, 156, 18, 0.4);
+}
+
+.report-restore-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+}
