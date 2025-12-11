@@ -93,20 +93,74 @@ export class SongController {
   ) {
     return this.songService.findAllWithFilters(genre, artistId);
   }
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
+//   @UseGuards(AuthGuard('jwt'), RolesGuard)
+// @Roles('artist')
+// @Post('my')
+// @UseInterceptors(FileFieldsInterceptor([ 
+//   { name: 'audioFile', maxCount: 1 },
+//   { name: 'imageFile', maxCount: 1 },
+// ]))
+// async createSong(
+//   @Req() req: any,
+//   @Body(ValidationPipe) dto: CreateSongDto,
+//   @UploadedFiles() files: { audioFile?: Express.Multer.File[], imageFile?: Express.Multer.File[] }
+// ) {
+//   const userId = (req.user as JwtPayload).userId;
+//   return this.songService.createSong(userId, dto, files);
+// }
+
+@UseGuards(AuthGuard('jwt'), RolesGuard)
 @Roles('artist')
 @Post('my')
 @UseInterceptors(FileFieldsInterceptor([ 
-  { name: 'audioFile', maxCount: 1 },
-  { name: 'imageFile', maxCount: 1 },
+    { name: 'audioFile', maxCount: 1 },
+    { name: 'imageFile', maxCount: 1 },
 ]))
 async createSong(
-  @Req() req: any,
-  @Body(ValidationPipe) dto: CreateSongDto,
-  @UploadedFiles() files: { audioFile?: Express.Multer.File[], imageFile?: Express.Multer.File[] }
+    @Req() req: any,
+    @Body() body: any, // ⭐ Thay thế @Body(ValidationPipe) dto: CreateSongDto
+    @UploadedFiles() files: { audioFile?: Express.Multer.File[], imageFile?: Express.Multer.File[] }
 ) {
-  const userId = (req.user as JwtPayload).userId;
-  return this.songService.createSong(userId, dto, files);
+    const userId = (req.user as JwtPayload).userId;
+
+    // ⭐ LOGIC XỬ LÝ ARTISTIDS (COPY TỪ updateMySong)
+    let artistIds: number[] = [];
+    if (body.artistIds) {
+        let parsed: any;
+        try {
+            if (typeof body.artistIds === 'string') {
+                parsed = JSON.parse(body.artistIds);
+            } else if (Array.isArray(body.artistIds)) {
+                parsed = body.artistIds;
+            } else {
+                throw new Error('Dữ liệu không phải chuỗi JSON hoặc mảng.');
+            }
+            
+            if (!Array.isArray(parsed)) {
+                throw new Error('artistIds phải là một mảng ID.');
+            }
+            
+            artistIds = parsed
+                .map(id => parseInt(id, 10))
+                .filter(id => !isNaN(id) && id > 0);
+            
+            if (artistIds.length !== parsed.length) {
+                throw new Error('Dữ liệu mảng artistIds chứa giá trị không hợp lệ.');
+            }
+            
+        } catch (err) {
+            console.error("Lỗi parse artistIds trong createSong:", err.message);
+            throw new BadRequestException('artistIds không hợp lệ'); 
+        }
+    }
+    
+    // ⭐ TẠO DTO (Phải dùng body và gán artistIds đã parse)
+    const dto: CreateSongDto = {
+        ...body,
+        artistIds, // Gán mảng số đã parse
+    };
+    
+    return this.songService.createSong(userId, dto, files);
 }
 
 @UseGuards(AuthGuard('jwt'), RolesGuard)
