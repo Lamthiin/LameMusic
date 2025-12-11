@@ -1,21 +1,28 @@
-// src/components/SongFormModal.jsx
 import React, { useState, useEffect } from "react";
 import {
     createSongApi,
     updateMySongApi,
     getMyAlbumsApi,
     fetchCategories,
-    fetchAllArtistsApi
+    fetchAllArtistsApi,
+    // ⭐ ĐẢM BẢO HÀM NÀY ĐÃ ĐƯỢC IMPORT
+    getSongDetailApi 
 } from "../../utils/api";
 
 import "./SongFormModal.css";
 import { FaTimes } from "react-icons/fa";
 
-const showToast = (msg) => alert(msg);
-const getDurationMock = () => "180";
+// Mock functions (nếu chưa có global functions)
+const showToast = (msg) => alert(msg); 
+const getDurationMock = () => "180"; 
 
-const SongFormModal = ({ onClose, onComplete, songToEdit, currentUserId }) => {
+const SongFormModal = ({ onClose, onComplete, songToEdit, currentArtistId }) => {
     const isEditMode = Boolean(songToEdit);
+    const songId = songToEdit?.id; // Lấy ID của bài hát (dùng để gọi API chi tiết)
+
+    // State mới để lưu trữ DỮ LIỆU CHI TIẾT bài hát (đã load đầy đủ)
+    // Khởi tạo bằng songToEdit (dữ liệu tóm tắt) để dùng tạm nếu không ở chế độ edit
+    const [detailSongData, setDetailSongData] = useState(songToEdit); 
 
     const [title, setTitle] = useState("");
     const [genre, setGenre] = useState("");
@@ -33,52 +40,85 @@ const SongFormModal = ({ onClose, onComplete, songToEdit, currentUserId }) => {
     const [selectedCollabIds, setSelectedCollabIds] = useState([]);
 
     const [collabOpen, setCollabOpen] = useState(false);
-
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
-    // LOAD
+    // LOAD DATA & INITIALIZE STATE
     useEffect(() => {
         const loadAll = async () => {
+            setLoading(true);
+
             try {
+                // 1. Tải dữ liệu cần thiết (Async Parallel)
                 const [alb, cat, artists] = await Promise.all([
                     getMyAlbumsApi(),
                     fetchCategories(),
                     fetchAllArtistsApi()
                 ]);
 
-                setArtistAlbums(alb.map(a => ({ ...a, id: a.id.toString() })));
-                setCategories(cat);
-                setAllArtists(artists);
+                setArtistAlbums((alb || []).map(a => ({ ...a, id: a.id.toString() })));
+                setCategories(cat || []);
+
+                const currentArtistIdNumber = Number(currentArtistId);
+                
+                if (!currentArtistIdNumber) {
+                    setError("ID Nghệ sĩ không hợp lệ.");
+                    setLoading(false);
+                    return;
+                }
+
+                const collabOptions = (artists || []).filter(a => Number(a.id) !== currentArtistIdNumber);
+                setAllArtists(collabOptions);
+
+                let songToUse = songToEdit;
+
+                // ⭐ 2. CHỈ GỌI API CHI TIẾT KHI CHỈNH SỬA
+                if (isEditMode && songId) {
+                    try {
+                        const detail = await getSongDetailApi(songId); // Gọi API chi tiết
+                        setDetailSongData(detail); // Lưu dữ liệu chi tiết
+                        songToUse = detail;
+                    } catch (e) {
+                        console.error("Lỗi tải chi tiết bài hát:", e);
+                        setError("Không thể tải chi tiết bài hát để chỉnh sửa.");
+                        setLoading(false);
+                        return;
+                    }
+                }
+                
+                // ⭐ 3. KHỞI TẠO STATE TỪ DỮ LIỆU ĐÃ LOAD ĐẦY ĐỦ
+                if (isEditMode && songToUse) {
+                    setTitle(songToUse.title || "");
+                    setGenre(songToUse.genre || "");
+                    setAlbumId(songToUse.album?.id?.toString() || "");
+                    setTrackNumber(songToUse.track_number || "");
+                    setLyricsContent(songToUse.lyrics?.lyrics || "");
+                    setLanguage(songToUse.lyrics?.language || "vi");
+                    setImagePreview(songToUse.image_url || "/images/default-album.png");
+
+                    // ⭐ LOGIC XỬ LÝ COLLAB ARTISTS (Sử dụng songArtists)
+                    const allArtistsFromSong = (songToUse.songArtists || [])
+                        .map(sa => sa.artist)
+                        .filter(artist => artist && artist.id);
+
+                    const selectedCollab = allArtistsFromSong
+                        .filter(a => Number(a.id) !== currentArtistIdNumber)
+                        .map(a => a.id.toString()); 
+                        
+                    setSelectedCollabIds(selectedCollab);
+                }
+
             } catch (e) {
-                console.error(e);
-                setError("Không thể tải dữ liệu.");
+                console.error("Lỗi tải dữ liệu chung:", e);
+                setError("Không thể tải dữ liệu cần thiết.");
+            } finally {
+                setLoading(false);
             }
         };
-
-        // Prefill khi edit
-        if (isEditMode && songToEdit) {
-            setTitle(songToEdit.title || "");
-            setGenre(songToEdit.genre || "");
-            setAlbumId(songToEdit.album?.id?.toString() || "");
-            setTrackNumber(songToEdit.track_number || "");
-            setLyricsContent(songToEdit.lyrics?.lyrics || "");
-            setLanguage(songToEdit.lyrics?.language || "vi");
-            setImagePreview(songToEdit.image_url || "/images/default-album.png");
-
-            const collabIds =
-                songToEdit.songArtists
-                    ?.map(sa => sa.artist)
-                    .filter(a => a && a.id !== currentUserId)
-                    .map(a => a.id.toString()) || [];
-
-            setSelectedCollabIds(collabIds);
-        }
-
         loadAll();
-    }, [isEditMode, songToEdit, currentUserId]);
+    }, [isEditMode, songId, currentArtistId]); 
 
-    // FILE
+    // FILE CHANGE (Giữ nguyên)
     const handleFileChange = (e, type) => {
         const f = e.target.files[0];
         if (!f) return;
@@ -90,7 +130,7 @@ const SongFormModal = ({ onClose, onComplete, songToEdit, currentUserId }) => {
         }
     };
 
-    // COLLAPSE
+    // TOGGLE COLLAB (Giữ nguyên)
     const toggleCollab = (id) => {
         const s = id.toString();
         setSelectedCollabIds(prev =>
@@ -100,13 +140,25 @@ const SongFormModal = ({ onClose, onComplete, songToEdit, currentUserId }) => {
         );
     };
 
-    // SUBMIT
+    // SUBMIT FORM (Giữ nguyên logic gửi Collab IDs)
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
 
-        if (!title || !genre || (!isEditMode && !audioFile)) {
-            setError("Hãy nhập tiêu đề, thể loại và file nhạc.");
+        const primaryArtistId = Number(currentArtistId); 
+        
+        if (!primaryArtistId) {
+            setError("ID Nghệ sĩ không hợp lệ.");
+            return;
+        }
+
+        if (!title || !genre) {
+            setError("Vui lòng nhập Tiêu đề và Thể loại.");
+            return;
+        }
+
+        if (!isEditMode && !audioFile) {
+            setError("Vui lòng chọn File nhạc.");
             return;
         }
 
@@ -115,28 +167,30 @@ const SongFormModal = ({ onClose, onComplete, songToEdit, currentUserId }) => {
         const formData = new FormData();
         formData.append("title", title);
         formData.append("genre", genre);
-
         if (albumId !== "") formData.append("albumId", albumId);
         else if (isEditMode) formData.append("albumId", "");
-
         if (trackNumber) formData.append("track_number", trackNumber);
-
         if (lyricsContent.trim()) {
             formData.append("lyricsContent", lyricsContent);
             formData.append("language", language);
         }
-
-        formData.append("duration", getDurationMock());
-
         if (audioFile) formData.append("audioFile", audioFile);
         if (imageFile) formData.append("imageFile", imageFile);
+        formData.append("duration", getDurationMock());
 
-        const allArtistIds = [currentUserId.toString(), ...selectedCollabIds];
-        formData.append("artistIds", JSON.stringify(allArtistIds));
+        // CHỈ GỬI ID CỦA CÁC ARTIST CỘNG TÁC (COLLAB IDs), loại bỏ ID chính
+        const artistIdsToSend = selectedCollabIds
+            .map(id => Number(id))
+            .filter(id => id && id !== primaryArtistId); 
 
+        // Gửi mảng ID dưới dạng JSON string (Chỉ chứa ID Cộng tác viên)
+        formData.append("artistIds", JSON.stringify(artistIdsToSend));
+        
         try {
             if (isEditMode) {
-                await updateMySongApi(songToEdit.id, formData);
+                // Sử dụng ID từ detailSongData (đã load đầy đủ) hoặc songToEdit (dữ liệu ban đầu)
+                const submitId = detailSongData?.id || songToEdit.id; 
+                await updateMySongApi(submitId, formData);
                 showToast("Đã cập nhật bài hát. Chờ duyệt lại.");
             } else {
                 await createSongApi(formData);
@@ -145,14 +199,20 @@ const SongFormModal = ({ onClose, onComplete, songToEdit, currentUserId }) => {
             onComplete();
             onClose();
         } catch (err) {
+            console.error("Lỗi API:", err);
             setError(err.response?.data?.message || "Lỗi gửi dữ liệu.");
         } finally {
             setLoading(false);
         }
     };
 
-    const collabArtists = allArtists.filter(a => a.id !== currentUserId);
 
+    if (loading && isEditMode) return (
+        <div className="sm-modal-overlay">
+            <div className="sm-modal-content">Đang tải chi tiết bài hát...</div>
+        </div>
+    );
+    
     return (
         <div className="sm-modal-overlay" onClick={onClose}>
             <div className="sm-modal-content" onClick={(e) => e.stopPropagation()}>
@@ -161,20 +221,18 @@ const SongFormModal = ({ onClose, onComplete, songToEdit, currentUserId }) => {
                 </button>
 
                 <h2>{isEditMode ? "Sửa Bài Hát" : "Tải Lên Bài Hát"}</h2>
-
                 {error && <p className="sm-modal-error">{error}</p>}
 
                 <form className="sm-modal-form" onSubmit={handleSubmit}>
-                    {/* LEFT */}
                     <div className="sm-modal-left">
-
+                        {/* INPUTS BÌNH THƯỜNG */}
                         <div className="sm-form-group">
-                            <label>Tiêu đề</label>
+                            <label>Tiêu đề *</label>
                             <input value={title} onChange={e => setTitle(e.target.value)} />
                         </div>
 
                         <div className="sm-form-group">
-                            <label>Thể loại</label>
+                            <label>Thể loại *</label>
                             <select value={genre} onChange={e => setGenre(e.target.value)}>
                                 <option value="">— chọn —</option>
                                 {categories.map(c => (
@@ -194,14 +252,18 @@ const SongFormModal = ({ onClose, onComplete, songToEdit, currentUserId }) => {
                         </div>
 
                         <div className="sm-form-group">
-                            <label>File Nhạc</label>
-                            <input type="file" accept=".mp3,.wav" onChange={e => handleFileChange(e, "audio")} required={!isEditMode} />
+                            <label>File Nhạc {isEditMode ? "(Không bắt buộc)" : "*"}</label>
+                            <input 
+                                type="file" 
+                                accept=".mp3,.wav" 
+                                onChange={e => handleFileChange(e, "audio")} 
+                                required={!isEditMode} 
+                            />
                         </div>
 
-                        {/* DROPDOWN COLLAB */}
+                        {/* HIỂN THỊ NGHỆ SĨ CỘNG TÁC VIÊN */}
                         <div className="sm-form-group">
                             <label>Nghệ sĩ cộng tác</label>
-
                             <div className="collab-dropdown">
                                 <div
                                     className="collab-dropdown-btn"
@@ -209,34 +271,35 @@ const SongFormModal = ({ onClose, onComplete, songToEdit, currentUserId }) => {
                                 >
                                     {selectedCollabIds.length === 0
                                         ? "Chọn nghệ sĩ"
-                                        : `${selectedCollabIds.length} nghệ sĩ`}
+                                        : `${selectedCollabIds.length} nghệ sĩ đã chọn`}
                                     <span className="arrow">▼</span>
                                 </div>
 
                                 <div className={`collab-dropdown-menu ${collabOpen ? "open" : ""}`}>
-                                    {collabArtists.map(a => (
-                                        <div
-                                            className="collab-item"
-                                            key={a.id}
-                                            onClick={() => toggleCollab(a.id)}
-                                        >
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedCollabIds.includes(a.id.toString())}
-                                                readOnly
-                                            />
-                                            {a.stage_name}
-                                        </div>
-                                    ))}
+                                    {allArtists.map(a => {
+                                        const isSelected = selectedCollabIds.includes(a.id.toString());
+                                        return (
+                                            <div
+                                                className={`collab-item ${isSelected ? 'selected' : ''}`}
+                                                key={a.id}
+                                                onClick={() => toggleCollab(a.id)}
+                                            >
+                                                <input
+                                                    type="checkbox"
+                                                    checked={isSelected}
+                                                    readOnly
+                                                />
+                                                {a.stage_name || a.name} 
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             </div>
                         </div>
-
                     </div>
 
-                    {/* RIGHT */}
                     <div className="sm-modal-right">
-
+                        {/* INPUTS CỘT PHẢI */}
                         <div className="sm-form-group">
                             <label>Track #</label>
                             <input type="number" value={trackNumber} onChange={e => setTrackNumber(e.target.value)} />
@@ -258,11 +321,10 @@ const SongFormModal = ({ onClose, onComplete, songToEdit, currentUserId }) => {
                         <div className="sm-form-group">
                             <label>Ảnh bìa</label>
                             <div className="sm-avatar-preview">
-                                <img src={imagePreview} alt="" />
+                                <img src={imagePreview} alt="Ảnh bìa bài hát" />
                                 <input type="file" accept="image/*" onChange={e => handleFileChange(e, "image")} />
                             </div>
                         </div>
-
                     </div>
 
                     <div className="sm-form-buttons">
@@ -274,6 +336,11 @@ const SongFormModal = ({ onClose, onComplete, songToEdit, currentUserId }) => {
             </div>
         </div>
     );
+};
+
+
+SongFormModal.propTypes = {
+    currentArtistId: () => {} 
 };
 
 export default SongFormModal;

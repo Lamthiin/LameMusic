@@ -708,3 +708,206 @@
 .artist-btn.danger {
     color:#ff5555;
 }
+
+
+/* Container */
+.artist-songs-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+/* Header */
+.artist-songs-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.artist-songs-container .btn-create {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    font-size: 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.artist-songs-container .btn-create svg {
+    margin-right: 5px;
+}
+
+.artist-songs-container .btn-create:hover {
+    background-color: #45a049;
+}
+
+/* Filter buttons */
+.artist-songs-container .artist-songs-filters {
+    margin-bottom: 15px;
+}
+
+.artist-songs-container .filter-btn {
+    background-color: #000000;
+    border: 1px solid #ccc;
+    margin-right: 8px;
+    padding: 5px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.filter-btn.active {
+    background-color: #4CAF50;
+    color: white;
+    border-color: #4CAF50;
+}
+
+/* Songs list */
+.artist-songs-container .artist-songs-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.artist-songs-container .song-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    border: 1px solid #000000;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+}
+
+.artist-songs-container .song-row:hover {
+    background-color: #303030;
+}
+
+.artist-songs-container .song-info {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.artist-songs-container .song-info img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-right: 12px;
+}
+
+.artist-songs-container .song-info div {
+    display: flex;
+    flex-direction: column;
+}
+
+.artist-songs-container .song-title {
+    font-weight: bold;
+    margin: 0;
+}
+
+.artist-songs-container .song-artist {
+    font-size: 12px;
+    color: #666;
+    margin: 0;
+}
+
+.artist-songs-container .song-album {
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+    flex: 1;
+    text-align: center;
+}
+
+.artist-songs-container .song-actions button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    margin-left: 8px;
+    color: #858484;
+}
+
+.artist-songs-container .song-actions button.danger {
+    color: #e74c3c;
+}
+
+.artist-songs-container .song-actions button:hover {
+    opacity: 0.7;
+}
+
+.empty {
+    text-align: center;
+    color: #999;
+    padding: 20px 0;
+}
+
+/* Header row */
+.artist-songs-header-row {
+    display: grid;
+    grid-template-columns: 3fr 0.9fr 0.8fr; /* title+artist | album | actions */
+    padding: 10px 12px;
+    font-weight: bold;
+    border-bottom: 2px solid #7c7c7c;
+    margin-bottom: 8px;
+}
+
+/* Row */
+.artist-songs-container .song-row {
+    display: grid;
+    grid-template-columns: 3fr 2fr 1fr; /* trùng với header */
+    align-items: center;
+    padding: 10px 12px;
+    border: 1px solid #000000;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+}
+
+.artist-songs-container .song-row:hover {
+    background-color: #4a4a4a;
+}
+
+/* Song info */
+.artist-songs-container .song-info {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    gap: 12px;
+}
+
+.artist-songs-container .song-info img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+/* Album column */
+.artist-songs-container .song-album {
+    font-size: 14px;
+    color: #565656;
+    cursor: pointer;
+}
+
+.popup-footer {
+  position: relative;
+  z-index: 999;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.popup-save {
+  display: inline-block !important;
+  background-color: #1db954;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+}

@@ -19,6 +19,7 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { Otp } from '../totp/totp.entity';
 import { RateLimitService } from '../common/rate-limit.service';
 import { RoleEnum } from '../role/role.enum';
+import { Artist } from '../artist/artist.entity';
 
 @Injectable()
 export class AuthService {
@@ -33,6 +34,8 @@ export class AuthService {
     @InjectRepository(Otp)
     private otpRepository: Repository<Otp>,
     private readonly rateLimitService: RateLimitService,
+    @InjectRepository(Artist)
+    private artistRepository: Repository<Artist>,
   ) {}
 
     private async sendOtpEmail(email: string, otpCode: string): Promise<void> {
@@ -127,15 +130,16 @@ export class AuthService {
     }
   }
 
-//   // 2. LOGIN (thêm rate-limit)
-//   async login(loginAuthDto: LoginAuthDto): Promise<{ accessToken: string }> {
+// async login(loginAuthDto: LoginAuthDto): Promise<{ accessToken: string }> {
 //     const { email, password } = loginAuthDto;
 //     const identifier = (email || '').toLowerCase();
-
-//     this.rateLimitService.check('login_fail', identifier, 5);
+    
+//     // 1. KIỂM TRA RATE LIMIT
+//     this.rateLimitService.check('login_fail', identifier, 5); // 5 lần sai trong 30 phút
 
 //     const user = await this.userRepository
 //       .createQueryBuilder('user')
+//       // Đảm bảo bạn đã Join Role (đúng)
 //       .leftJoinAndSelect('user.role', 'role')
 //       .addSelect('user.password')
 //       .where('user.email = :email', { email })
@@ -147,13 +151,10 @@ export class AuthService {
 //     }
 
 //     if (user.active !== 1) {
-//       if (user.active === 0) {
-//         this.rateLimitService.addFail('login_fail', identifier);
-//         throw new UnauthorizedException('Tài khoản của bạn đã bị khóa.');
-//       } else {
-//         this.rateLimitService.addFail('login_fail', identifier);
-//         throw new UnauthorizedException('Tài khoản chưa được kích hoạt. ');
-//       }
+//       this.rateLimitService.addFail('login_fail', identifier);
+//       // Giả định user.active = 0 là bị khóa, và active != 1 là chưa kích hoạt
+//       const message = user.active === 0 ? 'Tài khoản của bạn đã bị khóa.' : 'Tài khoản chưa được kích hoạt.';
+//       throw new UnauthorizedException(message);
 //     }
 
 //     const isPasswordValid = await bcrypt.compare(password, user.password!);
@@ -162,28 +163,41 @@ export class AuthService {
 //       throw new UnauthorizedException('Email hoặc mật khẩu không đúng');
 //     }
 
+//     // Đăng nhập thành công -> Reset Limit
 //     this.rateLimitService.reset('login_fail', identifier);
 
 //     const payload = {
+//       // id: user.id,  //TH bổ sung
 //       userId: user.id,
 //       username: user.username,
 //       role: user.role.name,
 //       email: user.email
 //     };
 
-//     const accessToken = this.jwtService.sign(payload);
+//     // === FIX LOGIC JWT ADMIN EXPIRATION ===
+//     // Kiểm tra nếu người dùng là Admin (Giả định RoleEnum.ADMIN tồn tại)
+//     const isAdmin = user.role.name === RoleEnum.ADMIN;
+    
+//     // Token sẽ hết hạn: 1 giờ (1h) cho Admin, 7 ngày (7d) cho User thường
+//     const expiresIn = isAdmin ? '30m' : '7d'; 
+
+//     const accessToken = this.jwtService.sign(payload, {
+//         expiresIn: expiresIn, // ÁP DỤNG THỜI GIAN TÙY CHỈNH
+//     });
+//     // ========================================
+
 //     return { accessToken };
 //   }
+
 async login(loginAuthDto: LoginAuthDto): Promise<{ accessToken: string }> {
     const { email, password } = loginAuthDto;
     const identifier = (email || '').toLowerCase();
     
     // 1. KIỂM TRA RATE LIMIT
-    this.rateLimitService.check('login_fail', identifier, 5); // 5 lần sai trong 30 phút
+    this.rateLimitService.check('login_fail', identifier, 5); 
 
     const user = await this.userRepository
       .createQueryBuilder('user')
-      // Đảm bảo bạn đã Join Role (đúng)
       .leftJoinAndSelect('user.role', 'role')
       .addSelect('user.password')
       .where('user.email = :email', { email })
@@ -196,7 +210,6 @@ async login(loginAuthDto: LoginAuthDto): Promise<{ accessToken: string }> {
 
     if (user.active !== 1) {
       this.rateLimitService.addFail('login_fail', identifier);
-      // Giả định user.active = 0 là bị khóa, và active != 1 là chưa kích hoạt
       const message = user.active === 0 ? 'Tài khoản của bạn đã bị khóa.' : 'Tài khoản chưa được kích hoạt.';
       throw new UnauthorizedException(message);
     }
@@ -210,30 +223,50 @@ async login(loginAuthDto: LoginAuthDto): Promise<{ accessToken: string }> {
     // Đăng nhập thành công -> Reset Limit
     this.rateLimitService.reset('login_fail', identifier);
 
+    // ========================================
+    // ⭐ BƯỚC MỚI: TÌM KIẾM VÀ GẮN ARTIST ID
+    // ========================================
+    let artistId: number | null = null;
+    
+    if (user.role.name === RoleEnum.ARTIST) { 
+        // 1. Tra cứu Artist ID dựa trên User ID
+        const artist = await this.artistRepository.findOne({
+            // Sử dụng cú pháp TypeORM query qua quan hệ:
+            where: { user: { id: user.id } }, 
+            select: ['id'], // Chỉ cần lấy ID
+        });
+        
+        if (artist) {
+            artistId = artist.id;
+            console.log(`[AUTH SERVICE] Artist ID tìm thấy: ${artistId} cho User ID: ${user.id}`);
+        } else {
+            console.warn(`[AUTH SERVICE] Không tìm thấy hồ sơ Artist cho User ID: ${user.id}. Token sẽ có artistId: null.`);
+        }
+    }
+    // ========================================
+
     const payload = {
-      // id: user.id,  //TH bổ sung
       userId: user.id,
       username: user.username,
       role: user.role.name,
-      email: user.email
+      email: user.email,
+      // ⭐ THÊM artistId VÀO PAYLOAD JWT
+      artistId: artistId 
     };
 
-    // === FIX LOGIC JWT ADMIN EXPIRATION ===
-    // Kiểm tra nếu người dùng là Admin (Giả định RoleEnum.ADMIN tồn tại)
+    // FIX LOGIC JWT ADMIN EXPIRATION
     const isAdmin = user.role.name === RoleEnum.ADMIN;
     
-    // Token sẽ hết hạn: 1 giờ (1h) cho Admin, 7 ngày (7d) cho User thường
+    // Token sẽ hết hạn: 30 phút cho Admin, 7 ngày cho User/Artist thường
     const expiresIn = isAdmin ? '30m' : '7d'; 
 
     const accessToken = this.jwtService.sign(payload, {
-        expiresIn: expiresIn, // ÁP DỤNG THỜI GIAN TÙY CHỈNH
+        expiresIn: expiresIn, 
     });
-    // ========================================
 
     return { accessToken };
-  }
-
-  // 3. VERIFY OTP (thêm rate-limit)
+}
+// 3. VERIFY OTP (thêm rate-limit)
   async verifyOtp(email: string, otpCode: string): Promise<User> {
     const identifier = (email || '').toLowerCase();
     this.rateLimitService.check('verify_otp_fail', identifier, 5);

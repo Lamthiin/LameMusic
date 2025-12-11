@@ -108,8 +108,8 @@ async findOne(id: number): Promise<Album> {
             'song.status = :status AND song.active = :active', 
             { status: 'APPROVED', active: true }
         )
-        .leftJoinAndSelect('song.songArtists', 'songArtist')
-        .leftJoinAndSelect('songArtist.artist', 'songArtistProfile')
+        .leftJoinAndSelect('song.songArtists', 'songArtist', 'songArtist.active = 1')
+        .leftJoinAndSelect('songArtist.artist', 'songArtistProfile', 'songArtistProfile.active = 1')
         .orderBy('song.track_number', 'ASC')
         .getOne();
 

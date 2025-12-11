@@ -45,23 +45,19 @@ export class LikeService {
     /**
      * === HÀM MỚI: Lấy danh sách bài hát yêu thích của User ===
      */
-    async findUserLikedSongs(userId: number): Promise<UserLikedSongs[]> {
+    async findUserLikedSongs(userId: number) {
         if (!userId) return [];
 
-        // Tìm tất cả các mục trong bảng liên kết,
-        // và JOIN (tải) thông tin chi tiết của bài hát (song)
-        return this.likedRepository.find({
-            where: { user_id: userId },
-            // QUAN TRỌNG: Lấy (JOIN) dữ liệu từ các bảng liên quan
-            relations: [
-                'song', 
-                'song.songArtists',       // Bảng trung gian
-                'song.songArtists.artist',// Lấy artist của bài hát
-                'song.album' // Lấy album của bài hát
-            ], 
-            order: {
-                liked_at: 'DESC' // Sắp xếp theo ngày thích mới nhất
-            }
-        });
+        return this.likedRepository
+            .createQueryBuilder('like')
+            .leftJoinAndSelect('like.song', 'song')
+            .leftJoinAndSelect('song.songArtists', 'sa', 'sa.active = 1')
+            .leftJoinAndSelect('sa.artist', 'artist', 'artist.active = 1')
+            .leftJoinAndSelect('song.album', 'album')
+            .where('like.user_id = :userId', { userId })
+            .andWhere('song.active = 1')
+            .andWhere('song.status = "APPROVED"')
+            .orderBy('like.liked_at', 'DESC')
+            .getMany();
     }
 }

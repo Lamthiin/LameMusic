@@ -61,13 +61,18 @@ export class PlaylistService {
    * === HÀM MỚI: Tìm playlist theo ID (kèm bài hát) ===
    */
   async findPublicById(id: number): Promise<Playlist> {
-    const playlist = await this.playlistRepository.findOne({
-      where: { 
-        id: id,
-        is_active: 1
-      },
-      relations: ['user', 'songs', 'songs.artist', 'songs.album']
-    });
+    const playlist = await this.playlistRepository
+      .createQueryBuilder('playlist')
+      .leftJoinAndSelect('playlist.user', 'user')
+      .leftJoinAndSelect('playlist.playlistSongs', 'ps', 'ps.is_active = 1')
+      .leftJoinAndSelect('ps.song', 'song')
+      .leftJoinAndSelect('song.songArtists', 'sa', 'sa.active = 1')
+      .leftJoinAndSelect('sa.artist', 'artist', 'artist.active = 1')
+      .leftJoinAndSelect('song.album', 'album')
+      .where('playlist.id = :id', { id })
+      .andWhere('playlist.is_active = 1')
+      .getOne();
+
     
     if (!playlist) {
       throw new NotFoundException('Không tìm thấy playlist.');
@@ -92,8 +97,16 @@ async findMyPlaylistById(userId: number, playlistId: number): Promise<Playlist> 
         .leftJoinAndSelect('playlist.user', 'user')
         .leftJoinAndSelect('playlist.playlistSongs', 'playlistSong', 'playlistSong.is_active = :activeStatus', { activeStatus: 1 })
         .leftJoinAndSelect('playlistSong.song', 'song')
-        .leftJoinAndSelect('song.songArtists', 'songArtist')       // join bảng trung gian
-        .leftJoinAndSelect('songArtist.artist', 'artist')          // lấy tất cả artist
+        .leftJoinAndSelect(
+            'song.songArtists',
+            'songArtist',
+            'songArtist.active = 1'
+        )
+        .leftJoinAndSelect(
+            'songArtist.artist',
+            'artist',
+            'artist.active = 1'
+        )       // lấy tất cả artist
         .leftJoinAndSelect('song.album', 'album')
         .where('playlist.id = :playlistId', { playlistId })
         .andWhere('user.id = :userId', { userId })
@@ -189,7 +202,9 @@ async addSongToPlaylist(
   }
 
   // 2. Lấy bài hát cần thêm
-  const song = await this.songRepository.findOne({ where: { id: songId } });
+  const song = await this.songRepository.findOne({
+      where: { id: songId, active: true, status: 'APPROVED' }
+  });
   if (!song) throw new NotFoundException('Bài hát không tồn tại.');
 
   // 3. Kiểm tra duplicate trong playlist

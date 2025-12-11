@@ -56,101 +56,29 @@ export class SongService {
   }
 
 async findAll(user: JwtPayload | null): Promise<Song[]> {
-    return this.songRepository.find({
-        where: { 
-            active: true, 
-            status: 'APPROVED'
-        },
-        relations: ['songArtists', 'songArtists.artist', 'album'], // nếu dùng SongArtist nhiều-nhiều
-        order: { play_count: 'DESC' },
-        take: 10
-    });
+  const songs = await this.songRepository
+    .createQueryBuilder('song')
+    .leftJoinAndSelect('song.songArtists', 'sa', 'sa.active = 1')
+    .leftJoinAndSelect('sa.artist', 'artist', 'artist.active = 1')
+    .leftJoinAndSelect('song.album', 'album')
+    .where('song.active = 1')
+    .andWhere('song.status = "APPROVED"')
+    .orderBy('song.play_count', 'DESC')
+    .take(14)
+    .getMany();
+
+
+  return songs.map(song => {
+    song.songArtists = song.songArtists.filter(sa => sa.active);
+    return song;
+  });
 }
 
-  /**
-   * (ARTIST) Lấy danh sách bài hát của TÔI
-//    */
-//   async findMySongs(userId: number, status: 'PENDING' | 'APPROVED' | 'REJECTED'): Promise<Song[]> {
-//     const artist = await this.getArtistByUserId(userId);
-    
-//     // SỬ DỤNG QUERY BUILDER AN TOÀN
-//     const query = this.songRepository.createQueryBuilder('song')
-//         // === FIX LỖI: BẮT BUỘC LEFT JOIN ARTIST ===
-//         .leftJoinAndSelect('song.artist', 'artist') 
-//         // ============================================
-//         .leftJoinAndSelect('song.album', 'album')
-        
-//         .where('song.artist_id = :artistId', { artistId: artist.id })
-//         .andWhere('song.active = :activeStatus', { activeStatus: true })
-//         .orderBy('song.created_at', 'DESC');
-        
-//     // Lọc theo Status (nếu có)
-//     if (status) {
-//         query.andWhere('song.status = :status', { status: status });
-//     } else {
-//         query.andWhere('song.status = :defaultStatus', { defaultStatus: 'APPROVED' });
-//     }
 
-//     return query.getMany();
-//  }
-
-//  // Hàm cần sửa (Ví dụ: Hàm kiểm tra quyền sở hữu)
-// // Hàm này phải được cập nhật ở tất cả các vị trí (112, 280, 317, 357, 374)
-// async checkSongOwnership(songId: number, artistId: number): Promise<Song | null> {
-//     // Sử dụng Query Builder để Join SongArtist và lọc
-//     return this.songRepository.createQueryBuilder('song')
-//         // Join bảng trung gian và lọc theo artistId
-//         .innerJoin('song.songArtists', 'sa', 'sa.artist_id = :artistId', { artistId })
-//         // Lọc thêm điều kiện is_primary = true nếu chỉ muốn kiểm tra nghệ sĩ chính
-//         // .andWhere('sa.is_primary = true') 
-//         .where('song.id = :songId', { songId })
-//         .getOne();
-// }
-
-// // Hàm lấy thông tin Artist chính (thay thế cho song.artist)
-// async getPrimaryArtist(songId: number): Promise<Artist | null> {
-//     const songArtist = await this.songArtistRepository.findOne({
-//         where: { song_id: songId, is_primary: true },
-//         relations: ['artist'],
-//     });
-//     return songArtist?.artist || null;
-// }
-
- /**
-   * (PUBLIC) Lấy tất cả bài hát có filter (Dùng cho Trang Artist Detail/All Songs)
-   * CHỈ HIỂN THỊ CÁC BÀI ĐÃ DUYỆT (APPROVED) VÀ CÒN ACTIVE.
-   * @param artistId ID Artist Profile
-   */
-  // async findAllWithFilters(genre?: string, artistId?: number): Promise<Song[]> {
-      
-  //     const whereConditions: FindOptionsWhere<Song> = {
-  //         // === BẮT BUỘC ĐIỀU KIỆN CÔNG KHAI ===
-  //         active: true,
-  //         status: 'APPROVED', 
-  //         // ===================================
-  //     };
-      
-  //     if (genre) {
-  //         whereConditions.genre = genre;
-  //     } 
-      
-  //     if (artistId) {
-  //         // Lọc theo ID hồ sơ Artist (PK của bảng Artist)
-  //         whereConditions.artist = { id: artistId } as FindOptionsWhere<Artist>; 
-  //     }
-      
-  //     const options: FindManyOptions<Song> = {
-  //         where: whereConditions,
-  //         relations: ['artist', 'album'],
-  //         order: { created_at: 'DESC' }
-  //     };
-
-  //     return this.songRepository.find(options);
-  // }
 async findAllWithFilters(genre?: string, artistId?: number): Promise<Song[]> {
   const qb = this.songRepository.createQueryBuilder('song')
-    .leftJoinAndSelect('song.songArtists', 'songArtist')
-    .leftJoinAndSelect('songArtist.artist', 'artist')
+    .leftJoinAndSelect('song.songArtists', 'sa', 'sa.active = 1')
+    .leftJoinAndSelect('sa.artist', 'artist', 'artist.active = 1')
     .leftJoinAndSelect('song.album', 'album')
     .where('song.active = :active', { active: true })
     .andWhere('song.status = :status', { status: 'APPROVED' });
@@ -168,37 +96,7 @@ async findAllWithFilters(genre?: string, artistId?: number): Promise<Song[]> {
   return qb.getMany();
 }
 
-  // (Hàm findOne - Chi tiết bài hát)
-  // async findOne(id: number): Promise<Song | null> {
-  //     const song = await this.songRepository.findOne({
-  //         where: { id: id, active: true , status: 'APPROVED'},
-  //         relations: ['artist', 'album', 'lyrics'], 
-  //     });
-  //     if (!song) {
-  //         throw new NotFoundException(`Song with ID ${id} not found`); 
-  //     }
-  //     return song;
-  // }
-  
-  // // (Hàm findAllWithFilters - Trang All Songs)
-  // async findAllWithFilters(genre?: string, artistId?: number): Promise<any> {
-  //     const options: FindManyOptions<Song> = {
-  //         where: { active: true, status: 'APPROVED' },
-  //         relations: ['artist', 'album'],
-  //         order: { created_at: 'DESC' }
-  //     };
-  //     if (genre) options.where = { ...options.where, genre: genre }; 
-  //     if (artistId) options.where = { ...options.where, artist: { id: artistId } };
-  //     return this.songRepository.find(options);
-  // }
-  
-  // (Hàm findByGenre - Trang Genre Detail)
-  // async findByGenre(genreName: string): Promise<Song[]> {
-  //      return this.songRepository.find({
-  //          where: { genre: genreName, active: true, status: 'APPROVED' },
-  //          relations: ['artist', 'album']
-  //      });
-  // }
+
 
 async findRelatedByGenre(currentSongId: number, genreName: string): Promise<Song[]> {
     if (!genreName) return [];
@@ -235,24 +133,6 @@ async findRelatedByGenre(currentSongId: number, genreName: string): Promise<Song
     return { lyrics: lyrics.lyrics};
   }
 
-
-  // async deleteMySong(userId: number, songId: number): Promise<{ message: string }> {
-  //   const artist = await this.getArtistByUserId(userId);
-  //   const song = await this.songRepository.findOne({ 
-  //     where: { id: songId, artist: { id: artist.id } },
-  //     relations: ['artist']
-  //   });
-  //   if (!song) throw new NotFoundException('Bài hát không tồn tại hoặc bạn không có quyền xóa.');
-
-  //   // 1. XÓA FILE TRÊN R2 (QUAN TRỌNG)
-  //   // if (song.file_url) await this.r2Service.deleteFileByUrl(song.file_url);
-  //   // if (song.image_url) await this.r2Service.deleteFileByUrl(song.image_url);
-
-  //   // 2. SOFT DELETE (Đặt active = false)
-  //   await this.songRepository.update(songId, { active: false });
-
-  //   return { message: 'Bài hát đã được ẩn thành công (Soft Deleted).' };
-  // }
 
   // === API MỚI CHO ADMIN (DUYỆT) ===
   async findPendingSongs(): Promise<Song[]> {
@@ -458,11 +338,6 @@ private calculateCosineSimilarity(vecA: number[], vecB: number[]): number {
     return (magA && magB) ? dot / (magA * magB) : 0;
 }
 
-  // private async getArtistByUserId(userId: number): Promise<Artist> {
-  //   const artist = await this.artistRepository.findOne({ where: { user_id: userId } });
-  //   if (!artist) throw new NotFoundException('Không tìm thấy hồ sơ nghệ sĩ của bạn.');
-  //   return artist;
-  // }
 
   // ==========================================================
   // =============== CREATE SONG =============================
@@ -474,20 +349,35 @@ async createSong(
 ): Promise<Song> {
   if (!files?.audioFile?.[0]) throw new BadRequestException('File nhạc là bắt buộc.');
 
-  const artist = await this.getArtistByUserId(userId);
   const audioFile = files.audioFile[0];
   const imageFile = files.imageFile?.[0];
 
+  const artist = await this.artistRepository.findOne({ where: { user_id: userId } });
+  if (!artist) throw new NotFoundException('Nghệ sĩ không tồn tại.');
+
   let album: Album | null = null;
-  if (dto.albumId) {
-    album = await this.albumRepository.findOne({ where: { id: +dto.albumId } });
-    if (!album) throw new NotFoundException('Album không tồn tại.');
+  if (dto.albumId && dto.albumId !== '' && dto.albumId !== '0') {
+    album = await this.albumRepository.findOne({
+      where: { id: +dto.albumId, artist: { id: artist.id } },
+    });
+    if (!album) throw new NotFoundException('Album không tồn tại hoặc không thuộc về bạn.');
   }
 
-  const audioUpload = await this.r2Service.uploadFile('music', audioFile.originalname, audioFile.buffer, audioFile.mimetype);
+  const audioUpload = await this.r2Service.uploadFile(
+    'music',
+    audioFile.originalname,
+    audioFile.buffer,
+    audioFile.mimetype
+  );
+
   let imageUrl: string | null = null;
   if (imageFile) {
-    const imageUpload = await this.r2Service.uploadFile('covers', imageFile.originalname, imageFile.buffer, imageFile.mimetype);
+    const imageUpload = await this.r2Service.uploadFile(
+      'covers',
+      imageFile.originalname,
+      imageFile.buffer,
+      imageFile.mimetype
+    );
     imageUrl = imageUpload.url;
   }
 
@@ -500,7 +390,7 @@ async createSong(
   const embeddingVector = await this.aiService.generateSongEmbedding(dto.title, dto.genre);
 
   const newSong = this.songRepository.create({
-    title: dto.title,
+    title: dto.title?.trim() || 'Untitled',
     file_url: audioUpload.url,
     image_url: imageUrl,
     duration,
@@ -512,80 +402,59 @@ async createSong(
     embedding: embeddingVector,
   });
 
-  const savedSong = await this.songRepository.save(newSong); // <-- TS biết đây là Song, không phải Song[]
+  const savedSong = await this.songRepository.save(newSong);
 
-  // === Lyrics 1-1 ===
   if (dto.lyricsContent?.trim()) {
     const lyricsEntity = this.lyricsRepository.create({
       lyrics: dto.lyricsContent.trim(),
       language: dto.language || 'vi',
-      song: savedSong, // gán relation đúng kiểu
+      song: savedSong,
     });
     await this.lyricsRepository.save(lyricsEntity);
   }
 
-  // === Nghệ sĩ chính ===
-  await this.songArtistRepository.save({ song: savedSong, artist, is_primary: true });
+  // Nghệ sĩ chính
+  await this.songArtistRepository.save({
+    song: savedSong,
+    artist,
+    is_primary: true,
+    active: true,
+  });
 
-  // === Nghệ sĩ phụ ===
-  if (dto.featuredArtistIds?.length) {
-    for (const id of dto.featuredArtistIds) {
-      if (id !== artist.id) {
-        const featArtist = await this.artistRepository.findOne({ where: { id } });
-        if (featArtist) {
-          await this.songArtistRepository.save({ song: savedSong, artist: featArtist, is_primary: false });
-        }
+  // Nghệ sĩ cộng tác
+  if (dto.artistIds) {
+    let collabIds: number[] = [];
+    try {
+      const parsed = typeof dto.artistIds === 'string' ? JSON.parse(dto.artistIds) : dto.artistIds;
+      if (Array.isArray(parsed)) {
+        collabIds = parsed.map(id => +id).filter(id => !isNaN(id) && id !== artist.id);
       }
+    } catch {
+      throw new BadRequestException('Dữ liệu nghệ sĩ cộng tác không hợp lệ.');
+    }
+
+    if (collabIds.length) {
+      const collabArtists = await this.artistRepository.findBy({ id: In(collabIds) });
+      const records = collabArtists.map(a => ({
+        song: savedSong,
+        artist: a,
+        is_primary: false,
+        active: true,
+      }));
+      await this.songArtistRepository.save(records);
     }
   }
 
   return savedSong;
 }
 
-
-  // ==========================================================
-  // =============== UPDATE SONG =============================
-  // ==========================================================
-  // async updateMySong(userId: number, songId: number, dto: any, imageFile?: Express.Multer.File) {
-  //   const artist = await this.getArtistByUserId(userId);
-
-  //   const song = await this.songRepository.createQueryBuilder('song')
-  //     .innerJoin('song.songArtists', 'sa', 'sa.artist_id = :artistId', { artistId: artist.id })
-  //     .where('song.id = :songId', { songId })
-  //     .leftJoinAndSelect('song.album', 'album')
-  //     .getOne();
-
-  //   if (!song) throw new NotFoundException('Bài hát không tồn tại hoặc bạn không có quyền sửa.');
-
-  //   song.title = dto.title || song.title;
-  //   song.track_number = dto.track_number ? parseInt(dto.track_number) : song.track_number;
-  //   if (dto.genre) song.genre = dto.genre;
-
-  //   // Album
-  //   if (dto.albumId !== undefined) {
-  //     if (dto.albumId === '') song.album = null;
-  //     else {
-  //       const album = await this.albumRepository.findOne({ where: { id: parseInt(dto.albumId) } });
-  //       if (!album) throw new NotFoundException('Album không tồn tại.');
-  //       song.album = album;
-  //     }
-  //   }
-
-  //   // Ảnh
-  //   if (imageFile) {
-  //     if (song.image_url) await this.r2Service.deleteFileByUrl(song.image_url);
-  //     const imageUpload = await this.r2Service.uploadFile('covers', imageFile.originalname, imageFile.buffer, imageFile.mimetype);
-  //     song.image_url = imageUpload.url;
-  //   }
-
-  //   if (song.status === 'APPROVED' || song.status === 'REJECTED') song.status = 'PENDING';
-
-  //   return this.songRepository.save(song);
-//   // }
+// ==========================================================
+// =============== 2. CẬP NHẬT BÀI HÁT (UPDATE SONG) =========
+// ==========================================================
 // async updateMySong(userId: number, songId: number, dto: any, imageFile?: Express.Multer.File) {
 //     const artist = await this.getArtistByUserId(userId);
 
-//     // 1. Kiểm tra quyền sở hữu và load Song
+//     // 1. Kiểm tra quyền sở hữu bằng Query Builder (FIX Collab)
 //     const song = await this.songRepository.createQueryBuilder('song')
 //       .innerJoin('song.songArtists', 'sa', 'sa.artist_id = :artistId', { artistId: artist.id })
 //       .where('song.id = :songId', { songId })
@@ -594,43 +463,25 @@ async createSong(
 
 //     if (!song) throw new NotFoundException('Bài hát không tồn tại hoặc bạn không có quyền sửa.');
 
-//     // Cập nhật các trường cơ bản
-//     song.title = dto.title || song.title;
-//     song.track_number = dto.track_number ? parseInt(dto.track_number) : song.track_number;
-//     if (dto.genre) song.genre = dto.genre;
+//     // ... (Logic cập nhật Title, Track Number, Genre, Album, Image giữ nguyên) ...
 
-//     // Album
-//     if (dto.albumId !== undefined) {
-//       if (dto.albumId === '') song.album = null;
-//       else {
-//         const album = await this.albumRepository.findOne({ where: { id: parseInt(dto.albumId) } });
-//         if (!album) throw new NotFoundException('Album không tồn tại.');
-//         song.album = album;
-//       }
-//     }
-
-//     // Ảnh
-//     if (imageFile) {
-//       if (song.image_url) await this.r2Service.deleteFileByUrl(song.image_url);
-//       const imageUpload = await this.r2Service.uploadFile('covers', imageFile.originalname, imageFile.buffer, imageFile.mimetype);
-//       song.image_url = imageUpload.url;
-//     }
-    
-//     // === 2. XỬ LÝ VÀ CẬP NHẬT COLLAB ARTISTS (FIX MỚI) ===
-    
+//     // === 2. XỬ LÝ VÀ CẬP NHẬT COLLAB ARTISTS ===
 //     let featuredArtistIds: number[] = [];
-//     if (dto.artistIds) { // Kiểm tra nếu Frontend gửi dữ liệu nghệ sĩ mới
+//     if (dto.artistIds) { 
 //       try {
 //         const allIds = JSON.parse(dto.artistIds).map(id => +id);
 //         featuredArtistIds = allIds.filter(id => id !== artist.id); // Lọc ID chính
 //       } catch (e) {
-//         console.error("Lỗi parse artistIds:", e);
 //         throw new BadRequestException('Dữ liệu nghệ sĩ cộng tác không hợp lệ.');
 //       }
 //     }
 
 //     // 2a. Xóa tất cả nghệ sĩ phụ hiện tại của bài hát này
-//     await this.songArtistRepository.delete({ song_id: songId, is_primary: false });
+//     await this.songArtistRepository.update(
+//   { song_id: songId, is_primary: false },
+//   { active: false }
+//   );
+
 
 //     // 2b. Tạo lại các bản ghi Collab mới
 //     if (featuredArtistIds.length > 0) {
@@ -638,7 +489,7 @@ async createSong(
 //         
 //         const collabRecords = collabArtists.map(featArtist => ({
 //             song_id: songId,
-//             artist: featArtist, // Dùng Entity
+//             artist: featArtist,
 //             is_primary: false,
 //         }));
 
@@ -651,194 +502,206 @@ async createSong(
 
 //     return this.songRepository.save(song);
 // }
+async updateMySong(
+    userId: number,
+    songId: number,
+    dto: any,
+    imageFile?: Express.Multer.File
+): Promise<Song> {
+    const artist = await this.getArtistByUserId(userId);
 
-// ==========================================================
-// =============== 1. TẠO BÀI HÁT (CREATE SONG) =============
-// ==========================================================
-// async createSong(
-//   userId: number,
-//   dto: any, // Chứa title, genre, albumId, artistIds (JSON string)
-//   files: { audioFile?: Express.Multer.File[], imageFile?: Express.Multer.File[] }
-// ): Promise<Song> {
-//     if (!files?.audioFile?.[0]) throw new BadRequestException('File nhạc là bắt buộc.');
+    // 1) Kiểm tra quyền + active
+    const song = await this.songRepository
+        .createQueryBuilder('song')
+        .innerJoin('song.songArtists', 'sa', 'sa.artist_id = :artistId AND sa.active = 1', { artistId: artist.id })
+        .innerJoin('sa.artist', 'a', 'a.active = 1')
+        .where('song.id = :songId', { songId })
+        .andWhere('song.active = 1')
+        .leftJoinAndSelect('song.album', 'album')
+        .getOne();
 
-//     const artist = await this.getArtistByUserId(userId); // Nghệ sĩ chính
-//     const audioFile = files.audioFile[0];
-//     const imageFile = files.imageFile?.[0];
+    if (!song) throw new NotFoundException('Bài hát không tồn tại hoặc bạn không có quyền sửa.');
 
-//     // === PHÂN TÍCH COLLAB IDS ===
-//     let featuredArtistIds: number[] = [];
-//     try {
-//       const allIds = JSON.parse(dto.artistIds).map(id => +id);
-//       featuredArtistIds = allIds.filter(id => id !== artist.id); // Lọc ID chính
-//     } catch (e) {
-//       throw new BadRequestException('Dữ liệu nghệ sĩ cộng tác không hợp lệ.');
-//     }
-//     // ============================
+    // ========================== UPDATE SONG ==========================
+    song.title = dto.title ?? song.title;
+    if (dto.track_number !== undefined) song.track_number = parseInt(dto.track_number);
+    if (dto.genre) song.genre = dto.genre;
 
-//     let album: Album | null = null;
-//     if (dto.albumId) {
-//       album = await this.albumRepository.findOne({ where: { id: +dto.albumId } });
-//       if (!album) throw new NotFoundException('Album không tồn tại.');
-//     }
+    // ==================== UPDATE ALBUM ====================
+    if (dto.albumId !== undefined) {
+        if (dto.albumId === '') song.album = null;
+        else {
+            const album = await this.albumRepository.findOne({
+                where: {
+                    id: parseInt(dto.albumId),
+                    artist: { id: artist.id },
+                    active: true,
+                },
+            });
+            if (!album) throw new NotFoundException('Album không tồn tại hoặc không thuộc về bạn.');
+            song.album = album;
+        }
+    }
 
-//     // ... (Logic Upload R2, Metadata, Embedding giữ nguyên) ...
-//     const audioUpload = await this.r2Service.uploadFile('music', audioFile.originalname, audioFile.buffer, audioFile.mimetype);
-//     // ... (Logic Image Upload, Duration, Embedding giữ nguyên) ...
-//     let imageUrl: string | null = null;
-//     // ... (Logic Image Upload) ...
+    // ==================== UPDATE IMAGE ====================
+    if (imageFile) {
+        if (song.image_url) await this.r2Service.deleteFileByUrl(song.image_url);
+        const uploaded = await this.r2Service.uploadFile('covers', imageFile.originalname, imageFile.buffer, imageFile.mimetype);
+        song.image_url = uploaded.url;
+    }
 
-//     let duration = 0;
-//     // ... (Logic Duration) ...
+    // Reset trạng thái duyệt
+    if (song.status === 'APPROVED' || song.status === 'REJECTED') song.status = 'PENDING';
+
+    // ====================== UPDATE COLLAB ARTISTS ======================
+let featuredArtistIds: number[] = [];
+// ...
+
+// KIỂM TRA VÀ LỌC DỮ LIỆU ARTISTIDS (CHỈ DÙNG KHI DỮ LIỆU ĐÃ LÀ MẢNG SỐ TỪ CONTROLLER)
+if (dto.artistIds && Array.isArray(dto.artistIds)) {
     
-//     // ... (Logic Embedding) ...
-//     const embeddingVector = await this.aiService.generateSongEmbedding(dto.title, dto.genre);
+    // Lấy ID nghệ sĩ chính từ đối tượng đã tải (artist.id)
+    const primaryArtistId = artist.id; 
 
-//     // Tạo entity Song
-//     const newSong: Song = this.songRepository.create({
-//         title: dto.title,
-//         file_url: audioUpload.url,
-//         image_url: imageUrl,
-//         duration,
-//         track_number: dto.track_number ? Number(dto.track_number) : null,
-//         active: true,
-//         status: 'PENDING',
-//         genre: dto.genre,
-//         album,
-//         embedding: embeddingVector,
-//     });
-
-//     const savedSong: Song = await this.songRepository.save(newSong); 
-
-//     // === 1. LƯU NGHỆ SĨ CHÍNH (PRIMARY ARTIST) ===
-//     await this.songArtistRepository.save({ song: savedSong, artist, is_primary: true });
-
-//     // === 2. LƯU NGHỆ SĨ PHỤ (COLLAB) ===
-//     if (featuredArtistIds.length > 0) {
-//         const collabArtists = await this.artistRepository.findBy({ id: In(featuredArtistIds) });
-//         
-//         const collabRecords = collabArtists.map(featArtist => ({
-//             song: savedSong,
-//             artist: featArtist,
-//             is_primary: false,
-//         }));
-
-//         await this.songArtistRepository.save(collabRecords);
-//     }
+    // Ánh xạ, kiểm tra hợp lệ, và LỌC RA ID nghệ sĩ chính
+    featuredArtistIds = dto.artistIds
+        .map(id => +id) // Ép kiểu về số (dù đã là số nhưng là best practice)
+        .filter(id => Number.isInteger(id) && id > 0) // Đảm bảo là số nguyên dương hợp lệ
+        .filter(id => id !== primaryArtistId); // Lọc ra nghệ sĩ chính
     
-//     // === 3. LYRICS ===
-//     if (dto.lyricsContent?.trim()) {
-//         const lyricsEntity = this.lyricsRepository.create({
-//           lyrics: dto.lyricsContent.trim(),
-//           language: dto.language || 'vi',
-//           song: savedSong, 
-//         });
-//         await this.lyricsRepository.save(lyricsEntity);
-//     }
-
-//     return savedSong;
-// }
-
-
-// ==========================================================
-// =============== 2. CẬP NHẬT BÀI HÁT (UPDATE SONG) =========
-// ==========================================================
-async updateMySong(userId: number, songId: number, dto: any, imageFile?: Express.Multer.File) {
-    const artist = await this.getArtistByUserId(userId);
-
-    // 1. Kiểm tra quyền sở hữu bằng Query Builder (FIX Collab)
-    const song = await this.songRepository.createQueryBuilder('song')
-      .innerJoin('song.songArtists', 'sa', 'sa.artist_id = :artistId', { artistId: artist.id })
-      .where('song.id = :songId', { songId })
-      .leftJoinAndSelect('song.album', 'album')
-      .getOne();
-
-    if (!song) throw new NotFoundException('Bài hát không tồn tại hoặc bạn không có quyền sửa.');
-
-    // ... (Logic cập nhật Title, Track Number, Genre, Album, Image giữ nguyên) ...
-
-    // === 2. XỬ LÝ VÀ CẬP NHẬT COLLAB ARTISTS ===
-    let featuredArtistIds: number[] = [];
-    if (dto.artistIds) { 
-      try {
-        const allIds = JSON.parse(dto.artistIds).map(id => +id);
-        featuredArtistIds = allIds.filter(id => id !== artist.id); // Lọc ID chính
-      } catch (e) {
-        throw new BadRequestException('Dữ liệu nghệ sĩ cộng tác không hợp lệ.');
-      }
-    }
-
-    // 2a. Xóa tất cả nghệ sĩ phụ hiện tại của bài hát này
-    await this.songArtistRepository.delete({ song_id: songId, is_primary: false });
-
-    // 2b. Tạo lại các bản ghi Collab mới
-    if (featuredArtistIds.length > 0) {
-        const collabArtists = await this.artistRepository.findBy({ id: In(featuredArtistIds) });
-        
-        const collabRecords = collabArtists.map(featArtist => ({
-            song_id: songId,
-            artist: featArtist,
-            is_primary: false,
-        }));
-
-        await this.songArtistRepository.save(collabRecords);
-    }
-    // ========================================================
-    
-    // Cập nhật trạng thái duyệt
-    if (song.status === 'APPROVED' || song.status === 'REJECTED') song.status = 'PENDING';
-
-    return this.songRepository.save(song);
+    // Tùy chọn: Nếu bạn muốn ném lỗi nếu mảng vẫn chứa giá trị không hợp lệ
+    // (Controller đã làm tốt việc này, nhưng có thể lặp lại để đảm bảo an toàn)
+    // if (featuredArtistIds.length !== dto.artistIds.length - 1) { 
+    //     throw new BadRequestException('Dữ liệu nghệ sĩ cộng tác có chứa ID không hợp lệ.');
+    // }
+} else {
+    // Nếu dto.artistIds không phải là mảng hoặc không tồn tại (đã được Controller kiểm soát)
+    // featuredArtistIds sẽ là mảng rỗng []
 }
+
+    // 1) Deactivate collab cũ không còn trong list
+    await this.songArtistRepository
+        .createQueryBuilder()
+        .update(SongArtist)
+        .set({ active: false })
+        .where('song_id = :songId', { songId })
+        .andWhere('is_primary = 0') // CHỈ TÁC ĐỘNG ĐẾN NGHỆ SĨ CỘNG TÁC
+        .andWhere('artist_id NOT IN (:...ids)', { ids: featuredArtistIds.length ? featuredArtistIds : [0] })
+        .execute();
+
+    // 2) Bật active cho các collab mới hoặc đã tồn tại
+    for (const collabId of featuredArtistIds) {
+        const existing = await this.songArtistRepository.findOne({ where: { song_id: songId, artist_id: collabId } });
+        if (existing) {
+            existing.active = true;
+            await this.songArtistRepository.save(existing);
+        } else {
+            await this.songArtistRepository.save({
+                song_id: songId,
+                artist_id: collabId,
+                is_primary: false,
+                active: true,
+            });
+        }
+    }
+
+    // ==================== ĐẢM BẢO NGHỆ SĨ CHÍNH (PRIMARY ARTIST) ====================
+    const primaryArtistId = artist.id;
+    const primaryArtistRelationship = await this.songArtistRepository.findOne({ 
+        where: { 
+            song_id: songId, 
+            artist_id: primaryArtistId 
+        } 
+    });
+
+    if (primaryArtistRelationship) {
+        // Cập nhật lại mối quan hệ nếu nó bị tắt hoặc bị đặt nhầm is_primary
+        if (!primaryArtistRelationship.active || !primaryArtistRelationship.is_primary) {
+            primaryArtistRelationship.active = true;
+            primaryArtistRelationship.is_primary = true;
+            await this.songArtistRepository.save(primaryArtistRelationship);
+        }
+    } else {
+        // Tạo mối quan hệ mới nếu nó bị xóa hoàn toàn
+        await this.songArtistRepository.save({
+            song_id: songId,
+            artist_id: primaryArtistId,
+            is_primary: true,
+            active: true,
+        });
+    }
+    // ==============================================================================
+
+
+    // ====================== SAVE SONG ======================
+    // Bạn có thể cân nhắc thêm logic cập nhật Lyrics ở đây nếu cần.
+    return this.songRepository.save(song);
+}
+
+
+
   // ==========================================================
   // =============== DELETE SONG =============================
   // ==========================================================
   async deleteMySong(userId: number, songId: number) {
     const artist = await this.getArtistByUserId(userId);
 
-    const song = await this.songRepository.createQueryBuilder('song')
-      .innerJoin('song.songArtists', 'sa', 'sa.artist_id = :artistId', { artistId: artist.id })
+    const song = await this.songRepository
+      .createQueryBuilder('song')
+      .innerJoin(
+        'song.songArtists',
+        'sa',
+        'sa.artist_id = :artistId AND sa.active = 1',
+        { artistId: artist.id }
+      )
+      .innerJoin('sa.artist', 'artist', 'artist.active = 1')
       .where('song.id = :songId', { songId })
+      .andWhere('song.active = 1')
       .getOne();
 
-    if (!song) throw new NotFoundException('Bài hát không tồn tại hoặc bạn không có quyền xóa.');
+    if (!song) {
+      throw new NotFoundException('Bài hát không tồn tại hoặc bạn không có quyền xóa.');
+    }
 
     await this.songRepository.update(songId, { active: false });
+
     return { message: 'Bài hát đã được ẩn thành công (Soft Deleted).' };
   }
 
-  // ==========================================================
-  // =============== FIND ONE SONG ===========================
-  // ==========================================================
-  async findOne(id: number): Promise<Song> {
-    const song = await this.songRepository.findOne({
-      where: { id, active: true, status: 'APPROVED' },
-      relations: ['songArtists', 'songArtists.artist', 'album', 'lyrics'],
-    });
-    if (!song) throw new NotFoundException(`Song with ID ${id} not found`);
-    return song;
-  }
 
   // ==========================================================
   // =============== CHECK OWNERSHIP =========================
   // ==========================================================
   async checkSongOwnership(songId: number, artistId: number): Promise<Song | null> {
-    return this.songRepository.createQueryBuilder('song')
-      .innerJoin('song.songArtists', 'sa', 'sa.artist_id = :artistId', { artistId })
+    return this.songRepository
+      .createQueryBuilder('song')
+      .innerJoin('song.songArtists', 'sa',
+        'sa.artist_id = :artistId AND sa.active = 1',
+        { artistId }
+      )
+      .innerJoin('sa.artist', 'artist', 'artist.active = 1')
       .where('song.id = :songId', { songId })
+      .andWhere('song.active = 1')
       .getOne();
   }
 
-  // ==========================================================
-  // =============== GET PRIMARY ARTIST ======================
-  // ==========================================================
+
+    // ==========================================================
+    // =============== GET PRIMARY ARTIST ======================
+    // ==========================================================
   async getPrimaryArtist(songId: number) {
-    const sa = await this.songArtistRepository.findOne({
-      where: { song_id: songId, is_primary: true },
-      relations: ['artist']
-    });
+    const sa = await this.songArtistRepository
+      .createQueryBuilder('sa')
+      .leftJoinAndSelect('sa.artist', 'artist')
+      .where('sa.song_id = :songId', { songId })
+      .andWhere('sa.is_primary = 1')
+      .andWhere('sa.active = 1')         // lọc songArtist.active
+      .andWhere('artist.active = 1')     // lọc artist.active
+      .getOne();
+
     return sa?.artist || null;
   }
+
 
   // ==========================================================
   // =============== FIND MY SONGS ===========================
@@ -847,11 +710,11 @@ async updateMySong(userId: number, songId: number, dto: any, imageFile?: Express
     const artist = await this.getArtistByUserId(userId);
 
     const query = this.songRepository.createQueryBuilder('song')
-      .leftJoinAndSelect('song.songArtists', 'sa')
-      .leftJoinAndSelect('sa.artist', 'artist')
+      .leftJoinAndSelect('song.songArtists', 'sa', 'sa.active = 1')
+      .leftJoinAndSelect('sa.artist', 'artist', 'artist.active = 1')
       .leftJoinAndSelect('song.album', 'album')
       .where('sa.artist_id = :artistId', { artistId: artist.id })
-      .andWhere('song.active = true')
+     // .andWhere('song.active = true')
       .orderBy('song.created_at', 'DESC');
 
     if (status) query.andWhere('song.status = :status', { status });
@@ -864,9 +727,36 @@ async updateMySong(userId: number, songId: number, dto: any, imageFile?: Express
   // =============== FIND BY GENRE ===========================
   // ==========================================================
   async findByGenre(genreName: string) {
-    return this.songRepository.find({
-      where: { genre: genreName, active: true, status: 'APPROVED' },
-      relations: ['songArtists', 'songArtists.artist', 'album'],
-    });
+    return this.songRepository
+      .createQueryBuilder('song')
+      .where('song.genre = :genre', { genre: genreName })
+      .andWhere('song.active = :active', { active: true })
+      .andWhere('song.status = :status', { status: 'APPROVED' })
+
+      .leftJoinAndSelect('song.album', 'album')
+
+      .leftJoinAndSelect('song.songArtists', 'sa', 'sa.active = 1')
+
+    // Chỉ lấy artist active
+      .leftJoinAndSelect('sa.artist', 'artist', 'artist.active = 1')
+
+      .getMany();
   }
+
+
+async findOne(id: number): Promise<Song> {
+  const song = await this.songRepository
+    .createQueryBuilder('song')
+    .leftJoinAndSelect('song.songArtists', 'sa', 'sa.active = 1')
+      .leftJoinAndSelect('sa.artist', 'artist', 'artist.active = 1')
+    .leftJoinAndSelect('song.album', 'album')
+    .leftJoinAndSelect('song.lyrics', 'lyrics')
+    .where('song.id = :id', { id })
+    .getOne();
+
+  if (!song) throw new NotFoundException(`Song with ID ${id} not found`);
+  return song;
+}
+
+
 }

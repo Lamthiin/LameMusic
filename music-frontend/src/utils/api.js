@@ -389,6 +389,12 @@ export const getMySongsApi = async (status) => {
         throw error;
     }
 };
+export const getSongDetailApi = async (songId) => {
+    // Đảm bảo endpoint này tồn tại ở Backend và trả về đầy đủ mối quan hệ
+    // Ví dụ: GET /song/detail/123
+    const response = await api.get(`/song/detail/${songId}`); 
+    return response.data;
+};
 
 // Tạo bài hát (FormData)
 export const createSongApi = async (formData) => {
@@ -578,7 +584,18 @@ export const markNotificationAsReadApi = async (notificationId) => {
  * GET /artists/approved: Lấy danh sách tất cả nghệ sĩ đã được duyệt
  */
 export const fetchAllArtistsApi = async () => {
-    // Giả định instance axios của bạn có tên là 'api'
-    const response = await api.get('/artists/approved');
-    return response.data;
+    try {
+        // Gửi request
+        const response = await api.get('/artists/approved');
+        
+        // KIỂM TRA VÀ ĐẢM BẢO GIÁ TRỊ TRẢ VỀ LUÔN LÀ MẢNG
+        // Nếu response.data là null/undefined, dùng mảng rỗng []
+        return response.data || []; 
+        
+    } catch (error) {
+        console.error("Lỗi khi tải danh sách nghệ sĩ:", error);
+        // QUAN TRỌNG: Nếu có lỗi (lỗi mạng, lỗi 500), hàm vẫn trả về mảng rỗng
+        return []; 
+    }
 };
+

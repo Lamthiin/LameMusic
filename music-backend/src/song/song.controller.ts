@@ -5,7 +5,11 @@ import {
   Param, ParseIntPipe, NotFoundException, 
   Query, 
   UseInterceptors, UploadedFile, ValidationPipe,
-  UploadedFiles, Patch, Delete
+  UploadedFiles, Patch, Delete, 
+} from '@nestjs/common';
+import { 
+  // Add it here
+  BadRequestException  
 } from '@nestjs/common';
 import type { Request } from 'express'; 
 import { SongService } from './song.service';
@@ -89,6 +93,77 @@ export class SongController {
   ) {
     return this.songService.findAllWithFilters(genre, artistId);
   }
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+@Roles('artist')
+@Post('my')
+@UseInterceptors(FileFieldsInterceptor([ 
+  { name: 'audioFile', maxCount: 1 },
+  { name: 'imageFile', maxCount: 1 },
+]))
+async createSong(
+  @Req() req: any,
+  @Body(ValidationPipe) dto: CreateSongDto,
+  @UploadedFiles() files: { audioFile?: Express.Multer.File[], imageFile?: Express.Multer.File[] }
+) {
+  const userId = (req.user as JwtPayload).userId;
+  return this.songService.createSong(userId, dto, files);
+}
+
+@UseGuards(AuthGuard('jwt'), RolesGuard)
+@Roles('artist')
+@Patch('my/:id') // <--- ĐỊNH NGHĨA ROUTE PATCH CHÍNH XÁC
+@UseInterceptors(FileInterceptor('imageFile')) // Chỉ cần 1 file (imageFile)
+async updateMySong(
+  @Param('id', ParseIntPipe) id: number,
+  @Req() req: any,
+  @Body() body: any,
+  @UploadedFile() file: Express.Multer.File // Nhận 1 file
+) {
+    const userId = (req.user as JwtPayload).userId;
+
+    // Logic xử lý artistIds (Tối ưu hóa từ các lần sửa trước)
+    let artistIds: number[] = [];
+    if (body.artistIds) {
+        let parsed: any;
+        try {
+            // Cố gắng parse JSON
+            if (typeof body.artistIds === 'string') {
+                parsed = JSON.parse(body.artistIds);
+            } else if (Array.isArray(body.artistIds)) {
+                parsed = body.artistIds;
+            } else {
+                throw new Error('Dữ liệu không phải chuỗi JSON hoặc mảng.');
+            }
+            
+            // Kiểm tra và làm sạch mảng
+            if (!Array.isArray(parsed)) {
+                throw new Error('artistIds phải là một mảng ID.');
+            }
+            
+            artistIds = parsed
+                .map(id => parseInt(id, 10))
+                .filter(id => !isNaN(id) && id > 0);
+            
+            if (artistIds.length !== parsed.length) {
+                 // Nếu có bất kỳ ID nào bị lọc (NaN, 0,...)
+                 throw new Error('Dữ liệu mảng artistIds chứa giá trị không hợp lệ.');
+            }
+            
+        } catch (err) {
+            console.error("Lỗi parse artistIds:", err.message);
+            throw new BadRequestException('artistIds không hợp lệ'); 
+        }
+    }
+    
+    // Gán mảng artistIds đã được làm sạch vào DTO
+    const dto: UpdateSongDto = {
+      ...body,
+      artistIds,
+    };
+    
+    return this.songService.updateMySong(userId, id, dto, file);
+}
+
   
   // (findLyrics - giữ nguyên)
   @Get(':id/lyrics')
@@ -145,35 +220,6 @@ export class SongController {
     return this.songService.findMySongs(userId, status as 'PENDING' | 'APPROVED' | 'REJECTED');
   }
 
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
-  @Roles('artist')
-  @Post('my')
-  @UseInterceptors(FileFieldsInterceptor([ 
-    { name: 'audioFile', maxCount: 1 },
-    { name: 'imageFile', maxCount: 1 },
-  ]))
-  async createSong(
-    @Req() req: any,
-    @Body(ValidationPipe) dto: CreateSongDto,
-    @UploadedFiles() files: { audioFile?: Express.Multer.File[], imageFile?: Express.Multer.File[] }
-  ) {
-    const userId = (req.user as JwtPayload).userId;
-    return this.songService.createSong(userId, dto, files);
-  }
-
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
-  @Roles('artist')
-  @Patch('my/:id')
-  @UseInterceptors(FileInterceptor('imageFile')) 
-  async updateMySong(
-  @Param('id', ParseIntPipe) id: number,
-  @Req() req: any,
-    @Body(ValidationPipe) dto: UpdateSongDto,
-    @UploadedFile() file: Express.Multer.File
-  ) {
-    const userId = (req.user as JwtPayload).userId;
-    return this.songService.updateMySong(userId, id, dto, file);
-  }
   
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles('artist')
@@ -252,6 +298,19 @@ export class SongController {
     return this.songService.getPublicSongs();
   }
 
+@Get('detail/:id') // Đường dẫn khớp: /song/detail/:id
+async getSongDetail(@Param('id', ParseIntPipe) id: number) {
+    // Chúng ta sử dụng hàm findOne đã có sẵn
+    const song = await this.songService.findOne(id);
+    
+    if (!song) {
+        throw new NotFoundException(`Bài hát với ID ${id} không tồn tại`);
+    }
+    
+    // Lưu ý: findOne trong Service phải đảm bảo tải mối quan hệ songArtists.
+    // Nếu findOne không tải songArtists, bạn cần tạo hàm findOneDetail riêng trong Service.
+    return song;
+}
 
  // (findOne - giữ nguyên)
   @Get(':id') 

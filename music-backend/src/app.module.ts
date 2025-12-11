@@ -42,7 +42,7 @@ import { AdminProfileModule } from './admin/admin-profile/admin-profile.module';
       host: 'localhost',
       port: 3306,
       username: 'root', // Đảm bảo đúng username
-      password: '123456',     // Đảm bảo đúng password
+      password: 'root',     // Đảm bảo đúng password
       database: 'musicdb',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: false, 

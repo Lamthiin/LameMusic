@@ -16,14 +16,14 @@ import { JwtStrategy } from './jwt.strategy';
 import { RateLimitModule } from '../common/rate-limit.module';
 import { AuthController } from './auth.controller'; 
 import { AuthService } from './auth.service';
-
+import { Artist } from '../artist/artist.entity';
 @Module({
   imports: [
     // Phá vỡ vòng lặp (Circular Dependency) với UserModule
     forwardRef(() => UserModule), 
     RateLimitModule,
     RoleModule, 
-    TypeOrmModule.forFeature([User, Role, Otp]),
+    TypeOrmModule.forFeature([User, Role, Otp, Artist]),
     
     // === (3) THÊM 2 MODULE BỊ THIẾU VÀO ĐÂY ===
     SharedModule, // Module chứa MailerModule đã cấu hình

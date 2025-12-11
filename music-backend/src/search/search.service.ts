@@ -26,13 +26,17 @@ export class SearchService {
 
     const searchTerm = `%${query}%`; 
 
-    const [songs, artists, albums, users] = await Promise.all([
-      // 1. Tìm Bài hát (qua songArtists)
-      this.songRepository.find({
-        where: { title: Like(searchTerm), active: true, status: 'APPROVED' },
-        relations: ['songArtists', 'songArtists.artist', 'album'],
-        take: 5,
-      }),
+      const [songs, artists, albums, users] = await Promise.all([
+        this.songRepository
+          .createQueryBuilder('song')
+          .leftJoinAndSelect('song.songArtists', 'sa', 'sa.active = 1')
+          .leftJoinAndSelect('sa.artist', 'artist', 'artist.active = 1')
+          .leftJoinAndSelect('song.album', 'album')
+          .where('song.title LIKE :search', { search: searchTerm })
+          .andWhere('song.active = 1')
+          .andWhere('song.status = "APPROVED"')
+          .take(5)
+          .getMany(),
 
       // 2. Tìm Nghệ sĩ
       this.artistRepository.find({
