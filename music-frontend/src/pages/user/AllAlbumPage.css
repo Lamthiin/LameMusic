@@ -167,3 +167,106 @@
         grid-template-columns: repeat(1,1fr);
     }
 }
+
+/* src/pages/AllAlbumPage.css */
+
+/* --- KHU VỰC LỌC --- */
+.allalbums-filter-area {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+    position: relative;
+}
+
+/* Dropdown */
+.allalbums-artist-select {
+    position: relative;
+    padding: 10px 15px;
+    border: 1px solid var(--border-color, #333);
+    border-radius: 6px;
+    cursor: pointer;
+    background-color: var(--card-bg, #1a1a1a);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 200px;
+    transition: all 0.2s;
+}
+
+.allalbums-artist-select:hover,
+.allalbums-artist-select.open {
+    border-color: var(--primary-color, #1db954);
+}
+
+.allalbums-select-label {
+    font-weight: 500;
+    color: var(--text-color, #fff);
+}
+
+.allalbums-select-icon {
+    margin-left: 10px;
+    transition: transform 0.2s;
+}
+
+.allalbums-artist-select.open .allalbums-select-icon {
+    transform: rotate(180deg);
+}
+
+.allalbums-dropdown-menu {
+    position: absolute;
+    top: 100%; /* Đặt ngay dưới nút chọn */
+    left: 0;
+    width: 100%;
+    margin-top: 5px;
+    background-color: var(--dropdown-bg, #282828);
+    border: 1px solid var(--primary-color, #1db954);
+    border-radius: 6px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    z-index: 10;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.allalbums-dropdown-item {
+    padding: 10px 15px;
+    cursor: pointer;
+    color: var(--text-color-secondary, #b3b3b3);
+    transition: background-color 0.1s;
+}
+
+.allalbums-dropdown-item:hover {
+    background-color: var(--hover-bg, #3a3a3a);
+    color: var(--text-color, #fff);
+}
+
+.allalbums-dropdown-item.active {
+    background-color: var(--primary-color, #1db954);
+    color: white;
+}
+
+/* Nút Reset */
+.allalbums-reset-btn {
+    background: none;
+    border: 1px solid var(--border-color, #333);
+    color: var(--text-color-secondary, #b3b3b3);
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s;
+}
+
+.allalbums-reset-btn:hover {
+    border-color: var(--primary-color, #1db954);
+    color: var(--primary-color, #1db954);
+}
+
+/* --- HIỂN THỊ SỐ LƯỢNG --- */
+.allalbums-count {
+    margin-top: 20px;
+    color: var(--text-color-secondary, #b3b3b3);
+    font-size: 0.9em;
+}

@@ -1,8 +1,10 @@
-// src/pages/AllAlbumsPage.jsx – FULL, ĐẸP, KHÔNG TRÙNG CLASS
-import React, { useState, useEffect } from 'react';
+// src/pages/AllAlbumsPage.jsx – FULL, ĐẸP, CÓ LỌC NGHỆ SĨ
+
+import React, { useState, useEffect, useMemo } from 'react'; 
 import { useNavigate } from 'react-router-dom';
 import { fetchAllAlbumsApi } from '../../utils/api';
 import './AllAlbumPage.css';
+import { FaChevronDown, FaTimes } from 'react-icons/fa'; // Icon cho dropdown/reset
 
 const fixUrl = (url, type = 'image') => {
     if (!url) {
@@ -24,6 +26,10 @@ const fixUrl = (url, type = 'image') => {
 const AllAlbumsPage = () => {
     const [albums, setAlbums] = useState([]);
     const [loading, setLoading] = useState(true);
+    // STATE LỌC
+    const [selectedArtistId, setSelectedArtistId] = useState(null); 
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false); 
+    
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -47,6 +53,28 @@ const AllAlbumsPage = () => {
         loadAlbums();
     }, []);
 
+    // 1. TÍNH TOÁN DANH SÁCH NGHỆ SĨ DUY NHẤT
+    const uniqueArtists = useMemo(() => {
+        const artistMap = new Map();
+        albums.forEach(album => {
+            if (album.artist) {
+                artistMap.set(album.artist.id, album.artist);
+            }
+        });
+        return Array.from(artistMap.values()).sort((a, b) => 
+            a.stage_name.localeCompare(b.stage_name)
+        );
+    }, [albums]);
+
+    // 2. LỌC ALBUM DỰA TRÊN NGHỆ SĨ ĐƯỢC CHỌN
+    const filteredAlbums = useMemo(() => {
+        if (!selectedArtistId) return albums;
+        // Chuyển selectedArtistId thành chuỗi để so sánh
+        return albums.filter(album => album.artist && String(album.artist.id) === String(selectedArtistId));
+    }, [albums, selectedArtistId]);
+
+    const currentArtist = uniqueArtists.find(a => String(a.id) === String(selectedArtistId));
+
     const goToAlbumDetail = (id) => {
         navigate(`/album/${id}`);
     };
@@ -59,9 +87,59 @@ const AllAlbumsPage = () => {
         <div className="allalbums-wrapper">
             <h1 className="allalbums-title">Tất cả Album</h1>
             
-            {albums.length > 0 ? (
+            {/* --- KHU VỰC LỌC (Lọc theo Nghệ sĩ) --- */}
+            <div className="allalbums-filter-area">
+                <div 
+                    className={`allalbums-artist-select ${isDropdownOpen ? 'open' : ''}`}
+                    onClick={() => setIsDropdownOpen(prev => !prev)}
+                    onBlur={() => setTimeout(() => setIsDropdownOpen(false), 200)} 
+                    tabIndex={0}
+                >
+                    <span className="allalbums-select-label">
+                        {currentArtist ? currentArtist.stage_name : 'Lọc theo Nghệ sĩ'}
+                    </span>
+                    <FaChevronDown size={12} className="allalbums-select-icon" />
+                    
+                    {isDropdownOpen && (
+                        <div className="allalbums-dropdown-menu">
+                            {/* Option "Tất cả" */}
+                            <div 
+                                className="allalbums-dropdown-item"
+                                onClick={() => { setSelectedArtistId(null); setIsDropdownOpen(false); }}
+                            >
+                                Tất cả Album
+                            </div>
+                            
+                            {/* Danh sách Nghệ sĩ */}
+                            {uniqueArtists.map(artist => (
+                                <div 
+                                    key={artist.id}
+                                    className={`allalbums-dropdown-item ${String(selectedArtistId) === String(artist.id) ? 'active' : ''}`}
+                                    onClick={() => { setSelectedArtistId(artist.id); setIsDropdownOpen(false); }}
+                                >
+                                    {artist.stage_name}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+                
+                {/* Nút Reset Filter */}
+                {selectedArtistId && (
+                    <button 
+                        className="allalbums-reset-btn"
+                        onClick={() => setSelectedArtistId(null)}
+                    >
+                        <FaTimes size={12} /> Xóa bộ lọc
+                    </button>
+                )}
+            </div>
+            {/* --- KẾT THÚC KHU VỰC LỌC --- */}
+
+            
+            {filteredAlbums.length > 0 ? (
                 <div className="allalbums-grid">
-                    {albums.map(album => (
+                    {filteredAlbums.map(album => ( 
                         <div 
                             key={album.id} 
                             className="allalbums-card"
@@ -90,7 +168,15 @@ const AllAlbumsPage = () => {
                     ))}
                 </div>
             ) : (
-                <p className="allalbums-empty">Không tìm thấy Album nào.</p>
+                <p className="allalbums-empty">
+                    {selectedArtistId ? `Không tìm thấy Album nào của ${currentArtist?.stage_name}.` : "Không tìm thấy Album nào."}
+                </p>
+            )}
+            
+            {!loading && albums.length > 0 && (
+                <p className="allalbums-count">
+                    Hiển thị {filteredAlbums.length} trên tổng số {albums.length} Album.
+                </p>
             )}
         </div>
     );
