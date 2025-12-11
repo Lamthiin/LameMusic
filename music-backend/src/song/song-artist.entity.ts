@@ -11,16 +11,25 @@ export class SongArtist {
     @PrimaryColumn({ name: 'artist_id' })
     artist_id: number;
 
-    @Column({ default: false, name: 'is_primary' })
-    is_primary: boolean; // Chỉ định ai là nghệ sĩ chính
+     @Column({ name: 'is_primary', type: 'tinyint', width: 1, default: 0 })
+    is_primary: boolean;
+
+    @Column({ name: 'active', type: 'tinyint', width: 1, default: 1 })
+    active: boolean;
 
     // SỬA: Xóa { primary: true }
-    @ManyToOne(() => Song, song => song.songArtists)
+    @ManyToOne(() => Song, song => song.songArtists, {
+        nullable: false,        // 1
+        onDelete: 'CASCADE',    // 2
+    })
     @JoinColumn({ name: 'song_id' })
     song: Song;
 
     // SỬA: Xóa { primary: true }
-    @ManyToOne(() => Artist, artist => artist.songArtists)
+   @ManyToOne(() => Artist, artist => artist.songArtists, {
+        nullable: false,        // 3
+        onDelete: 'CASCADE',    // 4
+    })
     @JoinColumn({ name: 'artist_id' })
     artist: Artist;
 }

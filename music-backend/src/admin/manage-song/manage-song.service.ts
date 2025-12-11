@@ -105,32 +105,46 @@ export class ManageSongService {
       const savedSong = await this.songRepo.save(song);
 
       // =====================
-      // Lưu nghệ sĩ chính
+      // 1) LƯU NGHỆ SĨ CHÍNH → 11 (is_primary = true, active = true)
       // =====================
       await this.songArtistRepo.save({
-        song: savedSong,
-        artist,
+        song_id: savedSong.id,
+        artist_id: artist.id,
         is_primary: true,
+        active: true,
+        song: { id: savedSong.id },
+        artist: { id: artist.id },
       });
 
-      // =====================
-      // Lưu nghệ sĩ collab
-      // =====================
-      if (Array.isArray(body.featuredArtists)) {
-        for (const id of body.featuredArtists) {
-          const collab = await this.artistRepo.findOne({
-            where: { id: Number(id) },
-          });
 
-          if (collab) {
-            await this.songArtistRepo.save({
-              song: savedSong,
-              artist: collab,
-              is_primary: false,
-            });
-          }
+      // =====================
+      // 2) LƯU NGHỆ SĨ COLLAB → 01 (is_primary = false, active = true)
+      //    FE gửi featuredArtists = JSON.stringify([...])
+      // =====================
+      let featuredIds: number[] = [];
+
+      if (body.featuredArtists) {
+        const raw =
+          typeof body.featuredArtists === 'string'
+            ? JSON.parse(body.featuredArtists)
+            : body.featuredArtists;
+
+        if (Array.isArray(raw)) {
+          featuredIds = raw.map((v: any) => Number(v));
         }
       }
+
+      for (const id of featuredIds) {
+        await this.songArtistRepo.save({
+          song_id: savedSong.id,
+          artist_id: id,
+          is_primary: false,
+          active: true,
+          song: { id: savedSong.id },
+          artist: { id },
+        });
+      }
+
 
       // =====================
       // Lưu lyrics
@@ -222,50 +236,81 @@ export class ManageSongService {
       if (!category) throw new NotFoundException('Thể loại không tồn tại');
       song.genre = category.name;
     }
-
-    song.songArtists = [];
-    // =====================
-    // UPDATE NGHỆ SĨ (primary + collab)
-    // =====================
+    
+    // ========================
+    // UPDATE NGHỆ SĨ (primary + collab) — KHÔNG DÙNG save() NỮA
+    // =====================================================
     if (body.artist) {
-      const artist = await this.artistRepo.findOne({
-        where: { id: Number(body.artist) },
+      const newPrimaryId = Number(body.artist);
+
+      let newCollabs: number[] = [];
+      if (body.featuredArtists) {
+        const raw = typeof body.featuredArtists === "string"
+          ? JSON.parse(body.featuredArtists)
+          : body.featuredArtists;
+
+        if (Array.isArray(raw)) newCollabs = raw.map(Number);
+      }
+
+      // Lấy quan hệ cũ
+      const oldRelations = await this.songArtistRepo.find({
+        where: { song_id: id },
       });
 
-      if (!artist) throw new NotFoundException('Artist không tồn tại');
+      const oldArtistIds = oldRelations.map(r => r.artist_id);
+      const newArtistIds = [newPrimaryId, ...newCollabs];
 
-      // XÓA toàn bộ quan hệ cũ
-      await this.songArtistRepo
-        .createQueryBuilder()
-        .delete()
-        .from(SongArtist)
-        .where("song_id = :id", { id })
-        .execute();
+      // -------------------------------
+      // 1) UPDATE primary (11)
+      // -------------------------------
+      if (oldArtistIds.includes(newPrimaryId)) {
+        await this.songArtistRepo.update(
+          { song_id: id, artist_id: newPrimaryId },
+          { is_primary: true, active: true },
+        );
+      } else {
+        await this.songArtistRepo.insert({
+          song_id: id,
+          artist_id: newPrimaryId,
+          is_primary: true,
+          active: true,
+        });
+      }
 
-      // Thêm nghệ sĩ chính
-      await this.songArtistRepo.save({
-        song: song,
-        artist,
-        is_primary: true,
-      });
-
-      // Thêm collab
-      if (Array.isArray(body.featuredArtists)) {
-        for (const aId of body.featuredArtists) {
-          const collab = await this.artistRepo.findOne({
-            where: { id: Number(aId) },
+      // -------------------------------
+      // 2) UPDATE collabs (01)
+      // -------------------------------
+      for (const collabId of newCollabs) {
+        if (oldArtistIds.includes(collabId)) {
+          await this.songArtistRepo.update(
+            { song_id: id, artist_id: collabId },
+            { is_primary: false, active: true },
+          );
+        } else {
+          await this.songArtistRepo.insert({
+            song_id: id,
+            artist_id: collabId,
+            is_primary: false,
+            active: true,
           });
+        }
+      }
 
-          if (collab) {
-            await this.songArtistRepo.save({
-              song: song,
-              artist: collab,
-              is_primary: false,
-            });
-          }
+      // -------------------------------
+      // 3) NGHỆ SĨ BỊ LOẠI → active = false
+      // -------------------------------
+      for (const old of oldRelations) {
+        if (!newArtistIds.includes(old.artist_id)) {
+          await this.songArtistRepo.update(
+            { song_id: id, artist_id: old.artist_id },
+            { active: false },
+          );
         }
       }
     }
+
+
+
 
   // ========================
   // ALBUM
@@ -343,7 +388,6 @@ export class ManageSongService {
     song.file_url = uploaded.url;
   }
 
-  delete (song as any).songArtists;
   await this.songRepo.save(song);
   return song;
 

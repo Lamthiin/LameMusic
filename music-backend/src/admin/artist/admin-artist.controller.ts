@@ -19,6 +19,7 @@ import { AdminArtistService } from './admin-artist.service';
 @Controller('admin/artists')
 export class AdminArtistController {
   constructor(private readonly service: AdminArtistService) {}
+  
 
   // ⭐ FIX URL AVATAR (thêm duy nhất phần này)
   private fixAvatar(artist: any) {
@@ -84,6 +85,12 @@ export class AdminArtistController {
     return list.map(a => this.fixAvatar(a));
   }
 
+  // ⭐ LẤY TẤT CẢ NGHỆ SĨ ĐÃ ĐƯỢC APPROVED (bao gồm nghệ sĩ nội bộ + đăng ký)
+  @Get('list-all')
+  async listAllArtists() {
+    const artists = await this.service.findAllApprovedArtists();
+    return artists.map(a => this.fixAvatar(a));
+  }
 
   @Get(':id')
   async getOne(@Param('id') id: string) {

@@ -225,21 +225,21 @@ const AdminCustomerPage = () => {
 
       </table>
 
-      <div className="mini-pagination">
+      <div className="user-mini-pagination">
         <button
-          className="mini-page-btn"
+          className="user-mini-page-btn"
           onClick={() => setCurrentPage((p) => p - 1)}
           disabled={currentPage === 1}
         >
           ←
         </button>
 
-        <span className="mini-page-text">
+        <span className="user-mini-page-text">
           Trang {currentPage} / {totalPages}
         </span>
 
         <button
-          className="mini-page-btn"
+          className="user-mini-page-btn"
           onClick={() => setCurrentPage((p) => p + 1)}
           disabled={currentPage === totalPages}
         >

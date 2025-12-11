@@ -27,10 +27,18 @@ const ManageSong = () => {
 
       setSongs(
         data.map(s => {
-          const primary = s.songArtists?.find(a => a.is_primary === 1);
+          // ⭐ CHỈ LẤY NGHỆ SĨ active = 1 (11 + 01)
+          const activeArtists = s.songArtists?.filter(sa => sa.active === 1) ?? [];
+
+          // ⭐ Nghệ sĩ chính (11)
+          const primary = activeArtists.find(a => a.is_primary === 1);
+
+          // ⭐ Danh sách tên nghệ sĩ để hiển thị
           const allNames = s.songArtists
-            ?.map(a => a.artist?.stage_name)
+            ?.filter(a => a.active === 1)
+            .map(a => a.artist?.stage_name)
             .join(", ") ?? "";
+
 
           return {
             id: s.id,
@@ -39,15 +47,17 @@ const ManageSong = () => {
             // LẤY NGHỆ SĨ ĐÚNG
             artistName: allNames,
             artistId: primary?.artist?.id ?? null,
-            collabs: s.songArtists
-            ?.filter(a => !a.is_primary)
-            ?.map(a => a.artist?.id) ?? [],     // ✔ thêm collab để dùng cho edit
+            collabs: activeArtists
+            .filter(a => a.is_primary === 0)
+            .map(a => a.artist?.id),
 
             albumName: s.album?.title ?? "",
             duration: s.duration,
             playCount: s.play_count,
             genre: s.genre ?? "",
-            genreId: genres.find(g => g.name === s.genre)?.id ?? null,
+            genreId: genres?.length
+            ? genres.find(g => g.name === s.genre)?.id ?? null
+            : null,
             coverUrl: s.image_url,
             audioUrl: s.file_url,
             status: s.status,
@@ -176,13 +186,19 @@ const ManageSong = () => {
 
   useEffect(() => {
     if (showEditPopup) {
-      setEditCollabArtists(
-        showEditPopup.songArtists
-          ?.filter(sa => !sa.is_primary)
-          ?.map(sa => sa.artist_id) || []
-      );
+      // ⭐ chỉ lấy nghệ sĩ còn active = 1
+      const activeSongArtists =
+        showEditPopup.songArtists?.filter(sa => sa.active === 1) ?? [];
+
+      // ⭐ chỉ collab (01)
+      const activeCollabs = activeSongArtists
+        .filter(sa => sa.is_primary === 0)
+        .map(sa => sa.artist?.id);
+
+      setEditCollabArtists(activeCollabs);
     }
   }, [showEditPopup]);
+
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -323,36 +339,41 @@ const ManageSong = () => {
 
   const handleUpdateSong = async () => {
     const id = showEditPopup.id;
-
     const formData = new FormData();
-    formData.append("title", editTitle);
-    formData.append("artist", editArtist);
-    formData.append("album", editAlbum ?? "");
-    formData.append("category", editCategory);
-    formData.append("lyrics", editLyrics);
-    formData.append("lyricsLanguage", editLyricsLanguage);
-    
-    // Lấy collab gốc
-    const originalCollabs =
-      showEditPopup?.songArtists
-        ?.filter(sa => !sa.is_primary)
-        ?.map(sa => sa.artist_id) || [];
 
-    // Nếu user đã thay đổi collab → gửi lên
-    const hasChangedCollab =
-      JSON.stringify(originalCollabs.sort()) !==
-      JSON.stringify([...editCollabArtists].sort());
+    // luôn gửi title
+    formData.append("title", editTitle.trim());
 
-    if (hasChangedCollab) {
-      formData.append("featuredArtists", JSON.stringify(editCollabArtists));
+    // chỉ gửi artist nếu có id hợp lệ
+    if (editArtist) {
+      formData.append("artist", String(editArtist));
     }
 
+    // album: nếu có id thì gửi, không thì gửi rỗng để BE set null
+    if (editAlbum) {
+      formData.append("album", String(editAlbum));
+    } else {
+      formData.append("album", "");
+    }
 
+    // category: chỉ gửi nếu có
+    if (editCategory) {
+      formData.append("category", String(editCategory));
+    }
+
+    // lyrics: luôn là string
+    formData.append("lyrics", editLyrics || "");
+    formData.append("lyricsLanguage", editLyricsLanguage || "vi");
+
+    // featuredArtists: luôn là mảng id số, nhưng đảm bảo không undefined
+    formData.append(
+      "featuredArtists",
+      JSON.stringify(editCollabArtists || [])
+    );
 
     if (editCoverFile) {
       formData.append("imageFile", editCoverFile);
     }
-
     if (editAudioFile) {
       formData.append("audioFile", editAudioFile);
     }
@@ -360,25 +381,22 @@ const ManageSong = () => {
     try {
       const res = await fetch(`http://localhost:3000/admin/manage-song/${id}`, {
         method: "PATCH",
-        body: formData
+        body: formData,
       });
 
       if (!res.ok) throw new Error("Update failed");
 
-      await fetchSongs(); // load lại danh sách
-
-      // Thay alert thành popup success
+      await fetchSongs();
       setShowEditSuccessPopup(true);
-
       resetEditPopup();
       setShowEditPopup(null);
-
     } catch (err) {
       console.error(err);
       setErrorMessage("Sửa bài hát thất bại, vui lòng kiểm tra backend.");
       setShowErrorPopup(true);
     }
   };
+
 
 
 
@@ -444,7 +462,17 @@ const ManageSong = () => {
     formData.append("category", newCategory); // ID thể loại
     formData.append("lyrics", newLyrics);
     formData.append("lyricsLanguage", newLyricsLanguage);
-    formData.append("featuredArtists", JSON.stringify(featuredArtists));
+    const originalCollabs =
+      showEditPopup.songArtists
+        ?.filter(sa => sa.active && !sa.is_primary)
+        ?.map(sa => sa.artist.id) || [];
+
+    const collabsToSend =
+      editCollabArtists.length === 0
+        ? originalCollabs
+        : editCollabArtists;
+
+    formData.append("featuredArtists", JSON.stringify(collabsToSend));
 
 
 
@@ -696,29 +724,31 @@ const ManageSong = () => {
                         <button
                           onClick={async () => {
 
-                            // Lấy FULL bài hát từ backend (có songArtists, lyrics, album…)
                             const res = await fetch(`http://localhost:3000/admin/manage-song/${song.id}`);
                             const full = await res.json();
 
-                            // Mở popup bằng full data
                             setShowEditPopup(full);
 
-                            // Set tiêu đề + lyrics
+                            // Tiêu đề + lyrics
                             setEditTitle(full.title);
                             setEditLyrics(full.lyrics?.lyrics || "");
                             setEditLyricsLanguage(full.lyrics?.language || "vi");
 
-                            // LẤY NGHỆ SĨ CHÍNH
-                            const primary = full.songArtists.find(sa => sa.is_primary);
+                            // ⭐ LỌC NGHỆ SĨ ACTIVE = 1
+                            const activeSongArtists = full.songArtists?.filter(sa => sa.active) ?? [];
+
+                            // ⭐ NGHỆ SĨ CHÍNH (11)
+                            const primary = activeSongArtists.find(sa => sa.is_primary);
                             setSelectedEditArtist(primary?.artist || null);
                             setEditArtist(primary?.artist?.id || "");
 
-                            // LẤY COLLAB (tick checkbox)
                             setEditCollabArtists(
-                              full.songArtists
+                              activeSongArtists
                                 .filter(sa => !sa.is_primary)
-                                .map(sa => sa.artist_id)
+                                .map(sa => sa.artist?.id)   
                             );
+
+
 
                             // LOAD ALBUM THEO NGHỆ SĨ
                             if (primary?.artist?.id) {
@@ -727,20 +757,27 @@ const ManageSong = () => {
                               );
                               const albumData = await albRes.json();
 
+                              // Nếu nghệ sĩ mới KHÔNG có album → reset toàn bộ
+                              if (!albumData.length) {
+                                setFilteredAlbumsEdit([]); 
+                                setSelectedEditAlbum(null); 
+                                setEditAlbum("");            // gửi rỗng lên BE → sẽ set null
+                                return;
+                              }
+
                               setFilteredAlbumsEdit(albumData);
 
-                              // Chọn album đúng
                               const matchAlbum = albumData.find(a => a.id === full.album?.id);
                               setSelectedEditAlbum(matchAlbum || null);
                               setEditAlbum(matchAlbum?.id || "");
                             }
 
-                            // 7️Thể loại
+                            // Thể loại
                             const categoryObj = genres.find(g => g.name === full.genre);
                             setSelectedEditCategory(categoryObj || null);
                             setEditCategory(categoryObj?.id || "");
 
-                            // 8Ảnh preview
+                            // Ảnh preview
                             setEditCoverPreview(full.image_url);
                             setEditCoverFile(null);
 
@@ -871,7 +908,7 @@ const ManageSong = () => {
                       const data = await res.json();
 
                       // 🔥 chỉ giữ album active
-                      const activeAlbums = data.filter(a => a.active === true);
+                      const activeAlbums = data.filter(a => a.active === 1);
 
                       setFilteredAlbumsAdd(data);
                       setNewAlbum("");          // reset album
@@ -1219,7 +1256,8 @@ const ManageSong = () => {
                 type="text"
                 value={
                   showViewPopup.songArtists
-                    ?.find(sa => sa.is_primary)?.artist?.stage_name || ""
+                    ?.filter(sa => sa.active)
+                    .find(sa => sa.is_primary)?.artist?.stage_name || ""
                 }
                 readOnly
               />
@@ -1232,12 +1270,13 @@ const ManageSong = () => {
               {showViewPopup.songArtists?.some(sa => !sa.is_primary) ? (
                 <div className="view-collab-box">
                   {showViewPopup.songArtists
-                    .filter(sa => !sa.is_primary)
+                    .filter(sa => sa.active && !sa.is_primary)
                     .map(sa => (
-                      <span key={sa.artist_id} className="view-collab-tag">
+                      <span key={sa.artist?.id} className="view-collab-tag">
                         {sa.artist?.stage_name}
                       </span>
-                    ))}
+                    ))
+                  }
                 </div>
               ) : (
                 <input type="text" value="Không có" readOnly />

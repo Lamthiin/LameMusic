@@ -250,7 +250,7 @@
   opacity: 0.4;
 }
 
-.mini-pagination {
+.user-mini-pagination {
   margin-top: 25px;
   display: flex;
   justify-content: center;
@@ -258,7 +258,7 @@
   gap: 15px;
 }
 
-.mini-page-btn {
+.user-mini-page-btn {
   width: 28px;
   height: 28px;
   border-radius: 6px;
@@ -273,17 +273,17 @@
   transition: 0.15s ease;
 }
 
-.mini-page-btn:hover:not(:disabled) {
+.user-mini-page-btn:hover:not(:disabled) {
   background: #4b4b4b;
 }
 
-.mini-page-btn:disabled {
+.user-mini-page-btn:disabled {
   background: #555;
   color: #888;
   cursor: not-allowed;
 }
 
-.mini-page-text {
+.user-mini-page-text {
   color: #fff;
   font-size: 16px;
   font-weight: 500;

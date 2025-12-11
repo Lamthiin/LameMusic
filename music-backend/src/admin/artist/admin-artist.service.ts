@@ -459,4 +459,5 @@ export class AdminArtistService {
       totalItems: total
     };
   }
+  
 }
