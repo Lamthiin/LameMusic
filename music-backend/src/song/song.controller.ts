@@ -71,16 +71,7 @@ export class SongController {
     res.send(Buffer.from(buffer));
   }
   
-//   // (findAllWithFilters - giữ nguyên)
-//   @Get('all')
-//   @UseGuards(OptionalJwtAuthGuard)
-//   findAllWithFilters(
-//     @Query('genre') genre?: string, 
-//     @Query('artistId', new ParseIntPipe({ optional: true })) 
-//     artistId?: number, 
-//   ) {
-//     return this.songService.findAllWithFilters(genre, artistId);
-//   }
+
 
   @Get('all')
   @UseGuards(OptionalJwtAuthGuard)
@@ -93,21 +84,7 @@ export class SongController {
   ) {
     return this.songService.findAllWithFilters(genre, artistId);
   }
-//   @UseGuards(AuthGuard('jwt'), RolesGuard)
-// @Roles('artist')
-// @Post('my')
-// @UseInterceptors(FileFieldsInterceptor([ 
-//   { name: 'audioFile', maxCount: 1 },
-//   { name: 'imageFile', maxCount: 1 },
-// ]))
-// async createSong(
-//   @Req() req: any,
-//   @Body(ValidationPipe) dto: CreateSongDto,
-//   @UploadedFiles() files: { audioFile?: Express.Multer.File[], imageFile?: Express.Multer.File[] }
-// ) {
-//   const userId = (req.user as JwtPayload).userId;
-//   return this.songService.createSong(userId, dto, files);
-// }
+
 
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 @Roles('artist')

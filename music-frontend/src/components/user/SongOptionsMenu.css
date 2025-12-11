@@ -1,25 +1,46 @@
+/* SongOptionsMenu.css */
 .song-options-menu {
-  position: absolute;
-  background: rgb(0, 0, 0);
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  z-index: 1000;
+  position: fixed; /* để menu tự do trên toàn màn hình */
+  background: #181818; /* nền tối giống Spotify */
+  color: #fff; /* chữ trắng */
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
   min-width: 160px;
+  max-width: 220px;
+  overflow: hidden;
+  font-size: 14px;
+  z-index: 1000;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+  opacity: 1;
 }
 
 .song-options-menu ul {
   list-style: none;
   margin: 0;
-  padding: 8px 0;
+  padding: 4px 0;
 }
 
 .song-options-menu li {
-  padding: 8px 16px;
+  padding: 10px 16px;
   cursor: pointer;
+  white-space: nowrap; /* không xuống dòng */
+  overflow: hidden; /* tránh text tràn */
+  text-overflow: ellipsis;
   transition: background 0.15s;
 }
 
 .song-options-menu li:hover {
-  background: #000000;
+  background: #333; /* hover nền tối hơn */
+}
+
+.song-options-menu li:active {
+  background: #555; /* nhấn menu */
+}
+
+@media (max-width: 600px) {
+  .song-options-menu {
+    min-width: 140px;
+    max-width: 180px;
+    font-size: 13px;
+  }
 }

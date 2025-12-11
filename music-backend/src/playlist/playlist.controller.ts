@@ -11,6 +11,7 @@ import { CreatePlaylistDto } from './dto/create-playlist.dto';
 import { AuthGuard } from '@nestjs/passport'; 
 import { JwtPayload } from '../auth/jwt.strategy';
 import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
+import { AddSongsToPlaylistDto } from './dto/add-songs-to-playlist.dto'; // Import DTO
 
 
 @Controller('playlists')
@@ -42,6 +43,30 @@ export class PlaylistController {
     const userId = (req.user as JwtPayload).userId;
     return this.playlistService.findMyPlaylists(userId);
   }
+
+  /**
+ * === API MỚI: Thêm bài hát HÀNG LOẠT vào playlist ===
+ * POST /playlists/:playlistId/add-songs
+ */
+@UseGuards(AuthGuard('jwt'))
+@Post(':playlistId/add-songs') // <-- Đổi endpoint thành 'add-songs' (số nhiều)
+async addSongsToPlaylist(
+  @Param('playlistId', ParseIntPipe) playlistId: number,
+  @Body() data: AddSongsToPlaylistDto, // <-- NHẬN DTO HÀNG LOẠT
+  @Req() req
+) {
+  // Nhờ ValidationPipe, chúng ta biết data.songIds là MẢNG SỐ hợp lệ
+  
+  const userId = (req.user as JwtPayload).userId;
+  
+  await this.playlistService.addSongsToPlaylist(
+    userId, 
+    playlistId, 
+    data.songIds // TRUYỀN MẢNG ID
+  );
+  
+  return { message: `Đã thêm ${data.songIds.length} bài hát vào playlist.` };
+}
 
   /**
    * === API MỚI: Thêm bài hát vào playlist ===

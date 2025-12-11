@@ -1,17 +1,14 @@
-// src/components/SongListTable.jsx – ĐẸP, CÓ PHÂN TRANG, LƯỢT NGHE ĐẸP
-import React, { useState, useMemo, useEffect } from 'react';
+// src/components/SongListTable.jsx
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePlayer } from '../../context/PlayerContext';
-import SongOptionsMenu from './SongOptionsMenu';
 import AddToPlaylistModal from './AddToPlaylistModal';
 import './SongListTable.css';
-import { FaPlay, FaPause, FaCheck, FaTimes, FaDownload } from 'react-icons/fa';
+import { FaPlay, FaPause, FaTimes, FaDownload, FaList } from 'react-icons/fa';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:3000";
-
-const showToast = (msg) => alert(msg);
+const ITEMS_PER_PAGE = 10;
 
 const formatPlayCount = (num) => {
   if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
@@ -26,8 +23,6 @@ const formatDuration = (seconds) => {
   return `${m}:${s.toString().padStart(2, '0')}`;
 };
 
-const ITEMS_PER_PAGE = 10;
-
 const SongListTable = ({ songs = [], onRemoveSong }) => {
   const navigate = useNavigate();
   const { playTrack, currentTrack, isPlaying } = usePlayer();
@@ -35,8 +30,8 @@ const SongListTable = ({ songs = [], onRemoveSong }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedSongs, setSelectedSongs] = useState(new Set());
   const [hoveredRow, setHoveredRow] = useState(null);
-  const [menuAnchor, setMenuAnchor] = useState(null);
   const [menuSong, setMenuSong] = useState(null);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const totalPages = Math.ceil(songs.length / ITEMS_PER_PAGE);
@@ -56,11 +51,8 @@ const SongListTable = ({ songs = [], onRemoveSong }) => {
   };
 
   const selectAll = () => {
-    if (selectedSongs.size === paginatedSongs.length) {
-      setSelectedSongs(new Set());
-    } else {
-      setSelectedSongs(new Set(paginatedSongs.map(s => s.id)));
-    }
+    if (selectedSongs.size === paginatedSongs.length) setSelectedSongs(new Set());
+    else setSelectedSongs(new Set(paginatedSongs.map(s => s.id)));
   };
 
   const playSong = (song, index) => {
@@ -72,13 +64,52 @@ const SongListTable = ({ songs = [], onRemoveSong }) => {
 
   const openMenu = (e, song) => {
     e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    const menuWidth = 180;
+    const menuHeight = 80;
+    let left = rect.left;
+    if (left + menuWidth > window.innerWidth) left = window.innerWidth - menuWidth - 10;
+    let top = rect.bottom + 4;
+    if (top + menuHeight > window.innerHeight) top = rect.top - menuHeight - 4;
     setMenuSong(song);
-    setMenuAnchor(e.currentTarget);
+    setMenuPosition({ top, left });
   };
 
-  const closeMenu = () => {
-    setMenuAnchor(null);
-    setMenuSong(null);
+  const closeMenu = () => setMenuSong(null);
+
+  const handleDownload = async (song) => {
+    try {
+      const res = await fetch(`/song/download/${song.id}`);
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${song.title}.mp3`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Lỗi tải bài', song.title, err);
+    }
+  };
+
+  const handleDownloadSelected = async () => {
+    if (selectedSongs.size === 0) return;
+    const zip = new JSZip();
+    for (const songId of selectedSongs) {
+      const song = songs.find(s => s.id === songId);
+      if (!song) continue;
+      try {
+        const res = await fetch(`/song/download/${songId}`);
+        const blob = await res.blob();
+        zip.file(`${song.title}.mp3`, blob);
+      } catch (err) {
+        console.error('Lỗi tải bài', song.title, err);
+      }
+    }
+    const content = await zip.generateAsync({ type: 'blob' });
+    saveAs(content, 'SelectedSongs.zip');
   };
 
   return (
@@ -89,14 +120,14 @@ const SongListTable = ({ songs = [], onRemoveSong }) => {
         </span>
 
         {hasSelection ? (
-          <>
-            <span className="selection-count">
-              Đã chọn {selectedSongs.size} bài
-            </span>
-            <button className="action-download" onClick={() => {}}>
+          <div className="action-button-group">
+            <button className="action-download" onClick={handleDownloadSelected}>
               <FaDownload /> Tải xuống
             </button>
-          </>
+            <button className="action-add-to-playlist" onClick={() => setIsAddModalOpen(true)}>
+              <FaList /> Thêm vào Playlist
+            </button>
+          </div>
         ) : (
           <>
             <span className="col-index">#</span>
@@ -127,43 +158,25 @@ const SongListTable = ({ songs = [], onRemoveSong }) => {
             >
               <span className="row-index">
                 {hoveredRow === song.id || isPlayingThis ? (
-                  <button
-                    className="play-btn-small"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      playSong(song, idx);
-                    }}
-                  >
+                  <button className="play-btn-small" onClick={(e) => { e.stopPropagation(); playSong(song, idx); }}>
                     {isPlayingThis ? <FaPause size={14} /> : <FaPlay size={14} />}
                   </button>
-                ) : (
-                  displayIndex
-                )}
+                ) : displayIndex}
               </span>
 
               <div className="col-img-title">
                 <img src={thumb} alt="" className="song-thumb" />
-                <div
-                  className="song-info"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/song/${song.id}`);
-                  }}
-                >
+                <div className="song-info" onClick={(e) => { e.stopPropagation(); navigate(`/song/${song.id}`); }}>
                   <p className="song-title">{song.title}</p>
                   <p className="song-artist">
-                    {song.songArtists && song.songArtists.length > 0
-                      ? song.songArtists.map((sa, index) => (
+                    {song.songArtists?.length > 0
+                      ? song.songArtists.map((sa, i) => (
                           <span
-                            key={sa.artist?.id || index}
+                            key={sa.artist?.id || i}
                             className="song-artist-link"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (sa.artist?.id) navigate(`/artist/${sa.artist.id}`);
-                            }}
+                            onClick={(e) => { e.stopPropagation(); if(sa.artist?.id) navigate(`/artist/${sa.artist.id}`); }}
                           >
-                            {sa.artist?.stage_name}
-                            {index < song.songArtists.length - 1 ? ', ' : ''}
+                            {sa.artist?.stage_name}{i < song.songArtists.length - 1 ? ', ' : ''}
                           </span>
                         ))
                       : 'Không rõ'}
@@ -176,14 +189,8 @@ const SongListTable = ({ songs = [], onRemoveSong }) => {
               <span className="col-duration">{formatDuration(song.duration)}</span>
 
               <div className="col-options" onClick={(e) => e.stopPropagation()}>
-                {onRemoveSong && (
-                  <button className="btn-remove" onClick={() => onRemoveSong(song.id)}>
-                    <FaTimes size={14} />
-                  </button>
-                )}
-                <button className="btn-menu" onClick={(e) => openMenu(e, song)}>
-                  ⋯
-                </button>
+                {onRemoveSong && <button className="btn-remove" onClick={() => onRemoveSong(song.id)}><FaTimes size={14} /></button>}
+                <button className="btn-menu" onClick={(e) => openMenu(e, song)}>⋯</button>
               </div>
             </div>
           );
@@ -192,43 +199,31 @@ const SongListTable = ({ songs = [], onRemoveSong }) => {
 
       {totalPages > 1 && (
         <div className="songlist-pagination">
-          <button
-            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
-          >
-            Trước
-          </button>
-          <span>
-            Trang {currentPage} / {totalPages}
-          </span>
-          <button
-            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages}
-          >
-            Sau
-          </button>
+          <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>Trước</button>
+          <span>Trang {currentPage} / {totalPages}</span>
+          <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>Sau</button>
         </div>
       )}
 
-      {menuAnchor && menuSong && (
-        <SongOptionsMenu
-          song={menuSong}
-          closeMenu={closeMenu}
-          onAddToPlaylistClick={() => {
-            setSelectedSongs(new Set([menuSong.id]));
-            setIsAddModalOpen(true);
-            closeMenu();
-          }}
-        />
+      {menuSong && (
+        <div
+          className="song-options-menu"
+          style={{ top: menuPosition.top, left: menuPosition.left, position: 'fixed' }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <ul>
+            <li onClick={() => handleDownload(menuSong)}>Tải về</li>
+            <li onClick={() => { setSelectedSongs(new Set([menuSong.id])); setIsAddModalOpen(true); setMenuSong(null); }}>
+              Thêm vào Playlist
+            </li>
+          </ul>
+        </div>
       )}
 
       {isAddModalOpen && (
         <AddToPlaylistModal
           songIds={Array.from(selectedSongs)}
-          onClose={() => {
-            setIsAddModalOpen(false);
-            setSelectedSongs(new Set());
-          }}
+          onClose={() => { setIsAddModalOpen(false); setSelectedSongs(new Set()); }}
         />
       )}
     </div>

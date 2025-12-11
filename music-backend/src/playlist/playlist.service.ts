@@ -1,5 +1,5 @@
 // music-backend/src/playlist/playlist.service.ts (FULL CODE)
-import { Injectable, NotFoundException, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Playlist } from './playlist.entity';
@@ -238,6 +238,88 @@ async addSongToPlaylist(
   });
 
   if (!updatedPlaylist) throw new NotFoundException('Playlist không tồn tại');
+
+  return updatedPlaylist;
+}
+
+/**
+ * HÀM MỚI ĐÃ SỬA: Thêm bài hát HÀNG LOẠT vào Playlist
+ * @param userId ID người dùng
+ * @param playlistId ID Playlist
+ * @param songIds Mảng ID bài hát cần thêm
+ */
+async addSongsToPlaylist(
+  userId: number, 
+  playlistId: number, 
+  songIds: number[] // <-- NHẬN MẢNG ID
+): Promise<Playlist> {
+
+  // 1. Tìm Playlist và kiểm tra quyền
+  const playlist = await this.playlistRepository.findOne({
+    where: { id: playlistId, is_active: 1 },
+    relations: ['user', 'playlistSongs', 'playlistSongs.song']
+  });
+
+  if (!playlist) throw new NotFoundException('Playlist không tồn tại.');
+  if (playlist.user.id !== userId) {
+    throw new UnauthorizedException('Bạn không có quyền sửa playlist này.');
+  }
+
+  // 2. Lấy TẤT CẢ các bài hát cần thêm
+  const songs = await this.songRepository.find({
+      where: { 
+          id: In(songIds), // SỬ DỤNG IN() TỪ TypeORM
+          active: true, 
+          status: 'APPROVED' 
+      }
+  });
+
+  if (songs.length === 0) {
+      throw new NotFoundException('Không tìm thấy bài hát hợp lệ nào.');
+  }
+
+  const existingSongsMap = new Map(
+      playlist.playlistSongs.map(ps => [ps.song.id, ps])
+  );
+
+  const songsToAdd: Song[] = [];
+  const songsToReactivate: PlaylistSong[] = [];
+
+  for (const song of songs) {
+      const existing = existingSongsMap.get(song.id);
+
+      if (existing) {
+          if (existing.is_active === 0) {
+              // Bật lại nếu đã soft delete
+              existing.is_active = 1;
+              songsToReactivate.push(existing);
+          }
+          // Ngược lại (is_active === 1), bỏ qua (duplicate)
+      } else {
+          // Thêm mới
+          songsToAdd.push(song);
+      }
+  }
+
+  // 3. Xử lý Thêm/Bật lại
+  const newPlaylistSongs = songsToAdd.map(song => 
+      this.playlistSongRepository.create({
+          playlist,
+          song,
+          is_active: 1,
+          order: playlist.playlistSongs.length + songsToAdd.indexOf(song)
+      })
+  );
+
+  await this.playlistSongRepository.save([...songsToReactivate, ...newPlaylistSongs]);
+
+  // 4. Tải lại playlist để trả về
+  const updatedPlaylist = await this.playlistRepository.findOne({
+    where: { id: playlistId },
+    relations: ['user', 'playlistSongs', 'playlistSongs.song']
+  });
+
+  if (!updatedPlaylist) throw new InternalServerErrorException('Cập nhật Playlist thất bại.');
 
   return updatedPlaylist;
 }
