@@ -7,6 +7,12 @@ import axios from "axios";
 export default function AlbumEditModal({ show, onClose, initialData, onSubmit }) {
   if (!show) return null;
 
+  const formatDateDisplay = (iso) => {
+  if (!iso) return "";
+  const d = new Date(iso);
+  return d.toLocaleDateString("vi-VN"); // dd/MM/yyyy
+};
+
   const [name, setName] = useState("");
   const [releaseDate, setReleaseDate] = useState("");
   const [coverFile, setCoverFile] = useState(null);
@@ -15,6 +21,16 @@ export default function AlbumEditModal({ show, onClose, initialData, onSubmit })
   const [info, setInfo] = useState("");
 
   const [error, setError] = useState("");
+
+  const formatDuration = (seconds) => {
+    if (!seconds || isNaN(seconds)) return "—"; // tránh lỗi
+
+    const m = Math.floor(seconds / 60).toString().padStart(2, "0");
+    const s = (seconds % 60).toString().padStart(2, "0");
+
+    return `${m}:${s}`;
+  };
+
 
   // ⭐ THÊM STATE BỊ THIẾU
   const [songs, setSongs] = useState([]);
@@ -162,7 +178,7 @@ export default function AlbumEditModal({ show, onClose, initialData, onSubmit })
                     <tr key={song.id}>
                       <td>{index + 1}</td>
                       <td>{song.title}</td>
-                      <td>{song.duration ?? "—"}</td>
+                      <td>{song.duration}</td>
                       <td>{song.status}</td>
                     </tr>
                   ))}
@@ -194,7 +210,7 @@ export default function AlbumEditModal({ show, onClose, initialData, onSubmit })
                       <td>{index + 1}</td>
                       <td>{song.title}</td>
                       <td>{song.artist_name}</td>
-                      <td>{song.duration ?? "—"}</td>
+                      <td>{formatDuration(song.duration)}</td>
                       <td>
                         <button
                           className="song-add-btn"

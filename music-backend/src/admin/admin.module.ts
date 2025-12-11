@@ -23,6 +23,8 @@ import { AdminGenreService } from "./genre/admin-genre.service";
 import { Category } from "../category/category.entity";
 import { CategoryModule } from '../category/category.module';
 import { SharedModule } from '../shared/shared.module';
+import { Notification } from '../notification/notification.entity'; 
+import { NotificationModule } from '../notification/notification.module';
 
 import * as multer from 'multer';
 
@@ -35,11 +37,11 @@ import * as multer from 'multer';
       Album,   // ⭐ BẮT BUỘC
       Song, 
       Category,
-      
-         // ⭐ BẮT BUỘC
+      Notification,
     ]),
     SharedModule,
-    CategoryModule,   
+    CategoryModule,
+    NotificationModule,
     MulterModule.register({
   storage: multer.memoryStorage(),
 }),

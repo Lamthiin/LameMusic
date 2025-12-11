@@ -8,6 +8,9 @@ import {
   UseInterceptors,
   UploadedFile,
   Delete,
+  Query,
+  ParseIntPipe,
+  BadRequestException,
 } from '@nestjs/common';
 
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -43,13 +46,6 @@ export class AdminArtistController {
     return list.map(a => this.fixAvatar(a));
   }
 
-  @Get('list-all')
-  async listAllApproved() {
-    const list = await this.service.findAllApprovedArtists();
-    return list.map(a => this.fixAvatar(a));
-  }
-
-
   @Get('pending')
   async getPending() {
     const list = await this.service.findPending();
@@ -82,6 +78,13 @@ export class AdminArtistController {
     return list.map(a => this.fixAvatar(a));
   }
 
+  @Get('removed')
+  async getRemoved() {
+    const list = await this.service.findRemoved();
+    return list.map(a => this.fixAvatar(a));
+  }
+
+
   @Get(':id')
   async getOne(@Param('id') id: string) {
     const artist = await this.service.findOne(Number(id));
@@ -90,8 +93,13 @@ export class AdminArtistController {
 
   @Patch(':id/approve')
   approve(@Param('id') id: string) {
-    return this.service.approve(Number(id));
+    const artistId = Number(id);
+    if (isNaN(artistId)) {
+      throw new BadRequestException('Invalid artist ID');
+    }
+    return this.service.approve(artistId);
   }
+
 
   @Patch(':id/reject')
   reject(@Param('id') id: string) {
@@ -138,4 +146,20 @@ export class AdminArtistController {
     return this.fixAvatar(artist);
   }
 
+  @Get('paginated')
+  async getPaginatedArtists(
+    @Query('page', ParseIntPipe) page: number = 1, 
+    @Query('take', ParseIntPipe) take: number = 15,
+  ) {
+    if (page < 1) page = 1; // Đảm bảo page >= 1
+    
+    // Gọi service để lấy dữ liệu phân trang
+    const result = await this.service.getPaginatedArtists(page, take);
+    
+    // Áp dụng fixAvatar cho từng nghệ sĩ trong mảng data
+    const fixedData = result.data.map(a => this.fixAvatar(a));
+    
+    // Trả về kết quả phân trang đã được sửa URL
+    return { ...result, data: fixedData };
+  }
 }

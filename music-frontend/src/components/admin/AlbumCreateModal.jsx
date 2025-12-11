@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import "./AlbumCreateModal.css";
 import { FaTimes } from "react-icons/fa";
 import AlbumArtistSelector from "./AlbumArtistSelector";
+import ArtistDropdown from "../admin/ArtistDropdown";
+
+
 
 export default function AlbumCreateModal({ show, onClose, onSubmit }) {
   if (!show) return null;

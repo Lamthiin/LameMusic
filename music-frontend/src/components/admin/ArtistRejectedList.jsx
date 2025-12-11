@@ -25,7 +25,7 @@ const ArtistRejectedList = ({ artists = [], refresh }) => {
 
     try {
       await axios.delete(`http://localhost:3000/admin/artists/${id}`);
-      alert("Đã xoá vĩnh viễn nghệ sĩ!");
+      alert("Đã xoá nghệ sĩ thành công!");
       refresh && refresh();
     } catch (err) {
       console.error("DELETE ERROR:", err);
@@ -99,7 +99,7 @@ const ArtistRejectedList = ({ artists = [], refresh }) => {
                       className="btn-delete"
                       onClick={() => purgeArtist(a.id)}
                     >
-                      Xoá vĩnh viễn
+                      Xoá 
                     </button>
 
                   </div>

@@ -4,6 +4,7 @@ import "./ArtistDropdown.css";
 const ArtistDropdown = ({ artists = [], value, onChange }) => {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [limit, setLimit] = useState(10); // ⭐ hiển thị 10 nghệ sĩ đầu tiên
 
   const ref = useRef(null);
 
@@ -21,10 +22,27 @@ const ArtistDropdown = ({ artists = [], value, onChange }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // SAFE FILTER (tránh lỗi khi artist chưa load)
-  const filtered = artists.filter((a) =>
+  // =============================
+  // FILTER THEO TÊN NGHỆ SĨ (stage_name)
+  // =============================
+  const filtered = (artists || []).filter((a) =>
     (a?.stage_name ?? "").toLowerCase().includes(search.toLowerCase())
   );
+
+  // ⭐ Reset limit mỗi khi search đổi
+  useEffect(() => {
+    setLimit(10);
+  }, [search]);
+
+  // =============================
+  // SCROLL → LOAD THÊM
+  // =============================
+  const handleScroll = (e) => {
+    const el = e.target;
+    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 5) {
+      setLimit((prev) => Math.min(prev + 10, filtered.length));
+    }
+  };
 
   return (
     <div className="dropdown-container" ref={ref}>
@@ -44,20 +62,33 @@ const ArtistDropdown = ({ artists = [], value, onChange }) => {
             className="dropdown-search"
           />
 
-          <div className="dropdown-list">
-            {filtered.map((a) => (
-              <div
-                key={a.id}
-                className="dropdown-item"
-                onClick={() => {
-                  onChange(a);
-                  setOpen(false); // đóng dropdown khi chọn
-                }}
-              >
-                <img src={a.avatar_url} alt="" className="dropdown-avatar" />
-                <span>{a.stage_name}</span>
-              </div>
-            ))}
+          <div className="dropdown-list" onScroll={handleScroll}>
+            {filtered.length === 0 && (
+              <div className="dropdown-empty">Không tìm thấy nghệ sĩ</div>
+            )}
+
+            {filtered.slice(0, limit).map((a) => {
+              const avatar =
+                a.avatar_url || "/uploads/defaults/default-artist.png";
+
+              return (
+                <div
+                  key={a.id}
+                  className="dropdown-item"
+                  onClick={() => {
+                    onChange(a);
+                    setOpen(false); // đóng dropdown khi chọn
+                  }}
+                >
+                  <img
+                    src={avatar}
+                    alt={a.stage_name}
+                    className="dropdown-avatar"
+                  />
+                  <span>{a.stage_name}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

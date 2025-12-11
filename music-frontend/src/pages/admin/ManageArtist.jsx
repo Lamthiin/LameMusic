@@ -7,28 +7,33 @@ import ArtistPendingList from "../../components/admin/ArtistPendingList";
 import ArtistActiveList from "../../components/admin/ArtistActiveList";
 import ArtistRejectedList from "../../components/admin/ArtistRejectedList";
 import ArtistBot from "../../components/admin/ArtistBot";
-
+import ArtistRemovedList from "../../components/admin/ArtistRemoved";
 
 export default function ManageArtist() {
-  const location = useLocation();  
+  const location = useLocation();
   const startTab = location.state?.tab || "pending";
   const [tab, setTab] = useState(startTab);
 
-  useEffect(() => {                 // ⭐ THÊM BLOCK NÀY
+  useEffect(() => {
     if (location.state?.tab) {
       setTab(location.state.tab);
     }
-  }, [location.state])
+  }, [location.state]);
 
   const [artistsPending, setArtistsPending] = useState([]);
   const [artistsActive, setArtistsActive] = useState([]);
   const [artistsRejected, setArtistsRejected] = useState([]);
+  const [artistsRemoved, setArtistsRemoved] = useState([]);
+
+  // ⭐ SEARCH
+  const [search, setSearch] = useState("");
 
   /* LOAD DATA */
   useEffect(() => {
     loadPending();
     loadActive();
     loadRejected();
+    loadRemoved();
   }, []);
 
   const loadPending = async () => {
@@ -58,6 +63,15 @@ export default function ManageArtist() {
     }
   };
 
+  const loadRemoved = async () => {
+    try {
+      const res = await axios.get("http://localhost:3000/admin/artists/removed");
+      setArtistsRemoved(Array.isArray(res.data) ? res.data : []);
+    } catch {
+      setArtistsRemoved([]);
+    }
+  };
+
   const approve = async (id) => {
     await axios.patch(`http://localhost:3000/admin/artists/${id}/approve`);
     loadPending();
@@ -73,13 +87,42 @@ export default function ManageArtist() {
     loadRejected();
   };
 
+  // ⭐ PAGINATION FOR ACTIVE TAB
+  const [pageActive, setPageActive] = useState(1);
+  const itemsPerPage = 10;
+
+  // ⭐ FILTER THEO SEARCH
+  const filteredPending = artistsPending.filter((a) =>
+    (a?.stage_name ?? "").toLowerCase().includes(search.toLowerCase())
+  );
+
+  const filteredActive = artistsActive.filter((a) =>
+    (a?.stage_name ?? "").toLowerCase().includes(search.toLowerCase())
+  );
+
+  const filteredRejected = artistsRejected.filter((a) =>
+    (a?.stage_name ?? "").toLowerCase().includes(search.toLowerCase())
+  );
+
+  const filteredRemoved = artistsRemoved.filter((a) =>
+    (a?.stage_name ?? "").toLowerCase().includes(search.toLowerCase())
+  );
+
+  // ⭐ CHỈ ACTIVE MỚI PHÂN TRANG
+  const totalPagesActive =
+    Math.ceil(filteredActive.length / itemsPerPage) || 1;
+  const startIdxActive = (pageActive - 1) * itemsPerPage;
+  const showingActive = filteredActive.slice(
+    startIdxActive,
+    startIdxActive + itemsPerPage
+  );
+
   return (
-    <div className="album-management">{/* DÙNG LẠI CLASS CỦA ALBUM */}
+    <div className="album-management">
       <h2 className="am-title">Quản lý Nghệ sĩ</h2>
 
-      {/* 🔥 TAB – GIỐNG Y HỆT ALBUM */}
+      {/* 🔥 TAB */}
       <div className="am-grid">
-
         <div
           className={`am-card ${tab === "pending" ? "active" : ""}`}
           onClick={() => setTab("pending")}
@@ -111,39 +154,181 @@ export default function ManageArtist() {
           <h3>Bị từ chối</h3>
           <p>Hồ sơ không hợp lệ</p>
         </div>
+
+        <div
+          className={`am-card ${tab === "removed" ? "active" : ""}`}
+          onClick={() => setTab("removed")}
+        >
+          <h3>Đã xoá</h3>
+          <p>Nghệ sĩ đã bị xoá</p>
+        </div>
+      </div>
+
+      {/* 🔍 SEARCH BAR */}
+      <div className="am-search-row">
+        <div className="am-search-box">
+          <span className="am-search-icon">🔍</span>
+          <input
+            className="am-search-input"
+            placeholder="Tìm nghệ sĩ theo tên..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPageActive(1);
+            }}
+          />
+        </div>
       </div>
 
       {/* TABLE */}
       <div className="am-table-area">
         {tab === "pending" && (
-          <ArtistPendingList
-            artists={artistsPending}
-            approve={approve}
-            reject={reject}
-          />
+          <>
+            <ArtistPendingList
+              artists={filteredPending}
+              approve={approve}
+              reject={reject}
+            />
+            {/* Bạn đang dùng chung mini-pagination cho pending, 
+                mình giữ nguyên, dù về logic chỉ active mới phân trang */}
+            <div className="mini-pagination">
+              <button
+                disabled={pageActive === 1}
+                onClick={() => setPageActive(pageActive - 1)}
+              >
+                ←
+              </button>
+
+              <span>
+                Trang {pageActive} / {totalPagesActive || 1}
+              </span>
+
+              <button
+                disabled={
+                  pageActive === totalPagesActive || totalPagesActive === 0
+                }
+                onClick={() => setPageActive(pageActive + 1)}
+              >
+                →
+              </button>
+            </div>
+          </>
         )}
 
         {tab === "active" && (
-          <ArtistActiveList
-            artists={artistsActive}
-            refresh={loadActive}
-          />
+          <>
+            <ArtistActiveList artists={showingActive} refresh={loadActive} />
+
+            <div className="mini-pagination">
+              <button
+                disabled={pageActive === 1}
+                onClick={() => setPageActive(pageActive - 1)}
+              >
+                ←
+              </button>
+
+              <span>
+                Trang {pageActive} / {totalPagesActive || 1}
+              </span>
+
+              <button
+                disabled={
+                  pageActive === totalPagesActive || totalPagesActive === 0
+                }
+                onClick={() => setPageActive(pageActive + 1)}
+              >
+                →
+              </button>
+            </div>
+          </>
         )}
 
         {tab === "internal" && (
-          <ArtistBot />
+          <>
+            <ArtistBot />
+            <div className="mini-pagination">
+              <button
+                disabled={pageActive === 1}
+                onClick={() => setPageActive(pageActive - 1)}
+              >
+                ←
+              </button>
+
+              <span>
+                Trang {pageActive} / {totalPagesActive || 1}
+              </span>
+
+              <button
+                disabled={
+                  pageActive === totalPagesActive || totalPagesActive === 0
+                }
+                onClick={() => setPageActive(pageActive + 1)}
+              >
+                →
+              </button>
+            </div>
+          </>
         )}
 
         {tab === "rejected" && (
-          <ArtistRejectedList
-            artists={artistsRejected}
-            refresh={loadRejected}
-          />
+          <>
+            <ArtistRejectedList
+              artists={filteredRejected}
+              refresh={loadRejected}
+            />
+            <div className="mini-pagination">
+              <button
+                disabled={pageActive === 1}
+                onClick={() => setPageActive(pageActive - 1)}
+              >
+                ←
+              </button>
+
+              <span>
+                Trang {pageActive} / {totalPagesActive || 1}
+              </span>
+
+              <button
+                disabled={
+                  pageActive === totalPagesActive || totalPagesActive === 0
+                }
+                onClick={() => setPageActive(pageActive + 1)}
+              >
+                →
+              </button>
+            </div>
+          </>
         )}
 
+        {tab === "removed" && (
+          <>
+            <ArtistRemovedList
+              artists={filteredRemoved}
+              refresh={loadRemoved}
+            />
+            <div className="mini-pagination">
+              <button
+                disabled={pageActive === 1}
+                onClick={() => setPageActive(pageActive - 1)}
+              >
+                ←
+              </button>
 
+              <span>
+                Trang {pageActive} / {totalPagesActive || 1}
+              </span>
 
-
+              <button
+                disabled={
+                  pageActive === totalPagesActive || totalPagesActive === 0
+                }
+                onClick={() => setPageActive(pageActive + 1)}
+              >
+                →
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

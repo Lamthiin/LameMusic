@@ -4,6 +4,28 @@ import "./ArtistActiveList.css"; // vẫn dùng CSS cũ
 const ArtistPendingList = ({ artists = [], approve, reject, view }) => {
   const safeArtists = Array.isArray(artists) ? artists : [];
 
+  // ⭐ Thêm wrapper để log kết quả duyệt
+  const handleApprove = async (id) => {
+    try {
+      await approve?.(id);
+      alert("✔ Nghệ sĩ đã được duyệt thành công!");
+    } catch (err) {
+      console.error("APPROVE ARTIST ERROR:", err);
+      alert("❌ Lỗi khi duyệt nghệ sĩ!");
+    }
+  };
+
+  // ⭐ Thêm wrapper để log kết quả từ chối
+  const handleReject = async (id) => {
+    try {
+      await reject?.(id);
+      alert("✔ Đã từ chối nghệ sĩ!");
+    } catch (err) {
+      console.error("REJECT ARTIST ERROR:", err);
+      alert("❌ Lỗi khi từ chối nghệ sĩ!");
+    }
+  };
+
   return (
     <div className="active-container">
 
@@ -20,7 +42,7 @@ const ArtistPendingList = ({ artists = [], approve, reject, view }) => {
               <th>STT</th>
               <th>Ảnh</th>
               <th>Tên nghệ sĩ</th>
-              <th>Ngày tạo</th>    
+              <th>Ngày tạo</th>
               <th>Trạng thái</th>
               <th>Hành động</th>
             </tr>
@@ -29,10 +51,8 @@ const ArtistPendingList = ({ artists = [], approve, reject, view }) => {
           <tbody>
             {safeArtists.map((a, index) => (
               <tr key={a.id}>
-                {/* STT */}
                 <td>{index + 1}</td>
 
-                {/* Ảnh */}
                 <td>
                   <img
                     src={a.avatar_url}
@@ -41,27 +61,33 @@ const ArtistPendingList = ({ artists = [], approve, reject, view }) => {
                   />
                 </td>
 
-                {/* Tên nghệ sĩ */}
                 <td>{a.stage_name}</td>
 
-                {/* ⭐ Ngày tạo */}
-                <td>{a.created_at ? new Date(a.created_at).toLocaleDateString("vi-VN") : "—"}</td>
+                <td>
+                  {a.created_at
+                    ? new Date(a.created_at).toLocaleDateString("vi-VN")
+                    : "—"}
+                </td>
 
-                {/* Status */}
                 <td className="artist-status-pending">Pending</td>
 
-                {/* Actions */}
                 <td>
                   <div className="admin-actions">
-        
 
-                    <button className="btn-save" onClick={() => approve?.(a.id)}>
+                    <button
+                      className="btn-save"
+                      onClick={() => handleApprove(a.id)}
+                    >
                       Duyệt
                     </button>
 
-                    <button className="btn-delete" onClick={() => reject?.(a.id)}>
+                    <button
+                      className="btn-delete"
+                      onClick={() => handleReject(a.id)}
+                    >
                       Từ chối
                     </button>
+
                   </div>
                 </td>
               </tr>

@@ -17,14 +17,55 @@ export default function ArtistBot() {
 
   const loadInternalArtists = async () => {
     try {
+      // 1️⃣ Lấy danh sách nghệ sĩ như cũ
       const res = await axios.get("http://localhost:3000/admin/artists/inactive");
 
-      const sorted = (Array.isArray(res.data) ? res.data : []).sort(
+      const rawList = Array.isArray(res.data) ? res.data : [];
+
+      // 2️⃣ Với mỗi artist, gọi thêm API full detail để lấy total_albums & total_songs
+      const artistsWithStats = await Promise.all(
+        rawList.map(async (a) => {
+          try {
+            const detailRes = await axios.get(
+              `http://localhost:3000/admin/artists/${a.id}/full`
+            );
+            const detail = detailRes.data || {};
+
+            return {
+              ...a,
+              // ưu tiên dùng dữ liệu từ full detail, fallback về giá trị cũ nếu đã có
+              total_albums:
+                detail.total_albums ??
+                a.total_albums ??
+                (Array.isArray(detail.albums) ? detail.albums.length : 0),
+
+              total_songs:
+                detail.total_songs ??
+                a.total_songs ??
+                (Array.isArray(detail.songs) ? detail.songs.length : 0),
+
+              // đồng bộ avatar nếu BE đã normalize trong full detail
+              avatar_url: detail.avatar_url || a.avatar_url,
+              created_at: detail.created_at || a.created_at,
+            };
+          } catch (e) {
+            console.warn("LOAD ARTIST DETAIL ERROR:", e);
+            // nếu lỗi thì vẫn return artist gốc, set 0 cho tổng
+            return {
+              ...a,
+              total_albums: a.total_albums ?? 0,
+              total_songs: a.total_songs ?? 0,
+            };
+          }
+        })
+      );
+
+      // 3️⃣ Sắp xếp theo created_at (mới nhất lên trên)
+      const sorted = artistsWithStats.sort(
         (a, b) => new Date(b.created_at) - new Date(a.created_at)
       );
 
       setArtists(sorted);
-
     } catch (err) {
       console.error("LOAD INTERNAL ARTISTS ERROR:", err);
       setArtists([]);
@@ -116,10 +157,7 @@ export default function ArtistBot() {
 
               <td>{a.stage_name}</td>
 
-              {/* ⭐ Tổng album */}
               <td>{a.total_albums ?? 0}</td>
-
-              {/* ⭐ Tổng bài hát */}
               <td>{a.total_songs ?? 0}</td>
 
               {/* ⭐ Ngày tạo */}
@@ -128,8 +166,6 @@ export default function ArtistBot() {
                   ? new Date(a.created_at).toLocaleDateString("vi-VN")
                   : "—"}
               </td>
-
-              {/* ⭐ Status */}
               {/* ⭐ Status */}
               <td className="status-cell">
                 {a.registrationStatus === "PENDING" && (
@@ -149,15 +185,13 @@ export default function ArtistBot() {
                 )}
               </td>
 
-
               <td>
                 <div className="admin-actions">
-
                   <button
                     className="btn-view"
                     onClick={() =>
                       navigate(`/admin/artists/${a.id}`, {
-                        state: { fromTab: "bot" }
+                        state: { fromTab: "internal" },
                       })
                     }
                   >
@@ -180,15 +214,12 @@ export default function ArtistBot() {
                   >
                     Xoá
                   </button>
-
                 </div>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-
-
 
       <ArtistFormModal
         isOpen={showModal}
