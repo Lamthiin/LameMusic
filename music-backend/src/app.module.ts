@@ -29,6 +29,8 @@ import { ReportModule } from './report/report.module'; // <-- IMPORT MỚI
 import { NotificationModule } from './notification/notification.module';
 import { RateLimitModule } from './common/rate-limit.module'; // <-- IMPORT MỚI
 import { AdminProfileModule } from './admin/admin-profile/admin-profile.module';
+import { ChatService } from './chat/chat.service';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -69,6 +71,7 @@ import { AdminProfileModule } from './admin/admin-profile/admin-profile.module';
     NotificationModule,
     RateLimitModule,
     AdminProfileModule,
+    ChatModule,
   ],
   
   controllers: [AppController],

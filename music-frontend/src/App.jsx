@@ -52,6 +52,7 @@ import ArtistDashboardLayout from './pages/ArtistDashboard/ArtistDashboardLayout
 import ArtistInfo from './pages/ArtistDashboard/ArtistInfo'; // <-- (2) IMPORT MỚI
 import ArtistAlbums from './pages/ArtistDashboard/ArtistAlbums'; // <-- (1) IMPORT MỚI
 import ArtistSongs from './pages/ArtistDashboard/ArtistSongs'; // <-- (1) IMPORT MỚI
+import AdminChat from './pages/admin/AdminChat';
 
 function App() {
   return (
@@ -130,6 +131,8 @@ function App() {
           <Route path="users/customers" element={<AdminCustomerPage />} />
           <Route path="users/artists" element={<AdminArtistPage />} />
           <Route path="users/admins" element={<AdminAccountPage />} /> */}
+
+          <Route path="support" element={<AdminChat />} />
 
           {/* Các mục quản lý khác */}
           <Route path="artists" element={<ManageArtist />} />
