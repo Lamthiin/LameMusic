@@ -40,6 +40,10 @@ async function bootstrap() {
     // cors: true, // <-- XÓA DÒNG NÀY (BỊ LỖI)
   });
 
+  //cau hinh port
+  const port = process.env.PORT || 3000;
+  await app.listen(port);
+
   await app.listen(3000);
 }
 bootstrap();
