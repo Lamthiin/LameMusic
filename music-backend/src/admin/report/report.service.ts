@@ -92,4 +92,74 @@ export class ReportService {
       notification: noti,
     };
   }
+
+  async restoreReport(id: number) {
+    const report = await this.reportRepo.findOne({
+      where: { id },
+      relations: ['song', 'song.songArtists', 'song.songArtists.artist', 'user'],
+    });
+
+    if (!report) throw new NotFoundException('Report không tồn tại');
+
+    const song = report.song;
+    if (!song) throw new NotFoundException('Không tìm thấy bài hát liên quan');
+
+    // ------------------------------------
+    // Lấy nghệ sĩ CHÍNH của bài hát
+    // ------------------------------------
+    const primaryArtist = song.songArtists.find(sa => sa.is_primary);
+
+    const artist = primaryArtist ? primaryArtist.artist : null;
+
+    // ------------------------------------
+    // Khôi phục bài hát
+    // ------------------------------------
+    song.active = true;
+    song.status = 'APPROVED';
+    await this.songRepo.save(song);
+
+    // ------------------------------------
+    // Cập nhật trạng thái report
+    // ------------------------------------
+    report.status = ReportStatus.REJECTED;
+    await this.reportRepo.save(report);
+
+    // ============================================================
+    // 1. Gửi notification cho NGƯỜI GỬI REPORT
+    // ============================================================
+    const notiUser = this.notiRepo.create({
+      user_id: report.userId,
+      artist_id: null,
+      message: `Bài hát "${song.title}" đã được khôi phục sau khi xem xét lại.`,
+      type: NotificationType.ADMIN_MESSAGE,
+      reference_id: song.id,
+      is_read: false,
+    });
+
+    await this.notiRepo.save(notiUser);
+
+    // ============================================================
+    // 2. Gửi notification cho NGHỆ SĨ CHÍNH (nếu có)
+    //    Không gửi nếu artist.user_id = null (admin tạo)
+    // ============================================================
+    if (artist && artist.user_id !== null) {
+      const notiArtist = this.notiRepo.create({
+        user_id: artist.user_id,     // gửi notification cho User của nghệ sĩ
+        artist_id: artist.id,
+        message: `Bài hát "${song.title}" của bạn đã được khôi phục.`,
+        type: NotificationType.ADMIN_MESSAGE,
+        reference_id: song.id,
+        is_read: false,
+      });
+
+      await this.notiRepo.save(notiArtist);
+    }
+
+    return {
+      message: 'Khôi phục thành công',
+      report,
+      song,
+    };
+  }
+
 }

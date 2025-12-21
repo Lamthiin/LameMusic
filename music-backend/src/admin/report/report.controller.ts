@@ -23,4 +23,10 @@ export class ReportController {
   rejectReport(@Param('id') id: number) {
     return this.reportService.updateStatus(Number(id), ReportStatus.REJECTED);
   }
+
+  @Patch(':id/restore')
+  restoreReport(@Param('id') id: number) {
+    return this.reportService.restoreReport(Number(id));
+  }
+
 }

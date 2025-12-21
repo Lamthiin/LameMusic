@@ -5,13 +5,22 @@ import { Report } from '../../report/report.entity';
 import { User } from '../../user/user.entity';
 import { Song } from '../../song/song.entity';
 import { Notification } from '../../notification/notification.entity';
+import { Artist } from '../../artist/artist.entity';
+import { SongArtist } from '../../song/song-artist.entity';
 
 import { ReportService } from './report.service';
 import { ReportController } from './report.controller';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Report, Notification, Song, User]),
+    TypeOrmModule.forFeature([
+      Report,
+      Notification,
+      Song,
+      Artist,
+      SongArtist, 
+      User,
+    ]),
   ],
   controllers: [ReportController],
   providers: [ReportService],

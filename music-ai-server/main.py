@@ -2,7 +2,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 import random
-from typing import List
+from typing import List, Optional
 import uvicorn
 import os # Cần cho việc kiểm tra file (mặc dù ta không đọc file thật)
 
@@ -12,7 +12,8 @@ app = FastAPI()
 class EmbeddingRequest(BaseModel):
     title: str
     genre: str
-    audio_path: str # Đường dẫn vật lý (NestJS gửi để mô phỏng)
+    # audio_path: str # Đường dẫn vật lý (NestJS gửi để mô phỏng)
+    audio_path : Optional[str] = None
 
 # API endpoint: Tạo embedding khi Upload
 @app.post("/api/embed")

@@ -17,6 +17,8 @@ import { CategoryModule } from '../../category/category.module';
 import { Lyrics } from '../../lyrics/lyrics.entity';  
 import { NotificationModule } from '../../notification/notification.module';
 import { SongArtist } from '../../song/song-artist.entity';
+import { AiModule } from '../../ai/ai.module';
+
 
 @Module({
   imports: [
@@ -24,6 +26,7 @@ import { SongArtist } from '../../song/song-artist.entity';
     TypeOrmModule.forFeature([Song, Artist, Album, Lyrics, SongArtist,]),
     CategoryModule,
     NotificationModule,
+    AiModule,
 
     // Upload file vào RAM để gửi lên R2
     MulterModule.register({

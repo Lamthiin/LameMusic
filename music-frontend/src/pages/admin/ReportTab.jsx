@@ -61,6 +61,15 @@ export default function ReportTab() {
     fetchReports();
   };
 
+  const handleRestore = async (id) => {
+    await fetch(`http://localhost:3000/admin/report/${id}/restore`, {
+      method: "PATCH",
+    });
+
+    fetchReports();
+  };
+
+
   return (
     <div className="report-wrapper">
 

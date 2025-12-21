@@ -127,6 +127,10 @@ const ManageSong = () => {
   const [editCollabArtists, setEditCollabArtists] = useState([]); // nghệ sĩ collab khi SỬA
   const ITEMS_PER_PAGE = 15;
   const [page, setPage] = useState(1);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+
 
 
   // Lọc bài hát
@@ -338,6 +342,9 @@ const ManageSong = () => {
   };
 
   const handleUpdateSong = async () => {
+    if (isUpdating) return;        //  chặn click nhiều lần
+    setIsUpdating(true);           //  BẬT LOADING
+
     const id = showEditPopup.id;
     const formData = new FormData();
 
@@ -389,11 +396,13 @@ const ManageSong = () => {
       await fetchSongs();
       setShowEditSuccessPopup(true);
       resetEditPopup();
-      setShowEditPopup(null);
+      //setShowEditPopup(null);
     } catch (err) {
       console.error(err);
       setErrorMessage("Sửa bài hát thất bại, vui lòng kiểm tra backend.");
       setShowErrorPopup(true);
+    }finally {
+      setIsUpdating(false);        // TẮT LOADING
     }
   };
 
@@ -425,6 +434,8 @@ const ManageSong = () => {
   // };
 
   const handleSaveSong = async () => {
+    if (isSaving) return; //chặn click nhiều lần
+
     let error = "";
 
     // KIỂM TRA NẾU CHƯA NHẬP GÌ
@@ -455,6 +466,10 @@ const ManageSong = () => {
       return;
     }
 
+    // ✅ QUAN TRỌNG NHẤT
+    setIsSaving(true);
+
+
     // TẠO FORM DATA GỬI BACKEND
     const formData = new FormData();
     formData.append("title", newTitle);
@@ -462,17 +477,11 @@ const ManageSong = () => {
     formData.append("category", newCategory); // ID thể loại
     formData.append("lyrics", newLyrics);
     formData.append("lyricsLanguage", newLyricsLanguage);
-    const originalCollabs =
-      showEditPopup.songArtists
-        ?.filter(sa => sa.active && !sa.is_primary)
-        ?.map(sa => sa.artist.id) || [];
-
-    const collabsToSend =
-      editCollabArtists.length === 0
-        ? originalCollabs
-        : editCollabArtists;
-
-    formData.append("featuredArtists", JSON.stringify(collabsToSend));
+    // THÊM BÀI HÁT → CHỈ dùng featuredArtists
+    formData.append(
+      "featuredArtists",
+      JSON.stringify(featuredArtists || [])
+    );
 
 
 
@@ -506,7 +515,9 @@ const ManageSong = () => {
       console.error(err);
       setErrorMessage("Upload thất bại! Kiểm tra backend hoặc file.");
       setShowErrorPopup(true);
-    }
+    } finally {
+      setIsSaving(false); // TẮT LOADING (dù success hay error)
+  }
   };
 
 
@@ -1144,9 +1155,21 @@ const ManageSong = () => {
                 Hủy
               </button>
 
-              <button className="popup-save" onClick={handleSaveSong}>
-                Lưu bài hát
+              <button
+                className={`popup-save ${isSaving ? "loading" : ""}`}
+                onClick={handleSaveSong}
+                disabled={isSaving}
+              >
+                {isSaving ? (
+                  <>
+                    <span className="spinner"></span>
+                    Đang lưu...
+                  </>
+                ) : (
+                  "Lưu bài hát"
+                )}
               </button>
+
             </div>
 
           </div>
@@ -1222,7 +1245,11 @@ const ManageSong = () => {
           <div className="success-actions">
             <button
               className="success-btn cancel"
-              onClick={() => setShowEditSuccessPopup(false)}
+              onClick={() => {
+                setShowEditSuccessPopup(false);
+                resetEditPopup();
+                setShowEditPopup(null);   // ✅ ĐÓNG Ở ĐÂY
+              }}
             >
               OK
             </button>
@@ -1230,6 +1257,7 @@ const ManageSong = () => {
         </div>
       </div>
     )}
+
 
 
 
@@ -1648,9 +1676,21 @@ const ManageSong = () => {
             Hủy
           </button>
 
-          <button className="popup-save" onClick={handleUpdateSong}>
-            Lưu chỉnh sửa
+          <button
+            className={`popup-save ${isUpdating ? "loading" : ""}`}
+            onClick={handleUpdateSong}
+            disabled={isUpdating}
+          >
+            {isUpdating ? (
+              <>
+                <span className="spinner"></span>
+                Đang lưu...
+              </>
+            ) : (
+              "Lưu chỉnh sửa"
+            )}
           </button>
+
 
         </div>
 

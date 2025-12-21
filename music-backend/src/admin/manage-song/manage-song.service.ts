@@ -20,6 +20,7 @@ import { UpdateSongDto } from './dto/update-song.dto';
 import * as mm from 'music-metadata';
 import { NotificationService } from '../../notification/notification.service';
 import { NotificationType } from '../../notification/notification.entity';
+import { AiService } from '../../ai/ai.service';
 
 @Injectable()
 export class ManageSongService {
@@ -33,6 +34,7 @@ export class ManageSongService {
 
     private readonly r2: R2Service,
     private readonly notificationService: NotificationService,
+    private readonly aiService: AiService,   // AI Service
   ) {}
 
   // ======================================================
@@ -71,6 +73,22 @@ export class ManageSongService {
       });
       if (!category) throw new NotFoundException('Thể loại không tồn tại');
 
+
+      // =====================
+      // TẠO EMBEDDING (AI)
+      // =====================
+      let embedding: number[] | null = null;
+
+      try {
+        embedding = await this.aiService.generateSongEmbedding(
+          body.title,
+          category.name,
+        );
+      } catch (e) {
+        console.warn('⚠️ Không tạo được embedding, tiếp tục lưu bài hát');
+      }
+
+
       // =====================
       // Upload lên R2
       // =====================
@@ -100,6 +118,7 @@ export class ManageSongService {
         active: true,
         album: album ?? null,
         genre: category.name,
+        embedding: embedding, // <- EMBEDDING (AI)
       });
 
       const savedSong = await this.songRepo.save(song);
