@@ -1,7 +1,5 @@
-/* src/pages/ArtistDashboard/ArtistDashboard.css */
-/* PHIÊN BẢN ĐEN SẠCH – CHỈ XANH NGỌC – KHÔNG GLOW, KHÔNG NẶNG */
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap');
 
 :root {
   --color-bg: #000;
@@ -372,10 +370,7 @@
   .avatar-preview { width: 100px; height: 100px; }
 }
 
-/* src/pages/ArtistDashboard/ArtistSongs.css */
-/* PHIÊN BẢN NANO – NHỎ NHẤT CÓ THỂ – ĐEN TUYỆT ĐỐI */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap');
 
 .artist-songs-container {
   max-width: 1000px;
