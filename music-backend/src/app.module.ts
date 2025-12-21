@@ -37,16 +37,30 @@ import { AdminProfileModule } from './admin/admin-profile/admin-profile.module';
     }),
 
     // 1. Cấu hình kết nối Database
-    TypeOrmModule.forRoot({
-      type: 'mysql', // <-- DÒNG NÀY SẼ SỬA LỖI CỦA BẠN
-      host: 'localhost',
-      port: 3306,
-      username: 'root', // Đảm bảo đúng username
-      password: 'root',     // Đảm bảo đúng password
-      database: 'musicdb',
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: false, 
-    }),
+    TypeOrmModule.forRootAsync({
+  useFactory: () => {
+    const host = process.env.DB_HOST;
+    const port = Number(process.env.DB_PORT);
+
+    if (!host) throw new Error('DB_HOST missing');
+    if (!port) throw new Error('DB_PORT missing');
+    if (host === 'localhost' || host === '127.0.0.1') {
+      throw new Error('DB_HOST is localhost (wrong for Railway)');
+    }
+
+    return {
+      type: 'mysql' as const,
+      host,
+      port,
+      username: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+      autoLoadEntities: true,
+      synchronize: false,
+    };
+  },
+}),
+    
 
     // 2. Các module tính năng
     RoleModule,
