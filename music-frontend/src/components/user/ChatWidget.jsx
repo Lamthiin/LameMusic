@@ -8,92 +8,97 @@ const ChatWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
-  const [unreadCount, setUnreadCount] = useState(0); // Quản lý tin nhắn chưa đọc
+  const [unreadCount, setUnreadCount] = useState(0);
   const scrollRef = useRef(null);
 
-  const myId = user?.userId ? Number(user.userId) : null;
-  const roomId = myId ? `user_${myId}` : null;
+  // --- LOGIC ĐỊNH DANH (GUEST HOẶC USER) ---
+  const [chatIdentity, setChatIdentity] = useState({ id: null, roomId: null });
 
-  // 1. Theo dõi tin nhắn chưa đọc khi đóng widget
   useEffect(() => {
-    if (!myId || !roomId) return;
+    let finalId;
+    let usernamePrefix;
 
+    if (user?.userId) {
+      // Nếu là thành viên
+      finalId = Number(user.userId);
+      usernamePrefix = `user_${finalId}`;
+    } else {
+      // Nếu là khách (Guest)
+      let guestId = localStorage.getItem('guestChatId');
+      if (!guestId) {
+        guestId = 'guest_' + Math.random().toString(36).substring(2, 9);
+        localStorage.setItem('guestChatId', guestId);
+      }
+      finalId = guestId;
+      usernamePrefix = guestId;
+    }
+    setChatIdentity({ id: finalId, roomId: usernamePrefix });
+  }, [user]);
+
+  const { id: myId, roomId } = chatIdentity;
+
+  // --- SOCKET & TIN NHẮN ---
+  useEffect(() => {
+    if (!roomId) return;
     socket.connect();
 
-    // Lắng nghe tin nhắn mới từ Admin
     socket.on('receive_message', (newMsg) => {
       if (newMsg.roomId === roomId) {
         setMessages((prev) => {
-          const exists = prev.some(m => m.id === newMsg.id);
-          if (exists) return prev;
+          if (prev.some(m => m.id === newMsg.id)) return prev;
           return [...prev, newMsg];
         });
-
-        // Nếu đang đóng hộp thoại VÀ người gửi không phải là mình -> Tăng unread
-        if (!isOpen && Number(newMsg.senderId) !== myId) {
+        if (!isOpen && newMsg.senderId !== myId) {
           setUnreadCount(prev => prev + 1);
         }
       }
     });
 
-    return () => {
-      socket.off('receive_message');
-    };
-  }, [myId, roomId, isOpen]);
+    return () => socket.off('receive_message');
+  }, [roomId, isOpen, myId]);
 
-  // 2. Xử lý khi MỞ hộp thoại chat
+  // --- KHI MỞ HỘP THOẠI ---
   useEffect(() => {
-    if (isOpen && myId && roomId) {
-      // Khi mở hộp thoại:
-      // a. Xóa badge thông báo
+    if (isOpen && roomId) {
       setUnreadCount(0);
-
-      // b. Join room
       socket.emit('join_room', { roomId, userId: myId });
-
-      // c. Báo cho Admin là mình đã đọc tin (Gửi read_event)
       socket.emit('read_event', { roomId, userId: myId });
 
-      // d. Lấy lịch sử chat
       fetch(`http://localhost:3000/chat/history/${roomId}`)
         .then(res => res.json())
-        .then(data => {
-          if (Array.isArray(data)) setMessages(data);
-        })
+        .then(data => { if (Array.isArray(data)) setMessages(data); })
         .catch(err => console.error("Lỗi history:", err));
     }
-  }, [isOpen, myId, roomId]);
+  }, [isOpen, roomId, myId]);
 
   const sendMessage = () => {
-    if (!message.trim() || !myId || !roomId) return;
+    if (!message.trim() || !roomId) return;
     const chatData = {
       senderId: myId,
       roomId: roomId,
       content: message,
+      // Có thể gửi thêm field này để Admin biết đây là Khách Vô Danh
+      isGuest: !user 
     };
     socket.emit('send_message', chatData);
     setMessage('');
   };
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
+    scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
-
-  if (!user) return null;
 
   return (
     <div className="chat-widget-wrapper">
       {isOpen && (
         <div className="chat-box-main">
           <div className="chat-box-header">
-            <span>Hỗ trợ trực tuyến</span>
+            <span>Hỗ trợ trực tuyến {!user && "(Khách)"}</span>
             <button onClick={() => setIsOpen(false)}>✕</button>
           </div>
           <div className="chat-box-body">
             {messages.map((msg, i) => (
-              <div key={msg.id || i} className={`message-row ${Number(msg.senderId) === myId ? 'me' : 'them'}`}>
+              <div key={msg.id || i} className={`message-row ${msg.senderId == myId ? 'me' : 'them'}`}>
                 <div className="message-bubble">{msg.content}</div>
               </div>
             ))}
@@ -104,13 +109,12 @@ const ChatWidget = () => {
               value={message} 
               onChange={e => setMessage(e.target.value)} 
               onKeyDown={e => e.key === 'Enter' && sendMessage()}
-              placeholder="Nhập tin nhắn..."
+              placeholder="Hỏi chúng tôi bất cứ điều gì..."
             />
             <button onClick={sendMessage}>Gửi</button>
           </div>
         </div>
       )}
-
       {!isOpen && (
         <button className="chat-floating-button" onClick={() => setIsOpen(true)}>
           💬
