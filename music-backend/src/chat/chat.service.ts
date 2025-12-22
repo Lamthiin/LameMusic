@@ -10,11 +10,13 @@ export class ChatService {
     private messageRepo: Repository<Message>,
   ) {}
 
-  // 1. Lưu tin nhắn: Luôn lưu isRead = false để User có thể thấy thông báo
   async saveMessage(data: any) {
+    // Chỉ lấy đúng các trường hiện có trong Database
     const newMessage = this.messageRepo.create({
-        ...data,
-        isRead: false, // Mặc định là chưa đọc để đối phương (User hoặc Admin) nhận được badge
+        senderId: String(data.senderId),
+        roomId: data.roomId,
+        content: data.content,
+        isRead: false, 
         createdAt: new Date()
     });
     return await this.messageRepo.save(newMessage);
@@ -24,17 +26,20 @@ export class ChatService {
     return await this.messageRepo.find({
       where: { roomId },
       order: { createdAt: 'ASC' },
-      relations: ['sender'],
+      // ĐÃ XÓA relations: ['sender'] - Đây là nguyên nhân gây lỗi của bạn
     });
   }
 
-  // 2. Lấy danh sách phòng: Phải nhận vào adminId để lọc số lượng chưa đọc
-// chat.service.ts
+// Sửa trong ChatService.getAllRooms
 async getAllRooms(currentUserId: number) {
   return await this.messageRepo.query(`
     SELECT 
       m1.roomId,
-      u.username AS username,
+      CASE 
+        WHEN u.username IS NOT NULL THEN u.username 
+        WHEN m1.roomId LIKE 'guest_%' THEN CONCAT('Khách lạ #', UPPER(SUBSTRING(m1.roomId, -4)))
+        ELSE 'Người dùng ẩn danh'
+      END AS username,
       m1.content AS lastMessage,
       m1.createdAt,
       (
@@ -45,22 +50,26 @@ async getAllRooms(currentUserId: number) {
         AND senderId != ?
       ) AS unreadCount
     FROM message m1
-    /* Chú ý: Đổi thành 'user' thay vì 'users' */
-    JOIN user u ON u.id = CAST(REPLACE(m1.roomId, 'user_', '') AS UNSIGNED)
+    LEFT JOIN user u ON u.id = CASE 
+      WHEN m1.roomId LIKE 'user_%' THEN CAST(REPLACE(m1.roomId, 'user_', '') AS UNSIGNED)
+      ELSE NULL 
+    END
     WHERE m1.id = (
       SELECT id FROM message 
       WHERE roomId = m1.roomId 
       ORDER BY createdAt DESC LIMIT 1
     )
     ORDER BY m1.createdAt DESC
-  `, [currentUserId]);
+  `, [String(currentUserId)]);
 }
-  // 3. Đánh dấu đã đọc: Khi Admin vào phòng, chỉ đánh dấu "Đã đọc" cho tin của khách
+
   async markAsRead(roomId: string, readerId: number) {
+    const readerIdStr = String(readerId);
+    
     return await this.messageRepo.update(
       { 
         roomId: roomId, 
-        senderId: Not(readerId), // Chỉ đánh dấu tin nhắn của người khác gửi cho mình
+        senderId: Not(readerIdStr), 
         isRead: false 
       },
       { isRead: true }

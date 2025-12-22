@@ -275,3 +275,23 @@
     padding: 12px;
   }
 }
+/* Màu cho User thành viên (Xanh dương) */
+.admin-chat-user-item .admin-chat-avatar {
+  background-color: #007bff;
+  color: white;
+}
+
+/* Màu cho Guest - Khách lạ (Màu xám/cam) */
+.admin-chat-user-item.is-guest .admin-chat-avatar {
+  background-color: #6c757d;
+  border: 2px solid #adb5bd;
+}
+
+/* Hiệu ứng badge */
+.admin-chat-badge {
+  background-color: #ff4d4f;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 8px;
+  font-size: 12px;
+}

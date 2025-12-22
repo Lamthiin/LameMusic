@@ -135,20 +135,22 @@ const AdminChat = () => {
     setInputValue('')
   }
 
-  const markAsRead = async roomId => {
-    if (!token) return
-    try {
-      await fetch(`http://localhost:3000/chat/read/${roomId}`, {
-        method: 'PATCH',
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      
-      // Đồng bộ lại state users một lần nữa cho chắc
-      setUsers(prev =>
-        prev.map(u => (u.roomId === roomId ? { ...u, unreadCount: 0 } : u))
-      )
-    } catch (err) {}
-  }
+const markAsRead = async (roomId) => {
+  if (!token) return;
+  try {
+    await fetch(`http://localhost:3000/chat/read/${roomId}`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    
+    // PHÁT TÍN HIỆU ĐỒNG BỘ: Để Sidebar chính biết mà giảm số badge tổng
+    socket.emit('admin_read_message', { roomId });
+
+    setUsers(prev =>
+      prev.map(u => (u.roomId === roomId ? { ...u, unreadCount: 0 } : u))
+    );
+  } catch (err) {}
+};
 
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' })

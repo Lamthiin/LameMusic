@@ -38,22 +38,23 @@ export class ChatGateway {
   }
   
   // 3. Khi có tin nhắn mới
-  @SubscribeMessage('send_message')
-  async handleMessage(@MessageBody() data: any) {
-    console.log("🚀 Server nhận tin nhắn:", data.content); // Xem log này ở Terminal máy tính
-    // Lưu tin nhắn vào Database
-    const savedMsg = await this.chatService.saveMessage(data);
-    
-    // Gửi vào phòng riêng (cho người đang mở khung chat thấy)
-    this.server.to(data.roomId).emit('receive_message', savedMsg);
-    
-    // Gửi thông báo tổng quát (cho Sidebar chính và danh sách user nhảy số)
-    this.server.emit('admin_new_notification', {
-      roomId: data.roomId,
-      content: data.content,
-      unreadCountUpdate: true
-    });
-  }
+// chat.gateway.ts
+
+@SubscribeMessage('send_message')
+async handleMessage(@MessageBody() data: any) {
+  // 1. Lưu vào DB
+  const savedMsg = await this.chatService.saveMessage(data);
+  
+  // 2. Gửi cho những người đang ở TRONG phòng chat (để hiện tin nhắn lên màn hình)
+  this.server.to(data.roomId).emit('receive_message', savedMsg);
+  
+  // 3. QUAN TRỌNG: Gửi cho TẤT CẢ mọi người (để Sidebar ở Dashboard/Admin cũng nhận được)
+  // Chúng ta emit thêm một lần nữa nhưng không giới hạn trong phòng .to(roomId)
+  this.server.emit('receive_message', savedMsg); 
+
+  // 4. Phát tín hiệu thông báo chung (nếu cần)
+  this.server.emit('admin_new_notification', savedMsg);
+}
 
   // 4. (Tùy chọn) Thêm sự kiện báo Admin đã đọc từ phía Frontend
   @SubscribeMessage('admin_read_message')

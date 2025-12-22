@@ -1,18 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { User } from '../user/user.entity'; 
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
 
 @Entity('message')
 export class Message {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  senderId: number;
-
-  // Thiết lập mối quan hệ để NestJS hiểu khóa ngoại
-  @ManyToOne(() => User, (user) => user.id, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'senderId' })
-  sender: User;
+  @Column({ type: 'varchar', length: 255 })
+  senderId: string; // Lưu "28" hoặc "guest_abc"
 
   @Column()
   roomId: string;
@@ -20,7 +14,7 @@ export class Message {
   @Column('text')
   content: string;
 
-  @Column({ default: false }) // Cột trạng thái đã đọc
+  @Column({ default: false })
   isRead: boolean;
 
   @CreateDateColumn()
