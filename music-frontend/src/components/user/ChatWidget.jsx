@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { socket } from '../../utils/socket';
 import { useAuth } from '../../context/AuthContext';
 import './ChatWidget.css';
+import { FiMessageCircle } from "react-icons/fi";
+
 
 const ChatWidget = () => {
   const { user } = useAuth();
@@ -117,9 +119,12 @@ const ChatWidget = () => {
       )}
       {!isOpen && (
         <button className="chat-floating-button" onClick={() => setIsOpen(true)}>
-          💬
-          {unreadCount > 0 && <span className="unread-badge">{unreadCount}</span>}
+          <FiMessageCircle size={22} />
+          {unreadCount > 0 && (
+            <span className="unread-badge">{unreadCount}</span>
+          )}
         </button>
+
       )}
     </div>
   );

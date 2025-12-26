@@ -66,12 +66,12 @@ const AdminSidebar = () => {
 
   return (
     <div className="admin-sidebar">
-      <div className="admin-sidebar-header">
-        <img
-          src="/images/Logomusic.png"
-          alt="Logo"
-          className="admin-logo"
-        />
+      {/* LOGO */}
+      <div
+        className="admin-sidebar-header"
+        onClick={() => navigate("/admin")}
+      >
+        <span className="admin-logo-text galaxy-text">🎧 Lame</span>
       </div>
 
       <nav className="admin-nav">
@@ -85,17 +85,17 @@ const AdminSidebar = () => {
           <span>Quản lý tài khoản</span>
         </NavLink>
 
-        <NavLink to="/admin/support" className="admin-link">
-          <div className="admin-link-content">
-            <MdChat size={20} />
-            <span>Hỗ trợ khách hàng</span>
-            {totalUnread > 0 && (
-              <span className="sidebar-badge-red">
-                {totalUnread > 99 ? "99+" : totalUnread}
-              </span>
-            )}
-          </div>
+        <NavLink to="/admin/support" className="admin-link support-link">
+          <MdChat size={20} />
+          <span>Hỗ trợ khách hàng</span>
+
+          {totalUnread > 0 && (
+            <span className="sidebar-badge-red">
+              {totalUnread > 99 ? "99+" : totalUnread}
+            </span>
+          )}
         </NavLink>
+
 
         <NavLink to="/admin/artists" className="admin-link">
           <MdPerson size={20} />

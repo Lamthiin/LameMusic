@@ -82,9 +82,9 @@ export default function PopupAddAdmin({ onClose, onSubmit }) {
           </div>
         </div>
 
-        <div className="popup-footer">
-          <button className="btn-cancel" onClick={onClose}>Hủy</button>
-          <button className="btn-save" onClick={handleSubmit}>Thêm</button>
+        <div className="popup-footer-buttons">
+          <button className="button-cancel" onClick={onClose}>Hủy</button>
+          <button className="button-save" onClick={handleSubmit}>Thêm</button>
         </div>
       </div>
     </div>

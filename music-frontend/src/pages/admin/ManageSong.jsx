@@ -129,7 +129,7 @@ const ManageSong = () => {
   const [page, setPage] = useState(1);
   const [isSaving, setIsSaving] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
-
+  const contentRef = useRef(null);
 
 
 
@@ -205,16 +205,32 @@ const ManageSong = () => {
 
 
   useEffect(() => {
-    function handleClickOutside(e) {
-      if (searchRef.current && !searchRef.current.contains(e.target)) {
-        setSearchValue("");   // reset search
-        // setPage(1);           // reset page
+    const handleClickOutside = (e) => {
+      // ❌ click trong popup / dropdown → bỏ qua
+      if (
+        e.target.closest(".popup-overlay") ||
+        e.target.closest(".success-overlay") ||
+        e.target.closest(".action-dropdown")
+      ) {
+        return;
       }
-    }
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+      // ✅ click ngoài vùng quản lý bài hát
+      if (
+        contentRef.current &&
+        !contentRef.current.contains(e.target)
+      ) {
+        setSearchValue("");
+        setPage(1);
+        setOpenMenu(null);
+      }
+    };
+
+    document.addEventListener("click", handleClickOutside);
+    return () =>
+      document.removeEventListener("click", handleClickOutside);
   }, []);
+
 
 
 
@@ -556,7 +572,7 @@ const ManageSong = () => {
   
   return (
     
-    <div className="admin-user-container">
+    <div className="admin-user-container" ref={contentRef}>
       {/* HEADER */}
       <div className="admin-user-header"></div>
         <h2 className="um-title">Quản lý bài hát</h2>
@@ -745,6 +761,12 @@ const ManageSong = () => {
                             setEditLyrics(full.lyrics?.lyrics || "");
                             setEditLyricsLanguage(full.lyrics?.language || "vi");
 
+                            // =======================
+                            // SET ẢNH COVER CŨ
+                            // =======================
+                            setEditCoverPreview(full.image_url);   // ✅ HIỂN ẢNH
+                            setEditCoverFile(null);                // chưa chọn file mới
+
                             // ⭐ LỌC NGHỆ SĨ ACTIVE = 1
                             const activeSongArtists = full.songArtists?.filter(sa => sa.active) ?? [];
 
@@ -757,6 +779,16 @@ const ManageSong = () => {
                               activeSongArtists
                                 .filter(sa => !sa.is_primary)
                                 .map(sa => sa.artist?.id)   
+                            );
+
+                            // =======================
+                            // SET FILE NHẠC CŨ
+                            // =======================
+                            setEditAudioFile(null);                // chưa chọn file mới
+                            setEditAudioName(
+                              full.file_url
+                                ? full.file_url.split("/").pop()    // lấy tên file từ URL
+                                : ""
                             );
 
 
