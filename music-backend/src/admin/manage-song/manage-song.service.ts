@@ -37,6 +37,15 @@ export class ManageSongService {
     private readonly aiService: AiService,   // AI Service
   ) {}
 
+  private logNotify(title: string, data: Record<string, any>) {
+    console.log(`🚀 [NOTIFY] ${title}`);
+    for (const [key, value] of Object.entries(data)) {
+      console.log(`➡️ ${key}:`, value);
+    }
+    console.log('------------------------------------------------');
+  }
+
+
   // ======================================================
   // TẠO BÀI HÁT (UPLOAD)
   // ======================================================
@@ -182,6 +191,14 @@ export class ManageSongService {
       // Gửi thông báo
       // =====================
       if (artist.user_id) {
+        this.logNotify('SEND SONG APPROVED (UPLOAD)', {
+          userId: artist.user_id,
+          artistId: artist.id,
+          songId: savedSong.id,
+          title: savedSong.title,
+          type: NotificationType.SONG_APPROVED,
+        });
+
         await this.notificationService.createNotificationForUser(
           artist.user_id,
           artist.id,
@@ -189,7 +206,19 @@ export class ManageSongService {
           `Admin đã thêm bài hát "${savedSong.title}" vào hồ sơ nghệ sĩ của bạn.`,
           savedSong.id,
         );
+
+        console.log('✅ [NOTIFY] SENT SUCCESS');
+        console.log('------------------------------------------------');
+      } else {
+        console.log('⚠️ [NOTIFY] SKIP');
+        console.log('➡️ Reason: Artist không có userId, không gửi thông báo');
+        console.log('➡️ artistId:', artist.id);
+        console.log('➡️ songId:', savedSong.id);
+        console.log('➡️ title:', savedSong.title);
+        console.log('------------------------------------------------');
       }
+
+
 
       return savedSong;
     } catch (err) {
@@ -242,6 +271,13 @@ export class ManageSongService {
 
     if (!song) throw new NotFoundException('Không tìm thấy bài hát');
 
+    console.log('✏️ [SONG] START UPDATE');
+    console.log('➡️ songId:', song.id);
+    console.log(`➡️ title: "${song.title}"`);
+    console.log('➡️ fields:', Object.keys(body));
+    console.log('------------------------------------------------');
+
+
     if (body.title) song.title = body.title.trim();
 
     // ========================
@@ -280,13 +316,19 @@ export class ManageSongService {
       const newArtistIds = [newPrimaryId, ...newCollabs];
 
       // -------------------------------
-      // 1) UPDATE primary (11)
+      // 1) UPDATE primary (11) — FIXED
       // -------------------------------
       if (oldArtistIds.includes(newPrimaryId)) {
-        await this.songArtistRepo.update(
-          { song_id: id, artist_id: newPrimaryId },
-          { is_primary: true, active: true },
-        );
+        await this.songArtistRepo
+          .createQueryBuilder()
+          .update(SongArtist)
+          .set({
+            is_primary: true,
+            active: true,
+          })
+          .where("song_id = :songId", { songId: id })
+          .andWhere("artist_id = :artistId", { artistId: newPrimaryId })
+          .execute();
       } else {
         await this.songArtistRepo.insert({
           song_id: id,
@@ -301,10 +343,16 @@ export class ManageSongService {
       // -------------------------------
       for (const collabId of newCollabs) {
         if (oldArtistIds.includes(collabId)) {
-          await this.songArtistRepo.update(
-            { song_id: id, artist_id: collabId },
-            { is_primary: false, active: true },
-          );
+          await this.songArtistRepo
+            .createQueryBuilder()
+            .update(SongArtist)
+            .set({
+              is_primary: false,
+              active: true,
+            })
+            .where("song_id = :songId", { songId: id })
+            .andWhere("artist_id = :artistId", { artistId: collabId })
+            .execute();
         } else {
           await this.songArtistRepo.insert({
             song_id: id,
@@ -315,17 +363,21 @@ export class ManageSongService {
         }
       }
 
-      // -------------------------------
+      /// -------------------------------
       // 3) NGHỆ SĨ BỊ LOẠI → active = false
       // -------------------------------
       for (const old of oldRelations) {
         if (!newArtistIds.includes(old.artist_id)) {
-          await this.songArtistRepo.update(
-            { song_id: id, artist_id: old.artist_id },
-            { active: false },
-          );
+          await this.songArtistRepo
+            .createQueryBuilder()
+            .update(SongArtist)
+            .set({ active: false })
+            .where("song_id = :songId", { songId: id })
+            .andWhere("artist_id = :artistId", { artistId: old.artist_id })
+            .execute();
         }
       }
+
     }
 
 
@@ -455,14 +507,34 @@ export class ManageSongService {
 
     const artist = song.songArtists.find((s) => s.is_primary)?.artist;
 
+    // ✅ BỔ SUNG: đảm bảo không lỗi + log rõ ràng
     if (artist?.user_id) {
-      await this.notificationService.createNotificationForUser(
-        artist.user_id,
-        artist.id,
-        NotificationType.SONG_APPROVED,
-        `Bài hát "${song.title}" đã được phê duyệt.`,
-        song.id,
-      );
+      try {
+        await this.notificationService.createNotificationForUser(
+          artist.user_id,
+          artist.id,
+          NotificationType.SONG_APPROVED,
+          `Bài hát "${song.title}" đã được phê duyệt.`,
+          song.id,
+        );
+
+        console.log('✅ [NOTIFY] SONG APPROVED SENT');
+        console.log(`🎵 [SONG] Đã duyệt bài hát: ${song.title}`);
+        console.log('➡️ userId:', artist.user_id);
+        console.log('➡️ artistId:', artist.id);
+        console.log('➡️ songId:', song.id);
+        console.log('------------------------------------------------');
+      } catch (err) {
+        console.error('❌ [NOTIFY] FAILED TO SEND SONG APPROVED');
+        console.error(err);
+        console.log('------------------------------------------------');
+      }
+    } else {
+      console.log('⚠️ [NOTIFY] SKIP SENDING SONG APPROVED');
+      console.log(`🎵 [SONG] Đã duyệt bài hát: ${song.title}`);
+      console.log('➡️ Reason: Artist không có userId, không gửi thông báo');
+      console.log('➡️ songId:', song.id);
+      console.log('------------------------------------------------');
     }
 
     return song;
@@ -486,7 +558,17 @@ export class ManageSongService {
 
     const artist = song.songArtists.find((s) => s.is_primary)?.artist;
 
+    // =========================
+    // LOG + NOTIFY REJECT
+    // =========================
     if (artist?.user_id) {
+      console.log('🚀 [NOTIFY] SEND SONG REJECTED');
+      console.log('➡️ userId:', artist.user_id);
+      console.log('➡️ artistId:', artist.id);
+      console.log('➡️ songId:', song.id);
+      console.log(`➡️ title: "${song.title}"`);
+      console.log('------------------------------------------------');
+
       await this.notificationService.createNotificationForUser(
         artist.user_id,
         artist.id,
@@ -494,23 +576,51 @@ export class ManageSongService {
         `Bài hát "${song.title}" đã bị từ chối bởi quản trị viên.`,
         song.id,
       );
+
+      console.log('❌ [NOTIFY] REJECT SENT SUCCESS');
+      console.log('------------------------------------------------');
+    } else {
+      console.log('⚠️ [NOTIFY] SKIP SONG REJECTED');
+      console.log('➡️ Reason: Artist không có userId');
+      console.log('➡️ songId:', song.id);
+      console.log(`➡️ title: "${song.title}"`);
+      console.log('------------------------------------------------');
     }
 
     return song;
   }
 
+
   // ======================================================
-  // SOFT DELETE
+  // SOFT DELETE SONG (LOG)
   // ======================================================
   async softDeleteSong(id: number) {
     const song = await this.songRepo.findOne({ where: { id } });
     if (!song) throw new NotFoundException('Không tìm thấy bài hát');
 
+    console.log('🗑️ [SONG] START SOFT DELETE');
+    console.log('➡️ songId:', song.id);
+    console.log(`➡️ title: "${song.title}"`);
+    console.log('➡️ currentStatus:', song.status);
+    console.log('➡️ currentActive:', song.active);
+    console.log('------------------------------------------------');
+
+    // Soft delete
     song.active = false;
     song.status = 'APPROVED';
 
-    return this.songRepo.save(song);
+    await this.songRepo.save(song);
+
+    console.log('✅ [SONG] SOFT DELETE SUCCESS');
+    console.log('➡️ songId:', song.id);
+    console.log(`➡️ title: "${song.title}"`);
+    console.log('➡️ newStatus:', song.status);
+    console.log('➡️ newActive:', song.active);
+    console.log('------------------------------------------------');
+
+    return song;
   }
+
 
   // ======================================================
   // DELETE SONG

@@ -87,11 +87,11 @@ export default function PopupAddUser({ onClose, onSubmit }) {
         </div>
 
         {/* Footer */}
-        <div className="popup-footer">
-          <button className="btn-cancel" onClick={onClose}>
+        <div className="popup-footer-buttons">
+          <button className="button-cancel" onClick={onClose}>
             Hủy
           </button>
-          <button className="btn-save" onClick={handleSubmit}>
+          <button className="button-save" onClick={handleSubmit}>
             Thêm
           </button>
         </div>

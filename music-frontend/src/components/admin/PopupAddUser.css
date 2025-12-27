@@ -60,7 +60,7 @@
 }
 
 /* ===== Footer ===== */
-.popup-footer {
+.popup-footer-buttons {
   margin-top: 28px;
   display: flex;
   justify-content: flex-end;
@@ -68,7 +68,7 @@
 }
 
 /* ===== Nút Hủy ===== */
-.btn-cancel {
+.button-cancel {
   padding: 10px 22px;
   border-radius: 30px;
   background: #333;
@@ -78,12 +78,12 @@
   transition: background 0.2s;
 }
 
-.btn-cancel:hover {
+.button-cancel:hover {
   background: #3e3e3e;
 }
 
 /* ===== Nút Thêm ===== */
-.btn-save {
+.button-save {
   padding: 10px 28px;
   border-radius: 30px;
   background: #1db954;
@@ -94,11 +94,11 @@
   transition: background 0.2s, transform 0.1s;
 }
 
-.btn-save:hover {
+.button-save:hover {
   background: #1ed760;
 }
 
-.btn-save:active {
+.button-save:active {
   transform: scale(0.97);
 }
 
