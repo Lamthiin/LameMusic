@@ -182,7 +182,10 @@ const submitSearch = (e) => {
     <header className="header">
 
       {/* LEFT: LOGO */}
-      <div className="header-left" onClick={() => navigate("/")}>
+      <div
+        className="header-left header-logo galaxy-text"
+        onClick={() => navigate("/")}
+      >
         🎧 Lame
       </div>
 
@@ -282,7 +285,10 @@ const submitSearch = (e) => {
 
             {notifOpen && (
               <div className="notif-dropdown">
-                {notifications.length === 0 && <div>Không có thông báo</div>}
+                {notifications.length === 0 && (
+                  <div className="notif-empty">Không có thông báo</div>
+                )}
+
 
                 {notifications.map(n => (
                   <div

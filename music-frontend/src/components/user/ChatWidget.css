@@ -148,3 +148,31 @@
     font-size: 20px;
   }
 }
+
+/* Close button */
+.chat-close-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  color: #e5e5e5;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.chat-close-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  transform: scale(1.05);
+}
+
+.chat-close-btn:active {
+  transform: scale(0.95);
+}
+.chat-close-btn {
+  backdrop-filter: blur(6px);
+}
+

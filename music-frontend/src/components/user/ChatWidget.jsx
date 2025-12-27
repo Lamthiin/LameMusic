@@ -3,6 +3,8 @@ import { socket } from '../../utils/socket';
 import { useAuth } from '../../context/AuthContext';
 import './ChatWidget.css';
 import { FiMessageCircle } from "react-icons/fi";
+import { FiX } from "react-icons/fi";
+
 
 
 const ChatWidget = () => {
@@ -96,8 +98,15 @@ const ChatWidget = () => {
         <div className="chat-box-main">
           <div className="chat-box-header">
             <span>Hỗ trợ trực tuyến {!user && "(Khách)"}</span>
-            <button onClick={() => setIsOpen(false)}>✕</button>
+            <button
+              className="chat-close-btn"
+              onClick={() => setIsOpen(false)}
+              aria-label="Đóng"
+            >
+              <FiX size={18} />
+            </button>
           </div>
+
           <div className="chat-box-body">
             {messages.map((msg, i) => (
               <div key={msg.id || i} className={`message-row ${msg.senderId == myId ? 'me' : 'them'}`}>
