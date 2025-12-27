@@ -65,7 +65,11 @@ export class HistoryService {
       return this.historyRepository.find({
           where: { user: { id: userId } },
           // Phải lấy cả thông tin bài hát (để có embedding)
-          relations: ['song'], 
+          relations: [
+            'song', 
+            'song.songArtists',          // Lấy bảng trung gian kết nối bài hát & nghệ sĩ
+            'song.songArtists.artist'    // Lấy chi tiết thông tin nghệ sĩ (để có stage_name)
+        ],
           order: { listenedAt: 'DESC' },
           take: limit,
       });

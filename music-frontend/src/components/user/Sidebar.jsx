@@ -1,10 +1,11 @@
+// music-frontend/src/components/Sidebar.jsx
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import {
   fetchMyFollowingApi,
-  getRecommendedSongApi,
-  fetchListenHistoryApi
+  fetchListenHistoryApi,
+  getRecommendedSongApi
 } from '../../utils/api';
 import { usePlayer } from '../../context/PlayerContext';
 import './Sidebar.css';
@@ -28,33 +29,28 @@ const Sidebar = () => {
   const dropdownRef = useRef(null);
   const triggerRef = useRef(null);
 
-  // ================= LOAD FOLLOWING =================
+  // ================= FOLLOWING =================
   const loadFollowing = useCallback(async () => {
     if (!isAuthenticated) return setFollowingList([]);
-    try {
-      const data = await fetchMyFollowingApi();
-      setFollowingList(data);
-    } catch (e) {
-      console.error(e);
-    }
+    const data = await fetchMyFollowingApi();
+    setFollowingList(data || []);
   }, [isAuthenticated]);
 
-  // ================= LOAD HISTORY (NGHE GẦN NHẤT) =================
   useEffect(() => {
-    if (!isAuthenticated) {
-      setListenHistory([]);
-      return;
-    }
+    loadFollowing();
+    const handler = () => loadFollowing();
+    window.addEventListener('followStatusChanged', handler);
+    return () =>
+      window.removeEventListener('followStatusChanged', handler);
+  }, [loadFollowing]);
+
+  // ================= HISTORY =================
+  useEffect(() => {
+    if (!isAuthenticated) return setListenHistory([]);
 
     const loadHistory = async () => {
       const data = await fetchListenHistoryApi(10);
-
-      // 🔥 SẮP XẾP NGHE GẦN NHẤT TRÊN CÙNG (CHO CHẮC)
-      const sorted = [...data].sort(
-        (a, b) => new Date(b.listenedAt) - new Date(a.listenedAt)
-      );
-
-      setListenHistory(sorted);
+      setListenHistory(data || []);
     };
 
     loadHistory();
@@ -85,9 +81,7 @@ const Sidebar = () => {
   const handleForYouClick = async () => {
     if (!isAuthenticated) return navigate('/login');
     const song = await getRecommendedSongApi();
-    if (song?.file_url) {
-      playTrack(song, [song], 0);
-    }
+    if (song?.file_url) playTrack(song, [song], 0);
   };
 
   const followedArtists = followingList
@@ -100,7 +94,10 @@ const Sidebar = () => {
       {/* ================= NAV ================= */}
       <div className="sidebar-section sidebar-nav">
         <ul>
-          <li className={`nav-item ${activePage === 'home' ? 'active' : ''}`} onClick={() => navigate('/')}>
+          <li
+            className={`nav-item ${activePage === 'home' ? 'active' : ''}`}
+            onClick={() => navigate('/')}
+          >
             {activePage === 'home' ? <MdExplore /> : <MdOutlineExplore />}
             <span>Khám phá</span>
           </li>
@@ -110,7 +107,10 @@ const Sidebar = () => {
             <span>Dành cho tôi</span>
           </li>
 
-          <li className={`nav-item ${activePage === 'albums' ? 'active' : ''}`} onClick={() => navigate('/albums')}>
+          <li
+            className={`nav-item ${activePage === 'albums' ? 'active' : ''}`}
+            onClick={() => navigate('/albums')}
+          >
             <FaCompactDisc />
             <span>Albums</span>
           </li>
@@ -121,11 +121,11 @@ const Sidebar = () => {
 
       {/* ================= LIBRARY ================= */}
       <div className="sidebar-section sidebar-library">
-        <ul className="sidebar-library-items">
-          <li className="library-item" onClick={() => navigate('/profile/info')}>
+        <ul>
+          {/* <li className="library-item" onClick={() => navigate('/profile/info')}>
             <VscLibrary />
             <span>Thư viện</span>
-          </li>
+          </li> */}
 
           {isAuthenticated && (
             <div className="dropdown-wrapper">
@@ -146,26 +146,40 @@ const Sidebar = () => {
                 <div className="dropdown-header">Nghệ sĩ bạn quan tâm</div>
                 <div className="dropdown-body">
                   {followedArtists.length > 0 ? (
-                    followedArtists.slice(0, 3).map(artist => (
-                      <div
-                        key={artist.id}
-                        className="dropdown-item"
-                        onClick={() => {
-                          navigate(`/artist/${artist.id}`);
-                          setIsFollowMenuOpen(false);
-                        }}
-                      >
-                        <img
-                          src={
-                            artist.avatar_url?.startsWith('http')
-                              ? artist.avatar_url
-                              : `http://localhost:3000${artist.avatar_url}`
-                          }
-                          className="artist-mini-avatar"
-                        />
-                        <span>{artist.stage_name}</span>
-                      </div>
-                    ))
+                    <>
+                      {followedArtists.slice(0, 3).map(artist => (
+                        <div
+                          key={artist.id}
+                          className="dropdown-item"
+                          onClick={() => {
+                            navigate(`/artist/${artist.id}`);
+                            setIsFollowMenuOpen(false);
+                          }}
+                        >
+                          <img
+                            src={
+                              artist.avatar_url?.startsWith('http')
+                                ? artist.avatar_url
+                                : `http://localhost:3000${artist.avatar_url || '/images/default-avatar.png'}`
+                            }
+                            className="artist-mini-avatar"
+                          />
+                          <span>{artist.stage_name}</span>
+                        </div>
+                      ))}
+
+                      {followedArtists.length > 3 && (
+                        <div
+                          className="see-all-artists"
+                          onClick={() => {
+                            navigate('/profile/following');
+                            setIsFollowMenuOpen(false);
+                          }}
+                        >
+                          Xem thêm ({followedArtists.length - 3})
+                        </div>
+                      )}
+                    </>
                   ) : (
                     <div className="dropdown-empty">Chưa theo dõi Artist nào</div>
                   )}
@@ -182,41 +196,55 @@ const Sidebar = () => {
       </div>
 
       {/* ================= HISTORY ================= */}
-      {isAuthenticated && (
-        <>
-          <hr className="sidebar-divider" />
-          <div className="sidebar-section sidebar-history">
-            <div className="sidebar-title">Nghe gần đây</div>
+{/* ================= HISTORY ================= */}
+{isAuthenticated && (
+  <div className="sidebar-history">
+    <div className="sidebar-title">Nghe gần đây</div>
 
-            {listenHistory.length > 0 ? (
-              listenHistory.slice(0, 5).map(h => (
-                <div
-                  key={h.id}
-                  className="history-item"
-                  onClick={() => playTrack(h.song, [h.song], 0)}
-                >
-                  <img
-                    src={
-                      h.song.image_url?.startsWith('http')
-                        ? h.song.image_url
-                        : `http://localhost:3000${h.song.image_url || '/images/default.png'}`
-                    }
-                  />
-                  <div>
-                    <p className="history-title">{h.song.title}</p>
-                    <span className="history-artist">
-                      {h.song.artist?.stage_name}
-                    </span>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="history-empty">Chưa có lịch sử nghe</div>
-            )}
-          </div>
-        </>
+    <div className="sidebar-history-list">
+      {listenHistory.length > 0 ? (
+        // Lọc trùng: Chỉ giữ lại lần xuất hiện đầu tiên của mỗi song.id
+        listenHistory
+          .filter((item, index, self) => 
+            index === self.findIndex((t) => t.song.id === item.song.id)
+          )
+          .map((h) => (
+            <div
+              key={h.id}
+              className="history-item"
+              onClick={() => playTrack(h.song, [h.song], 0)}
+            >
+              <img
+                src={
+                  h.song.image_url?.startsWith('http')
+                    ? h.song.image_url
+                    : `http://localhost:3000${h.song.image_url || '/images/default.png'}`
+                }
+                alt={h.song.title}
+              />
+              <div>
+                <div className="history-title">{h.song.title}</div>
+                <div className="history-artist">
+  {(() => {
+    // 1. Tìm nghệ sĩ chính
+    const primaryArtist = h.song.songArtists?.find(a => a.is_primary)?.artist;
+    
+    // 2. Nếu không có nghệ sĩ chính, lấy nghệ sĩ đầu tiên trong mảng
+    const fallbackArtist = h.song.songArtists?.[0]?.artist;
+    
+    // 3. Trả về stage_name hoặc thông báo mặc định
+    return primaryArtist?.stage_name || fallbackArtist?.stage_name || "Nghệ sĩ";
+  })()}
+</div>
+              </div>
+            </div>
+          ))
+      ) : (
+        <div className="history-empty">Chưa có lịch sử nghe</div>
       )}
-
+    </div>
+  </div>
+)}
     </div>
   );
 };

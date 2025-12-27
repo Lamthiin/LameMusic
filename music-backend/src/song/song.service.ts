@@ -214,7 +214,7 @@ async addSongToAlbum(userId: number, songId: number, albumId: number): Promise<S
   async findAllApprovedSongsWithMissingEmbedding(): Promise<Song[]> {
     return this.songRepository.find({
       where: {
-        status: 'APPROVED',
+        
         active: true,
         embedding: IsNull(), // <-- Tìm những bài có cột embedding là NULL
       },

@@ -226,3 +226,64 @@
   color: #666;
   padding: 6px 16px;
 }
+
+.sidebar-history {
+  margin-top: auto;       /* 👈 đẩy xuống đáy */
+  padding-bottom: 20px;   /* 👈 cách đáy 20px */
+}
+
+/* ===== HISTORY ===== */
+.sidebar-history {
+  position: absolute;
+  bottom: 90px;
+  left: 0;
+  width: 100%;
+  padding: 0 12px;
+}
+
+.sidebar-history-list {
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.sidebar-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #aaa;
+  margin: 8px 4px;
+}
+
+.history-item {
+  display: flex;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.history-item:hover {
+  background: #1e1e1e;
+}
+
+.history-item img {
+  width: 36px;
+  height: 36px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.history-title {
+  font-size: 13px;
+  color: #fff;
+}
+
+.history-artist {
+  font-size: 11px;
+  color: #999;
+}
+
+.history-empty {
+  font-size: 12px;
+  color: #666;
+  padding: 6px;
+}

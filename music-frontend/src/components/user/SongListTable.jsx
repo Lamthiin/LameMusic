@@ -165,24 +165,30 @@ const SongListTable = ({ songs = [], onRemoveSong }) => {
               </span>
 
               <div className="col-img-title">
-                <img src={thumb} alt="" className="song-thumb" />
-                <div className="song-info" onClick={(e) => { e.stopPropagation(); navigate(`/song/${song.id}`); }}>
-                  <p className="song-title">{song.title}</p>
-                  <p className="song-artist">
-                    {song.songArtists?.length > 0
-                      ? song.songArtists.map((sa, i) => (
-                          <span
-                            key={sa.artist?.id || i}
-                            className="song-artist-link"
-                            onClick={(e) => { e.stopPropagation(); if(sa.artist?.id) navigate(`/artist/${sa.artist.id}`); }}
-                          >
-                            {sa.artist?.stage_name}{i < song.songArtists.length - 1 ? ', ' : ''}
-                          </span>
-                        ))
-                      : 'Không rõ'}
-                  </p>
-                </div>
-              </div>
+  <img
+    src={thumb}
+    alt=""
+    className="song-thumb"
+    onClick={(e) => { e.stopPropagation(); playSong(song, idx); }}
+  />
+  <div className="song-info" onClick={(e) => { e.stopPropagation(); navigate(`/song/${song.id}`); }}>
+    <p className="song-title">{song.title}</p>
+    <p className="song-artist">
+      {song.songArtists?.length > 0
+        ? song.songArtists.map((sa, i) => (
+            <span
+              key={sa.artist?.id || i}
+              className="song-artist-link"
+              onClick={(e) => { e.stopPropagation(); if(sa.artist?.id) navigate(`/artist/${sa.artist.id}`); }}
+            >
+              {sa.artist?.stage_name}{i < song.songArtists.length - 1 ? ', ' : ''}
+            </span>
+          ))
+        : 'Không rõ'}
+    </p>
+  </div>
+</div>
+
 
               <span className="col-album">{song.album?.title || 'Single'}</span>
               <span className="col-plays">{formatPlayCount(song.play_count || 0)}</span>

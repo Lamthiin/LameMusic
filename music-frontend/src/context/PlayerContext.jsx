@@ -89,6 +89,8 @@ export const PlayerProvider = ({ children }) => {
         }
     }, [playTrack, currentTrack, currentPlaylist]);
 
+    
+
 
     // === 4. HOOK CHÍNH ĐIỀU KHIỂN AUDIO ELEMENT (FIX ABORTERROR) ===
     useEffect(() => {
