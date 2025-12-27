@@ -43,7 +43,6 @@ const Header = () => {
   const userRef = useRef(null);
   const notifRef = useRef(null);
   const location = useLocation();
-  
 
   // ---------------- NOTIFICATION ----------------
   const [notifications, setNotifications] = useState([]);
@@ -94,40 +93,37 @@ const Header = () => {
   // ------------------------------------------------------
   // SEARCH
   // ------------------------------------------------------
-useEffect(() => {
-  if (location.pathname === "/search") {
-    return;
-  }
+  useEffect(() => {
+    if (location.pathname === "/search") return;
 
-  if (!query.trim()) {
-    setResults(null);
-    return;
-  }
+    if (!query.trim()) {
+      setResults(null);
+      return;
+    }
 
-  const timer = setTimeout(async () => {
-    try {
-      const data = await searchApi(query, "dropdown");
+    const timer = setTimeout(async () => {
+      try {
+        const data = await searchApi(query, "dropdown");
 
-      data.songs = data.songs.map(s => ({
-        ...s,
-        image_url: fixImageUrl(s.image_url || s.album?.cover_url)
-      }));
-      data.artists = data.artists.map(a => ({
-        ...a,
-        avatar_url: fixImageUrl(a.avatar_url)
-      }));
-      data.albums = data.albums.map(a => ({
-        ...a,
-        cover_url: fixImageUrl(a.cover_url)
-      }));
+        data.songs = data.songs.map(s => ({
+          ...s,
+          image_url: fixImageUrl(s.image_url || s.album?.cover_url)
+        }));
+        data.artists = data.artists.map(a => ({
+          ...a,
+          avatar_url: fixImageUrl(a.avatar_url)
+        }));
+        data.albums = data.albums.map(a => ({
+          ...a,
+          cover_url: fixImageUrl(a.cover_url)
+        }));
 
-      setResults(data);
-    } catch {}
-  }, 400);
+        setResults(data);
+      } catch {}
+    }, 400);
 
-  return () => clearTimeout(timer);
-}, [query, location.pathname]);
-
+    return () => clearTimeout(timer);
+  }, [query, location.pathname]);
 
   // ------------------------------------------------------
   // CLICK OUTSIDE
@@ -164,16 +160,14 @@ useEffect(() => {
   // ------------------------------------------------------
   const [userOpen, setUserOpen] = useState(false);
 
-const submitSearch = (e) => {
-  if (e.key === "Enter" && query.trim()) {
-    const q = query.trim();
-    setQuery("");        // 🔥 QUAN TRỌNG
-    setResults(null);    // 🔥 QUAN TRỌNG
-    navigate(`/search?q=${encodeURIComponent(q)}`);
-  }
-};
-
-
+  const submitSearch = (e) => {
+    if (e.key === "Enter" && query.trim()) {
+      const q = query.trim();
+      setQuery("");        // 🔥 QUAN TRỌNG
+      setResults(null);    // 🔥 QUAN TRỌNG
+      navigate(`/search?q=${encodeURIComponent(q)}`);
+    }
+  };
 
   // ------------------------------------------------------
   // RENDER
@@ -303,6 +297,13 @@ const submitSearch = (e) => {
           <div className="artist-badge">
             <FaCheckCircle/> Nghệ sĩ
           </div>
+        )}
+
+        {/* NÚT TRỞ THÀNH NGHỆ SĨ */}
+        {isAuthenticated && user?.role === "listener" && (
+          <button className="btn-become-artist" onClick={() => navigate("/artist-registration")}>
+            Trở thành Nghệ sĩ
+          </button>
         )}
 
         {/* USER MENU */}

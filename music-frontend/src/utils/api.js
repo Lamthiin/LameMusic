@@ -621,3 +621,14 @@ export const fetchListenHistoryApi = async (limit = 10) => {
     return [];
   }
 };
+
+export const checkStageNameApi = async (stageName) => {
+    if (!stageName) return { exists: false };
+    try {
+        const res = await axios.get(`/api/artist/check-stage-name?name=${encodeURIComponent(stageName)}`);
+        return res.data; // { exists: true/false }
+    } catch (err) {
+        console.error(err);
+        throw err;
+    }
+};

@@ -17,14 +17,33 @@ import {
 const FEE_AMOUNT = 500000;
 
 // ✅ Toast ở cuối màn hình
-const Toast = ({ message, type }) => {
-    if (!message) return null;
+const Toast = ({ message, type, duration = 6000 }) => {
+    const [visible, setVisible] = useState(false);
+    const [localMessage, setLocalMessage] = useState('');
+
+    useEffect(() => {
+        if (!message) return;
+        setLocalMessage(message);
+        setVisible(true);
+
+        const timer = setTimeout(() => {
+            setVisible(false);
+            setLocalMessage('');
+        }, duration);
+
+        return () => clearTimeout(timer);
+    }, [message, duration]);
+
+    if (!visible) return null;
+
     return (
         <div className={`toast ${type}`}>
-            {message}
+            {localMessage}
         </div>
     );
 };
+
+
 
 const ArtistRegistrationPage = () => {
     const { user, isAuthenticated } = useAuth();
@@ -57,19 +76,21 @@ const ArtistRegistrationPage = () => {
         checkArtistStatus();
     }, [isAuthenticated]);
 
-    const handleNext = () => {
-        if (step === 2 && !agreed) {
-            setFormError("Vui lòng đồng ý với Chính sách bản quyền để tiếp tục.");
-            return;
-        }
-        if (step === 3 && !stageName.trim()) {
-            setFormError("Vui lòng nhập Nghệ danh.");
-            return;
-        }
-        setFormError('');
-        setStep(prev => prev + 1);
-        window.scrollTo(0, 0);
-    };
+const handleNext = () => {
+    if (step === 2 && !agreed) {
+        setFormError("Vui lòng đồng ý với Chính sách bản quyền để tiếp tục.");
+        return;
+    }
+    if (step === 3 && !stageName.trim()) {
+        setFormError("Vui lòng nhập Nghệ danh.");
+        return;
+    }
+
+    setFormError(''); // chỉ xóa khi bước tiếp thành công
+    setStep(prev => prev + 1);
+    window.scrollTo(0, 0);
+};
+
 
     const handleSubmitFinal = async () => {
         if (isSubmitting || !stageName.trim()) return;
@@ -82,7 +103,7 @@ const ArtistRegistrationPage = () => {
             setTimeout(() => navigate('/'), 2000);
         } catch (error) {
             setIsSubmitting(false);
-            setToast({ message: error.response?.data?.message || '❌ Đăng ký thất bại. Vui lòng thử lại.', type: 'error' });
+            setToast({ message: error.response?.data?.message || '❌ Đăng ký thất bại. Vui lòng thử lại.', type: 'error' });      
         }
     };
 
@@ -161,7 +182,11 @@ const ArtistRegistrationPage = () => {
             </div>
 
             {/* ✅ Toast thông báo ở cuối trang */}
-            <Toast message={toast.message} type={toast.type} />
+            {/* Hiển thị lỗi form step */}
+{formError && <p className="error-message-general">{formError}</p>}
+
+{/* Toast thông báo server */}
+<Toast message={toast.message} type={toast.type} duration={6000} />
         </div>
     );
 };

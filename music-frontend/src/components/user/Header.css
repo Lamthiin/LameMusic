@@ -1,7 +1,29 @@
 /* ================================
    HEADER.CSS – ĐẸP NHƯ SPOTIFY CHÍNH HIỆU 2025
    Dùng cho Header.jsx của bạn
-================================ */
+===========
+===================== */
+
+/* Header.css hoặc file CSS bạn đang dùng */
+.btn-become-artist {
+  background-color: #3bc264; /* màu nổi bật, bạn thay đổi tùy ý */
+  color: rgb(0, 0, 0);
+  border: none;
+  border-radius: 20px;
+  padding: 6px 14px;
+  margin-left: 10px; /* cách xa các phần khác */
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-become-artist:hover {
+  background-color: #31bd60;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
 
 .header {
   position: sticky;
