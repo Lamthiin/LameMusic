@@ -8,7 +8,8 @@ import {
   MdPerson,
   MdMusicNote,
   MdGroup,
-  MdChat
+  MdChat,
+  MdAlbum,
 } from "react-icons/md";
 
 const AdminSidebar = () => {
@@ -102,6 +103,11 @@ const AdminSidebar = () => {
           <span>Quản lý nghệ sĩ</span>
         </NavLink>
 
+         <NavLink to="/admin/albums" className={({ isActive }) => (isActive ? "active admin-link" : "admin-link")}>
+          <MdAlbum size={20} />
+          <span>Quản lý album</span>
+        </NavLink>
+        
         <NavLink to="/admin/songs" className="admin-link">
           <MdMusicNote size={20} />
           <span>Quản lý bài hát</span>

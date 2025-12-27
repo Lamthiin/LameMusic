@@ -98,6 +98,7 @@
     margin-top: 20px;
     display: flex;
     gap: 6px;
+    margin-bottom: 100px; /* chừa chỗ cho playbar */
 }
 
 .songs-pagination button {

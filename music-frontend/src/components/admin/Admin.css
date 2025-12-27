@@ -72,6 +72,8 @@
   border-radius: 6px;
   text-decoration: none;
   transition: 0.2s;
+  font-size: 20px;      /* mặc định thường ~14px */
+  font-weight: 500;     /* đậm vừa, nhìn rõ */
 }
 
 .admin-link:hover {
@@ -487,7 +489,9 @@
 }
 
 .admin-sidebar-header {
-  padding: 15px 0px;
+  padding: 5px 0px;
+  margin-top: -10px; 
+  margin-bottom: 24px; /* tăng/giảm 24–36px tùy mắt */
   font-size: 45px;
   font-weight: 700;
   color: #ffffff;

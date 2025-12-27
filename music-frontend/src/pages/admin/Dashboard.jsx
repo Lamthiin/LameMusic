@@ -74,7 +74,7 @@ const Dashboard = () => {
 
       <AdminTopArtists />
       <AdminTopChart />
-      <AlbTop10 />
+      {/* <AlbTop10 /> */}
     </div>
   );
 };

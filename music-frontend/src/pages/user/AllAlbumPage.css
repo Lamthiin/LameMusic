@@ -270,3 +270,55 @@
     color: var(--text-color-secondary, #b3b3b3);
     font-size: 0.9em;
 }
+
+/* =========================
+   ALBUM PAGINATION
+========================= */
+
+.allalbums-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+
+    margin-top: 40px;
+    margin-bottom: 120px; /* ⭐ chừa chỗ cho playbar */
+}
+
+/* Nút số & mũi tên */
+.page-number,
+.page-arrow {
+    min-width: 32px;
+    height: 32px;
+    border-radius: 6px;
+
+    background: #2a2a2a;
+    color: #ddd;
+    border: none;
+
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+
+    transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.page-number:hover,
+.page-arrow:hover:not(:disabled) {
+    background: #3a3a3a;
+    transform: translateY(-1px);
+}
+
+/* Trang đang active */
+.page-number.active {
+    background: #1db954;
+    color: #000;
+    font-weight: 600;
+}
+
+/* Disable */
+.page-arrow:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+}

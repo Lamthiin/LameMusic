@@ -5,7 +5,7 @@ import { fetchAllArtists } from "../../utils/api";
 import "./AllArtistsPage.css";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
-const PER_PAGE = 30;   //phan trang
+const PER_PAGE = 14;   //phan trang
 
 const fixUrl = (url) => {
     if (!url) return "/images/default-artist.png";

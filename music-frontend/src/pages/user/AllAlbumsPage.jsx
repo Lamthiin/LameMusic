@@ -29,6 +29,9 @@ const AllAlbumsPage = () => {
     // STATE LỌC
     const [selectedArtistId, setSelectedArtistId] = useState(null); 
     const [isDropdownOpen, setIsDropdownOpen] = useState(false); 
+    const [currentPage, setCurrentPage] = useState(1);
+    const ALBUMS_PER_PAGE = 16;
+
     
     const navigate = useNavigate();
 
@@ -53,6 +56,11 @@ const AllAlbumsPage = () => {
         loadAlbums();
     }, []);
 
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [selectedArtistId]);
+
+
     // 1. TÍNH TOÁN DANH SÁCH NGHỆ SĨ DUY NHẤT
     const uniqueArtists = useMemo(() => {
         const artistMap = new Map();
@@ -72,6 +80,14 @@ const AllAlbumsPage = () => {
         // Chuyển selectedArtistId thành chuỗi để so sánh
         return albums.filter(album => album.artist && String(album.artist.id) === String(selectedArtistId));
     }, [albums, selectedArtistId]);
+
+    const totalPages = Math.ceil(filteredAlbums.length / ALBUMS_PER_PAGE);
+
+    const paginatedAlbums = useMemo(() => {
+        const startIndex = (currentPage - 1) * ALBUMS_PER_PAGE;
+        return filteredAlbums.slice(startIndex, startIndex + ALBUMS_PER_PAGE);
+    }, [filteredAlbums, currentPage]);
+
 
     const currentArtist = uniqueArtists.find(a => String(a.id) === String(selectedArtistId));
 
@@ -138,35 +154,67 @@ const AllAlbumsPage = () => {
 
             
             {filteredAlbums.length > 0 ? (
-                <div className="allalbums-grid">
-                    {filteredAlbums.map(album => ( 
-                        <div 
-                            key={album.id} 
-                            className="allalbums-card"
-                            onClick={() => goToAlbumDetail(album.id)}
-                        >
-                            <div className="allalbums-cover-wrapper">
-                                <img 
-                                    src={album.cover_url} 
-                                    alt={album.title}
-                                    className="allalbums-cover"
-                                />
-                                <div className="allalbums-play-overlay">
-                                    {/* <div className="allalbums-play-icon"></div> */}
+                <>  
+                    <div className="allalbums-grid">
+                        {paginatedAlbums.map(album => ( 
+                            <div 
+                                key={album.id} 
+                                className="allalbums-card"
+                                onClick={() => goToAlbumDetail(album.id)}
+                            >
+                                <div className="allalbums-cover-wrapper">
+                                    <img 
+                                        src={album.cover_url} 
+                                        alt={album.title}
+                                        className="allalbums-cover"
+                                    />
+                                    <div className="allalbums-play-overlay">
+                                        {/* <div className="allalbums-play-icon"></div> */}
+                                    </div>
+                                </div>
+                                <div className="allalbums-info">
+                                    <h3 className="allalbums-album-title">{album.title}</h3>
+                                    <p className="allalbums-artist-name">
+                                        {album.artist?.stage_name || 'Nghệ sĩ'}
+                                    </p>
+                                    <p className="allalbums-release-year">
+                                        {new Date(album.release_date).getFullYear()}
+                                    </p>
                                 </div>
                             </div>
-                            <div className="allalbums-info">
-                                <h3 className="allalbums-album-title">{album.title}</h3>
-                                <p className="allalbums-artist-name">
-                                    {album.artist?.stage_name || 'Nghệ sĩ'}
-                                </p>
-                                <p className="allalbums-release-year">
-                                    {new Date(album.release_date).getFullYear()}
-                                </p>
-                            </div>
+                        ))}
+                    </div>
+                    {/* 🔽 PAGINATION BỎ Ở ĐÂY */}
+                    {totalPages > 1 && (
+                        <div className="allalbums-pagination">
+                            <button
+                                className="page-arrow"
+                                disabled={currentPage === 1}
+                                onClick={() => setCurrentPage(p => p - 1)}
+                            >
+                                ‹
+                            </button>
+
+                            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                                <button
+                                    key={page}
+                                    className={`page-number ${page === currentPage ? 'active' : ''}`}
+                                    onClick={() => setCurrentPage(page)}
+                                >
+                                    {page}
+                                </button>
+                            ))}
+
+                            <button
+                                className="page-arrow"
+                                disabled={currentPage === totalPages}
+                                onClick={() => setCurrentPage(p => p + 1)}
+                            >
+                                ›
+                            </button>
                         </div>
-                    ))}
-                </div>
+                    )}
+                </>
             ) : (
                 <p className="allalbums-empty">
                     {selectedArtistId ? `Không tìm thấy Album nào của ${currentArtist?.stage_name}.` : "Không tìm thấy Album nào."}
