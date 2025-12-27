@@ -143,7 +143,7 @@ const Home = () => {
                         playTrack({
                           ...song,
                           file_url: fixUrl(song.file_url, "audio"),
-                        });
+                        }, songs, songs.indexOf(song));
                       }
                     }}
                   >

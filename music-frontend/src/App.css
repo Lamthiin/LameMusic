@@ -66,10 +66,15 @@ body {
   overflow-y: auto;
 
   /* top | right | bottom | left */
-  padding: calc(var(--header-height) + 8px) 10px 24px 12px;
+  padding: 
+    calc(var(--header-height) + 8px)
+    10px
+    calc(var(--player-height) + 24px)  /* 👈 SỬA DÒNG NÀY */
+    12px;
 
   background: black;
 }
+
 
 
 /* Thanh cuộn đẹp */

@@ -51,8 +51,22 @@ const PlayerBar = () => {
 
   const isReady = !!currentTrack;
 
-  const handleNextClick = () => currentPlaylist.length && playNext();
-  const handlePreviousClick = () => currentPlaylist.length && playPrevious();
+  const handleNextClick = () => {
+    console.debug('[UI] handleNextClick', { currentTrackId: currentTrack?.id, playlistLength: currentPlaylist?.length, playNextDefined: !!playNext });
+    if (!currentPlaylist.length) {
+      console.debug('[UI] handleNextClick -> playlist empty');
+      return;
+    }
+    playNext();
+  };
+  const handlePreviousClick = () => {
+    console.debug('[UI] handlePreviousClick', { currentTrackId: currentTrack?.id, playlistLength: currentPlaylist?.length, playPreviousDefined: !!playPrevious });
+    if (!currentPlaylist.length) {
+      console.debug('[UI] handlePreviousClick -> playlist empty');
+      return;
+    }
+    playPrevious();
+  };
 
   const handleGoToSongDetail = () => {
     if (currentTrack?.id) navigate(`/song/${currentTrack.id}`);
@@ -118,7 +132,7 @@ const PlayerBar = () => {
           src={fixAudioUrl(currentTrack.file_url)}
           onClickNext={handleNextClick}
           onClickPrevious={handlePreviousClick}
-          onEnded={playNext}
+          onEnded={() => { console.debug('[UI] AudioPlayer onEnded event'); playNext(); }}
           showSkipControls={true}
           showJumpControls={false}
           customIcons={customIcons}
@@ -127,7 +141,7 @@ const PlayerBar = () => {
               key="shuffle" 
               className={`rhap_shuffle_button ${isShuffling ? 'rhap_active' : ''}`}
               onClick={toggleShuffle} 
-              title="Phát ngẫu nhiên"
+              title="Bật/Tắt Shuffle"
             >
               <IoShuffle size={18} />
             </button>,

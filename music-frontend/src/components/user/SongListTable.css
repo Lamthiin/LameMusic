@@ -566,3 +566,15 @@
     display: none;
   }
 }
+/* ==== SONG OPTIONS BACKDROP ==== */
+.song-options-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0); /* vô hình nhưng bắt click */
+  z-index: 998;
+}
+
+/* ==== SONG OPTIONS MENU ==== */
+.song-options-menu {
+  z-index: 999;
+}

@@ -1,6 +1,6 @@
 // music-frontend/src/context/PlayerContext.jsx (BẢN SỬA LỖI CUỐI CÙNG - FIX PLAYBACK)
 import React, { createContext, useState, useContext, useCallback, useRef, useEffect } from 'react';
-import { incrementPlayCountApi, logPlaybackApi } from '../utils/api'; 
+import { incrementPlayCountApi, logPlaybackApi, getRecommendedSongApi } from '../utils/api'; 
 
 const PlayerContext = createContext(null);
 
@@ -35,11 +35,33 @@ export const PlayerProvider = ({ children }) => {
             audio.removeEventListener('timeupdate', handleTimeUpdate); 
         }
     }, [currentTrack]);
-    
-    // Khai báo các hàm Next/Prev (Dùng Ref để tránh lỗi ReferenceError)
-    const playNextRef = useRef(() => {});
-    const playPreviousRef = useRef(() => {});
-    const getNextTrack = useCallback(() => { /* ... */ return currentPlaylist[0]; }, [currentTrack, currentPlaylist]); 
+
+    // SHUFFLE STATE
+    const [isShuffling, setIsShuffling] = useState(false);
+    const toggleShuffle = useCallback(() => setIsShuffling(s => !s), []);
+
+    // HÀM LẤY BÀI TIẾP THEO
+    const getNextTrack = useCallback(() => {
+        console.debug('[Player] getNextTrack', { currentTrackId: currentTrack?.id, playlistLength: currentPlaylist?.length, isShuffling });
+        if (!currentPlaylist || currentPlaylist.length === 0) return null;
+        if (!currentTrack) return currentPlaylist[0];
+
+        if (isShuffling) {
+            if (currentPlaylist.length === 1) return currentTrack;
+            let idx = Math.floor(Math.random() * currentPlaylist.length);
+            // ensure not same track
+            if (currentPlaylist[idx].id === currentTrack.id) {
+                idx = (idx + 1) % currentPlaylist.length;
+            }
+            console.debug('[Player] getNextTrack -> shuffle selected idx', idx, 'id', currentPlaylist[idx]?.id);
+            return currentPlaylist[idx];
+        }
+
+        const currentIndex = currentPlaylist.findIndex(t => t.id === currentTrack.id);
+        const nextIndex = (currentIndex + 1) % currentPlaylist.length;
+        console.debug('[Player] getNextTrack -> nextIndex', nextIndex, 'id', currentPlaylist[nextIndex]?.id);
+        return currentPlaylist[nextIndex];
+    }, [currentPlaylist, currentTrack, isShuffling]);
 
     // 2. HÀM CHÍNH playTrack VÀ TOGGLEPLAY
     const playTrack = useCallback((track, playlist = null, startIndex = 0) => {
@@ -48,9 +70,16 @@ export const PlayerProvider = ({ children }) => {
 
         if (urlToPlay !== currentTrack?.file_url || playlist) { // So sánh URL đã fix
             // Trường hợp 1: Bài hát mới (Chỉ cập nhật state)
+            console.debug('[Player] playTrack -> set currentTrack', track.id, 'playlistProvided', !!playlist);
             setCurrentTrack(track);
             if (playlist) {
                 setCurrentPlaylist(playlist);
+            } else {
+                // Nếu không truyền playlist mà playlist hiện tại không chứa bài hát, đặt playlist thành [track]
+                if (!currentPlaylist || currentPlaylist.length === 0 || !currentPlaylist.find(t => t.id === track.id)) {
+                    console.debug('[Player] playTrack -> creating single-item playlist for standalone play');
+                    setCurrentPlaylist([track]);
+                }
             }
             setIsPlaying(true); // Đặt state là Play
         } else if (audio) {
@@ -70,24 +99,35 @@ export const PlayerProvider = ({ children }) => {
     }, [currentTrack]);
 
 
-    // 3. HÀM NEXT/PREVIOUS LOGIC (Logic giữ nguyên)
-    playNextRef.current = useCallback(() => {
+    // 3. HÀM NEXT/PREVIOUS LOGIC
+    const playNext = useCallback(() => {
+        console.debug('[Player] playNext invoked', { currentTrackId: currentTrack?.id, playlistLength: currentPlaylist?.length });
         const nextTrack = getNextTrack();
+        console.debug('[Player] playNext -> nextTrack', nextTrack?.id);
         if (nextTrack) {
-            playTrack(nextTrack); 
+            playTrack(nextTrack);
+        } else {
+            console.debug('[Player] playNext -> no next track found');
         }
-    }, [playTrack, getNextTrack]); 
-    
-    playPreviousRef.current = useCallback(() => {
+    }, [playTrack, getNextTrack, currentTrack, currentPlaylist]);
+
+    const playPrevious = useCallback(() => {
+        console.debug('[Player] playPrevious invoked', { currentTrackId: currentTrack?.id, playlistLength: currentPlaylist?.length });
         const currentActivePlaylist = currentPlaylist;
-        if (!currentTrack || currentActivePlaylist.length === 0) return;
+        if (!currentTrack || currentActivePlaylist.length === 0) {
+            console.debug('[Player] playPrevious -> nothing to do');
+            return;
+        }
         const currentIndex = currentActivePlaylist.findIndex(t => t.id === currentTrack.id);
         const previousIndex = (currentIndex - 1 + currentActivePlaylist.length) % currentActivePlaylist.length;
 
+        console.debug('[Player] playPrevious -> previousIndex', previousIndex, 'id', currentActivePlaylist[previousIndex]?.id);
         if (currentActivePlaylist[previousIndex]) {
             playTrack(currentActivePlaylist[previousIndex]);
         }
     }, [playTrack, currentTrack, currentPlaylist]);
+
+
 
     
 
@@ -99,7 +139,7 @@ export const PlayerProvider = ({ children }) => {
         if (audio) {
             // --- GẮN LISTENERS SỰ KIỆN GỐC (FIX XUNG ĐỘT) ---
             const onTimeUpdate = handleTimeUpdate;
-            const onEnded = playNextRef.current; 
+            const onEnded = playNext; 
             const handleNativePlay = () => setIsPlaying(true); // Cập nhật state từ Audio Element
             const handleNativePause = () => setIsPlaying(false); // Cập nhật state từ Audio Element
 
@@ -148,9 +188,11 @@ export const PlayerProvider = ({ children }) => {
                 audio.removeEventListener('ended', onEnded);
             };
         }
-    }, [currentTrack, isPlaying, handleTimeUpdate, playNextRef.current]); 
+    }, [currentTrack, isPlaying, handleTimeUpdate, playNext]); 
     // =================================================================
 
+
+    const isLoggedIn = !!localStorage.getItem('token');
 
     const contextValue = {
         currentTrack,
@@ -159,9 +201,16 @@ export const PlayerProvider = ({ children }) => {
         togglePlay,
         audioRef, 
         currentPlaylist, 
-        playNext: playNextRef.current, 
-        playPrevious: playPreviousRef.current,
-    };
+        playNext, 
+        playPrevious,
+        isShuffling,
+        toggleShuffle,
+        setCurrentTrack,
+        setCurrentPlaylist,
+        setIsPlaying,
+        isLoggedIn,
+        getRecommendedSongApi,
+    }; 
 
     return (
         <PlayerContext.Provider value={contextValue}>
