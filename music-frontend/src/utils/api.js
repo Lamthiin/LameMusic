@@ -612,3 +612,12 @@ export const fetchAllArtistsApi = async () => {
     }
 };
 
+export const fetchListenHistoryApi = async (limit = 10) => {
+  try {
+    const res = await api.get(`/history/me?limit=${limit}`);
+    return res.data;
+  } catch (e) {
+    console.error(e);
+    return [];
+  }
+};

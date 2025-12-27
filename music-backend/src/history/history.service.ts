@@ -2,7 +2,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 // Fix: Import LessThan và các operator
-import { Repository, LessThan, FindManyOptions } from 'typeorm'; 
+import { Repository, LessThan, FindManyOptions , MoreThan } from 'typeorm'; 
 import { History } from './history.entity';
 import { User } from '../user/user.entity';
 import { Song } from '../song/song.entity';

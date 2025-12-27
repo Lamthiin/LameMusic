@@ -259,143 +259,128 @@ export class ManageSongService {
     return song;
   }
 
+// ======================================================
+// UPDATE SONG (FIXED 100% song_id = NULL)
+// ======================================================
+async updateSong(id: number, body: UpdateSongDto, files?: any) {
 
-  // ======================================================
-  // UPDATE SONG
-  // ======================================================
-  async updateSong(id: number, body: UpdateSongDto, files?: any) {
-    const song = await this.songRepo.findOne({
-      where: { id },
-      relations: ['album', 'lyrics', 'songArtists', 'songArtists.artist'],
+  // ❌ KHÔNG load songArtists ở đây
+  const song = await this.songRepo.findOne({
+    where: { id },
+    relations: ['album', 'lyrics'],
+  });
+
+  if (!song) throw new NotFoundException('Không tìm thấy bài hát');
+
+  console.log('✏️ [SONG] START UPDATE');
+  console.log('➡️ songId:', song.id);
+  console.log('➡️ fields:', Object.keys(body));
+  console.log('------------------------------------------------');
+
+  // ========================
+  // TITLE
+  // ========================
+  if (body.title) {
+    song.title = body.title.trim();
+  }
+
+  // ========================
+  // CATEGORY
+  // ========================
+  if (body.category) {
+    const category = await this.categoryRepo.findOne({
+      where: { id: Number(body.category) },
     });
+    if (!category) throw new NotFoundException('Thể loại không tồn tại');
+    song.genre = category.name;
+  }
 
-    if (!song) throw new NotFoundException('Không tìm thấy bài hát');
+  // =====================================================
+  // UPDATE ARTIST (primary + collab) – KHÔNG DÙNG save()
+  // =====================================================
+  if (body.artist) {
+    const newPrimaryId = Number(body.artist);
 
-    console.log('✏️ [SONG] START UPDATE');
-    console.log('➡️ songId:', song.id);
-    console.log(`➡️ title: "${song.title}"`);
-    console.log('➡️ fields:', Object.keys(body));
-    console.log('------------------------------------------------');
-
-
-    if (body.title) song.title = body.title.trim();
-
-    // ========================
-    // CATEGORY
-    // ========================
-    if (body.category) {
-      const category = await this.categoryRepo.findOne({
-        where: { id: Number(body.category) },
-      });
-
-      if (!category) throw new NotFoundException('Thể loại không tồn tại');
-      song.genre = category.name;
-    }
-    
-    // ========================
-    // UPDATE NGHỆ SĨ (primary + collab) — KHÔNG DÙNG save() NỮA
-    // =====================================================
-    if (body.artist) {
-      const newPrimaryId = Number(body.artist);
-
-      let newCollabs: number[] = [];
-      if (body.featuredArtists) {
-        const raw = typeof body.featuredArtists === "string"
+    let newCollabs: number[] = [];
+    if (body.featuredArtists) {
+      const raw =
+        typeof body.featuredArtists === 'string'
           ? JSON.parse(body.featuredArtists)
           : body.featuredArtists;
 
-        if (Array.isArray(raw)) newCollabs = raw.map(Number);
-      }
+      if (Array.isArray(raw)) newCollabs = raw.map(Number);
+    }
 
-      // Lấy quan hệ cũ
-      const oldRelations = await this.songArtistRepo.find({
-        where: { song_id: id },
+    const oldRelations = await this.songArtistRepo.find({
+      where: { song_id: id },
+    });
+
+    const oldArtistIds = oldRelations.map(r => r.artist_id);
+    const newArtistIds = [newPrimaryId, ...newCollabs];
+
+    // -------- PRIMARY --------
+    if (oldArtistIds.includes(newPrimaryId)) {
+      await this.songArtistRepo
+        .createQueryBuilder()
+        .update()
+        .set({ is_primary: true, active: true })
+        .where('song_id = :songId', { songId: id })
+        .andWhere('artist_id = :artistId', { artistId: newPrimaryId })
+        .execute();
+    } else {
+      await this.songArtistRepo.insert({
+        song_id: id,
+        artist_id: newPrimaryId,
+        is_primary: true,
+        active: true,
       });
+    }
 
-      const oldArtistIds = oldRelations.map(r => r.artist_id);
-      const newArtistIds = [newPrimaryId, ...newCollabs];
-
-      // -------------------------------
-      // 1) UPDATE primary (11) — FIXED
-      // -------------------------------
-      if (oldArtistIds.includes(newPrimaryId)) {
+    // -------- COLLAB --------
+    for (const collabId of newCollabs) {
+      if (oldArtistIds.includes(collabId)) {
         await this.songArtistRepo
           .createQueryBuilder()
-          .update(SongArtist)
-          .set({
-            is_primary: true,
-            active: true,
-          })
-          .where("song_id = :songId", { songId: id })
-          .andWhere("artist_id = :artistId", { artistId: newPrimaryId })
+          .update()
+          .set({ is_primary: false, active: true })
+          .where('song_id = :songId', { songId: id })
+          .andWhere('artist_id = :artistId', { artistId: collabId })
           .execute();
       } else {
         await this.songArtistRepo.insert({
           song_id: id,
-          artist_id: newPrimaryId,
-          is_primary: true,
+          artist_id: collabId,
+          is_primary: false,
           active: true,
         });
       }
-
-      // -------------------------------
-      // 2) UPDATE collabs (01)
-      // -------------------------------
-      for (const collabId of newCollabs) {
-        if (oldArtistIds.includes(collabId)) {
-          await this.songArtistRepo
-            .createQueryBuilder()
-            .update(SongArtist)
-            .set({
-              is_primary: false,
-              active: true,
-            })
-            .where("song_id = :songId", { songId: id })
-            .andWhere("artist_id = :artistId", { artistId: collabId })
-            .execute();
-        } else {
-          await this.songArtistRepo.insert({
-            song_id: id,
-            artist_id: collabId,
-            is_primary: false,
-            active: true,
-          });
-        }
-      }
-
-      /// -------------------------------
-      // 3) NGHỆ SĨ BỊ LOẠI → active = false
-      // -------------------------------
-      for (const old of oldRelations) {
-        if (!newArtistIds.includes(old.artist_id)) {
-          await this.songArtistRepo
-            .createQueryBuilder()
-            .update(SongArtist)
-            .set({ active: false })
-            .where("song_id = :songId", { songId: id })
-            .andWhere("artist_id = :artistId", { artistId: old.artist_id })
-            .execute();
-        }
-      }
-
     }
 
-
-
+    // -------- DEACTIVE REMOVED ARTISTS --------
+    for (const old of oldRelations) {
+      if (!newArtistIds.includes(old.artist_id)) {
+        await this.songArtistRepo
+          .createQueryBuilder()
+          .update()
+          .set({ active: false })
+          .where('song_id = :songId', { songId: id })
+          .andWhere('artist_id = :artistId', { artistId: old.artist_id })
+          .execute();
+      }
+    }
+  }
 
   // ========================
   // ALBUM
   // ========================
   if (body.album !== undefined) {
-    if (body.album === "" || body.album === null) {
+    if (body.album === '' || body.album === null) {
       song.album = null;
     } else {
       const album = await this.albumRepo.findOne({
         where: { id: Number(body.album) },
       });
-
-      if (!album) throw new NotFoundException("Album không tồn tại");
-
+      if (!album) throw new NotFoundException('Album không tồn tại');
       song.album = album;
     }
   }
@@ -423,7 +408,7 @@ export class ManageSongService {
   }
 
   // ========================
-  // ẢNH
+  // IMAGE
   // ========================
   const newImage = files?.imageFile?.[0];
   if (newImage) {
@@ -435,12 +420,11 @@ export class ManageSongService {
       newImage.buffer,
       newImage.mimetype,
     );
-
     song.image_url = uploaded.url;
   }
 
   // ========================
-  // FILE NHẠC
+  // AUDIO FILE
   // ========================
   const newAudio = files?.audioFile?.[0];
   if (newAudio) {
@@ -455,13 +439,17 @@ export class ManageSongService {
       newAudio.buffer,
       newAudio.mimetype,
     );
-
     song.file_url = uploaded.url;
   }
 
+  // ✅ SAVE SONG (KHÔNG DÍNH OneToMany)
   await this.songRepo.save(song);
-  return song;
 
+  // ✅ LOAD FULL ĐỂ TRẢ VỀ
+  return this.songRepo.findOne({
+    where: { id },
+    relations: ['album', 'lyrics', 'songArtists', 'songArtists.artist'],
+  });
 }
 
 
