@@ -53,6 +53,7 @@ import ArtistInfo from './pages/ArtistDashboard/ArtistInfo'; // <-- (2) IMPORT M
 import ArtistAlbums from './pages/ArtistDashboard/ArtistAlbums'; // <-- (1) IMPORT MỚI
 import ArtistSongs from './pages/ArtistDashboard/ArtistSongs'; // <-- (1) IMPORT MỚI
 import AdminChat from './pages/admin/AdminChat';
+import SearchResult from './pages/user/SearchResult';
 
 function App() {
   return (
@@ -78,6 +79,7 @@ function App() {
         {/* === (3) ROUTE ĐĂNG KÝ NGHỆ SĨ MỚI === */}
         <Route path="artist-registration" element={<ArtistRegistrationPage />} />
         {/* ==================================== */}
+        <Route path="/search" element={<SearchResult />} />
 
         {/* === (3) ROUTE PUBLIC PROFILE MỚI (LỒNG NHAU) === */}
         <Route path="profile/:username" element={<PublicProfileLayout />}>

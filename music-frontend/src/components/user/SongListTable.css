@@ -1,18 +1,20 @@
-/* SongListTable.css – CHUẨN SPOTIFY 2025 */
+/* SongListTable.css – FIXED, KHÔNG BỊ CHE, ĐỀU FORM */
+
 .songlist-wrapper {
   background: #121212;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 8px 30px rgba(0,0,0,0.5);
-  font-family: "Arial", sans-serif;
+  font-family: Arial, sans-serif;
   color: #fff;
 }
 
-/* HEADER */
+/* ================= HEADER ================= */
 .songlist-header {
   display: grid;
-  grid-template-columns: 30px 0.1fr 0.35fr 0.15fr 0.3fr 160px;
-  padding: 16px 20px;
+  grid-template-columns: 40px 1fr 0.35fr 0.2fr 0.2fr 120px;
+  align-items: center;
+  padding: 14px 20px;
   background: #1a1a1a;
   color: #b3b3b3;
   font-size: 13px;
@@ -20,55 +22,79 @@
   text-transform: uppercase;
   letter-spacing: 1px;
   border-bottom: 1px solid #333;
-  align-items: center;
+  min-height: 56px;
 }
 
 .songlist-header.has-selection {
-  grid-template-columns: 50px 1fr auto;
-  gap: 20px;
+  grid-template-columns: 40px 1fr auto;
 }
 
-.header-checkbox,
-.selection-count,
-.action-download,
-.action-add-to-playlist {
+.header-checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
   cursor: pointer;
 }
 
-.action-download,
-.action-add-to-playlist {
-  background: #1db954;
-  border: none;
-  color: #000;
-  padding: 4px 10px;
-  border-radius: 4px;
-  font-weight: 700;
+.header-checkbox:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.action-button-group {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 12px;
+  white-space: nowrap;
+}
+
+.action-download,
+.action-add-to-playlist {
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: none;
   font-size: 13px;
-  transition: background 0.2s;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.action-download {
+  background: #1db954;
+  color: #000;
+}
+
+.action-add-to-playlist {
+  background: #1db954;
+  color: #000;
 }
 
 .action-download:hover,
 .action-add-to-playlist:hover {
   background: #1ed760;
+  transform: scale(1.05);
 }
 
-/* BODY */
+/* ================= BODY ================= */
 .songlist-body {
   max-height: 70vh;
   overflow-y: auto;
 }
 
-/* ROWS */
+/* ================= ROW ================= */
 .songlist-row {
   display: grid;
-  grid-template-columns: 50px 1fr 1fr 5px 200px 130px;
-  padding: 12px 20px;
+  grid-template-columns: 40px 1fr 0.35fr 0.2fr 0.2fr 120px;
   align-items: center;
+  padding: 12px 20px;
   border-bottom: 1px solid #282828;
-  transition: all 0.2s;
+  transition: background 0.2s;
   cursor: pointer;
 }
 
@@ -77,19 +103,18 @@
 }
 
 .songlist-row.selected {
-  background: rgba(29, 185, 84, 0.2);
+  background: rgba(29,185,84,0.2);
 }
 
 .songlist-row.playing {
-  background: rgba(29, 185, 84, 0.15);
+  background: rgba(29,185,84,0.15);
   color: #1db954;
 }
 
-/* INDEX & PLAY BUTTON */
+/* ================= INDEX / PLAY ================= */
 .row-index {
   text-align: center;
   font-weight: 600;
-  width: 30px;
 }
 
 .play-btn-small {
@@ -99,11 +124,12 @@
   cursor: pointer;
 }
 
-/* IMAGE + TITLE */
+/* ================= IMAGE + TITLE ================= */
 .col-img-title {
   display: flex;
   align-items: center;
   gap: 14px;
+  min-width: 0;
 }
 
 .song-thumb {
@@ -114,25 +140,28 @@
 }
 
 .song-info {
-  cursor: pointer;
+  min-width: 0;
 }
 
 .song-title {
   font-weight: 600;
-  color: #fff;
   margin: 0;
-}
-
-.song-artist {
-  font-size: 13px;
-  color: #b3b3b3;
-  margin: 4px 0 0;
+  color: #fff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* ALBUM / PLAYS / DURATION */
+.song-artist {
+  font-size: 13px;
+  color: #b3b3b3;
+  margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ================= ALBUM / PLAYS / DURATION ================= */
 .col-album,
 .col-plays,
 .col-duration {
@@ -141,27 +170,25 @@
   text-overflow: ellipsis;
 }
 
-.col-album {
+.col-album,
+.col-plays {
   color: #a7a7a7;
 }
 
-.col-plays {
-  color: #a7a7a7;
+.col-plays,
+.col-duration {
   text-align: right;
-  padding-right: 20px;
 }
 
 .col-duration {
-  color: #fff;
-  text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-/* OPTIONS COLUMN */
+/* ================= OPTIONS ================= */
 .col-options {
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
+  gap: 10px;
 }
 
 .btn-remove,
@@ -169,10 +196,10 @@
   background: none;
   border: none;
   color: #aaa;
-  cursor: pointer;
   padding: 6px;
   border-radius: 50%;
-  transition: all 0.2s;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
 }
 
 .btn-remove:hover,
@@ -181,16 +208,15 @@
   color: #fff;
 }
 
-/* MENU OPTIONS */
+/* ================= CONTEXT MENU ================= */
 .song-options-menu {
   position: fixed;
   background: #181818;
   border: 1px solid #333;
   border-radius: 6px;
   min-width: 180px;
-  z-index: 1000;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  color: white;
+  z-index: 9999;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
   font-size: 13px;
 }
 
@@ -203,20 +229,19 @@
 .song-options-menu li {
   padding: 8px 12px;
   cursor: pointer;
-  transition: background 0.15s;
 }
 
 .song-options-menu li:hover {
-  background: #1db95433;
+  background: rgba(29,185,84,0.2);
 }
 
-/* PAGINATION */
+/* ================= PAGINATION ================= */
 .songlist-pagination {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 20px;
-  padding: 20px;
+  padding: 16px;
   background: #1a1a1a;
   font-size: 14px;
   color: #aaa;
@@ -229,7 +254,6 @@
   padding: 8px 16px;
   border-radius: 999px;
   cursor: pointer;
-  transition: all 0.2s;
 }
 
 .songlist-pagination button:hover:not(:disabled) {
@@ -242,93 +266,303 @@
   cursor: not-allowed;
 }
 
-/* RESPONSIVE */
+/* ================= RESPONSIVE ================= */
 @media (max-width: 768px) {
   .songlist-header {
-    grid-template-columns: 40px 1fr 100px 80px;
-    font-size: 12px;
+    grid-template-columns: 40px 1fr 80px;
   }
+
   .songlist-row {
-    grid-template-columns: 40px 1fr 100px 80px;
+    grid-template-columns: 40px 1fr 80px;
   }
+
+  .col-album,
   .col-plays,
-  .col-options,
-  .col-album {
+  .col-options {
     display: none;
   }
 }
-/* HEADER KHI CHỌN NHIỀU BÀI */
+/* SongListTable.css – FIXED, KHÔNG BỊ CHE, ĐỀU FORM */
+
+.songlist-wrapper {
+  background: #121212;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+  font-family: Arial, sans-serif;
+  color: #fff;
+}
+
+/* ================= HEADER ================= */
+.songlist-header {
+  display: grid;
+  grid-template-columns: 0px 1.5fr 3.5fr 2fr 2fr 200px;
+  align-items: center;
+  padding: 14px 20px;
+  background: #1a1a1a;
+  color: #b3b3b3;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 1px solid #333;
+  min-height: 56px;
+}
+
 .songlist-header.has-selection {
+  grid-template-columns: 40px 1fr auto;
+}
+
+.header-checkbox {
   display: flex;
   align-items: center;
-  justify-content: space-between; /* chia ra 2 bên */
-  padding: 12px 20px;
-  background: #1a1a1a;
-  border-bottom: 1px solid #333;
-  border-radius: 8px 8px 0 0;
-  color: #fff;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
 }
 
-/* Thông báo số bài chọn */
-.selection-count {
-  font-weight: 600;
-  font-size: 14px;
-  color: #fff;
+.header-checkbox:hover {
+  background: rgba(255,255,255,0.1);
 }
 
-/* Nhóm các nút hành động */
 .action-button-group {
   display: flex;
   align-items: center;
   gap: 12px;
+  white-space: nowrap;
 }
 
-/* Nút Tải xuống */
-.action-download {
+.action-download,
+.action-add-to-playlist {
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.action-download {
   background: #1db954;
   color: #000;
-  font-weight: 600;
-  font-size: 13px;
-  border-radius: 20px;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s;
 }
 
-.action-download:hover {
-  background: #1ed760;
-  transform: scale(1.05);
-}
-
-/* Nút Thêm vào Playlist */
 .action-add-to-playlist {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
   background: #1db954;
-  color: #fff;
-  font-weight: 600;
-  font-size: 13px;
-  border-radius: 20px;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s;
+  color: #000;
 }
 
+.action-download:hover,
 .action-add-to-playlist:hover {
   background: #1ed760;
   transform: scale(1.05);
 }
 
-/* Icon trong nút */
-.action-download svg,
-.action-add-to-playlist svg {
-  width: 14px;
-  height: 14px;
-  color: inherit;
+/* ================= BODY ================= */
+.songlist-body {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+/* ================= ROW ================= */
+.songlist-row {
+  display: grid;
+  grid-template-columns: 40px 2.5fr 1.5fr 1fr 0.7fr 120px;
+  align-items: center;
+  padding: 12px 20px;
+  border-bottom: 1px solid #282828;
+  transition: background 0.2s;
+  cursor: pointer;
+}
+
+.songlist-row:hover {
+  background: #282828;
+}
+
+.songlist-row.selected {
+  background: rgba(29,185,84,0.2);
+}
+
+.songlist-row.playing {
+  background: rgba(29,185,84,0.15);
+  color: #1db954;
+}
+
+/* ================= INDEX / PLAY ================= */
+.row-index {
+  text-align: center;
+  font-weight: 600;
+}
+
+.play-btn-small {
+  background: none;
+  border: none;
+  color: #1db954;
+  cursor: pointer;
+}
+
+/* ================= IMAGE + TITLE ================= */
+.col-img-title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.song-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.song-info {
+  min-width: 0;
+}
+
+.song-title {
+  font-weight: 600;
+  margin: 0;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.song-artist {
+  font-size: 13px;
+  color: #b3b3b3;
+  margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ================= ALBUM / PLAYS / DURATION ================= */
+.col-album,
+.col-plays,
+.col-duration {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.col-album,
+.col-plays {
+  color: #a7a7a7;
+}
+
+.col-plays,
+.col-duration {
+  text-align: right;
+}
+
+.col-duration {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ================= OPTIONS ================= */
+.col-options {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn-remove,
+.btn-menu {
+  background: none;
+  border: none;
+  color: #aaa;
+  padding: 6px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.btn-remove:hover,
+.btn-menu:hover {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+}
+
+/* ================= CONTEXT MENU ================= */
+.song-options-menu {
+  position: fixed;
+  background: #181818;
+  border: 1px solid #333;
+  border-radius: 6px;
+  min-width: 180px;
+  z-index: 9999;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  font-size: 13px;
+}
+
+.song-options-menu ul {
+  list-style: none;
+  margin: 0;
+  padding: 6px 0;
+}
+
+.song-options-menu li {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.song-options-menu li:hover {
+  background: rgba(29,185,84,0.2);
+}
+
+/* ================= PAGINATION ================= */
+.songlist-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  padding: 16px;
+  background: #1a1a1a;
+  font-size: 14px;
+  color: #aaa;
+}
+
+.songlist-pagination button {
+  background: #333;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.songlist-pagination button:hover:not(:disabled) {
+  background: #1db954;
+  color: #000;
+}
+
+.songlist-pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 768px) {
+  .songlist-header {
+    grid-template-columns: 40px 1fr 80px;
+  }
+
+  .songlist-row {
+    grid-template-columns: 40px 1fr 80px;
+  }
+
+  .col-album,
+  .col-plays,
+  .col-options {
+    display: none;
+  }
 }

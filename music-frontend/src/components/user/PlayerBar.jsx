@@ -90,7 +90,14 @@ const PlayerBar = () => {
 
   return (
     <div className={`player-bar-container ${!isReady ? 'empty' : ''}`}>
-      <div className="player-track-info" onClick={handleGoToSongDetail}>
+      <div
+  className="player-track-info"
+  onClick={(e) => {
+    e.stopPropagation();
+    handleGoToSongDetail();
+  }}
+>
+
         {isReady ? (
           <>
             <img src={fixPlayerImageUrl(currentTrack)} alt={currentTrack.title} />

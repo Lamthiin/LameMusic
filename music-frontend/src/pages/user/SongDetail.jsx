@@ -1,19 +1,23 @@
-// music-frontend/src/pages/SongDetail.jsx
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../../utils/api';
 import { usePlayer } from '../../context/PlayerContext';
 import './SongDetail.css';
-import { FaPlay, FaHeart, FaRedo, FaEllipsisV, FaPlus, FaFlag } from 'react-icons/fa';
+import {
+    FaPlay,
+    FaPause,
+    FaHeart,
+    FaRedo,
+    FaEllipsisV,
+    FaPlus,
+    FaFlag
+} from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 
 import SongOptionsMenu from '../../components/user/SongOptionsMenu';
 import AddToPlaylistModal from '../../components/user/AddToPlaylistModal';
 import ReportModal from '../../components/user/ReportModal';
 
-// ─────────────────────────
-// FIX URL
-// ─────────────────────────
 const fixUrl = (url, type = 'image') => {
     if (!url) {
         if (type === 'artist') return '/images/default-artist.png';
@@ -29,14 +33,17 @@ const fixUrl = (url, type = 'image') => {
     return `http://localhost:3000${url.replace(original, prefix)}`;
 };
 
-// ─────────────────────────
-// COMPONENT
-// ─────────────────────────
 const SongDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
 
-    const { playTrack, currentTrack, isPlaying, setIsPlaying, audioRef } = usePlayer();
+    const {
+        playTrack,
+        togglePlay,
+        currentTrack,
+        isPlaying
+    } = usePlayer();
+
     const { isAuthenticated } = useAuth();
 
     const [song, setSong] = useState(null);
@@ -50,9 +57,6 @@ const SongDetail = () => {
     const [playlistModal, setPlaylistModal] = useState(false);
     const [reportOpen, setReportOpen] = useState(false);
 
-    // ─────────────────────────
-    // LOAD SONG
-    // ─────────────────────────
     useEffect(() => {
         const load = async () => {
             setLoading(true);
@@ -68,6 +72,7 @@ const SongDetail = () => {
 
                 data.file_url = fixUrl(data.file_url, 'audio');
                 data.image_url = fixUrl(data.image_url, 'image');
+
                 if (data.album) {
                     data.album.cover_url = fixUrl(data.album.cover_url, 'image');
                 }
@@ -92,44 +97,40 @@ const SongDetail = () => {
         load();
     }, [id, isAuthenticated]);
 
-    // Tự động phát khi vào bài
-    useEffect(() => {
-        if (song && (!currentTrack || currentTrack.id !== song.id)) {
-            playTrack(song);
+    const isThisSongPlaying =
+        currentTrack?.id === song?.id && isPlaying;
+
+    const handlePlayPause = () => {
+        if (!song) return;
+
+        if (currentTrack?.id === song.id) {
+            togglePlay();
+        } else {
+            playTrack(song, [song], 0);
         }
-    }, [song]);
+    };
 
-    // ─────────────────────────
-    // EVENT
-    // ─────────────────────────
     const replay = () => {
-        if (!audioRef.current?.audio?.current) return;
-
-        audioRef.current.audio.current.currentTime = 0;
-        audioRef.current.audio.current.play();
-        setIsPlaying(true);
+        if (!song) return;
+        playTrack(song, [song], 0);
     };
 
     const toggleLike = async () => {
         if (!isAuthenticated) {
-            alert("Vui lòng đăng nhập!");
-            navigate("/login");
+            alert('Vui lòng đăng nhập!');
+            navigate('/login');
             return;
         }
         const res = await api.post(`/like/${song.id}`);
         setIsLiked(res.data.isLiked);
     };
 
-    // ─────────────────────────
-    // RENDER
-    // ─────────────────────────
     if (loading) return <div>Đang tải...</div>;
     if (!song) return <div>Không tìm thấy bài hát</div>;
 
     return (
         <div className="song-detail-container">
 
-            {/* HEADER */}
             <div className="song-detail-header">
 
                 <img
@@ -143,43 +144,61 @@ const SongDetail = () => {
                     <h1>{song.title}</h1>
 
                     <p>
-                        {song.artist?.stage_name} • {song.album?.title}
+                        {song.artist?.stage_name}
+                        {song.album?.title && ` • ${song.album.title}`}
                     </p>
 
-                    {/* ===================== CONTROLS ===================== */}
-                    <div className="detail-controls">
+                    <div className="controls-left song-detail-actions">
 
-                        {/* LEFT ONLY PLAY */}
                         <div className="controls-left">
-                            <button className="btn-play" onClick={replay}>
+
+                            <button
+                                className="btn-play main"
+                                onClick={handlePlayPause}
+                            >
+                                {isThisSongPlaying ? <FaPause /> : <FaPlay />}
+                                {isThisSongPlaying ? 'TẠM DỪNG' : 'PHÁT'}
+                            </button>
+
+                            <button
+                                className="btn-play sub"
+                                onClick={replay}
+                            >
                                 <FaRedo /> PHÁT LẠI
                             </button>
+
                         </div>
 
-                        {/* RIGHT ALL BUTTONS */}
                         <div className="controls-right">
 
-                            <button className={`icon-btn ${isLiked ? 'liked' : ''}`}
-                                    onClick={toggleLike}>
+                            <button
+                                className={`icon-btn ${isLiked ? 'liked' : ''}`}
+                                onClick={toggleLike}
+                            >
                                 <FaHeart />
                             </button>
 
-                            <button className="icon-btn"
-                                    onClick={() => setPlaylistModal(true)}>
+                            <button
+                                className="icon-btn"
+                                onClick={() => setPlaylistModal(true)}
+                            >
                                 <FaPlus />
                             </button>
 
                             {isAuthenticated && (
-                                <button className="icon-btn"
-                                        onClick={() => setReportOpen(true)}>
+                                <button
+                                    className="icon-btn"
+                                    onClick={() => setReportOpen(true)}
+                                >
                                     <FaFlag />
                                 </button>
                             )}
 
-                            {/* MENU */}
                             <div className="menu-box">
-                                <button className="icon-btn"
-                                        onClick={() => setMenuOpen(!menuOpen)}>
+                                <button
+                                    className="icon-btn"
+                                    onClick={() => setMenuOpen(!menuOpen)}
+                                >
                                     <FaEllipsisV />
                                 </button>
 
@@ -197,16 +216,11 @@ const SongDetail = () => {
                 </div>
             </div>
 
-            {/* LYRICS */}
             <div className="lyrics-box">
                 <h3>Lời bài hát</h3>
-                {loadingLyrics
-                    ? <p>Đang tải...</p>
-                    : <p>{lyrics}</p>
-                }
+                {loadingLyrics ? <p>Đang tải...</p> : <p>{lyrics}</p>}
             </div>
 
-            {/* MODALS */}
             {playlistModal && (
                 <AddToPlaylistModal
                     songId={song.id}

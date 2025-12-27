@@ -1,12 +1,12 @@
 // music-frontend/src/components/Header.jsx
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import {
   fetchNotificationsApi,
   markNotificationAsReadApi,
   searchApi
 } from "../../utils/api";
+import { useNavigate, useLocation } from "react-router-dom";
 
 import {
   FaSearch,
@@ -42,6 +42,8 @@ const Header = () => {
   const searchRef = useRef(null);
   const userRef = useRef(null);
   const notifRef = useRef(null);
+  const location = useLocation();
+  
 
   // ---------------- NOTIFICATION ----------------
   const [notifications, setNotifications] = useState([]);
@@ -92,39 +94,40 @@ const Header = () => {
   // ------------------------------------------------------
   // SEARCH
   // ------------------------------------------------------
-  useEffect(() => {
-    if (!query.trim()) {
-      setResults(null);
-      return;
-    }
+useEffect(() => {
+  if (location.pathname === "/search") {
+    return;
+  }
 
-    const timer = setTimeout(async () => {
-      try {
-        const data = await searchApi(query);
+  if (!query.trim()) {
+    setResults(null);
+    return;
+  }
 
-        data.songs = data.songs.map(s => ({
-          ...s,
-          image_url: fixImageUrl(s.image_url || s.album?.cover_url)
-        }));
-        data.artists = data.artists.map(a => ({
-          ...a,
-          avatar_url: fixImageUrl(a.avatar_url)
-        }));
-        data.albums = data.albums.map(a => ({
-          ...a,
-          cover_url: fixImageUrl(a.cover_url)
-        }));
+  const timer = setTimeout(async () => {
+    try {
+      const data = await searchApi(query, "dropdown");
 
-        setResults(data);
+      data.songs = data.songs.map(s => ({
+        ...s,
+        image_url: fixImageUrl(s.image_url || s.album?.cover_url)
+      }));
+      data.artists = data.artists.map(a => ({
+        ...a,
+        avatar_url: fixImageUrl(a.avatar_url)
+      }));
+      data.albums = data.albums.map(a => ({
+        ...a,
+        cover_url: fixImageUrl(a.cover_url)
+      }));
 
-      } catch (err) {
-        console.log(err);
-      }
-    }, 400);
+      setResults(data);
+    } catch {}
+  }, 400);
 
-    return () => clearTimeout(timer);
+  return () => clearTimeout(timer);
+}, [query, location.pathname]);
 
-  }, [query]);
 
   // ------------------------------------------------------
   // CLICK OUTSIDE
@@ -161,6 +164,17 @@ const Header = () => {
   // ------------------------------------------------------
   const [userOpen, setUserOpen] = useState(false);
 
+const submitSearch = (e) => {
+  if (e.key === "Enter" && query.trim()) {
+    const q = query.trim();
+    setQuery("");        // 🔥 QUAN TRỌNG
+    setResults(null);    // 🔥 QUAN TRỌNG
+    navigate(`/search?q=${encodeURIComponent(q)}`);
+  }
+};
+
+
+
   // ------------------------------------------------------
   // RENDER
   // ------------------------------------------------------
@@ -180,6 +194,7 @@ const Header = () => {
           <input
             value={query}
             onChange={e => setQuery(e.target.value)}
+            onKeyDown={submitSearch}
             placeholder="Tìm kiếm bài hát, nghệ sĩ, album..."
           />
         </div>

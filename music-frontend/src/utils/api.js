@@ -186,17 +186,30 @@ export const updateMyProfileApi = async (data) => {
     }
 };
 
-/* === API MỚI: TÌM KIẾM (SEARCH) === */
-export const searchApi = async (query) => {
-    if (!query) return { songs: [], artists: [], albums: [] }; // Không gọi API nếu query rỗng
-    try {
-        // Dùng 'api' (có interceptor) vì API /search là Optional
-        const response = await api.get(`/search?q=${query}`);
-        return response.data;
-    } catch (error) {
-        console.error('Lỗi khi tìm kiếm:', error);
-        return { songs: [], artists: [], albums: [] };
-    }
+// /* === API MỚI: TÌM KIẾM (SEARCH) === */
+// export const searchApi = async (query) => {
+//     if (!query) return { songs: [], artists: [], albums: [] }; // Không gọi API nếu query rỗng
+//     try {
+//         // Dùng 'api' (có interceptor) vì API /search là Optional
+//         const response = await api.get(`/search?q=${query}`);
+//         return response.data;
+//     } catch (error) {
+//         console.error('Lỗi khi tìm kiếm:', error);
+//         return { songs: [], artists: [], albums: [] };
+//     }
+// };
+export const searchApi = async (query, mode = "dropdown") => {
+  if (!query) return { songs: [], artists: [], albums: [] };
+
+  try {
+    const response = await api.get("/search", {
+      params: { q: query, mode }
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Lỗi khi tìm kiếm:", error);
+    return { songs: [], artists: [], albums: [] };
+  }
 };
 
 

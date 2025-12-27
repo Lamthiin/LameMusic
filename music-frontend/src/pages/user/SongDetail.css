@@ -183,3 +183,67 @@
         justify-content: center;
     }
 }
+
+/* ===============================
+   SONG DETAIL ACTION BUTTONS
+================================ */
+
+.song-detail-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+/* Base button */
+.song-detail-actions .btn-play {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+/* MAIN PLAY / PAUSE */
+.song-detail-actions .btn-play.main {
+    background: #1db954;
+    color: #000;
+}
+
+.song-detail-actions .btn-play.main:hover {
+    transform: scale(1.05);
+    background: #1ed760;
+}
+
+/* SUB REPLAY */
+.song-detail-actions .btn-play.sub {
+    background: transparent;
+    color: #fff;
+    border: 1px solid #555;
+}
+
+.song-detail-actions .btn-play.sub:hover {
+    border-color: #fff;
+    transform: scale(1.03);
+}
+
+/* ICON SIZE */
+.song-detail-actions .btn-play svg {
+    font-size: 16px;
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+    .song-detail-actions {
+        gap: 10px;
+    }
+
+    .song-detail-actions .btn-play {
+        padding: 8px 14px;
+        font-size: 13px;
+    }
+}
