@@ -9,6 +9,7 @@ import { NotificationType } from 'src/notification/notification.entity';
 import { NotificationService } from '../../notification/notification.service';
 import { Album } from '../../album/album.entity'; // Thêm dòng này
 import { Song } from '../../song/song.entity'; // Thêm dòng này
+
 @Injectable()
 export class AdminArtistService {
   constructor(
@@ -161,8 +162,8 @@ export class AdminArtistService {
 
     // Nếu là đường dẫn local → convert sang BE host
     if (url.startsWith("\\") || url.startsWith("/")) {
-      return `http://localhost:3000${url.replace(/\\/g, "/")}`;
-    }
+  return `${url.replace(/\\/g, "/")}`;
+}
 
     return url; // Cloudflare URL giữ nguyên
   }
