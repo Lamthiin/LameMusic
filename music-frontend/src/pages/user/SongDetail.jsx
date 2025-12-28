@@ -146,6 +146,7 @@ const SongDetail = () => {
                     <p>
                         {song.artist?.stage_name}
                         {song.album?.title && ` • ${song.album.title}`}
+                         {song.genre && ` • ${song.genre}`}
                     </p>
 
                     <div className="controls-left song-detail-actions">
