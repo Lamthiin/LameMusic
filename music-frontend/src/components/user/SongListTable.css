@@ -593,7 +593,7 @@
 /* Header */
 .songlist-header {
   display: grid;
-  grid-template-columns: 40px 0.5fr 500px 100px 200px 200px;
+  grid-template-columns: 40px 0.5fr 360px 300px 200px 200px;
   align-items: center;
   padding: 12px 20px;
   background: #1e1e1e;
@@ -653,7 +653,7 @@
 
 .songlist-row {
   display: grid;
-  grid-template-columns: 40px 1fr 150px 120px 200px 90px;
+  grid-template-columns: 40px 1fr 150px   300px 200px 90px;
   align-items: center;
   padding: 10px 20px;
   border-bottom: 1px solid #282828;

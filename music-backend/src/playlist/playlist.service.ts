@@ -56,42 +56,49 @@ export class PlaylistService {
       order: { created_at: 'DESC' } // Playlist mới nhất lên đầu
     });
   }
+async findPublicById(id: number): Promise<Playlist> {
+  const playlist = await this.playlistRepository
+    .createQueryBuilder('playlist')
+    .leftJoinAndSelect('playlist.user', 'user')
+    .leftJoinAndSelect('playlist.playlistSongs', 'ps', 'ps.is_active = 1')
+    .leftJoinAndSelect('ps.song', 'song')
+    .leftJoinAndSelect('song.songArtists', 'sa', 'sa.active = 1')
+    .leftJoinAndSelect('sa.artist', 'artist', 'artist.active = 1')
+    .leftJoinAndSelect('song.album', 'album')
+    .where('playlist.id = :id', { id })
+    .andWhere('playlist.is_active = 1')
+    .getOne();
 
-  /**
-   * === HÀM MỚI: Tìm playlist theo ID (kèm bài hát) ===
-   */
-  async findPublicById(id: number): Promise<Playlist> {
-    const playlist = await this.playlistRepository
-      .createQueryBuilder('playlist')
-      .leftJoinAndSelect('playlist.user', 'user')
-      .leftJoinAndSelect('playlist.playlistSongs', 'ps', 'ps.is_active = 1')
-      .leftJoinAndSelect('ps.song', 'song')
-      .leftJoinAndSelect('song.songArtists', 'sa', 'sa.active = 1')
-      .leftJoinAndSelect('sa.artist', 'artist', 'artist.active = 1')
-      .leftJoinAndSelect('song.album', 'album')
-      .where('playlist.id = :id', { id })
-      .andWhere('playlist.is_active = 1')
-      .getOne();
-
-    
-    if (!playlist) {
-      throw new NotFoundException('Không tìm thấy playlist.');
-    }
-    
-    // Kiểm tra nếu Playlist là Riêng tư
-    if (playlist.is_private === 1) {
-        // (Trong tương lai, bạn có thể check 'userId' (optional auth) ở đây)
-        throw new UnauthorizedException('Bạn không có quyền xem playlist riêng tư này.');
-    }
-
-    // Xóa thông tin nhạy cảm của chủ sở hữu
-    if (playlist.user) {
-      const { password, ...safeUser } = playlist.user;
-      playlist.user = safeUser as User;
-    }
-    
-    return playlist;
+  if (!playlist) {
+    throw new NotFoundException('Không tìm thấy playlist.');
   }
+
+  if (playlist.is_private === 1) {
+    throw new UnauthorizedException('Bạn không có quyền xem playlist riêng tư này.');
+  }
+
+  if (playlist.user) {
+    const { password, ...safeUser } = playlist.user;
+    playlist.user = safeUser as User;
+  }
+
+  // ===== FIX QUAN TRỌNG Ở ĐÂY =====
+  const songs = (playlist.playlistSongs || [])
+    .filter(ps => ps.song && ps.is_active === 1)
+    .sort((a, b) => a.order - b.order)
+    .map(ps => ({
+      ...ps.song,
+      order: ps.order,
+      artists: (ps.song.songArtists || []).map(sa => sa.artist),
+    }));
+
+  (playlist as any).songs = songs;
+  delete (playlist as any).playlistSongs;
+  // ===== END FIX =====
+
+  return playlist;
+}
+
 async findMyPlaylistById(userId: number, playlistId: number): Promise<Playlist> {
     const playlist = await this.playlistRepository.createQueryBuilder('playlist')
         .leftJoinAndSelect('playlist.user', 'user')

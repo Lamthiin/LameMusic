@@ -8,7 +8,7 @@
 
 .chat-box-main {
   width: 300px; /* nhỏ hơn trước */
-  max-height: 420px;
+  height: 420px;
   background: #1e1e1e;
   border-radius: 12px;
   display: flex;
@@ -175,4 +175,5 @@
 .chat-close-btn {
   backdrop-filter: blur(6px);
 }
+
 

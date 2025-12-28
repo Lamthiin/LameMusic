@@ -64,9 +64,7 @@ const PublicProfilePlaylists = () => {
               {/* Thông tin */}
               <div className="pp-card-info">
                 <p className="pp-title">{pl.name}</p>
-                <p className="pp-song-count">
-                  {pl.songs?.length || 0} bài hát
-                </p>
+                
               </div>
 
               {/* Hover overlay (tùy chọn) */}

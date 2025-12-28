@@ -224,7 +224,7 @@ const SongDetail = () => {
 
             {playlistModal && (
                 <AddToPlaylistModal
-                    songId={song.id}
+                    songIds={[song.id]}
                     onClose={() => setPlaylistModal(false)}
                 />
             )}
