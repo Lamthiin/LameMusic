@@ -3,6 +3,7 @@ import "./AlbumEditModal.css";
 import { FaTimes } from "react-icons/fa";
 import AlbumArtistSelector from "./AlbumArtistSelector";
 import axios from "axios";
+import { api } from "@/utils/api";
 
 export default function AlbumEditModal({ show, onClose, initialData, onSubmit }) {
   if (!show) return null;
@@ -50,7 +51,7 @@ export default function AlbumEditModal({ show, onClose, initialData, onSubmit })
 
       // ⭐ Load danh sách bài hát có thể thêm
       axios
-        .get(`http://localhost:3000/admin/albums/${initialData.id}/available-songs`)
+        .get(`/admin/albums/${initialData.id}/available-songs`)
         .then((res) => setAvailableSongs(res.data || []))
         .catch(() => setAvailableSongs([]));
     }
@@ -216,7 +217,7 @@ export default function AlbumEditModal({ show, onClose, initialData, onSubmit })
                           className="song-add-btn"
                           onClick={async () => {
                             await axios.patch(
-                              `http://localhost:3000/admin/albums/${initialData.id}/add-song`,
+                              `/admin/albums/${initialData.id}/add-song`,
                               { songId: song.id }
                             );
 

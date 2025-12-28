@@ -3,6 +3,8 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import ArtistFormModal from "../admin/ArtistFormModal.jsx";
 import "./ArtistActiveList.css";
+import { api } from "@/utils/api";
+
 const ArtistRemovedList = ({ artists = [], refresh }) => {
   const [showModal, setShowModal] = useState(false);
   const [editArtist, setEditArtist] = useState(null);
@@ -18,7 +20,7 @@ const ArtistRemovedList = ({ artists = [], refresh }) => {
     if (!window.confirm("Bạn chắc chắn muốn khôi phục nghệ sĩ này?")) return;
 
     try {
-      await axios.patch(`http://localhost:3000/admin/artists/${id}/pending`);
+      await axios.patch(`/admin/artists/${id}/pending`);
       alert("Đã khôi phục nghệ sĩ!");
       refresh();
     } catch (err) {
@@ -116,7 +118,7 @@ const ArtistRemovedList = ({ artists = [], refresh }) => {
           try {
             if (editArtist?.id) {
               await axios.patch(
-                `http://localhost:3000/admin/artists/${editArtist.id}`,
+                `/admin/artists/${editArtist.id}`,
                 data,
                 { headers: { "Content-Type": "multipart/form-data" } }
               );

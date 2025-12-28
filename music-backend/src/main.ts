@@ -1,49 +1,54 @@
-// music-backend/src/main.ts (BẢN SỬA LỖI FINAL)
+// music-backend/src/main.ts
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common'; 
-import { NestExpressApplication } from '@nestjs/platform-express'; 
-import { config as dotenvConfig } from 'dotenv';
+import { ValidationPipe, Logger } from '@nestjs/common';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 
-dotenvConfig({ path: join(process.cwd(), '.env') });
-
-import * as express from 'express'; 
 async function bootstrap() {
+  Logger.log('=== BOOTSTRAP START ===');
+  Logger.log(`DB_HOST=${process.env.DB_HOST}`);
+  Logger.log(`DB_PORT=${process.env.DB_PORT}`);
+  Logger.log(`DB_USER=${process.env.DB_USER}`);
+  Logger.log(`DB_NAME=${process.env.DB_NAME}`);
+
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // (1) Cấu hình CORS chung (Cho API VÀ FILE TĨNH)
-  app.enableCors({
-    origin: ['http://localhost:5173', 'http://localhost:3000'],
-    credentials: true,
-    methods: ['GET', 'POST', 'PATCH', 'DELETE'],
-  });
 
-  // Áp dụng ValidationPipe toàn cục
-  app.useGlobalPipes(new ValidationPipe({ 
-    whitelist: true, 
-    transform: true 
-  }));
 
-  // (2) Cấu hình phục vụ file tĩnh
-  const frontendPublicPath = join(__dirname, '..', '..', 'music-frontend', 'public');
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+    }),
+  );
+
+  // Serve static media
+  const frontendPublicPath = join(
+    __dirname,
+    '..',
+    '..',
+    'music-frontend',
+    'public',
+  );
 
   app.useStaticAssets(frontendPublicPath, {
-    prefix: '/media', 
-    // cors: true, // <-- XÓA DÒNG NÀY (BỊ LỖI)
-    setHeaders: (res, path, stat) => {
-        if (path.endsWith('.mp3') || path.endsWith('.m4a')) {
-            res.set('Content-Type', 'audio/mpeg');
-        }
+    prefix: '/media',
+    setHeaders: (res, path) => {
+      if (path.endsWith('.mp3') || path.endsWith('.m4a')) {
+        res.set('Content-Type', 'audio/mpeg');
+      }
     },
   });
-  
-  // (Cấu hình uploads)
+
   app.useStaticAssets(join(__dirname, '..', 'uploads'), {
-    prefix: '/uploads', 
-    // cors: true, // <-- XÓA DÒNG NÀY (BỊ LỖI)
+    prefix: '/uploads',
   });
 
-  await app.listen(3000);
+  const port = process.env.PORT || 3000;
+  await app.listen(port);
+
+  Logger.log(`🚀 Server running on port ${port}`);
 }
+
 bootstrap();

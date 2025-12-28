@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import "./AlbumAddSongModal.css";
 import axios from "axios";
 import AlbumSongSelector from "./AlbumSongSelector";
+import { api } from "@/utils/api";
 
 export default function AlbumAddSongModal({ show, onClose, albumId, albumName }) {
   const [selectedSongs, setSelectedSongs] = useState([]);
@@ -12,10 +13,10 @@ export default function AlbumAddSongModal({ show, onClose, albumId, albumName })
     if (selectedSongs.length === 0) return alert("Vui lòng chọn ít nhất 1 bài hát!");
 
     try {
-      await axios.patch(
-        `http://localhost:3000/admin/albums/${albumId}/add-songs`,
-        { song_ids: selectedSongs }
-      );
+      await api.patch(
+      `/admin/albums/${albumId}/add-songs`,
+      { song_ids: selectedSongs }
+    );
 
       alert("Thêm bài hát vào album thành công!");
       onClose();

@@ -7,7 +7,7 @@ const AdminTopArtists = () => {
   useEffect(() => {
     const fetchArtists = async () => {
       try {
-        const res = await fetch("http://localhost:3000/admin/dashboard/top-artists");
+        const res = await fetch(`${API_BASE_URL}/admin/dashboard/top-artists`);
         const data = await res.json();
         setArtists(data);
       } catch (err) {

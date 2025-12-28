@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./Admin.css";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "@/utils/api";
 
 const AdminHeader = () => {
   const [open, setOpen] = useState(false);
@@ -18,11 +19,9 @@ const AdminHeader = () => {
       if (!token) return; //RETURN TRONG ASYNC, KHÔNG RETURN TRONG COMPONENT
 
       try {
-        const res = await fetch("http://localhost:3000/auth/me", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+       const res = await fetch(`${API_BASE_URL}/auth/me`, {
+       headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
 
         console.log("Status /auth/me:", res.status);
         const data = await res.json();

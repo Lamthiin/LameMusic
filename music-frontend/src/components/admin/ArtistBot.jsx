@@ -3,7 +3,8 @@ import axios from "axios";
 import "./ArtistActiveList.css"; 
 import ArtistFormModal from "../../components/admin/ArtistFormModal.jsx";
 import { useNavigate } from "react-router-dom";
-
+import { api } from "@/utils/api";
+ 
 export default function ArtistBot() {
   const [artists, setArtists] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -17,7 +18,7 @@ export default function ArtistBot() {
 
   const loadInternalArtists = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/admin/artists/inactive");
+      const res = await axios.get("/admin/artists/inactive");
 
       const sorted = (Array.isArray(res.data) ? res.data : []).sort(
         (a, b) => new Date(b.created_at) - new Date(a.created_at)
@@ -35,7 +36,7 @@ export default function ArtistBot() {
     if (!window.confirm("Bạn chắc chắn muốn xoá nghệ sĩ này?")) return;
 
     try {
-      await axios.delete(`http://localhost:3000/admin/artists/${id}`);
+      await axios.delete(`/admin/artists/${id}`);
       alert("Đã xoá nghệ sĩ!");
       loadInternalArtists();
     } catch (err) {
@@ -48,13 +49,13 @@ export default function ArtistBot() {
     try {
       if (editArtist?.id) {
         await axios.patch(
-          `http://localhost:3000/admin/artists/${editArtist.id}`,
+          `/admin/artists/${editArtist.id}`,
           data,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
         alert("Đã cập nhật nghệ sĩ!");
       } else {
-        await axios.post("http://localhost:3000/admin/artists", data, {
+        await axios.post("/admin/artists", data, {
           headers: { "Content-Type": "multipart/form-data" },
         });
         alert("Đã thêm nghệ sĩ mới!");

@@ -8,7 +8,7 @@ export default function AlbumSongSelector({ albumId, selectedSongs, onSelect }) 
 
   useEffect(() => {
     axios
-      .get(`http://localhost:3000/admin/albums/${albumId}/available-songs`)
+      .get(`/admin/albums/${albumId}/available-songs`)
       .then((res) => setSongs(res.data || []))
       .catch(() => setSongs([]));
   }, [albumId]);

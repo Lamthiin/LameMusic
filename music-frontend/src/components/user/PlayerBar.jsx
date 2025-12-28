@@ -4,7 +4,7 @@ import { usePlayer } from '../../context/PlayerContext';
 import AudioPlayer from 'react-h5-audio-player'; 
 import 'react-h5-audio-player/lib/styles.css'; 
 import './PlayerBar.css'; 
-
+import { API_BASE_URL } from "@/utils/api";
 // Icons
 import { 
   IoPlaySkipBackSharp, 
@@ -22,13 +22,18 @@ const fixPlayerImageUrl = (track) => {
   const url = track.image_url || track.album?.cover_url;
   if (!url) return '/images/default-album.png'; 
   if (url.startsWith('http')) return url;
-  return `http://localhost:3000${url.startsWith('/media') ? url : url.replace('/images', '/media/images')}`;
+  return `${API_BASE_URL}${
+    url.startsWith("/media")
+      ? url
+      : url.replace("/images", "/media/images")
+  }`;
 };
 
   const fixAudioUrl = (url) => {
     if (!url) return '';
-    return url.startsWith('http') ? url : `http://localhost:3000${url}`;
+    return url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
   };
+
 
 const PlayerBar = () => {
   const navigate = useNavigate();

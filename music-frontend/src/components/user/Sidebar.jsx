@@ -151,7 +151,7 @@ const Sidebar = () => {
                         <img
                           src={artist.avatar_url?.startsWith('http') 
                             ? artist.avatar_url 
-                            : `http://localhost:3000${artist.avatar_url || '/images/default-avatar.png'}`}
+                            : `${API_BASE_URL}${artist.avatar_url || '/images/default-avatar.png'}`}
                           alt={artist.stage_name}
                           className="artist-mini-avatar"
                           // onError={e => e.target.src = '/images/default-avatar.png'}

@@ -14,7 +14,7 @@ export default function PopupAddUser({ onClose, onSubmit }) {
     }
 
     try {
-      const res = await fetch("http://localhost:3000/admin/users/create", {
+      const res = await fetch("/admin/users/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -17,7 +17,7 @@ const ArtistActiveList = ({ artists = [], refresh }) => {
     if (!window.confirm("Bạn chắc chắn muốn xoá nghệ sĩ này?")) return;
 
     try {
-      await axios.delete(`http://localhost:3000/admin/artists/${id}`);
+      await axios.delete(`/admin/artists/${id}`);
       alert("Đã xoá nghệ sĩ!");
       refresh();
     } catch (err) {
@@ -30,13 +30,13 @@ const ArtistActiveList = ({ artists = [], refresh }) => {
     try {
       if (editArtist?.id) {
         await axios.patch(
-          `http://localhost:3000/admin/artists/${editArtist.id}`,
+          `/admin/artists/${editArtist.id}`,
           data,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
         alert("Đã cập nhật nghệ sĩ!");
       } else {
-        await axios.post("http://localhost:3000/admin/artists", data, {
+        await axios.post("/admin/artists", data, {
           headers: { "Content-Type": "multipart/form-data" },
         });
         alert("Đã thêm nghệ sĩ mới!");

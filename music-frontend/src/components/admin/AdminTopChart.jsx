@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./Admin.css";
-
+import { API_BASE_URL } from "@/utils/api";
 const formatNumber = (n) =>
   n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 
@@ -10,7 +10,7 @@ const AdminTopChart = () => {
   useEffect(() => {
     const fetchTop = async () => {
       try {
-        const res = await fetch("http://localhost:3000/admin/dashboard/top-charts");
+        const res = await fetch(`${API_BASE_URL}/admin/dashboard/top-charts"`);
         const data = await res.json();
         setTopSongs(data);
       } catch (err) {

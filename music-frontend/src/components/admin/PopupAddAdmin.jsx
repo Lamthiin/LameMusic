@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import "./PopupAddAdmin.css";
+import { api } from "@/utils/api";
 
 export default function PopupAddAdmin({ onClose, onSubmit }) {
   const [name, setName] = useState("");
@@ -14,7 +15,7 @@ export default function PopupAddAdmin({ onClose, onSubmit }) {
     }
 
     try {
-      const res = await fetch("http://localhost:3000/admin/users/admins/create", {
+      const res = await fetch("/admin/users/admins/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

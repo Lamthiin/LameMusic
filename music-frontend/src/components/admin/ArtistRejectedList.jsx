@@ -12,7 +12,7 @@ const ArtistRejectedList = ({ artists = [], refresh }) => {
     if (!window.confirm("Khôi phục nghệ sĩ này về trạng thái chờ duyệt?")) return;
 
     try {
-      await axios.patch(`http://localhost:3000/admin/artists/${id}/pending`);
+      await axios.patch(`/admin/artists/${id}/pending`);
       refresh && refresh();
     } catch (err) {
       console.error("RESTORE ERROR:", err);
@@ -24,7 +24,7 @@ const ArtistRejectedList = ({ artists = [], refresh }) => {
     if (!window.confirm("Bạn chắc chắn muốn xoá vĩnh viễn?")) return;
 
     try {
-      await axios.delete(`http://localhost:3000/admin/artists/${id}`);
+      await axios.delete(`/admin/artists/${id}`);
       alert("Đã xoá vĩnh viễn nghệ sĩ!");
       refresh && refresh();
     } catch (err) {

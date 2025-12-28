@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { FaChevronDown } from "react-icons/fa";
 import "./AlbumArtistSelector.css";
+import { api } from "@/utils/api";
 
 export default function AlbumArtistSelector({ selected, onSelect }) {
   const [artists, setArtists] = useState([]);
@@ -9,7 +10,7 @@ export default function AlbumArtistSelector({ selected, onSelect }) {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3000/admin/artists")
+      .get("/admin/artists")
       .then((res) => setArtists(res.data))
       .catch((err) => console.error("LOAD ARTISTS ERROR:", err));
   }, []);

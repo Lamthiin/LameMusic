@@ -2,8 +2,14 @@ import React, { useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import axios from 'axios';
 import './CreatePlaylistModal.css';
+import { api } from "@/utils/api";
 
-const api = axios.create({ baseURL: 'http://localhost:3000' });
+const api = axios.create({
+  baseURL:
+    import.meta.env.VITE_API_URL ||
+    import.meta.env.VITE_API_BASE ||
+    'http://localhost:3000',
+});
 
 const CreatePlaylistModal = ({ isOpen, onClose, onPlaylistCreated }) => {
   const token = localStorage.getItem('accessToken');

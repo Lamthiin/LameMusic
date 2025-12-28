@@ -38,15 +38,15 @@ import { AdminProfileModule } from './admin/admin-profile/admin-profile.module';
 
     // 1. Cấu hình kết nối Database
     TypeOrmModule.forRootAsync({
-  useFactory: () => {
-    const host = process.env.DB_HOST;
-    const port = Number(process.env.DB_PORT);
+      useFactory: () => {
+        const host = process.env.DB_HOST;
+        const port = Number(process.env.DB_PORT);
 
-    if (!host) throw new Error('DB_HOST missing');
-    if (!port) throw new Error('DB_PORT missing');
-    if (host === 'localhost' || host === '127.0.0.1') {
-      throw new Error('DB_HOST is localhost (wrong for Railway)');
-    }
+        if (!host) throw new Error('DB_HOST missing');
+        if (!port) throw new Error('DB_PORT missing');
+        if (host === 'localhost' || host === '127.0.0.1') {
+          throw new Error('DB_HOST is localhost (wrong for Railway)');
+        }
 
     return {
       type: 'mysql' as const,
