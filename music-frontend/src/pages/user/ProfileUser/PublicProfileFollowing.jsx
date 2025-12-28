@@ -19,13 +19,18 @@ const PublicProfileFollowing = () => {
                         onClick={() => navigate(`/artist/${f.following?.artist?.id}`)}
                     >
                         {/* Ảnh nghệ sĩ đang theo dõi (Nếu là Artist) */}
-                        <img 
-                            src={f.following?.artist?.avatar_url || '/images/default-artist.png'} 
-                            alt={f.following?.username} 
-                            className="card-image artist-avatar-round" 
+                        <img
+                        src={f.following?.avatar_url || '/images/default-artist.png'}
+                        alt={f.following?.stage_name}
+                        className="card-image artist-avatar-round"
                         />
-                        <h4 className="card-title">{f.following?.artist?.stage_name || f.following?.username}</h4>
-                        <p className="card-subtitle">{f.following?.artist ? 'Nghệ sĩ' : 'Người dùng'}</p>
+
+                        <h4 className="card-title">
+                        {f.following?.stage_name}
+                        </h4>
+
+                        <p className="card-subtitle">Nghệ sĩ</p>
+
                     </div>
                 ))}
                 {profile.following?.length === 0 && <p className="subtle-text">Người dùng này chưa theo dõi ai.</p>}

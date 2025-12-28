@@ -1,7 +1,7 @@
 // music-frontend/src/pages/PlaylistDetailPage.jsx
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getPublicPlaylistApi, removeSongFromPlaylistApi } from '../../utils/api';
+import { getPublicPlaylistApi, removeSongFromPlaylistApi, savePlaylistApi  } from '../../utils/api';
 import { usePlayer } from '../../context/PlayerContext';
 import { useAuth } from '../../context/AuthContext';
 import SongListTable from '../../components/user/SongListTable';
@@ -108,6 +108,23 @@ const PlaylistDetailPage = () => {
           <button className="plp-btn-play" onClick={playAll}>
             <FaPlay/> PHÁT TẤT CẢ
           </button>
+
+          {!isOwner && (
+          <button
+            className="plp-btn-save"
+            onClick={async () => {
+              try {
+                const res = await savePlaylistApi(playlist.id); // gọi API backend clone playlist
+                showToast('Đã lưu playlist vào tài khoản của bạn!');
+              } catch (err) {
+                console.error(err);
+                showToast('Lưu playlist thất bại!');
+              }
+            }}
+          >
+            💾 LƯU PLAYLIST
+          </button>
+        )}
         </div>
 
       </div>

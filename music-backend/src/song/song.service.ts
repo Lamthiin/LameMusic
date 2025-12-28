@@ -826,20 +826,43 @@ if (dto.artistIds && Array.isArray(dto.artistIds)) {
       .getMany();
   }
 
-
-async findOne(id: number): Promise<Song> {
+async findOne(id: number): Promise<any> {
   const song = await this.songRepository
     .createQueryBuilder('song')
     .leftJoinAndSelect('song.songArtists', 'sa', 'sa.active = 1')
-      .leftJoinAndSelect('sa.artist', 'artist', 'artist.active = 1')
+    .leftJoinAndSelect('sa.artist', 'artist', 'artist.active = 1')
     .leftJoinAndSelect('song.album', 'album')
     .leftJoinAndSelect('song.lyrics', 'lyrics')
     .where('song.id = :id', { id })
     .getOne();
 
   if (!song) throw new NotFoundException(`Song with ID ${id} not found`);
-  return song;
+
+  const artists = song.songArtists
+    ?.map(sa => sa.artist)
+    .filter(Boolean) || [];
+
+  return {
+    id: song.id,
+    title: song.title,
+    genre: song.genre,
+    duration: song.duration,
+    file_url: song.file_url,
+    image_url: song.image_url,
+    status: song.status,
+    play_count: song.play_count,
+    album: song.album ? {
+      id: song.album.id,
+      title: song.album.title,
+      cover_url: song.album.cover_url,
+    } : null,
+    artists,
+    lyrics: song.lyrics || null,
+    created_at: song.created_at,
+    updated_at: song.updated_at,
+  };
 }
+
 
 
 }

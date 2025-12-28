@@ -104,7 +104,9 @@ export class ArtistController {
    */
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
-    const artist = await this.artistService.findOne(id);
+
+
+     const artist = await this.artistService.findOne(id);
     if (!artist) {
         throw new NotFoundException(`Nghệ sĩ với ID ${id} không tồn tại`);
     }

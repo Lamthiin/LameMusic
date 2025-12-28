@@ -257,6 +257,25 @@ const Header = () => {
               </>
             )}
 
+            {results.users?.length > 0 && (
+             <>
+                <h4>Người dùng</h4>
+                {results.users.map(u => (
+                  <div
+                    key={u.id}
+                    className="result-item"
+                    onClick={e => go(`/profile/${u.username}`, e)}
+                  >
+                    <FaUserCircle className="user-icon" />
+                    <div>
+                      <p>{u.username}</p>
+                      <span>{u.role?.name}</span>
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
+
             {results.songs.length + results.artists.length + results.albums.length === 0 && (
               <div className="no-result">Không tìm thấy gì 😢</div>
             )}

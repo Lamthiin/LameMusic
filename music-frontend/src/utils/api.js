@@ -632,3 +632,16 @@ export const checkStageNameApi = async (stageName) => {
         throw err;
     }
 };
+
+export const savePlaylistApi = async (playlistId) => {
+  const token = localStorage.getItem('accessToken');
+  if (!token) throw new Error('Chưa đăng nhập');
+
+  const res = await api.post(
+    `/playlists/${playlistId}/clone`,
+    {}, 
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+
+  return res.data;
+};
