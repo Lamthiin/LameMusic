@@ -21,6 +21,8 @@ export const PlayerProvider = ({ children }) => {
     
     const audioRef = useRef(null); 
     const hasLoggedRef = useRef(false); 
+    // Ref to hold the current ended handler so we can add/remove it reliably
+    const endedHandlerRef = useRef(null); 
 
     // 1. HÀM XỬ LÝ LƯỢT NGHE VÀ LOG HISTORY
     const handleTimeUpdate = useCallback(() => {
@@ -105,7 +107,8 @@ export const PlayerProvider = ({ children }) => {
         const nextTrack = getNextTrack();
         console.debug('[Player] playNext -> nextTrack', nextTrack?.id);
         if (nextTrack) {
-            playTrack(nextTrack);
+            // Truyền playlist để "điều hướng" thay vì toggle khi track giống nhau
+            playTrack(nextTrack, currentPlaylist);
         } else {
             console.debug('[Player] playNext -> no next track found');
         }
@@ -123,7 +126,8 @@ export const PlayerProvider = ({ children }) => {
 
         console.debug('[Player] playPrevious -> previousIndex', previousIndex, 'id', currentActivePlaylist[previousIndex]?.id);
         if (currentActivePlaylist[previousIndex]) {
-            playTrack(currentActivePlaylist[previousIndex]);
+            // Truyền playlist để đảm bảo điều hướng và phát (không toggle) khi track giống nhau
+            playTrack(currentActivePlaylist[previousIndex], currentPlaylist);
         }
     }, [playTrack, currentTrack, currentPlaylist]);
 
@@ -139,21 +143,48 @@ export const PlayerProvider = ({ children }) => {
         if (audio) {
             // --- GẮN LISTENERS SỰ KIỆN GỐC (FIX XUNG ĐỘT) ---
             const onTimeUpdate = handleTimeUpdate;
-            const onEnded = playNext; 
             const handleNativePlay = () => setIsPlaying(true); // Cập nhật state từ Audio Element
             const handleNativePause = () => setIsPlaying(false); // Cập nhật state từ Audio Element
 
             // Loại bỏ listeners cũ
             audio.removeEventListener('play', handleNativePlay);
             audio.removeEventListener('pause', handleNativePause);
-            audio.removeEventListener('timeupdate', onTimeUpdate); 
-            audio.removeEventListener('ended', onEnded);
-            
+            audio.removeEventListener('timeupdate', onTimeUpdate);
+            if (endedHandlerRef.current) {
+                audio.removeEventListener('ended', endedHandlerRef.current);
+            }
+
+            // Tạo handler ended bền vững dùng ref để luôn gọi playNext mới nhất
+            const handleEnded = () => {
+                playNext();
+                // Đảm bảo play bài mới (đôi khi cần reset time và gọi play sau render)
+                setTimeout(() => {
+                    const nextAudio = getAudioElement(audioRef);
+                    if (!nextAudio) return;
+                    // Nếu vẫn ở trạng thái ended, reset time
+                    if (nextAudio.ended || (nextAudio.duration && nextAudio.currentTime >= nextAudio.duration)) {
+                        try {
+                            nextAudio.currentTime = 0;
+                        } catch (e) {
+                            // Some browsers disallow setting currentTime in certain states
+                        }
+                    }
+                    if (nextAudio.paused) {
+                        nextAudio.play().catch(e => {
+                            if (e.name !== 'AbortError') {
+                                console.warn('Play after ended blocked:', e);
+                            }
+                        });
+                    }
+                }, 50);
+            };
+
             // Gắn listeners mới
             audio.addEventListener('play', handleNativePlay);
             audio.addEventListener('pause', handleNativePause);
             audio.addEventListener('timeupdate', onTimeUpdate); 
-            audio.addEventListener('ended', onEnded); 
+            audio.addEventListener('ended', handleEnded); 
+            endedHandlerRef.current = handleEnded; 
             
             if (currentTrack?.file_url) {
                 
@@ -185,7 +216,9 @@ export const PlayerProvider = ({ children }) => {
                 audio.removeEventListener('play', handleNativePlay);
                 audio.removeEventListener('pause', handleNativePause);
                 audio.removeEventListener('timeupdate', onTimeUpdate);
-                audio.removeEventListener('ended', onEnded);
+                if (endedHandlerRef.current) {
+                    audio.removeEventListener('ended', endedHandlerRef.current);
+                }
             };
         }
     }, [currentTrack, isPlaying, handleTimeUpdate, playNext]); 
