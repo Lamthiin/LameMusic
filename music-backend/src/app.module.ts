@@ -3,8 +3,8 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ConfigModule } from '@nestjs/config';
-import { join } from 'path';
+import { ConfigModule, ConfigService  } from '@nestjs/config';
+// import { join } from 'path';
 
 // Import các module tính năng
 import { RoleModule } from './role/role.module';
@@ -20,7 +20,7 @@ import { PlaylistModule } from './playlist/playlist.module';
 import { SearchModule } from './search/search.module';
 import { FollowModule } from './follow/follow.module'; // <-- IMPORT MỚI
 import { AlbumModule } from './album/album.module';
-import { History } from './history/history.entity'; // <-- IMPORT MỚI
+// import { History } from './history/history.entity'; // <-- IMPORT MỚI
 import { HistoryModule } from './history/history.module'; // <-- IMPORT MỚI
 import { AdminModule } from './admin/admin.module';
 import { ManageUserModule } from './admin/manage-user/manage-user.module';
@@ -49,6 +49,22 @@ import { ChatModule } from './chat/chat.module';
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: false, 
     }),
+    // ✅ Database config CHUẨN DOCKER
+    // TypeOrmModule.forRootAsync({
+    //   imports: [ConfigModule],
+    //   inject: [ConfigService],
+    //   useFactory: (config: ConfigService) => ({
+    //     type: 'mysql',
+    //     host: config.get<string>('DB_HOST'),   // mysql
+    //     port: config.get<number>('DB_PORT'),   // 3306
+    //     username: config.get<string>('DB_USER'),
+    //     password: config.get<string>('DB_PASS'),
+    //     database: config.get<string>('DB_NAME'),
+    //     autoLoadEntities: true,
+    //     synchronize: false, // dev OK, prod nên false
+    //     logging: true,
+    //   }),
+    // }),
 
     // 2. Các module tính năng
     RoleModule,

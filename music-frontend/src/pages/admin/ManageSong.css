@@ -873,4 +873,29 @@ textarea::placeholder {
   }
 }
 
+/* ============================
+   FIX ẢNH BÌA KHÔNG ĐẨY LAYOUT
+============================ */
+
+.cover-fixed-wrapper {
+  height: 200px;              /* ⭐ LUÔN GIỮ CHỖ */
+  min-height: 200px;
+  max-height: 200px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* đảm bảo upload-area không nhỏ hơn */
+.cover-fixed-wrapper .spotify-upload-area {
+  height: 180px;
+  width: 100%;
+}
+
+/* preview cũng giữ chiều cao tương đương */
+.cover-fixed-wrapper .spotify-upload-preview {
+  height: 180px;
+}
+
 

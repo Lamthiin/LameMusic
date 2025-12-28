@@ -274,7 +274,7 @@ const StepFour = ({ fee, isSubmitting, handleSubmitFinal, stageName }) => {
             </p>
             <div className="qr-code-section">
                 <div className="qr-code-box">
-                    <img src="/mock-qr.png" alt="QR Code" style={{ width: '200px' }} />
+                    <img src="\images\qrthanhtoan.jpg" alt="QR Code" style={{ width: '200px' }} />
                     <p>Nội dung chuyển khoản: <strong>ARTIST-{user?.userId}</strong></p>
                 </div>
             </div>
