@@ -55,7 +55,7 @@ import { AdminProfileModule } from './admin/admin-profile/admin-profile.module';
         rejectUnauthorized: false, // ⭐ BẮT BUỘC cho Railway
       },
       autoLoadEntities: true,
-      synchronize: false,
+      synchronize: true,
     };
   },
 }),
