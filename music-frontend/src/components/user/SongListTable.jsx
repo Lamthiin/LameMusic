@@ -184,7 +184,7 @@ const SongListTable = ({ songs = [], onRemoveSong }) => {
                             {sa.artist?.stage_name}{i < song.songArtists.length - 1 ? ', ' : ''}
                           </span>
                         ))
-                      : 'Không rõ'}
+                      : 'Nghệ sĩ'}
                   </p>
                 </div>
               </div>

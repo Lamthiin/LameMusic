@@ -58,41 +58,21 @@ async findFeaturedArtists(): Promise<Artist[]> {
     });
   }
 
-async findOne(id: number): Promise<Artist | null> {
-  const artist = await this.artistRepository
-    .createQueryBuilder('artist')
-    .where('artist.id = :id', { id })
-    .andWhere('artist.active = true')
-    .andWhere('artist.registrationStatus = :status', { status: 'APPROVED' })
-
-    .leftJoinAndSelect('artist.albums', 'album', 'album.active = true')
-
-    .leftJoinAndSelect(
-      'artist.songArtists',
-      'songArtist',
-      'songArtist.active = true'
-    )
-
-    .leftJoinAndSelect(
-      'songArtist.song',
-      'song',
-      'song.active = true AND song.status = :songStatus',
-      { songStatus: 'APPROVED' }
-    )
-
-    .leftJoinAndSelect(
-      'song.songArtists',
-      'songAllArtists',
-      'songAllArtists.active = true'
-    )
-    .leftJoinAndSelect('songAllArtists.artist', 'songAllArtistsArtist')
-
-    .orderBy('song.play_count', 'DESC')
-    .addOrderBy('album.release_date', 'DESC')
-    .getOne();
-
-  return artist;
+async findOne(artistId: number) {
+    return this.artistRepository
+        .createQueryBuilder('artist')
+        .leftJoinAndSelect('artist.user', 'user')
+        .leftJoinAndSelect('artist.albums', 'album')
+        .leftJoinAndSelect('artist.songArtists', 'sa', 'sa.active = 1') // songArtists của artist
+        .leftJoinAndSelect('sa.song', 'song', 'song.active = 1 AND song.status = "APPROVED"') // song
+        .leftJoinAndSelect('song.songArtists', 'sa2', 'sa2.active = 1') // songArtists của từng song
+        .leftJoinAndSelect('sa2.artist', 'songArtist', 'songArtist.active = 1') // artist của từng song
+        .leftJoinAndSelect('song.album', 'songAlbum') // album của song
+        .leftJoinAndSelect('artist.followers', 'followers')
+        .where('artist.id = :id', { id: artistId })
+        .getOne();
 }
+
 
   /**
    * 2. HÀM LẤY DANH SÁCH CHỜ DUYỆT (ADMIN)
