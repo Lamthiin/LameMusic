@@ -113,14 +113,11 @@ const SearchResult = () => {
                   <div className="search-result-info">
                     <p className="search-result-title">
                       {title}
-                      {isAI && (
-                        <span className="search-result-ai-tag">
-                          AI Match {(song.similarity * 100).toFixed(0)}%
-                        </span>
-                      )}
+                      
                     </p>
 
                     <p className="search-result-artist">{artistNames}</p>
+                    
 
                     {albumName && <small className="search-result-album">{albumName}</small>}
 
@@ -129,6 +126,11 @@ const SearchResult = () => {
                         Tìm bằng AI
                       </small>
                     )}
+                    {isAI && (
+                        <span className="search-result-ai-tag">
+                          AI Match {(song.similarity * 100).toFixed(0)}%
+                        </span>
+                      )}
                   </div>
                 </div>
               );
