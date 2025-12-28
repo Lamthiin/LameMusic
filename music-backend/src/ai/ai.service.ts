@@ -8,6 +8,7 @@ import { SongService } from '../song/song.service'; // <-- IMPORT
 export class AiService {
   // Địa chỉ server AI của bạn
   private readonly AI_SERVER_URL = 'http://localhost:5000/api/embed'; 
+  private readonly AI_SEARCH_URL = 'http://localhost:5000/api/search';
   constructor(
       private httpService: HttpService, 
       // === FIX LỖI: DÙNG Inject VÀ forwardRef CHO SongService ===
@@ -82,5 +83,20 @@ export class AiService {
           return true;
       }
       return false;
+  }
+
+  async searchSongByText(query: string, topK = 5) {
+    try {
+      const response = await lastValueFrom(
+        this.httpService.post(this.AI_SEARCH_URL, {
+          query,
+          top_k: topK,
+        })
+      );
+      return response.data.list_song || [];
+    } catch (error) {
+      console.error('Lỗi gọi AI Server:', error.message);
+      throw new InternalServerErrorException('Không thể kết nối AI Server');
+    }
   }
 }

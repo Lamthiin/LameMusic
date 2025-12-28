@@ -1,5 +1,5 @@
 // music-backend/src/ai/ai.controller.ts (TẠO MỚI)
-import { Controller, Post, UseGuards } from '@nestjs/common';
+import { Controller, Post, UseGuards, Body  } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
@@ -7,8 +7,8 @@ import { AiService } from './ai.service';
 import { SongService } from '../song/song.service'; // Cần để lấy danh sách bài hát
 
 @Controller('ai')
-@UseGuards(AuthGuard('jwt'), RolesGuard)
-@Roles('admin') // <-- CHỈ ADMIN MỚI GỌI ĐƯỢC
+// @UseGuards(AuthGuard('jwt'), RolesGuard)
+// @Roles('admin') // <-- CHỈ ADMIN MỚI GỌI ĐƯỢC
 export class AiController {
   constructor(private readonly aiService: AiService, private readonly songService: SongService) {}
 
@@ -39,5 +39,12 @@ export class AiController {
         message: `Đã hoàn tất cập nhật embedding cho ${successCount} bài hát.`,
         processed: successCount 
     };
+  }
+
+  
+  @Post('search')
+  async searchLyrics(@Body() body: { query: string }) {
+    const songs = await this.aiService.searchSongByText(body.query, 5);
+    return { songs };
   }
 }

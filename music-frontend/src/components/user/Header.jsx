@@ -4,56 +4,52 @@ import { useAuth } from "../../context/AuthContext";
 import {
   fetchNotificationsApi,
   markNotificationAsReadApi,
-  searchApi
+  searchApi,
 } from "../../utils/api";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom"; // THÊM useSearchParams
 
 import {
   FaSearch,
   FaUserCircle,
   FaBell,
-  FaCheckCircle
+  FaCheckCircle,
 } from "react-icons/fa";
 
 import "./Header.css";
 
-// ------------------------------------------------------
-// FIX ẢNH (BẮT BUỘC PHẢI CÓ)
-// ------------------------------------------------------
 const fixImageUrl = (url) => {
   if (!url) return "/images/default.png";
   if (url.startsWith("http")) return url;
-
   return `http://localhost:3000${url}`;
 };
 
-// ------------------------------------------------------
-// HEADER COMPONENT
-// ------------------------------------------------------
 const Header = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams(); // THÊM: lấy params từ URL
   const { isAuthenticated, user, logout } = useAuth();
 
-  // ---------------- SEARCH STATE ----------------
-  const [query, setQuery] = useState("");
+  // Lấy query từ URL (nếu đang ở trang /search)
+  const urlQuery = searchParams.get("q")?.trim() || "";
+
+  const [query, setQuery] = useState(urlQuery);
   const [results, setResults] = useState(null);
 
-  // ---------------- DROPDOWN ----------------
   const searchRef = useRef(null);
   const userRef = useRef(null);
   const notifRef = useRef(null);
-  const location = useLocation();
 
-  // ---------------- NOTIFICATION ----------------
+  // Đồng bộ query từ URL mỗi khi thay đổi (back/forward hoặc vào trang search)
+  useEffect(() => {
+    setQuery(urlQuery);
+  }, [urlQuery]);
+
+  // ==================== NOTIFICATIONS ====================
   const [notifications, setNotifications] = useState([]);
   const [notifOpen, setNotifOpen] = useState(false);
 
-  // ------------------------------------------------------
-  // LOAD NOTIFICATION
-  // ------------------------------------------------------
   const loadNotifications = async () => {
     if (!isAuthenticated) return;
-
     try {
       const data = await fetchNotificationsApi(10);
       setNotifications(data);
@@ -68,33 +64,30 @@ const Header = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // ------------------------------------------------------
-  // HANDLE CLICK NOTIFICATION
-  // ------------------------------------------------------
   const handleNotifClick = async (n) => {
     try {
       if (!n.is_read) {
         await markNotificationAsReadApi(n.id);
         loadNotifications();
       }
-
       if (n.type === "SONG_APPROVED") {
         navigate(`/song/${n.reference_id}`);
       } else if (n.type === "ARTIST_PROFILE_APPROVED") {
         navigate("/artist-dashboard");
       }
     } catch (err) {}
-
     setNotifOpen(false);
   };
 
-  const unread = notifications.filter(n => !n.is_read).length;
+  const unread = notifications.filter((n) => !n.is_read).length;
 
-  // ------------------------------------------------------
-  // SEARCH
-  // ------------------------------------------------------
+  // ==================== SEARCH LOGIC (DROPDOWN) ====================
   useEffect(() => {
-    if (location.pathname === "/search") return;
+    // Không hiện dropdown khi đang ở trang search full
+    if (location.pathname === "/search") {
+      setResults(null);
+      return;
+    }
 
     if (!query.trim()) {
       setResults(null);
@@ -105,31 +98,38 @@ const Header = () => {
       try {
         const data = await searchApi(query, "dropdown");
 
-        data.songs = data.songs.map(s => ({
+        // Fix ảnh cho songs (DB + AI)
+        data.songs = data.songs.map((s) => ({
           ...s,
-          image_url: fixImageUrl(s.image_url || s.album?.cover_url)
+          image_url:
+            s.source === "AI"
+              ? s.image_url || "/images/ai-placeholder.jpg"
+              : fixImageUrl(s.image_url || s.album?.cover_url),
         }));
-        data.artists = data.artists.map(a => ({
+
+        // Fix ảnh cho artists & albums
+        data.artists = data.artists.map((a) => ({
           ...a,
-          avatar_url: fixImageUrl(a.avatar_url)
+          avatar_url: fixImageUrl(a.avatar_url),
         }));
-        data.albums = data.albums.map(a => ({
-          ...a,
-          cover_url: fixImageUrl(a.cover_url)
+
+        data.albums = data.albums.map((alb) => ({
+          ...alb,
+          cover_url: fixImageUrl(alb.cover_url),
         }));
 
         setResults(data);
-      } catch {}
+      } catch (err) {
+        console.error("Search error:", err);
+      }
     }, 400);
 
     return () => clearTimeout(timer);
   }, [query, location.pathname]);
 
-  // ------------------------------------------------------
-  // CLICK OUTSIDE
-  // ------------------------------------------------------
+  // Click outside để đóng dropdown
   useEffect(() => {
-    const handler = e => {
+    const handler = (e) => {
       if (searchRef.current && !searchRef.current.contains(e.target)) {
         setResults(null);
       }
@@ -140,42 +140,32 @@ const Header = () => {
         setNotifOpen(false);
       }
     };
-
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // ------------------------------------------------------
-  // RESULT CLICK
-  // ------------------------------------------------------
   const go = (path, e) => {
-    e.stopPropagation();
+    e?.stopPropagation();
     setResults(null);
     setQuery("");
     navigate(path);
   };
 
-  // ------------------------------------------------------
-  // USER MENU
-  // ------------------------------------------------------
   const [userOpen, setUserOpen] = useState(false);
 
+  // Khi bấm Enter → chuyển sang trang search full
   const submitSearch = (e) => {
     if (e.key === "Enter" && query.trim()) {
-      const q = query.trim();
-      setQuery("");        // 🔥 QUAN TRỌNG
-      setResults(null);    // 🔥 QUAN TRỌNG
-      navigate(`/search?q=${encodeURIComponent(q)}`);
+      const searchTerm = query.trim();
+      setQuery(""); // Clear input sau khi search
+      setResults(null);
+      navigate(`/search?q=${encodeURIComponent(searchTerm)}`);
     }
   };
 
-  // ------------------------------------------------------
-  // RENDER
-  // ------------------------------------------------------
   return (
     <header className="header">
-
-      {/* LEFT: LOGO */}
+      {/* LOGO */}
       <div
         className="header-left header-logo galaxy-text"
         onClick={() => navigate("/")}
@@ -183,51 +173,89 @@ const Header = () => {
         🎧 Lame
       </div>
 
-      {/* CENTER: SEARCH */}
+      {/* SEARCH BAR */}
       <div className="header-center" ref={searchRef}>
-
         <div className="search-box">
           <FaSearch />
           <input
             value={query}
-            onChange={e => setQuery(e.target.value)}
+            onChange={(e) => setQuery(e.target.value)}
             onKeyDown={submitSearch}
-            placeholder="Tìm kiếm bài hát, nghệ sĩ, album..."
+            placeholder={
+              urlQuery
+                ? `Đang tìm: "${urlQuery}"`
+                : "Tìm bài hát, lời bài hát, nghệ sĩ, album..."
+            }
+            autoFocus={location.pathname === "/search"}
           />
         </div>
 
+        {/* DROPDOWN RESULTS */}
         {results && (
           <div className="search-dropdown">
-
             {/* SONGS */}
-            {results.songs.map(song => {
-              const artistNames = song.songArtists?.map(sa => sa.artist?.stage_name).join(", ") || song.artist?.stage_name;
-              return (
-                <div
-                  key={song.id}
-                  className="result-item"
-                  onClick={e => go(`/song/${song.id}`, e)}
-                >
-                  <img src={song.image_url} />
-                  <div>
-                    <p>{song.title}</p>
-                    <span>{artistNames}</span>
-                  </div>
-                </div>
-              );
-            })}
+            {results.songs.length > 0 && (
+              <>
+                <h4>Bài hát</h4>
+                {results.songs.map((song) => {
+                  const isAI = song.source === "AI";
+                  const title = song.title;
+                  const artistNames = isAI
+                    ? song.artist_name
+                    : song.songArtists?.map((sa) => sa.artist?.stage_name).join(", ") ||
+                      "Unknown";
+
+                  const handleClick = (e) => {
+                    if (isAI) {
+                      // AI → chuyển sang trang search full
+                      setQuery("");
+                      setResults(null);
+                      navigate(`/search?q=${encodeURIComponent(query)}`);
+                    } else {
+                      go(`/song/${song.id}`, e);
+                    }
+                  };
+
+                  return (
+                    <div
+                      key={isAI ? `ai-${title}-${artistNames}` : song.id}
+                      className="result-item"
+                      onClick={handleClick}
+                    >
+                      <img src={song.image_url} alt={title} />
+                      <div>
+                        <p>
+                          {title}
+                          {isAI && (
+                            <small style={{ color: "#1db954", marginLeft: "8px" }}>
+                              (AI match)
+                            </small>
+                          )}
+                        </p>
+                        <span>{artistNames}</span>
+                        {isAI && (
+                          <small style={{ display: "block", color: "#b3b3b3" }}>
+                            Độ tương đồng: {(song.similarity * 100).toFixed(0)}%
+                          </small>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </>
+            )}
 
             {/* ARTISTS */}
             {results.artists.length > 0 && (
               <>
                 <h4>Nghệ sĩ</h4>
-                {results.artists.map(a => (
+                {results.artists.map((a) => (
                   <div
                     key={a.id}
                     className="result-item"
-                    onClick={e => go(`/artist/${a.id}`, e)}
+                    onClick={(e) => go(`/artist/${a.id}`, e)}
                   >
-                    <img src={a.avatar_url} />
+                    <img src={a.avatar_url} alt={a.stage_name} />
                     <div>
                       <p>{a.stage_name}</p>
                       <span>Nghệ sĩ</span>
@@ -241,13 +269,13 @@ const Header = () => {
             {results.albums.length > 0 && (
               <>
                 <h4>Album</h4>
-                {results.albums.map(alb => (
+                {results.albums.map((alb) => (
                   <div
                     key={alb.id}
                     className="result-item"
-                    onClick={e => go(`/album/${alb.id}`, e)}
+                    onClick={(e) => go(`/album/${alb.id}`, e)}
                   >
-                    <img src={alb.cover_url} />
+                    <img src={alb.cover_url} alt={alb.title} />
                     <div>
                       <p>{alb.title}</p>
                       <span>{alb.artist?.stage_name}</span>
@@ -257,14 +285,15 @@ const Header = () => {
               </>
             )}
 
+            {/* USERS */}
             {results.users?.length > 0 && (
-             <>
+              <>
                 <h4>Người dùng</h4>
-                {results.users.map(u => (
+                {results.users.map((u) => (
                   <div
                     key={u.id}
                     className="result-item"
-                    onClick={e => go(`/profile/${u.username}`, e)}
+                    onClick={(e) => go(`/profile/${u.username}`, e)}
                   >
                     <FaUserCircle className="user-icon" />
                     <div>
@@ -276,19 +305,19 @@ const Header = () => {
               </>
             )}
 
-            {results.songs.length + results.artists.length + results.albums.length === 0 && (
-              <div className="no-result">Không tìm thấy gì 😢</div>
-            )}
-
+            {/* NO RESULTS */}
+            {results.songs.length +
+              results.artists.length +
+              results.albums.length +
+              (results.users?.length || 0) ===
+              0 && <div className="no-result">Không tìm thấy gì 😢</div>}
           </div>
         )}
-
       </div>
 
-      {/* RIGHT: USER + NOTIF */}
+      {/* RIGHT SIDE */}
       <div className="header-right">
-
-        {/* NOTIF */}
+        {/* NOTIFICATION */}
         {isAuthenticated && (
           <div className="notif" ref={notifRef}>
             <button onClick={() => setNotifOpen(!notifOpen)}>
@@ -301,9 +330,7 @@ const Header = () => {
                 {notifications.length === 0 && (
                   <div className="notif-empty">Không có thông báo</div>
                 )}
-
-
-                {notifications.map(n => (
+                {notifications.map((n) => (
                   <div
                     key={n.id}
                     className={`notif-item ${n.is_read ? "" : "unread"}`}
@@ -320,13 +347,16 @@ const Header = () => {
         {/* ARTIST BADGE */}
         {isAuthenticated && user?.role === "artist" && (
           <div className="artist-badge">
-            <FaCheckCircle/> Nghệ sĩ
+            <FaCheckCircle /> Nghệ sĩ
           </div>
         )}
 
-        {/* NÚT TRỞ THÀNH NGHỆ SĨ */}
+        {/* BECOME ARTIST */}
         {isAuthenticated && user?.role === "listener" && (
-          <button className="btn-become-artist" onClick={() => navigate("/artist-registration")}>
+          <button
+            className="btn-become-artist"
+            onClick={() => navigate("/artist-registration")}
+          >
             Trở thành Nghệ sĩ
           </button>
         )}
@@ -342,8 +372,10 @@ const Header = () => {
             {userOpen && (
               <div className="user-dropdown">
                 <div onClick={() => navigate("/profile/info")}>Tài khoản</div>
-                {user.role==="artist" && (
-                  <div onClick={() => navigate("/artist-dashboard")}>Quản lý kênh nghệ sĩ</div>
+                {user.role === "artist" && (
+                  <div onClick={() => navigate("/artist-dashboard")}>
+                    Quản lý kênh nghệ sĩ
+                  </div>
                 )}
                 <div onClick={logout}>Đăng xuất</div>
               </div>
@@ -355,9 +387,7 @@ const Header = () => {
             <button onClick={() => navigate("/register")}>Đăng ký</button>
           </div>
         )}
-
       </div>
-
     </header>
   );
 };
