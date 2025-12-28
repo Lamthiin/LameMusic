@@ -8,12 +8,14 @@ import { join } from 'path';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
+  // ⭐ ENABLE CORS – PHẢI ĐẶT TRƯỚC app.listen
   app.enableCors({
     origin: [
-      'http://localhost:5173',
-      'http://localhost:3000',
       'https://lamemusic-1.onrender.com',
+      'http://localhost:5173',
     ],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: 'Content-Type, Authorization',
     credentials: true,
   });
 
@@ -24,6 +26,6 @@ async function bootstrap() {
     }),
   );
 
-  // static assets...
-  await app.listen(process.env.PORT || 3000);
+  const port = process.env.PORT || 3000;
+  await app.listen(port);
 }
