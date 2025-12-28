@@ -330,5 +330,64 @@ async addSongsToPlaylist(
 
   return updatedPlaylist;
 }
+/**
+ * HÀM MỚI: Sao chép playlist PUBLIC của người khác về tài khoản của mình
+ */
+async clonePublicPlaylistToUser(
+  userId: number,
+  sourcePlaylistId: number,
+): Promise<Playlist> {
+
+  // 1. Lấy user hiện tại
+  const user = await this.userRepository.findOne({ where: { id: userId } });
+  if (!user) throw new NotFoundException('User không tồn tại.');
+
+  // 2. Lấy playlist nguồn (PHẢI public)
+  const sourcePlaylist = await this.playlistRepository.findOne({
+    where: { id: sourcePlaylistId, is_active: 1, is_private: 0 },
+    relations: ['playlistSongs', 'playlistSongs.song'],
+  });
+
+  if (!sourcePlaylist) {
+    throw new NotFoundException('Playlist không tồn tại hoặc không phải public.');
+  }
+
+  // 3. Tạo playlist mới cho user hiện tại
+  const newPlaylist = this.playlistRepository.create({
+    name: `${sourcePlaylist.name}`,
+    user,
+    is_active: 1,
+    is_private: 0,
+  });
+
+  const savedPlaylist = await this.playlistRepository.save(newPlaylist);
+
+  // 4. Copy toàn bộ bài hát
+  const playlistSongs = (sourcePlaylist.playlistSongs || [])
+    .filter(ps => ps.is_active === 1)
+    .sort((a, b) => a.order - b.order)
+    .map(ps =>
+      this.playlistSongRepository.create({
+        playlist: savedPlaylist,
+        song: ps.song,
+        is_active: 1,
+        order: ps.order,
+      }),
+    );
+
+  if (playlistSongs.length > 0) {
+    await this.playlistSongRepository.save(playlistSongs);
+  }
+
+  // 5. Trả playlist mới (có bài hát)
+  const result = await this.playlistRepository.findOne({
+    where: { id: savedPlaylist.id },
+    relations: ['playlistSongs', 'playlistSongs.song'],
+  });
+
+  if (!result) throw new InternalServerErrorException('Clone playlist thất bại.');
+
+  return result;
+}
 
 }

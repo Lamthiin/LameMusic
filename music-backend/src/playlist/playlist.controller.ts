@@ -143,6 +143,16 @@ async addSongsToPlaylist(
         return this.playlistService.findPublicById(id);
     }
 
+@Post(':id/clone')
+@UseGuards(AuthGuard('jwt'))
+async clonePlaylist(
+  @Param('id', ParseIntPipe) id: number,
+  @Req() req,
+) {
+  const userId = (req.user as JwtPayload).userId;
+  return this.playlistService.clonePublicPlaylistToUser(userId, id);
+}
+
 
   /**
    * API MỚI: DELETE /playlists/my/:id (Xóa Playlist)
@@ -156,4 +166,5 @@ async addSongsToPlaylist(
     const userId = (req.user as JwtPayload).userId;
     return this.playlistService.deleteMyPlaylist(userId, id);
   }
+
 }
