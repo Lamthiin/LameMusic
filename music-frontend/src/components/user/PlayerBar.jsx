@@ -151,7 +151,7 @@ const PlayerBar = () => {
           src={fixAudioUrl(currentTrack.file_url)}
           onClickNext={handleNextClick}
           onClickPrevious={handlePreviousClick}
-          onEnded={() => { console.debug('[UI] AudioPlayer onEnded event'); playNext(); }}
+          onEnded={() => { console.debug('[UI] AudioPlayer onEnded event'); playNext('player-ui-ended'); }}
           showSkipControls={true}
           showJumpControls={false}
           customIcons={customIcons}

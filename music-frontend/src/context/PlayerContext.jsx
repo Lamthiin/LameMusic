@@ -21,22 +21,15 @@ export const PlayerProvider = ({ children }) => {
     
     const audioRef = useRef(null); 
     const hasLoggedRef = useRef(false); 
+    // Ref to prevent forwarding to next more than once per track when 'ended' fails
+    const hasForwardedRef = useRef(false);
+    // Progress watchdog state to detect stalled/no-progress situations
+    const progressWatcherRef = useRef({ lastTime: 0, intervalId: null });
     // Ref to hold the current ended handler so we can add/remove it reliably
     const endedHandlerRef = useRef(null); 
 
     // 1. HÀM XỬ LÝ LƯỢT NGHE VÀ LOG HISTORY
-    const handleTimeUpdate = useCallback(() => {
-        const audio = getAudioElement(audioRef);
-        if (!audio || !currentTrack) return;
-
-        if (audio.currentTime >= 2 && !hasLoggedRef.current) {
-            incrementPlayCountApi(currentTrack.id);
-            logPlaybackApi(currentTrack.id, Math.floor(audio.currentTime)); 
-            hasLoggedRef.current = true;
-            // Dùng audio.removeEventListener trực tiếp
-            audio.removeEventListener('timeupdate', handleTimeUpdate); 
-        }
-    }, [currentTrack]);
+    // NOTE: handler moved below to avoid referencing `playNext` before initialization.
 
     // SHUFFLE STATE
     const [isShuffling, setIsShuffling] = useState(false);
@@ -60,6 +53,8 @@ export const PlayerProvider = ({ children }) => {
         }
 
         const currentIndex = currentPlaylist.findIndex(t => t.id === currentTrack.id);
+        // Add more context in logs to help debug AllSongs issue
+        console.debug('[Player] getNextTrack -> playlist ids', currentPlaylist.map(t => t.id).slice(0,10), 'currentIndex', currentIndex);
         const nextIndex = (currentIndex + 1) % currentPlaylist.length;
         console.debug('[Player] getNextTrack -> nextIndex', nextIndex, 'id', currentPlaylist[nextIndex]?.id);
         return currentPlaylist[nextIndex];
@@ -102,12 +97,15 @@ export const PlayerProvider = ({ children }) => {
 
 
     // 3. HÀM NEXT/PREVIOUS LOGIC
-    const playNext = useCallback(() => {
-        console.debug('[Player] playNext invoked', { currentTrackId: currentTrack?.id, playlistLength: currentPlaylist?.length });
+    const playNext = useCallback((reason = 'manual') => {
+        console.debug('[Player] playNext invoked', { reason, currentTrackId: currentTrack?.id, playlistLength: currentPlaylist?.length });
         const nextTrack = getNextTrack();
         console.debug('[Player] playNext -> nextTrack', nextTrack?.id);
         if (nextTrack) {
-            // Truyền playlist để "điều hướng" thay vì toggle khi track giống nhau
+            // Nếu nextTrack là chính track hiện tại (playlist length 1), vẫn truyền playlist để force play
+            if (nextTrack.id === currentTrack?.id) {
+                console.debug('[Player] playNext -> nextTrack same as current, forcing play', { trackId: nextTrack.id });
+            }
             playTrack(nextTrack, currentPlaylist);
         } else {
             console.debug('[Player] playNext -> no next track found');
@@ -136,6 +134,30 @@ export const PlayerProvider = ({ children }) => {
     
 
 
+    // 1. HÀM XỬ LƯỢT NGHE VÀ LOG HISTORY (đặt ở đây để `playNext` đã được định nghĩa)
+    const handleTimeUpdate = useCallback(() => {
+        const audio = getAudioElement(audioRef);
+        if (!audio || !currentTrack) return;
+
+        // Log play count once after 2s
+        if (audio.currentTime >= 2 && !hasLoggedRef.current) {
+            incrementPlayCountApi(currentTrack.id);
+            logPlaybackApi(currentTrack.id, Math.floor(audio.currentTime)); 
+            hasLoggedRef.current = true;
+        }
+
+        // Fallback: if we detect we're very near the end and 'ended' didn't fire, move to next track once
+        if (!hasForwardedRef.current && audio.duration && isFinite(audio.duration)) {
+            const remaining = audio.duration - audio.currentTime;
+            if (remaining <= 0.6) { // 600ms tolerance
+                console.debug('[Player] near-end fallback triggered', { remaining, currentTime: audio.currentTime, duration: audio.duration, currentTrackId: currentTrack?.id });
+                hasForwardedRef.current = true;
+                playNext('near-end');
+            }
+        }
+    }, [currentTrack, playNext]);
+
+
     // === 4. HOOK CHÍNH ĐIỀU KHIỂN AUDIO ELEMENT (FIX ABORTERROR) ===
     useEffect(() => {
         const audio = getAudioElement(audioRef);
@@ -156,7 +178,8 @@ export const PlayerProvider = ({ children }) => {
 
             // Tạo handler ended bền vững dùng ref để luôn gọi playNext mới nhất
             const handleEnded = () => {
-                playNext();
+                console.debug('[Player] native ended event', { currentTime: audio.currentTime, duration: audio.duration, audioEnded: audio.ended, currentTrackId: currentTrack?.id, playlistLength: currentPlaylist?.length });
+                playNext('ended');
                 // Đảm bảo play bài mới (đôi khi cần reset time và gọi play sau render)
                 setTimeout(() => {
                     const nextAudio = getAudioElement(audioRef);
@@ -179,12 +202,50 @@ export const PlayerProvider = ({ children }) => {
                 }, 50);
             };
 
+            // Error / stalled handlers - nếu file gặp lỗi hoặc stall, thử next
+            const handleError = (e) => {
+                console.debug('[Player] audio error event', e, { currentTrackId: currentTrack?.id });
+                playNext('error');
+            };
+            const handleStalled = () => {
+                console.debug('[Player] audio stalled event', { currentTime: audio.currentTime, currentTrackId: currentTrack?.id });
+                playNext('stalled');
+            };
+
             // Gắn listeners mới
             audio.addEventListener('play', handleNativePlay);
             audio.addEventListener('pause', handleNativePause);
             audio.addEventListener('timeupdate', onTimeUpdate); 
-            audio.addEventListener('ended', handleEnded); 
+            audio.addEventListener('ended', handleEnded);
+            audio.addEventListener('error', handleError);
+            audio.addEventListener('stalled', handleStalled);
             endedHandlerRef.current = handleEnded; 
+            
+            // Setup a watchdog interval to detect stalled/no-progress audio
+            if (progressWatcherRef.current.intervalId) {
+                clearInterval(progressWatcherRef.current.intervalId);
+                progressWatcherRef.current.intervalId = null;
+            }
+            progressWatcherRef.current.lastTime = audio.currentTime || 0;
+            const watchdog = setInterval(() => {
+                const a = getAudioElement(audioRef);
+                if (!a) return;
+                const last = progressWatcherRef.current.lastTime || 0;
+                const now = a.currentTime || 0;
+                // If audio is supposed to be playing but time does not advance, consider it stalled
+                if (!a.paused && !a.ended && a.duration && isFinite(a.duration)) {
+                    // If no meaningful progress for 2 checks (~4s), attempt next
+                    if (now <= last + 0.01) {
+                        console.debug('[Player] no-progress watchdog fired', { last, now, currentTrackId: currentTrack?.id });
+                        playNext('no-progress');
+                    } else {
+                        progressWatcherRef.current.lastTime = now;
+                    }
+                } else {
+                    progressWatcherRef.current.lastTime = now;
+                }
+            }, 2000);
+            progressWatcherRef.current.intervalId = watchdog;
             
             if (currentTrack?.file_url) {
                 
@@ -194,6 +255,8 @@ export const PlayerProvider = ({ children }) => {
                     audio.src = fullUrl;
                     audio.load(); 
                     hasLoggedRef.current = false; 
+                    hasForwardedRef.current = false;
+                    progressWatcherRef.current.lastTime = 0;
                 }
                 
                 // PLAY DỰA TRÊN ISPLAYING
@@ -218,6 +281,12 @@ export const PlayerProvider = ({ children }) => {
                 audio.removeEventListener('timeupdate', onTimeUpdate);
                 if (endedHandlerRef.current) {
                     audio.removeEventListener('ended', endedHandlerRef.current);
+                }
+                audio.removeEventListener('error', handleError);
+                audio.removeEventListener('stalled', handleStalled);
+                if (progressWatcherRef.current.intervalId) {
+                    clearInterval(progressWatcherRef.current.intervalId);
+                    progressWatcherRef.current.intervalId = null;
                 }
             };
         }
