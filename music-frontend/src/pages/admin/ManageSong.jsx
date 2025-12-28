@@ -130,6 +130,7 @@ const ManageSong = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const contentRef = useRef(null);
+  const [editAudioUrl, setEditAudioUrl] = useState("");
 
 
 
@@ -784,12 +785,14 @@ const ManageSong = () => {
                             // =======================
                             // SET FILE NHẠC CŨ
                             // =======================
-                            setEditAudioFile(null);                // chưa chọn file mới
+                            setEditAudioFile(null);          // chưa upload file mới
+                            setEditAudioUrl(full.file_url); // ✅ LƯU URL GỐC
                             setEditAudioName(
                               full.file_url
-                                ? full.file_url.split("/").pop()    // lấy tên file từ URL
+                                ? full.file_url.split("/").pop()
                                 : ""
                             );
+
 
 
 
@@ -826,7 +829,7 @@ const ManageSong = () => {
 
                             // File audio
                             setEditAudioFile(null);
-                            setEditAudioName("");
+                            // setEditAudioName("");
                           }}
                         >
                           Sửa
@@ -1001,70 +1004,71 @@ const ManageSong = () => {
 
                 <div className="popup-group">
                   <label>Ảnh bìa</label>
-
-                  {previewCover ? (
-                    <div
-                      className="spotify-preview-wrapper"
-                      onClick={(e) => e.stopPropagation()}   // ✅ Sửa từ onMouseDown → onClick
-                    >
-                      <img src={previewCover} className="spotify-upload-preview" />
-
-                      <button
-                        className="spotify-remove-btn"
-                        onClick={(e) => {                     
-                          e.stopPropagation();
-                          setCoverFile(null);
-                          setPreviewCover(null);
-                          const input = document.getElementById("addcoverUpload");
-                          if (input) input.value = "";
-                        }}
+                  
+                  <div className="cover-fixed-wrapper">
+                    {previewCover ? (
+                      <div
+                        className="spotify-preview-wrapper"
+                        onClick={(e) => e.stopPropagation()}   // ✅ Sửa từ onMouseDown → onClick
                       >
-                        Xóa ảnh
-                      </button>
-                    </div>
-                  ) : (
-                    <div
-                      className="spotify-upload-area"
-                      onClick={() => {                         
-                        const input = document.getElementById("addcoverUpload");
-                        if (input) {
-                          input.value = "";
-                          input.click();
-                        }
-                      }}
-                      onDragOver={(e) => e.preventDefault()}
-                      onDrop={(e) => {
-                        e.preventDefault();
-                        const file = e.dataTransfer.files[0];
-                        if (file) {
-                          setCoverFile(file);
-                          setPreviewCover(URL.createObjectURL(file));
-                        }
-                      }}
-                    >
-                      <p className="spotify-upload-text">
-                        Kéo thả ảnh vào đây hoặc nhấn để chọn
-                      </p>
+                        <img src={previewCover} className="spotify-upload-preview" />
 
-                      <input
-                        id="addcoverUpload"
-                        type="file"
-                        accept="image/*"
-                        className="spotify-upload-input"
-                        onClick={(e) => e.stopPropagation()}       
-                        onChange={(e) => {
-                          const file = e.target.files[0];
+                        <button
+                          className="spotify-remove-btn"
+                          onClick={(e) => {                     
+                            e.stopPropagation();
+                            setCoverFile(null);
+                            setPreviewCover(null);
+                            const input = document.getElementById("addcoverUpload");
+                            if (input) input.value = "";
+                          }}
+                        >
+                          Xóa ảnh
+                        </button>
+                      </div>
+                    ) : (
+                      <div
+                        className="spotify-upload-area"
+                        onClick={() => {                         
+                          const input = document.getElementById("addcoverUpload");
+                          if (input) {
+                            input.value = "";
+                            input.click();
+                          }
+                        }}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          const file = e.dataTransfer.files[0];
                           if (file) {
                             setCoverFile(file);
                             setPreviewCover(URL.createObjectURL(file));
                           }
-                          e.target.value = "";
                         }}
-                      />
-                    </div>
-                  )}
-                </div>
+                      >
+                        <p className="spotify-upload-text">
+                          Kéo thả ảnh vào đây hoặc nhấn để chọn
+                        </p>
 
+                        <input
+                          id="addcoverUpload"
+                          type="file"
+                          accept="image/*"
+                          className="spotify-upload-input"
+                          onClick={(e) => e.stopPropagation()}       
+                          onChange={(e) => {
+                            const file = e.target.files[0];
+                            if (file) {
+                              setCoverFile(file);
+                              setPreviewCover(URL.createObjectURL(file));
+                            }
+                            e.target.value = "";
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
 
               {/* =====================
@@ -1666,6 +1670,17 @@ const ManageSong = () => {
                     }}
                   />
                 </div>
+              )}
+
+              {/* 🎧 AUDIO PREVIEW – ĐẶT NGAY DƯỚI */}
+              {editAudioUrl && (
+                <audio
+                  controls
+                  style={{ width: "100%", height:32, marginTop: 8 }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <source src={editAudioUrl} />
+                </audio>
               )}
             </div>
 
