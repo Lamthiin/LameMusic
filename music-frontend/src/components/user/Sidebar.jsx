@@ -1,5 +1,5 @@
 // music-frontend/src/components/Sidebar.jsx
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import {
@@ -55,6 +55,17 @@ const Sidebar = () => {
 
     loadHistory();
   }, [isAuthenticated]);
+
+  // Create a unique ordered list of recent songs to use as the playlist
+  const uniqueHistorySongs = useMemo(() => {
+    return listenHistory
+      .filter((item, index, self) => index === self.findIndex((t) => t.song.id === item.song.id))
+      .map(h => {
+        const s = { ...h.song };
+        s.image_url = s.image_url?.startsWith('http') ? s.image_url : `http://localhost:3000${s.image_url || '/images/default.png'}`;
+        return s;
+      });
+  }, [listenHistory]);
 
   // ================= ACTIVE PAGE =================
   useEffect(() => {
@@ -202,43 +213,29 @@ const Sidebar = () => {
     <div className="sidebar-title">Nghe gần đây</div>
 
     <div className="sidebar-history-list">
-      {listenHistory.length > 0 ? (
-        // Lọc trùng: Chỉ giữ lại lần xuất hiện đầu tiên của mỗi song.id
-        listenHistory
-          .filter((item, index, self) => 
-            index === self.findIndex((t) => t.song.id === item.song.id)
-          )
-          .map((h) => (
-            <div
-              key={h.id}
-              className="history-item"
-              onClick={() => playTrack(h.song, [h.song], 0)}
-            >
-              <img
-                src={
-                  h.song.image_url?.startsWith('http')
-                    ? h.song.image_url
-                    : `http://localhost:3000${h.song.image_url || '/images/default.png'}`
-                }
-                alt={h.song.title}
-              />
-              <div>
-                <div className="history-title">{h.song.title}</div>
-                <div className="history-artist">
-  {(() => {
-    // 1. Tìm nghệ sĩ chính
-    const primaryArtist = h.song.songArtists?.find(a => a.is_primary)?.artist;
-    
-    // 2. Nếu không có nghệ sĩ chính, lấy nghệ sĩ đầu tiên trong mảng
-    const fallbackArtist = h.song.songArtists?.[0]?.artist;
-    
-    // 3. Trả về stage_name hoặc thông báo mặc định
-    return primaryArtist?.stage_name || fallbackArtist?.stage_name || "Nghệ sĩ";
-  })()}
-</div>
+      {uniqueHistorySongs.length > 0 ? (
+        uniqueHistorySongs.map((song, idx) => (
+          <div
+            key={song.id}
+            className="history-item"
+            onClick={() => playTrack(song, uniqueHistorySongs, idx)}
+          >
+            <img
+              src={song.image_url}
+              alt={song.title}
+            />
+            <div>
+              <div className="history-title">{song.title}</div>
+              <div className="history-artist">
+                {(() => {
+                  const primaryArtist = song.songArtists?.find(a => a.is_primary)?.artist;
+                  const fallbackArtist = song.songArtists?.[0]?.artist;
+                  return primaryArtist?.stage_name || fallbackArtist?.stage_name || "Nghệ sĩ";
+                })()}
               </div>
             </div>
-          ))
+          </div>
+        ))
       ) : (
         <div className="history-empty">Chưa có lịch sử nghe</div>
       )}

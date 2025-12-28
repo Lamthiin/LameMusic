@@ -88,7 +88,7 @@
   aspect-ratio: 1/1;
   object-fit: cover;
   border-radius: 8px;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
@@ -163,7 +163,7 @@
   font-size: 12px;
   font-weight: 500;
   font-style: italic;
-  margin-top: auto; /* Đẩy xuống cuối card */
+  /* margin-top: auto; Đẩy xuống cuối card */
   padding-top: 8px;
   display: flex;
   align-items: center;
@@ -222,7 +222,7 @@
   }
   
   .search-result-card {
-    padding: 12px;
+    padding: 12px 12px 10px;
   }
 }
 /* =================================
@@ -287,7 +287,7 @@
 /* THẺ CARD XINH XẮN */
 .search-result-card {
   background: var(--sr-card-bg);
-  padding: 12px;
+  padding: 12px 12px 10px;   /* 🔥 thấp hơn */
   border-radius: var(--sr-radius-lg);
   transition: all 0.25s ease;
   border: 1px solid transparent;
@@ -395,4 +395,23 @@
     grid-template-columns: repeat(2, 1fr); /* Mobile hiện 2 cột cho xinh */
     gap: 12px;
   }
+}
+
+.search-result-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.search-result-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.search-result-ai-footer {
+  margin-top: auto;   /* 🔥 CHÌA KHOÁ */
+  padding-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }

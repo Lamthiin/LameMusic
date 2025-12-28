@@ -118,23 +118,26 @@ const PlayerBar = () => {
             <div>
               <p className="title">{currentTrack.title}</p>
               <p className="artist">
-              {currentTrack.songArtists?.length > 0
-                ? currentTrack.songArtists
-                    .filter(sa => sa.artist) // loại bỏ null
-                    .map((sa, i, arr) => (
-                      <span
-                        key={sa.artist.id || i}
-                        className="artist-link"
-                        onClick={(e) => { 
-                          e.stopPropagation(); 
-                          if(sa.artist?.id) navigate(`/artist/${sa.artist.id}`); 
-                        }}
-                      >
-                        {sa.artist.stage_name || sa.artist.name || 'Nghệ sĩ'}
-                        {i < arr.length - 1 ? ', ' : ''}
-                      </span>
-                    ))
-                : 'Nghệ sĩ'}
+              {currentTrack.songArtists?.length > 0 ? (
+                currentTrack.songArtists
+                  .filter(sa => sa.artist) // loại bỏ null
+                  .map((sa, i, arr) => (
+                    <span
+                      key={sa.artist?.id || i}
+                      className="artist-link"
+                      onClick={(e) => { 
+                        e.stopPropagation(); 
+                        if (sa.artist?.id) navigate(`/artist/${sa.artist.id}`); 
+                      }}
+                    >
+                      {sa.artist?.stage_name || sa.artist?.name || 'Nghệ sĩ'}
+                      {i < arr.length - 1 ? ', ' : ''}
+                    </span>
+                  ))
+              ) : (
+                // Fallback: use single artist field if available
+                (currentTrack.artist?.stage_name || currentTrack.artist?.name) || 'Nghệ sĩ'
+              )}
             </p>
 
             </div>

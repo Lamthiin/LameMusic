@@ -77,7 +77,11 @@ const SongDetail = () => {
                     data.album.cover_url = fixUrl(data.album.cover_url, 'image');
                 }
 
-                setSong(data);
+                const normalized = normalizeForPlayer(data);
+                console.log('[SongDetail] song in state:', normalized);
+
+                setSong(normalized);
+
 
                 if (isAuthenticated) {
                     const like = await api.get(`/like/${id}/status`);
@@ -100,20 +104,57 @@ const SongDetail = () => {
     const isThisSongPlaying =
         currentTrack?.id === song?.id && isPlaying;
 
+    const normalizeForPlayer = (s) => {
+        if (!s) return s;
+
+        // Ưu tiên songArtists
+        let songArtists = [];
+
+        if (Array.isArray(s.songArtists) && s.songArtists.length > 0) {
+            songArtists = s.songArtists;
+        }
+        // Backend trả artists[] (TRƯỜNG HỢP CỦA BẠN)
+        else if (Array.isArray(s.artists) && s.artists.length > 0) {
+            songArtists = s.artists.map(a => ({ artist: a }));
+        }
+        // Fallback cuối
+        else if (s.artist) {
+            songArtists = [{ artist: s.artist }];
+        }
+
+        const artist =
+            s.artist ||
+            songArtists[0]?.artist ||
+            null;
+
+        return {
+            ...s,
+            songArtists,
+            artist
+        };
+    };
+
+
     const handlePlayPause = () => {
         if (!song) return;
 
         if (currentTrack?.id === song.id) {
             togglePlay();
         } else {
-            playTrack(song, [song], 0);
+            const p = normalizeForPlayer(song);
+            console.log('[SongDetail] playTrack payload:', p);
+
+            playTrack(p, [p], 0);
         }
     };
 
+
     const replay = () => {
         if (!song) return;
-        playTrack(song, [song], 0);
+        const p = normalizeForPlayer(song);
+        playTrack(p, [p], 0);
     };
+
 
     const toggleLike = async () => {
         if (!isAuthenticated) {
