@@ -49,7 +49,7 @@ import { ChatModule } from './chat/chat.module';
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: false, 
     }),
-    // ✅ Database config CHUẨN DOCKER
+    // //✅ Database config CHUẨN DOCKER
     // TypeOrmModule.forRootAsync({
     //   imports: [ConfigModule],
     //   inject: [ConfigService],
