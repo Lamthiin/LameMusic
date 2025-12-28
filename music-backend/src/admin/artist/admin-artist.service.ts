@@ -113,37 +113,73 @@ export class AdminArtistService {
   // Trong AdminArtistService.ts
 
   // DUYỆT / PHÊ DUYỆT LẠI
-  async approve(id: number) {
-    // ⭐ SỬA LỖI 1: Tải mối quan hệ 'user' để lấy user_id
-    const artist = await this.artistRepository.findOne({ 
-      where: { id },
-      relations: ['user'] // THÊM DÒNG NÀY
-    });
+  // async approve(id: number) {
+  //   // ⭐ SỬA LỖI 1: Tải mối quan hệ 'user' để lấy user_id
+  //   const artist = await this.artistRepository.findOne({ 
+  //     where: { id },
+  //     relations: ['user'] // THÊM DÒNG NÀY
+  //   });
 
-    if (!artist) throw new NotFoundException('Artist không tồn tại');
+  //   if (!artist) throw new NotFoundException('Artist không tồn tại');
 
-    artist.registrationStatus = 'APPROVED';
-    artist.active = 1;
+  //   artist.registrationStatus = 'APPROVED';
+  //   artist.active = 1;
     
-    // Lưu trước để đảm bảo trạng thái đã được cập nhật
-    const savedArtist = await this.artistRepository.save(artist); 
+  //   // Lưu trước để đảm bảo trạng thái đã được cập nhật
+  //   const savedArtist = await this.artistRepository.save(artist); 
 
-    // Lấy user ID từ trường trực tiếp hoặc mối quan hệ
-    const userId = artist.user_id || artist.user?.id; 
+  //   // Lấy user ID từ trường trực tiếp hoặc mối quan hệ
+  //   const userId = artist.user_id || artist.user?.id; 
 
-    if (userId) {
-      await this.notificationService.createNotificationForUser(
-        userId, // Dùng userId đã xác định
-        artist.id,
-        // ⭐ SỬA LỖI 2: Dùng ARTIST_APPROVED
-        NotificationType.ARTIST_PROFILE_APPROVED, 
-        `Hồ sơ đăng ký nghệ sỹ của bạn đã được duyệt!.`,
-        artist.id
-      );
+  //   if (userId) {
+  //     await this.notificationService.createNotificationForUser(
+  //       userId, // Dùng userId đã xác định
+  //       artist.id,
+  //       // ⭐ SỬA LỖI 2: Dùng ARTIST_APPROVED
+  //       NotificationType.ARTIST_PROFILE_APPROVED, 
+  //       `Hồ sơ đăng ký nghệ sỹ của bạn đã được duyệt!.`,
+  //       artist.id
+  //     );
+  //   }
+    
+  //   return { artist: savedArtist, message: 'Đã phê duyệt nghệ sĩ thành công.' };
+  // }
+async approve(id: number) {
+  const artist = await this.artistRepository.findOne({
+    where: { id },
+    relations: ['user'],
+  });
+
+  if (!artist) throw new NotFoundException('Artist không tồn tại');
+
+  artist.registrationStatus = 'APPROVED';
+  artist.active = 1;
+
+  const user = artist.user;
+
+  if (user) {
+    // 👉 nâng role user lên ARTIST (role_id = 3)
+    if (user.role?.id !== 3) {
+      user.role = { id: 3 } as any;
+      await this.userRepository.save(user);
     }
-    
-    return { artist: savedArtist, message: 'Đã phê duyệt nghệ sĩ thành công.' };
+
+    await this.notificationService.createNotificationForUser(
+      user.id,
+      artist.id,
+      NotificationType.ARTIST_PROFILE_APPROVED,
+      'Hồ sơ đăng ký nghệ sỹ của bạn đã được duyệt!',
+      artist.id
+    );
   }
+
+  const savedArtist = await this.artistRepository.save(artist);
+
+  return {
+    artist: savedArtist,
+    message: 'Đã phê duyệt nghệ sĩ thành công.',
+  };
+}
 
   // TỪ CHỐI ARTIST
   async reject(id: number) {
