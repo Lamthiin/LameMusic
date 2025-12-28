@@ -1,5 +1,5 @@
 import React from "react";
-import "./AlbumViewM odal.css";
+import "./AlbumViewModal.css";
 
 export default function AlbumViewModal({ album, isOpen, onClose, onAddSong }) {
   if (!isOpen || !album) return null;
