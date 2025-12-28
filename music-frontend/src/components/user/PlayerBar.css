@@ -192,3 +192,82 @@
     font-size: 28px !important;
   }
 }
+
+/* Back / Next */
+.rhap_main-controls-button {
+  font-size: 26px !important;      /* Spotify nhỏ hơn */
+  color: #b3b3b3 !important;
+  opacity: 0.9;
+  transition: all 0.15s ease;
+}
+
+.rhap_main-controls-button:hover {
+  color: #fff !important;
+  transform: scale(1.08);
+}
+
+/* Play / Pause chuẩn Spotify */
+.rhap_play-pause-button {
+  width: 42px !important;
+  height: 42px !important;
+  background: #fff !important;
+  color: #000 !important;
+
+  border-radius: 50% !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  font-size: 22px !important;   /* icon nhỏ hơn nền */
+  line-height: 1 !important;
+
+  transition: transform 0.15s ease;
+}
+
+.rhap_play-pause-button:hover {
+  transform: scale(1.08);
+}
+
+/* Play / Pause – icon LUÔN ĐEN, kể cả hover */
+.rhap_play-pause-button {
+  width: 42px !important;
+  height: 42px !important;
+  background: #fff !important;
+
+  color: #000 !important;
+  fill: #000 !important;
+
+  border-radius: 50% !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  font-size: 22px !important;
+  line-height: 1 !important;
+
+  transition: transform 0.15s ease;
+}
+
+/* Hover KHÔNG đổi màu icon */
+.rhap_play-pause-button:hover {
+  background: #fff !important;
+  color: #000 !important;
+  fill: #000 !important;
+  transform: scale(1.08);
+}
+
+/* Active / Focus cũng không đổi */
+.rhap_play-pause-button:active,
+.rhap_play-pause-button:focus {
+  color: #000 !important;
+  fill: #000 !important;
+  outline: none;
+}
+
+/* Fix SVG icon bên trong */
+.rhap_play-pause-button svg {
+  color: #000 !important;
+  fill: #000 !important;
+}
