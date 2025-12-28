@@ -410,3 +410,40 @@
     font-size: 15px;
   }
 }
+
+
+/* Trong file Header.css */
+
+/* Badge số lượng thông báo */
+.notif .badge {
+  position: absolute;
+  top: -8px;              /* Điều chỉnh lên xuống */
+  right: -8px;            /* Điều chỉnh trái phải */
+  background-color: #ff3040;   /* Màu đỏ nổi bật */
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 50%;          /* Tròn hoàn toàn */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border: 2px solid white;     /* Viền trắng để nổi hơn trên nền tối/sáng */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  pointer-events: none;        /* Không ảnh hưởng đến click vào chuông */
+}
+
+/* Đảm bảo nút thông báo có position relative để badge định vị đúng */
+.notif {
+  position: relative;
+  display: inline-block;
+}
+
+/* Khi số thông báo lớn (ví dụ > 99), hiển thị kiểu 99+ */
+.notif .badge.large {
+  font-size: 10px;
+  min-width: 22px;
+  padding: 0 5px;
+}

@@ -578,3 +578,324 @@
 .song-options-menu {
   z-index: 999;
 }
+
+.songlist-wrapper {
+  width: 100%;
+  background: #121212;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  margin-top: 24px; /* Tạo khoảng cách rõ ràng với phần header/artist banner phía trên */
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Header */
+.songlist-header {
+  display: grid;
+  grid-template-columns: 40px 0.5fr 500px 100px 200px 200px;
+  align-items: center;
+  padding: 12px 20px;
+  background: #1e1e1e;
+  border-bottom: 1px solid #282828;
+  font-weight: 600;
+  font-size: 13px;
+  color: #b3b3b3;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-height: 48px;
+}
+
+.songlist-header.has-selection {
+  grid-template-columns: 40px 1fr;
+  gap: 20px;
+}
+
+.header-checkbox {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #b3b3b3;
+}
+
+.action-button-group {
+  display: flex;
+  gap: 12px;
+}
+
+.action-button-group button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #1db954;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.action-button-group button:hover {
+  background: #1ed760;
+  transform: translateY(-1px);
+}
+
+/* Body */
+.songlist-body {
+  max-height: 700px;
+  overflow-y: auto;
+}
+
+.songlist-row {
+  display: grid;
+  grid-template-columns: 40px 1fr 150px 120px 200px 90px;
+  align-items: center;
+  padding: 10px 20px;
+  border-bottom: 1px solid #282828;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.songlist-row:hover {
+  background: #2a2a2a;
+}
+
+.songlist-row.selected {
+  background: rgba(29, 185, 84, 0.25);
+}
+
+.songlist-row.playing {
+  background: rgba(29, 185, 84, 0.15);
+}
+
+.songlist-row.playing .song-title {
+  color: #1ed760;
+  font-weight: 600;
+}
+
+/* Các cột */
+.row-index {
+  text-align: center;
+  font-size: 15px;
+  color: #b3b3b3;
+}
+
+.play-btn-small {
+  background: none;
+  border: none;
+  color: #1db954;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.play-btn-small:hover {
+  background: rgba(29, 185, 84, 0.3);
+  transform: scale(1.15);
+}
+
+.col-img-title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.song-thumb {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  object-fit: cover;
+  transition: transform 0.2s;
+}
+
+.song-thumb:hover {
+  transform: scale(1.08);
+}
+
+.song-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.song-title {
+  font-weight: 500;
+  font-size: 14.5px;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 420px;
+}
+
+.song-artist {
+  font-size: 12.5px;
+  color: #b3b3b3;
+  margin-top: 2px;
+}
+
+.song-artist-link {
+  color: inherit;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.song-artist-link:hover {
+  color: #1db954;
+  text-decoration: underline;
+}
+
+.col-album,
+.col-plays,
+.col-duration {
+  font-size: 13.5px;
+  color: #b3b3b3;
+}
+
+.col-duration {
+  padding-right: 10px;     /* ← Chính xác: cách nút ⋯ đúng 10px */
+  text-align: right;
+  justify-self: end;
+}
+
+.col-options {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.songlist-row:hover .col-options {
+  opacity: 1;
+}
+
+.btn-remove,
+.btn-menu {
+  background: none;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #b3b3b3;
+  transition: all 0.2s;
+}
+
+.btn-remove:hover,
+.btn-menu:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+/* Pagination */
+.songlist-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+  background: #181818;
+  border-top: 1px solid #282828;
+}
+
+.songlist-pagination button {
+  padding: 8px 16px;
+  background: #2a2a2a;
+  color: #b3b3b3;
+  border: 1px solid #404040;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.songlist-pagination button:hover:not(:disabled) {
+  background: #1db954;
+  color: white;
+  border-color: #1db954;
+}
+
+.songlist-pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Context Menu */
+.song-options-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 998;
+}
+
+.song-options-menu {
+  position: fixed;
+  background: #282828;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  min-width: 180px;
+  z-index: 999;
+  overflow: hidden;
+  border: 1px solid #404040;
+}
+
+.song-options-menu ul {
+  list-style: none;
+  margin: 0;
+  padding: 8px 0;
+}
+
+.song-options-menu li {
+  padding: 12px 20px;
+  font-size: 14px;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.song-options-menu li:hover {
+  background: #3a3a3a;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .songlist-header,
+  .songlist-row {
+    grid-template-columns: 40px 1fr 150px 100px 90px 80px;
+  }
+}
+
+@media (max-width: 768px) {
+  .songlist-wrapper {
+    margin-top: 20px;
+    border-radius: 10px;
+  }
+
+  .songlist-header,
+  .songlist-row {
+    grid-template-columns: 40px 1fr 80px 80px;
+    padding: 12px 16px;
+  }
+
+  .songlist-header > span:not(.header-checkbox),
+  .songlist-row > span:not(.row-index):not(.col-img-title):not(.col-duration):not(.col-options) {
+    display: none;
+  }
+
+  .song-thumb {
+    width: 36px;
+    height: 36px;
+  }
+
+  .col-duration {
+    padding-right: 8px;
+  }
+}
