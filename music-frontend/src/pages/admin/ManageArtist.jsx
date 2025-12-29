@@ -244,8 +244,9 @@ export default function ManageArtist() {
         )}
 
         {tab === "internal" && (
-          <>
-            <ArtistBot />
+  <>
+    <ArtistBot search={search} />
+
             <div className="mini-pagination">
               <button
                 disabled={pageActive === 1}

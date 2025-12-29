@@ -54,6 +54,9 @@ import ArtistAlbums from './pages/ArtistDashboard/ArtistAlbums'; // <-- (1) IMPO
 import ArtistSongs from './pages/ArtistDashboard/ArtistSongs'; // <-- (1) IMPORT MỚI
 import AdminChat from './pages/admin/AdminChat';
 import SearchResult from './pages/user/SearchResult';
+import About from "./pages/user/About";
+import Blog from "./pages/user/Blog";
+import Contact from "./pages/user/Contact";
 
 function App() {
   return (
@@ -67,6 +70,9 @@ function App() {
       
       {/* 2. ROUTE CHÍNH (Layout Gốc) */}
       <Route path="/" element={<MainAppLayout />}> 
+    <Route path="/about" element={<About />} />
+    <Route path="/blog" element={<Blog />} />
+    <Route path="/contact" element={<Contact />} />
         <Route index element={<Home />} /> 
         <Route path="song/:id" element={<SongDetail />} /> 
         <Route path="artist/:id" element={<ArtistDetail />} /> 

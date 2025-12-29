@@ -36,14 +36,46 @@ export default function ManageAlbum() {
   const itemsPerPage = 10;
 
   // Lọc theo search cho tab ALL
-  const filteredAll = albumsAll.filter((a) =>
-    (a?.name ?? a?.title ?? "").toLowerCase().includes(search.toLowerCase())
-  );
+  // const filteredAll = albumsAll.filter((a) =>
+  //   (a?.name ?? a?.title ?? "").toLowerCase().includes(search.toLowerCase())
+  // );
+const filteredAll = albumsAll.filter(a => {
+  const albumName = (a?.name ?? a?.title ?? "").toLowerCase();
 
-  // Lọc theo search cho tab HIDDEN
-  const filteredHidden = albumsHidden.filter((a) =>
-    (a?.name ?? a?.title ?? "").toLowerCase().includes(search.toLowerCase())
-  );
+  const artistName =
+    (a?.artist?.stage_name ??
+     a?.artist_name ??
+     a?.artist?.name ??
+     (Array.isArray(a?.artists) ? a.artists[0]?.stage_name : "") ??
+     "").toLowerCase();
+
+  const keyword = search.toLowerCase();
+
+  return albumName.includes(keyword) || artistName.includes(keyword);
+});
+
+
+
+  // // Lọc theo search cho tab HIDDEN
+  // const filteredHidden = albumsHidden.filter((a) =>
+  //   (a?.name ?? a?.title ?? "").toLowerCase().includes(search.toLowerCase())
+  // );
+const filteredHidden = albumsHidden.filter(a => {
+  const albumName = (a?.name ?? a?.title ?? "").toLowerCase();
+
+  const artistName =
+    (a?.artist?.stage_name ??
+     a?.artist_name ??
+     a?.artist?.name ??
+     (Array.isArray(a?.artists) ? a.artists[0]?.stage_name : "") ??
+     "").toLowerCase();
+
+  const keyword = search.toLowerCase();
+
+  return albumName.includes(keyword) || artistName.includes(keyword);
+});
+
+
 
   // TÍNH PHÂN TRANG TRÊN LIST ĐÃ LỌC
   const totalPagesAll = Math.ceil(filteredAll.length / itemsPerPage) || 1;

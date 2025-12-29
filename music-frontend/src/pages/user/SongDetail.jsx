@@ -248,6 +248,10 @@ const SongDetail = () => {
                                     <SongOptionsMenu
                                         song={song}
                                         closeMenu={() => setMenuOpen(false)}
+                                         onAddToPlaylistClick={() => {
+      setPlaylistModal(true);   // mở modal thêm playlist
+      setMenuOpen(false);       // đóng menu 3 chấm
+    }}
                                     />
                                 )}
                             </div>

@@ -4,7 +4,7 @@ import "./ArtistActiveList.css";
 import ArtistFormModal from "../../components/admin/ArtistFormModal.jsx";
 import { useNavigate } from "react-router-dom";
 
-export default function ArtistBot() {
+export default function ArtistBot({ search }) {
   const [artists, setArtists] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editArtist, setEditArtist] = useState(null);
@@ -14,6 +14,12 @@ export default function ArtistBot() {
   useEffect(() => {
     loadInternalArtists();
   }, []);
+
+  const filteredArtists = artists.filter(a =>
+  (a?.stage_name ?? "")
+    .toLowerCase()
+    .includes(search.toLowerCase())
+);
 
   const loadInternalArtists = async () => {
     try {
@@ -143,81 +149,89 @@ export default function ArtistBot() {
         </thead>
 
         <tbody>
-          {artists.map((a, index) => (
-            <tr key={a.id}>
-              <td>{index + 1}</td>
-
-              <td>
-                <img
-                  src={a.avatar_url}
-                  className="artist-avatar-table"
-                  alt={a.stage_name}
-                />
-              </td>
-
-              <td>{a.stage_name}</td>
-
-              <td>{a.total_albums ?? 0}</td>
-              <td>{a.total_songs ?? 0}</td>
-
-              {/* ⭐ Ngày tạo */}
-              <td>
-                {a.created_at
-                  ? new Date(a.created_at).toLocaleDateString("vi-VN")
-                  : "—"}
-              </td>
-              {/* ⭐ Status */}
-              <td className="status-cell">
-                {a.registrationStatus === "PENDING" && (
-                  <span className="artist-status-pending">Pending</span>
-                )}
-
-                {a.registrationStatus === "APPROVED" && (
-                  <span className="artist-status-active">Active</span>
-                )}
-
-                {a.registrationStatus === "REJECTED" && (
-                  <span className="artist-status-rejected">Rejected</span>
-                )}
-
-                {!a.registrationStatus && (
-                  <span className="artist-status-bot">Internal</span>
-                )}
-              </td>
-
-              <td>
-                <div className="admin-actions">
-                  <button
-                    className="btn-view"
-                    onClick={() =>
-                      navigate(`/admin/artists/${a.id}`, {
-                        state: { fromTab: "internal" },
-                      })
-                    }
-                  >
-                    Xem
-                  </button>
-
-                  <button
-                    className="btn-edit"
-                    onClick={() => {
-                      setEditArtist(a);
-                      setShowModal(true);
-                    }}
-                  >
-                    Sửa
-                  </button>
-
-                  <button
-                    className="btn-delete"
-                    onClick={() => deleteArtist(a.id)}
-                  >
-                    Xoá
-                  </button>
-                </div>
+          {filteredArtists.length === 0 ? (
+            <tr>
+              <td colSpan={8} style={{ textAlign: "center", padding: "1rem" }}>
+                Không tìm thấy nghệ sĩ
               </td>
             </tr>
-          ))}
+          ) : (
+            filteredArtists.map((a, index) => (
+              <tr key={a.id}>
+                <td>{index + 1}</td>
+
+                <td>
+                  <img
+                    src={a.avatar_url}
+                    className="artist-avatar-table"
+                    alt={a.stage_name}
+                  />
+                </td>
+
+                <td>{a.stage_name}</td>
+
+                <td>{a.total_albums ?? 0}</td>
+                <td>{a.total_songs ?? 0}</td>
+
+                {/* ⭐ Ngày tạo */}
+                <td>
+                  {a.created_at
+                    ? new Date(a.created_at).toLocaleDateString("vi-VN")
+                    : "—"}
+                </td>
+                {/* ⭐ Status */}
+                <td className="status-cell">
+                  {a.registrationStatus === "PENDING" && (
+                    <span className="artist-status-pending">Pending</span>
+                  )}
+
+                  {a.registrationStatus === "APPROVED" && (
+                    <span className="artist-status-active">Active</span>
+                  )}
+
+                  {a.registrationStatus === "REJECTED" && (
+                    <span className="artist-status-rejected">Rejected</span>
+                  )}
+
+                  {!a.registrationStatus && (
+                    <span className="artist-status-bot">Internal</span>
+                  )}
+                </td>
+
+                <td>
+                  <div className="admin-actions">
+                    <button
+                      className="btn-view"
+                      onClick={() =>
+                        navigate(`/admin/artists/${a.id}`, {
+                          state: { fromTab: "internal" },
+                        })
+                      }
+                    >
+                      Xem
+                    </button>
+
+                    <button
+                      className="btn-edit"
+                      onClick={() => {
+                        setEditArtist(a);
+                        setShowModal(true);
+                      }}
+                    >
+                      Sửa
+                    </button>
+
+                    <button
+                      className="btn-delete"
+                      onClick={() => deleteArtist(a.id)}
+                    >
+                      Xoá
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
 

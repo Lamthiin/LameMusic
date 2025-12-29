@@ -27,9 +27,9 @@ const Footer = () => {
         <div className="footer-col">
           <h4>Kết nối với chúng tôi</h4>
           <div className="social-links">
-            <a href="#" aria-label="Facebook"><FaFacebook size={20} /></a>
-            <a href="#" aria-label="Twitter"><FaTwitter size={20} /></a>
-            <a href="#" aria-label="GitHub"><FaGithub size={20} /></a>
+            <a href="https://www.facebook.com/profile.php?id=100022833885967" aria-label="Facebook"><FaFacebook size={20} /></a>
+            <a href="https://x.com/?lang=vi" aria-label="Twitter"><FaTwitter size={20} /></a>
+            <a href="https://github.com/Briannthd" aria-label="GitHub"><FaGithub size={20} /></a>
           </div>
         </div>
       </div>

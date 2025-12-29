@@ -92,3 +92,36 @@
 .plp-owner {
     color: #9cffdf;
 }
+
+/* ==== SAVE PLAYLIST BUTTON ==== */
+.plp-btn-save {
+  margin-top: 14px;
+  margin-left: 10px;
+  padding: 10px 15px;
+  border-radius: 30px;
+  border: 1px solid #1ed760;
+  background: transparent;
+  color: #1ed760;
+  font-weight: 700;
+  letter-spacing: .5px;
+  cursor: pointer;
+  transition: all .25s ease;
+}
+
+.plp-btn-save:hover {
+  background: #1ed760;
+  color: #000;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(30, 215, 96, 0.25);
+}
+
+.plp-btn-save:active {
+  transform: scale(.96);
+}
+
+.plp-btn-save:disabled {
+  opacity: .6;
+  cursor: default;
+  transform: none;
+  box-shadow: none;
+}
