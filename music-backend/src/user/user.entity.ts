@@ -12,7 +12,7 @@ import { Follow } from '../follow/follow.entity'; // <-- (1) IMPORT FOLLOW
 import { Otp } from '../totp/totp.entity'; // <-- (1) IMPORT OTP
 import { History } from '../history/history.entity'; // <-- IMPORT MỚI
 
-@Entity('User')
+@Entity('user')
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
