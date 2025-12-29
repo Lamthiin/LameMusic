@@ -1,19 +1,34 @@
 // music-backend/src/main.ts
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe, Logger } from '@nestjs/common';
-import { NestExpressApplication } from '@nestjs/platform-express';
-import { join } from 'path';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
-  console.log('🔥🔥 CORS VERSION 2 IS RUNNING 🔥🔥');
+  console.log('🔥🔥 BACKEND IS RUNNING (CORS OPEN) 🔥🔥');
 
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
- app.enableCors({
-  origin: true,          // ⭐ CHO PHÉP MỌI ORIGIN
-  credentials: true,     // ⭐ BẮT BUỘC nếu dùng Authorization
-});
+  const app = await NestFactory.create(AppModule);
 
+  // ✅ CORS – cho mọi frontend (Render, localhost, v.v.)
+  app.enableCors({
+    origin: true,
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  });
 
-  await app.listen(process.env.PORT || 3000);
+  // ✅ Validation
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+    }),
+  );
+
+  const port = process.env.PORT || 3000;
+  await app.listen(port);
+
+  console.log(`🚀 Backend listening on port ${port}`);
 }
+
+// ❗❗❗ BẮT BUỘC PHẢI CÓ
+bootstrap();
