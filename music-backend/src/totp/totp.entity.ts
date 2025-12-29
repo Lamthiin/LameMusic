@@ -2,7 +2,7 @@
 import { Entity, PrimaryColumn, Column, OneToOne, JoinColumn } from 'typeorm';
 import { User } from '../user/user.entity';
 
-@Entity('Otp')
+@Entity('otp')
 export class Otp {
   
   @PrimaryColumn({ name: 'user_id' }) // Đặt user_id làm Khóa chính
