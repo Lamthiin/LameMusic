@@ -49,13 +49,14 @@ import { AdminProfileModule } from './admin/admin-profile/admin-profile.module';
         }
 
     return {
-      type: 'postgres',
-      url: process.env.DATABASE_URL,
-      ssl: {
-        rejectUnauthorized: false, // ⭐ BẮT BUỘC cho Railway
-      },
+      type: 'mysql' as const,
+      host,
+      port,
+      username: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
       autoLoadEntities: true,
-      synchronize: true,
+      synchronize: false,
     };
   },
 }),
