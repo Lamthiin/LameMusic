@@ -150,7 +150,7 @@ const Home = () => {
                     <FaPlay size={24} />
                   </button>
                 </div>
-                <p className="home-track-title">"a"+{song.title}</p>
+                <p className="home-track-title">"{song.title}</p>
                 <p className="home-track-artist">
                   {song.songArtists && song.songArtists.length > 0
                     ? song.songArtists.map((sa, index) => (
